@@ -1,1 +1,17 @@
-
+{
+  "name": "engine-codex-integration",
+  "version": "0.1.0",
+  "description": "Skills reutilizáveis para operar o engine AI-native com Codex.",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Engine Codex Integration",
+    "shortDescription": "Workflows de engine para Codex",
+    "longDescription": "Pacote inicial de skills para bootstrap, gameplay e validação de um engine AI-native.",
+    "developerName": "OpenAI user project",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ]
+  }
+}
