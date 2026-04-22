@@ -1,0 +1,18 @@
+{
+  "name": "ai-native-engine-codex-v0",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "engine/runtime",
+    "tools/mcp-server"
+  ],
+  "scripts": {
+    "validate:scene": "node ./engine/runtime/src/cli.mjs validate-scene",
+    "describe:scene": "node ./engine/runtime/src/cli.mjs describe-scene",
+    "validate:scenes": "node ./engine/runtime/src/cli.mjs validate-all-scenes ./scenes",
+    "mcp:server": "node ./tools/mcp-server/src/index.mjs",
+    "test": "node --test ./engine/runtime/test/scene-validation.test.mjs ./tools/mcp-server/test/mcp-server.test.mjs",
+    "smoke": "npm run validate:scene -- ./scenes/tutorial.scene.json && npm test"
+  }
+}
