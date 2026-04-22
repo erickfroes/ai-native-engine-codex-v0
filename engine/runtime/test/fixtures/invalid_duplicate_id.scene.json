@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "invalid-duplicate-id"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "enemy.1",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": true,
+          "fields": {}
+        }
+      ]
+    },
+    {
+      "id": "enemy.1",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {}
+        },
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {}
+        }
+      ]
+    }
+  ]
+}

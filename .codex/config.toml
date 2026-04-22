@@ -1,0 +1,13 @@
+model = "gpt-5.4"
+
+[agents]
+max_threads = 4
+max_depth = 1
+
+[mcp_servers.ai_engine_tools]
+command = "node"
+args = ["tools/mcp-server/src/index.mjs"]
+cwd = ".."
+enabled = true
+startup_timeout_sec = 20
+tool_timeout_sec = 90
