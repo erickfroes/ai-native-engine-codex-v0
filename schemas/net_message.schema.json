@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "net_message.schema.json",
+  "title": "NetworkMessage",
+  "type": "object",
+  "required": [
+    "opcode",
+    "version",
+    "direction",
+    "reliability",
+    "payload"
+  ],
+  "properties": {
+    "opcode": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "client_to_server",
+        "server_to_client",
+        "bidirectional"
+      ]
+    },
+    "reliability": {
+      "type": "string",
+      "enum": [
+        "reliable",
+        "unreliable"
+      ]
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
