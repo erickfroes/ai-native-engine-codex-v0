@@ -1,1 +1,82 @@
-
+{
+  "version": 1,
+  "metadata": {
+    "name": "tutorial",
+    "author": "OpenAI scaffold",
+    "tags": ["smoke", "demo"]
+  },
+  "systems": [
+    "core.loop",
+    "input.keyboard",
+    "networking.replication"
+  ],
+  "assetRefs": [
+    "sprites/player_idle.png",
+    "sprites/camera_icon.png"
+  ],
+  "entities": [
+    {
+      "id": "player.hero",
+      "name": "Hero",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": true,
+          "fields": {
+            "position": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          }
+        },
+        {
+          "kind": "sprite",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "asset": "sprites/player_idle.png"
+          }
+        },
+        {
+          "kind": "health",
+          "version": 1,
+          "replicated": true,
+          "fields": {
+            "current": 100,
+            "max": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "camera.main",
+      "name": "Main Camera",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "position": {
+              "x": 0,
+              "y": 4,
+              "z": 8
+            }
+          }
+        },
+        {
+          "kind": "camera",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "fov": 60,
+            "near": 0.1,
+            "far": 1000
+          }
+        }
+      ]
+    }
+  ]
+}
