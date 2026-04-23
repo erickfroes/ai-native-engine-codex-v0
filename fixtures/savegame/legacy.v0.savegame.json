@@ -1,0 +1,7 @@
+{
+  "saveVersion": 0,
+  "contentVersion": 1,
+  "seed": 42,
+  "checksum": "sha256:dummy-checksum-v0",
+  "payloadRef": "saves/tutorial/slot-legacy-v0.payload.json"
+}
