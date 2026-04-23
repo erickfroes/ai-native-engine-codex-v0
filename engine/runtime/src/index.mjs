@@ -8,3 +8,4 @@ export { buildWorldSnapshotMessage, validateNetMessageContract } from './network
 export { runDeterministicReplay } from './replay/run-deterministic-replay.mjs';
 export { buildReplayArtifact } from './replay/replay-artifact.mjs';
 export { generateReplaySignature } from './replay/replay-signature.mjs';
+export { runMinimalSystemLoop } from './loop/run-minimal-system-loop.mjs';
