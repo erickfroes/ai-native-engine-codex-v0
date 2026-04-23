@@ -7,7 +7,8 @@ import {
   validateSaveFile,
   loadSceneFile,
   buildWorldSnapshotMessage,
-  runDeterministicReplay
+  runDeterministicReplay,
+  buildReplayArtifact
 } from './index.mjs';
 
 function printUsage() {
@@ -17,6 +18,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
+  node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
 }
 
@@ -213,6 +215,40 @@ async function run() {
       console.log(`Final state: ${replayReport.finalState}`);
       console.log(`Final snapshot opcode: ${replayReport.snapshot.opcode}`);
       console.log(`Replay signature: ${replayReport.replaySignature}`);
+    }
+
+    return;
+  }
+
+  if (command === 'run-replay-artifact') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    if (!hasFlag('--ticks')) {
+      throw new Error('run-replay-artifact: --ticks is required');
+    }
+
+    const ticks = readNumberFlag('--ticks', 1);
+    const seed = readNumberFlag('--seed', undefined);
+
+    const scene = await loadSceneFile(maybePath);
+    const replay = runDeterministicReplay(scene, { ticks, seed });
+    const artifact = buildReplayArtifact(scene.metadata.name, replay);
+
+    if (asJson) {
+      console.log(JSON.stringify(artifact, null, 2));
+    } else {
+      console.log(`Scene: ${artifact.scene}`);
+      console.log(`Replay artifact version: ${artifact.replayArtifactVersion}`);
+      console.log(`Ticks: ${artifact.ticks}`);
+      console.log(`Seed: ${artifact.seed}`);
+      console.log(`Replay signature: ${artifact.replaySignature}`);
+      console.log(`Snapshot opcode: ${artifact.snapshotOpcode}`);
+      console.log(`Executed systems: ${artifact.executedSystemCount}`);
+      console.log(`Final state: ${artifact.finalState}`);
     }
 
     return;
