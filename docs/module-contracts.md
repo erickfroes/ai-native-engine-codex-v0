@@ -15,6 +15,16 @@ A V0 tem um único objetivo operacional: transformar contrato de cena em algo ca
   - validar shape e invariantes;
   - produzir resumo serializável.
 
+- `engine/runtime/src/network/`:
+  - gerar `world.snapshot` mínimo a partir de componentes replicados;
+  - validar a mensagem contra `schemas/net_message.schema.json`.
+
+- `engine/runtime/src/replay/`:
+  - executar replay determinístico mínimo por ticks na ordem dos systems da cena;
+  - retornar snapshot final para comparação reproduzível;
+  - gerar `replaySignature` estável a partir de serialização canônica.
+  - expor payload CI mínimo alinhado entre CLI e MCP.
+
 - `engine/runtime/src/cli.mjs`:
   - expor comandos para humanos e para automação.
 
@@ -48,3 +58,29 @@ Ao adicionar novo comportamento, preserve esta sequência:
 4. CLI;
 5. tool MCP;
 6. documentação curta.
+
+## Payload CI de replay (governança mínima)
+
+Shape mínimo atual (CLI `run-replay --json` e MCP `run_replay.structuredContent`):
+
+- `ciPayloadVersion`
+- `scene`
+- `ticks`
+- `seed`
+- `replaySignature`
+- `snapshotOpcode`
+
+Versão atual: `ciPayloadVersion: 1`.
+
+Regra de evolução:
+
+- qualquer mudança de shape do payload CI exige bump de `ciPayloadVersion`;
+- CLI e MCP devem permanecer alinhados no mesmo shape/versionamento.
+
+## Save versioning (política operacional mínima)
+
+- `saveVersion: 1` é a única versão atualmente suportada.
+- Versões diferentes falham de forma previsível no runtime/CLI/MCP.
+- A falha é reportada em `$.saveVersion`.
+- A mensagem atual é estável e usada pelos testes: `unsupported saveVersion: <valor>; supported: 1`.
+- Ainda não existe migração automática de save.

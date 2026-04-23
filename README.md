@@ -8,8 +8,10 @@ O que já está pronto:
 - loader de cena JSON;
 - validação por schema + invariantes do runtime;
 - CLI para validar e descrever cenas;
-- servidor MCP local via stdio com a tool `validate_scene`;
+- servidor MCP local via stdio com as tools `validate_scene`, `emit_world_snapshot` e `run_replay`;
 - testes automatizados do runtime e do MCP;
+- geração mínima de `world.snapshot` para replicação em tempo de execução.
+- runner mínimo de replay determinístico multi-sistema no runtime.
 - handoff pronto para uso com Codex.
 
 ## Estrutura prática
@@ -27,6 +29,8 @@ O que já está pronto:
 ```bash
 npm run validate:scene -- ./scenes/tutorial.scene.json
 npm run describe:scene -- ./scenes/tutorial.scene.json
+node ./engine/runtime/src/cli.mjs emit-world-snapshot ./scenes/tutorial.scene.json --json
+node ./engine/runtime/src/cli.mjs run-replay ./scenes/tutorial.scene.json --ticks 3 --seed 42 --json
 npm run validate:scenes
 npm test
 npm run smoke

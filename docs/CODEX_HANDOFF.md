@@ -18,6 +18,7 @@ Rode no terminal do projeto:
 
 ```bash
 npm run smoke
+node ./engine/runtime/src/cli.mjs emit-world-snapshot ./scenes/tutorial.scene.json --json
 ```
 
 Se esse comando passar, o repositório está pronto para o Codex assumir a próxima iteração.
@@ -37,9 +38,19 @@ Ordem recomendada:
 1. rodar `npm run smoke`;
 2. validar `./scenes/tutorial.scene.json`;
 3. usar a tool MCP `validate_scene` na mesma cena;
-4. comparar CLI e MCP;
-5. propor os próximos 3 commits pequenos;
-6. executar só o primeiro commit.
+4. usar a tool MCP `emit_world_snapshot` para a mesma cena;
+5. usar a tool MCP `run_replay` com `ticks` e `seed` fixos;
+6. comparar runtime/CLI/MCP para replay + `world.snapshot`;
+7. propor os próximos 3 commits pequenos;
+8. executar só o primeiro commit.
+
+## Status curto do slice concluído
+
+Slice de paridade mínima de `world.snapshot` concluído:
+
+- runtime gera `world.snapshot` determinístico;
+- CLI expõe `emit-world-snapshot`;
+- MCP expõe `emit_world_snapshot` e `run_replay`.
 
 ## Próxima entrega sugerida para o Codex
 

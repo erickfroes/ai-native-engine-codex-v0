@@ -2,7 +2,14 @@ import { createInterface } from 'node:readline';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { validateSceneFile, formatValidationReport } from '../../../engine/runtime/src/index.mjs';
+import {
+  validateSceneFile,
+  formatValidationReport,
+  validateSaveFile,
+  loadSceneFile,
+  buildWorldSnapshotMessage,
+  runDeterministicReplay
+} from '../../../engine/runtime/src/index.mjs';
 import { toolCatalog } from './tool-catalog.mjs';
 
 const serverDir = path.dirname(fileURLToPath(import.meta.url));
@@ -69,7 +76,12 @@ async function handleToolCall(params) {
     };
   }
 
-  if (params.name !== 'validate_scene') {
+  if (
+    params.name !== 'validate_scene' &&
+    params.name !== 'validate_save' &&
+    params.name !== 'emit_world_snapshot' &&
+    params.name !== 'run_replay'
+  ) {
     throw Object.assign(new Error(`Unknown tool: ${params.name}`), { code: -32602 });
   }
 
@@ -83,6 +95,74 @@ async function handleToolCall(params) {
 
   try {
     const targetPath = resolveRepoPath(args.path);
+
+    if (params.name === 'run_replay') {
+      if (!Number.isInteger(args.ticks) || args.ticks < 0) {
+        return {
+          content: toTextContent('run_replay: `ticks` is required and must be an integer >= 0.'),
+          isError: true
+        };
+      }
+
+      if (args.seed !== undefined && !Number.isInteger(args.seed)) {
+        return {
+          content: toTextContent('run_replay: `seed` must be an integer when provided.'),
+          isError: true
+        };
+      }
+
+      const scene = await loadSceneFile(targetPath);
+      const replay = runDeterministicReplay(scene, {
+        ticks: args.ticks,
+        seed: args.seed
+      });
+      const replayMetrics = {
+        ciPayloadVersion: 1,
+        scene: scene.metadata.name,
+        ticks: replay.ticks,
+        seed: replay.seed,
+        replaySignature: replay.replaySignature,
+        snapshotOpcode: replay.snapshot.opcode
+      };
+      return {
+        content: toTextContent(`Replay completed with ${replayMetrics.snapshotOpcode} at tick ${replayMetrics.ticks}.`),
+        structuredContent: replayMetrics,
+        isError: false
+      };
+    }
+
+    if (params.name === 'emit_world_snapshot') {
+      const scene = await loadSceneFile(targetPath);
+      const snapshot = buildWorldSnapshotMessage(scene);
+      return {
+        content: toTextContent(`Emitted ${snapshot.opcode} for ${snapshot.payload.entities.length} entity(ies).`),
+        structuredContent: {
+          path: targetPath,
+          snapshot
+        },
+        isError: false
+      };
+    }
+
+    if (params.name === 'validate_save') {
+      const report = await validateSaveFile(targetPath);
+      return {
+        content: toTextContent(report.ok ? 'Save validation passed.' : 'Save validation failed.'),
+        structuredContent: {
+          ok: report.ok,
+          path: report.absolutePath,
+          saveVersion: report.save.saveVersion,
+          contentVersion: report.save.contentVersion,
+          seed: report.save.seed,
+          checksum: report.save.checksum,
+          payloadRef: report.save.payloadRef,
+          errors: report.errors,
+          warnings: report.warnings
+        },
+        isError: !report.ok
+      };
+    }
+
     const report = await validateSceneFile(targetPath);
     return {
       content: toTextContent(formatValidationReport(report)),
@@ -96,12 +176,15 @@ async function handleToolCall(params) {
       isError: !report.ok
     };
   } catch (error) {
+    const errorMessage = params.name === 'run_replay' && error.name === 'ToolInputError'
+      ? `run_replay: ${error.message}`
+      : error.message;
     return {
-      content: toTextContent(error.message),
+      content: toTextContent(errorMessage),
       structuredContent: {
         ok: false,
         errorName: error.name,
-        errorMessage: error.message
+        errorMessage
       },
       isError: true
     };
@@ -129,7 +212,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene to validate scene JSON files before changing contracts or fixtures.'
+        'Use validate_scene, validate_save, emit_world_snapshot and run_replay for deterministic validation workflows.'
     });
     return;
   }

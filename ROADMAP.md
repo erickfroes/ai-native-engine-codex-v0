@@ -11,7 +11,7 @@ Entregas concluídas:
 - schemas mínimos
 - runtime mínimo para cenas
 - CLI local
-- MCP server com `validate_scene`
+- MCP server com `validate_scene` e `emit_world_snapshot`
 - testes de runtime e MCP
 
 ## Fase 1 — Runtime mínimo jogável

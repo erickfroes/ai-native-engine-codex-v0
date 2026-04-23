@@ -1,12 +1,22 @@
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 
-import { validateSceneFile, formatValidationReport, loadSceneFile } from './index.mjs';
+import {
+  validateSceneFile,
+  formatValidationReport,
+  validateSaveFile,
+  loadSceneFile,
+  buildWorldSnapshotMessage,
+  runDeterministicReplay
+} from './index.mjs';
 
 function printUsage() {
   console.log(`Usage:
   node engine/runtime/src/cli.mjs validate-scene <path> [--json]
+  node engine/runtime/src/cli.mjs validate-save <path> [--json]
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
+  node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
+  node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
 }
 
@@ -33,6 +43,25 @@ function hasFlag(flag) {
   return process.argv.includes(flag);
 }
 
+function readNumberFlag(flag, fallbackValue) {
+  const index = process.argv.indexOf(flag);
+  if (index === -1) {
+    return fallbackValue;
+  }
+
+  const rawValue = process.argv[index + 1];
+  if (!rawValue) {
+    throw new Error(`run-replay: ${flag} requires an integer value`);
+  }
+
+  const numericValue = Number(rawValue);
+  if (!Number.isInteger(numericValue)) {
+    throw new Error(`run-replay: ${flag} must be an integer`);
+  }
+
+  return numericValue;
+}
+
 async function run() {
   const [, , command, maybePath] = process.argv;
   const asJson = hasFlag('--json');
@@ -55,6 +84,36 @@ async function run() {
       console.log(JSON.stringify(report, null, 2));
     } else {
       console.log(formatValidationReport(report));
+    }
+    process.exitCode = report.ok ? 0 : 1;
+    return;
+  }
+
+  if (command === 'validate-save') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await validateSaveFile(maybePath);
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Save: ${report.absolutePath}`);
+      console.log(`Version: ${report.save.saveVersion}`);
+      console.log(`Content version: ${report.save.contentVersion}`);
+      console.log(`Seed: ${report.save.seed}`);
+      console.log(`Payload ref: ${report.save.payloadRef}`);
+      console.log('');
+      console.log(report.ok ? 'Status: OK' : 'Status: INVALID');
+      if (report.errors.length > 0) {
+        console.log('');
+        console.log('Errors:');
+        for (const error of report.errors) {
+          console.log(`- ${error.path}: ${error.message}`);
+        }
+      }
     }
     process.exitCode = report.ok ? 0 : 1;
     return;
@@ -88,6 +147,74 @@ async function run() {
         console.log(`- ${entity.id} (${entity.name ?? 'unnamed'}): ${entity.components.join(', ')}`);
       }
     }
+    return;
+  }
+
+  if (command === 'emit-world-snapshot') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const scene = await loadSceneFile(maybePath);
+    const message = buildWorldSnapshotMessage(scene);
+
+    if (asJson) {
+      console.log(JSON.stringify(message, null, 2));
+    } else {
+      console.log(`Opcode: ${message.opcode}`);
+      console.log(`Version: ${message.version}`);
+      console.log(`Direction: ${message.direction}`);
+      console.log(`Reliability: ${message.reliability}`);
+      console.log(`Tick: ${message.payload.tick}`);
+      console.log('Replicated entities:');
+      for (const entity of message.payload.entities) {
+        const kinds = entity.components.map((component) => component.kind).join(', ');
+        console.log(`- ${entity.id}: ${kinds}`);
+      }
+    }
+
+    return;
+  }
+
+  if (command === 'run-replay') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    if (!hasFlag('--ticks')) {
+      throw new Error('run-replay: --ticks is required');
+    }
+
+    const ticks = readNumberFlag('--ticks', 1);
+    const seed = readNumberFlag('--seed', undefined);
+
+    const scene = await loadSceneFile(maybePath);
+    const replayReport = runDeterministicReplay(scene, { ticks, seed });
+    const ciReplayReport = {
+      ciPayloadVersion: 1,
+      scene: scene.metadata.name,
+      ticks: replayReport.ticks,
+      seed: replayReport.seed,
+      replaySignature: replayReport.replaySignature,
+      snapshotOpcode: replayReport.snapshot.opcode
+    };
+
+    if (asJson) {
+      console.log(JSON.stringify(ciReplayReport, null, 2));
+    } else {
+      console.log(`Scene: ${scene.metadata.name}`);
+      console.log(`Ticks: ${replayReport.ticks}`);
+      console.log(`Seed: ${replayReport.seed}`);
+      console.log(`Executed systems: ${replayReport.executedSystemCount}`);
+      console.log(`Final state: ${replayReport.finalState}`);
+      console.log(`Final snapshot opcode: ${replayReport.snapshot.opcode}`);
+      console.log(`Replay signature: ${replayReport.replaySignature}`);
+    }
+
     return;
   }
 
