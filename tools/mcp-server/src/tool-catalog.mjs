@@ -70,5 +70,29 @@ export const toolCatalog = [
       },
       additionalProperties: false
     }
+  },
+  {
+    name: 'run_replay_artifact',
+    title: 'Run Replay Artifact',
+    description: 'Run deterministic replay for a scene and return the compact replay artifact.',
+    inputSchema: {
+      type: 'object',
+      required: ['path', 'ticks'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        ticks: {
+          type: 'integer',
+          description: 'Number of ticks to execute in deterministic replay.'
+        },
+        seed: {
+          type: 'integer',
+          description: 'Optional deterministic seed override.'
+        }
+      },
+      additionalProperties: false
+    }
   }
 ];

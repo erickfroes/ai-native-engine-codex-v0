@@ -82,6 +82,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_save'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'emit_world_snapshot'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay'));
+    assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay_artifact'));
 
     const callResponse = await client.request('tools/call', {
       name: 'validate_scene',
@@ -201,6 +202,47 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       replayResponseB.result.structuredContent
     );
 
+    const replayArtifactResponseA = await client.request('tools/call', {
+      name: 'run_replay_artifact',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 3,
+        seed: 42
+      }
+    });
+
+    const replayArtifactResponseB = await client.request('tools/call', {
+      name: 'run_replay_artifact',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 3,
+        seed: 42
+      }
+    });
+
+    const expectedArtifactKeys = [
+      'executedSystemCount',
+      'finalState',
+      'replayArtifactVersion',
+      'replaySignature',
+      'scene',
+      'seed',
+      'snapshotOpcode',
+      'ticks'
+    ];
+
+    assert.equal(replayArtifactResponseA.result.isError, false);
+    assert.deepEqual(
+      Object.keys(replayArtifactResponseA.result.structuredContent).sort(),
+      expectedArtifactKeys
+    );
+    assert.equal(replayArtifactResponseA.result.structuredContent.replayArtifactVersion, 1);
+    assert.equal(replayArtifactResponseA.result.structuredContent.snapshotOpcode, 'world.snapshot');
+    assert.deepEqual(
+      replayArtifactResponseA.result.structuredContent,
+      replayArtifactResponseB.result.structuredContent
+    );
+
     const missingTicksResponse = await client.request('tools/call', {
       name: 'run_replay',
       arguments: {
@@ -243,6 +285,20 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(
       invalidSeedResponse.result.content[0].text,
       /run_replay: `seed` must be an integer when provided/
+    );
+
+    const artifactMissingTicksResponse = await client.request('tools/call', {
+      name: 'run_replay_artifact',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        seed: 42
+      }
+    });
+
+    assert.equal(artifactMissingTicksResponse.result.isError, true);
+    assert.match(
+      artifactMissingTicksResponse.result.content[0].text,
+      /run_replay_artifact: `ticks` is required and must be an integer >= 0/
     );
 
     const invalidPathResponse = await client.request('tools/call', {

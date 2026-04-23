@@ -8,7 +8,8 @@ import {
   validateSaveFile,
   loadSceneFile,
   buildWorldSnapshotMessage,
-  runDeterministicReplay
+  runDeterministicReplay,
+  buildReplayArtifact
 } from '../../../engine/runtime/src/index.mjs';
 import { toolCatalog } from './tool-catalog.mjs';
 
@@ -80,7 +81,8 @@ async function handleToolCall(params) {
     params.name !== 'validate_scene' &&
     params.name !== 'validate_save' &&
     params.name !== 'emit_world_snapshot' &&
-    params.name !== 'run_replay'
+    params.name !== 'run_replay' &&
+    params.name !== 'run_replay_artifact'
   ) {
     throw Object.assign(new Error(`Unknown tool: ${params.name}`), { code: -32602 });
   }
@@ -96,17 +98,19 @@ async function handleToolCall(params) {
   try {
     const targetPath = resolveRepoPath(args.path);
 
-    if (params.name === 'run_replay') {
+    if (params.name === 'run_replay' || params.name === 'run_replay_artifact') {
       if (!Number.isInteger(args.ticks) || args.ticks < 0) {
+        const toolName = params.name;
         return {
-          content: toTextContent('run_replay: `ticks` is required and must be an integer >= 0.'),
+          content: toTextContent(`${toolName}: \`ticks\` is required and must be an integer >= 0.`),
           isError: true
         };
       }
 
       if (args.seed !== undefined && !Number.isInteger(args.seed)) {
+        const toolName = params.name;
         return {
-          content: toTextContent('run_replay: `seed` must be an integer when provided.'),
+          content: toTextContent(`${toolName}: \`seed\` must be an integer when provided.`),
           isError: true
         };
       }
@@ -116,6 +120,16 @@ async function handleToolCall(params) {
         ticks: args.ticks,
         seed: args.seed
       });
+
+      if (params.name === 'run_replay_artifact') {
+        const artifact = buildReplayArtifact(scene.metadata.name, replay);
+        return {
+          content: toTextContent(`Replay artifact built for ${artifact.scene} at tick ${artifact.ticks}.`),
+          structuredContent: artifact,
+          isError: false
+        };
+      }
+
       const replayMetrics = {
         ciPayloadVersion: 1,
         scene: scene.metadata.name,
@@ -212,7 +226,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_save, emit_world_snapshot and run_replay for deterministic validation workflows.'
+        'Use validate_scene, validate_save, emit_world_snapshot, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }
