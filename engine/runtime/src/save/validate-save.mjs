@@ -6,6 +6,7 @@ import { validateWithSchema } from '../schema/mini-json-schema.mjs';
 import { migrateLegacySaveEnvelope } from './migrate-save.mjs';
 
 const supportedSaveVersion = 1;
+const saveValidationReportVersion = 1;
 
 export async function validateSaveFile(savePath) {
   const absolutePath = path.resolve(savePath);
@@ -23,11 +24,28 @@ export async function validateSaveFile(savePath) {
     });
   }
 
-  return {
+  const report = {
+    reportVersion: saveValidationReportVersion,
     ok: errors.length === 0,
-    absolutePath,
+    path: absolutePath,
     save: migratedSave,
     errors,
     warnings: []
   };
+
+  const reportValidationErrors = validateWithSchema(
+    report,
+    registry['save_validation_report.schema.json'].schema,
+    registry,
+    '$',
+    []
+  );
+
+  if (reportValidationErrors.length > 0) {
+    throw new Error(
+      `validateSaveFile produced invalid save validation report: ${JSON.stringify(reportValidationErrors)}`
+    );
+  }
+
+  return report;
 }

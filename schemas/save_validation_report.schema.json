@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "save_validation_report.schema.json",
+  "title": "SaveValidationReport",
+  "type": "object",
+  "required": [
+    "reportVersion",
+    "ok",
+    "path",
+    "save",
+    "errors",
+    "warnings"
+  ],
+  "properties": {
+    "reportVersion": {
+      "const": 1
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "save": {
+      "type": "object",
+      "properties": {
+        "saveVersion": { "type": "integer" },
+        "contentVersion": { "type": "integer" },
+        "seed": { "type": "integer" },
+        "checksum": { "type": "string" },
+        "payloadRef": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "message"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "message": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "message"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "message": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

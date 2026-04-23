@@ -15,6 +15,7 @@ function saveFixturePath(relativePath) {
 test('validates versioned save fixture successfully', async () => {
   const report = await validateSaveFile(saveFixturePath('valid.savegame.json'));
 
+  assert.equal(report.reportVersion, 1);
   assert.equal(report.ok, true);
   assert.equal(report.errors.length, 0);
 });
@@ -22,6 +23,7 @@ test('validates versioned save fixture successfully', async () => {
 test('validates legacy v0 save fixture via minimal migration', async () => {
   const report = await validateSaveFile(saveFixturePath('legacy.v0.savegame.json'));
 
+  assert.equal(report.reportVersion, 1);
   assert.equal(report.ok, true);
   assert.equal(report.errors.length, 0);
   assert.equal(report.save.saveVersion, 1);
@@ -41,6 +43,7 @@ test('reports predictable error when required save field is missing', async () =
 test('reports predictable error when saveVersion is unsupported', async () => {
   const report = await validateSaveFile(saveFixturePath('invalid.unsupported-version.savegame.json'));
 
+  assert.equal(report.reportVersion, 1);
   assert.equal(report.ok, false);
   assert.ok(
     report.errors.some(

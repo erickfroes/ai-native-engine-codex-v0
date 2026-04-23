@@ -24,7 +24,8 @@ export async function loadSchemaRegistry() {
     'scene.schema.json',
     'component.schema.json',
     'net_message.schema.json',
-    'savegame.schema.json'
+    'savegame.schema.json',
+    'save_validation_report.schema.json'
   ];
 
   const entries = await Promise.all(
