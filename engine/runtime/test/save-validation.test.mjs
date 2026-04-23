@@ -19,6 +19,18 @@ test('validates versioned save fixture successfully', async () => {
   assert.equal(report.errors.length, 0);
 });
 
+test('validates legacy v0 save fixture via minimal migration', async () => {
+  const report = await validateSaveFile(saveFixturePath('legacy.v0.savegame.json'));
+
+  assert.equal(report.ok, true);
+  assert.equal(report.errors.length, 0);
+  assert.equal(report.save.saveVersion, 1);
+  assert.equal(report.save.contentVersion, 1);
+  assert.equal(report.save.seed, 42);
+  assert.equal(report.save.checksum, 'sha256:dummy-checksum-v0');
+  assert.equal(report.save.payloadRef, 'saves/tutorial/slot-legacy-v0.payload.json');
+});
+
 test('reports predictable error when required save field is missing', async () => {
   const report = await validateSaveFile(saveFixturePath('invalid.missing-checksum.savegame.json'));
 
