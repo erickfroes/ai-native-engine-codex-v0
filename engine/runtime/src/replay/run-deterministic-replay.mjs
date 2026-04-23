@@ -1,5 +1,6 @@
 import { buildWorldSnapshotMessage } from '../network/world-snapshot.mjs';
 import { generateReplaySignature } from './replay-signature.mjs';
+import { runResolvedSystem } from '../loop/system-handlers.mjs';
 
 const DEFAULT_SEED = 1337;
 
@@ -22,18 +23,6 @@ function normalizeSeed(value) {
   return value;
 }
 
-function mix(state, value) {
-  return (Math.imul(state, 1664525) + value + 1013904223) >>> 0;
-}
-
-function hashString(value) {
-  let state = 0;
-  for (const char of value) {
-    state = mix(state, char.codePointAt(0));
-  }
-  return state;
-}
-
 export function runDeterministicReplay(scene, options = {}) {
   const ticks = normalizeTicks(options.ticks ?? 1);
   const seed = normalizeSeed(options.seed);
@@ -45,8 +34,7 @@ export function runDeterministicReplay(scene, options = {}) {
   for (let tick = 1; tick <= ticks; tick += 1) {
     for (const systemName of systems) {
       systemExecutionOrder.push(systemName);
-      state = mix(state, tick);
-      state = mix(state, hashString(systemName));
+      state = runResolvedSystem(systemName, { state, tick, seed });
     }
   }
 
