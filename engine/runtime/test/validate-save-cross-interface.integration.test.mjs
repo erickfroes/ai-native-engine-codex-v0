@@ -10,6 +10,7 @@ const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
 const validSavePath = path.join(repoRoot, 'fixtures', 'savegame', 'valid.savegame.json');
+const legacySavePath = path.join(repoRoot, 'fixtures', 'savegame', 'legacy.v0.savegame.json');
 const unsupportedVersionSavePath = path.join(
   repoRoot,
   'fixtures',
@@ -17,6 +18,7 @@ const unsupportedVersionSavePath = path.join(
   'invalid.unsupported-version.savegame.json'
 );
 const validSaveEnvelope = JSON.parse(readFileSync(validSavePath, 'utf8'));
+const legacySaveEnvelope = JSON.parse(readFileSync(legacySavePath, 'utf8'));
 
 function normalizeSaveSuccess(payload, envelope) {
   return {
@@ -133,6 +135,51 @@ test('validate_save success payload stays semantically aligned across CLI and MC
 
     assert.equal(cliSuccess.ok, true);
     assert.equal(mcpSuccess.ok, true);
+    assert.deepEqual(cliSuccess, mcpSuccess);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('validate_save legacy v0 payload stays semantically aligned across CLI and MCP after migration', async () => {
+  const cliResult = runCli(['validate-save', legacySavePath, '--json']);
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliSuccess = normalizeSaveSuccess(JSON.parse(cliResult.stdout), {
+    ...legacySaveEnvelope,
+    saveVersion: 1
+  });
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: {
+        name: 'node-test',
+        version: '1.0.0'
+      }
+    });
+
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'validate_save',
+      arguments: {
+        path: './fixtures/savegame/legacy.v0.savegame.json'
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpSuccess = normalizeSaveSuccess(mcpResponse.result.structuredContent, {
+      ...legacySaveEnvelope,
+      saveVersion: 1
+    });
+
+    assert.equal(cliSuccess.ok, true);
+    assert.equal(mcpSuccess.ok, true);
+    assert.equal(cliSuccess.saveVersion, 1);
+    assert.equal(mcpSuccess.saveVersion, 1);
     assert.deepEqual(cliSuccess, mcpSuccess);
   } finally {
     await mcp.close();
