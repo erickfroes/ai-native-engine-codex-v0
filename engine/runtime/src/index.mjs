@@ -6,4 +6,5 @@ export { summarizeScene } from './scene/summary.mjs';
 export { validateSceneInvariants } from './scene/invariants.mjs';
 export { buildWorldSnapshotMessage, validateNetMessageContract } from './network/world-snapshot.mjs';
 export { runDeterministicReplay } from './replay/run-deterministic-replay.mjs';
+export { buildReplayArtifact } from './replay/replay-artifact.mjs';
 export { generateReplaySignature } from './replay/replay-signature.mjs';
