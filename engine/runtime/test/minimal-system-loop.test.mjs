@@ -59,3 +59,28 @@ test('unknown systems use predictable fallback behavior', () => {
   assert.deepEqual(first.systemExecutionOrder, ['unknown.alpha', 'unknown.alpha', 'unknown.alpha', 'unknown.alpha']);
   assert.equal(first.finalState, second.finalState);
 });
+
+
+test('loopable fixture evolves final state per tick in deterministic way', async () => {
+  const scene = await loadSceneFile(scenePath('loopable-minimal.scene.json'));
+
+  const tick1 = runMinimalSystemLoop(scene, { ticks: 1, seed: 21 });
+  const tick3 = runMinimalSystemLoop(scene, { ticks: 3, seed: 21 });
+  const tick3Again = runMinimalSystemLoop(scene, { ticks: 3, seed: 21 });
+
+  assert.equal(tick1.ticksExecuted, 1);
+  assert.equal(tick3.ticksExecuted, 3);
+  assert.notEqual(tick1.finalState, tick3.finalState);
+  assert.deepEqual(tick3, tick3Again);
+  assert.deepEqual(tick3.executedSystems, [
+    'core.loop',
+    'input.keyboard',
+    'networking.replication',
+    'core.loop',
+    'input.keyboard',
+    'networking.replication',
+    'core.loop',
+    'input.keyboard',
+    'networking.replication'
+  ]);
+});

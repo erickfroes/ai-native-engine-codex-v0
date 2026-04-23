@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "loopable-minimal",
+    "author": "OpenAI scaffold",
+    "tags": ["loop", "deterministic"]
+  },
+  "systems": [
+    "core.loop",
+    "input.keyboard",
+    "networking.replication"
+  ],
+  "entities": [
+    {
+      "id": "probe.entity",
+      "name": "Probe",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": true,
+          "fields": {
+            "position": {
+              "x": 1,
+              "y": 2,
+              "z": 3
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
