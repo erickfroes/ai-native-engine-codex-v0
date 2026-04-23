@@ -103,9 +103,10 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     });
 
     assert.equal(validSaveResponse.result.isError, false);
+    assert.equal(validSaveResponse.result.structuredContent.reportVersion, 1);
     assert.equal(validSaveResponse.result.structuredContent.ok, true);
-    assert.equal(validSaveResponse.result.structuredContent.saveVersion, 1);
-    assert.equal(validSaveResponse.result.structuredContent.contentVersion, 1);
+    assert.equal(validSaveResponse.result.structuredContent.save.saveVersion, 1);
+    assert.equal(validSaveResponse.result.structuredContent.save.contentVersion, 1);
     assert.equal(validSaveResponse.result.structuredContent.errors.length, 0);
 
     const invalidSaveResponse = await client.request('tools/call', {
@@ -131,6 +132,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     });
 
     assert.equal(unsupportedVersionSaveResponse.result.isError, true);
+    assert.equal(unsupportedVersionSaveResponse.result.structuredContent.reportVersion, 1);
     assert.equal(unsupportedVersionSaveResponse.result.structuredContent.ok, false);
     assert.ok(
       unsupportedVersionSaveResponse.result.structuredContent.errors.some(

@@ -162,17 +162,7 @@ async function handleToolCall(params) {
       const report = await validateSaveFile(targetPath);
       return {
         content: toTextContent(report.ok ? 'Save validation passed.' : 'Save validation failed.'),
-        structuredContent: {
-          ok: report.ok,
-          path: report.absolutePath,
-          saveVersion: report.save.saveVersion,
-          contentVersion: report.save.contentVersion,
-          seed: report.save.seed,
-          checksum: report.save.checksum,
-          payloadRef: report.save.payloadRef,
-          errors: report.errors,
-          warnings: report.warnings
-        },
+        structuredContent: report,
         isError: !report.ok
       };
     }

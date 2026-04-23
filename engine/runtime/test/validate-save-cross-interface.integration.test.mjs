@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { readFileSync } from 'node:fs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
@@ -17,32 +16,31 @@ const unsupportedVersionSavePath = path.join(
   'savegame',
   'invalid.unsupported-version.savegame.json'
 );
-const validSaveEnvelope = JSON.parse(readFileSync(validSavePath, 'utf8'));
-const legacySaveEnvelope = JSON.parse(readFileSync(legacySavePath, 'utf8'));
 
-function normalizeSaveSuccess(payload, envelope) {
+const expectedReportKeys = ['errors', 'ok', 'path', 'reportVersion', 'save', 'warnings'];
+const expectedSaveKeys = ['checksum', 'contentVersion', 'payloadRef', 'saveVersion', 'seed'];
+const expectedErrorKeys = ['message', 'path'];
+
+function normalizeSaveValidationReport(report) {
   return {
-    ok: payload.ok,
-    saveVersion: payload.saveVersion ?? envelope.saveVersion,
-    contentVersion: payload.contentVersion ?? envelope.contentVersion,
-    seed: payload.seed ?? envelope.seed,
-    checksum: payload.checksum ?? envelope.checksum,
-    payloadRef: payload.payloadRef ?? envelope.payloadRef
+    reportVersion: report.reportVersion,
+    ok: report.ok,
+    path: report.path,
+    save: report.save,
+    errors: report.errors,
+    warnings: report.warnings
   };
 }
 
-function normalizeSaveVersionError(payload) {
-  const saveVersionError = (payload.errors ?? []).find((error) => error.path === '$.saveVersion');
-  const message = String(saveVersionError?.message ?? '').toLowerCase();
-
-  return {
-    ok: payload.ok,
-    hasSaveVersionPath: saveVersionError?.path === '$.saveVersion',
-    isUnsupportedVersionFamily:
-      message.includes('unsupported') &&
-      message.includes('saveversion') &&
-      message.includes('supported: 1')
-  };
+function assertReportShape(report) {
+  assert.deepEqual(Object.keys(report).sort(), expectedReportKeys);
+  assert.deepEqual(Object.keys(report.save).sort(), expectedSaveKeys);
+  assert.equal(report.reportVersion, 1);
+  assert.ok(Array.isArray(report.errors));
+  assert.ok(Array.isArray(report.warnings));
+  for (const error of report.errors) {
+    assert.deepEqual(Object.keys(error).sort(), expectedErrorKeys);
+  }
 }
 
 function runCli(args) {
@@ -104,10 +102,11 @@ function createMcpClient() {
   return { request, notify, close };
 }
 
-test('validate_save success payload stays semantically aligned across CLI and MCP', async () => {
-  const cliResult = runCli(['validate-save', validSavePath, '--json']);
-  assert.equal(cliResult.status, 0, cliResult.stderr);
-  const cliSuccess = normalizeSaveSuccess(JSON.parse(cliResult.stdout), validSaveEnvelope);
+async function assertCliMcpParity({ cliPathArg, mcpPathArg, expectedIsError }) {
+  const cliResult = runCli(['validate-save', cliPathArg, '--json']);
+  assert.equal(cliResult.status, expectedIsError ? 1 : 0, cliResult.stderr);
+  const cliReport = normalizeSaveValidationReport(JSON.parse(cliResult.stdout));
+  assertReportShape(cliReport);
 
   const mcp = createMcpClient();
   try {
@@ -126,103 +125,63 @@ test('validate_save success payload stays semantically aligned across CLI and MC
     const mcpResponse = await mcp.request('tools/call', {
       name: 'validate_save',
       arguments: {
-        path: './fixtures/savegame/valid.savegame.json'
+        path: mcpPathArg
       }
     });
 
-    assert.equal(mcpResponse.result.isError, false);
-    const mcpSuccess = normalizeSaveSuccess(mcpResponse.result.structuredContent, validSaveEnvelope);
+    assert.equal(mcpResponse.result.isError, expectedIsError);
+    const mcpReport = normalizeSaveValidationReport(mcpResponse.result.structuredContent);
+    assertReportShape(mcpReport);
 
-    assert.equal(cliSuccess.ok, true);
-    assert.equal(mcpSuccess.ok, true);
-    assert.deepEqual(cliSuccess, mcpSuccess);
+    assert.deepEqual(cliReport, mcpReport);
+    return { cliReport, mcpReport };
   } finally {
     await mcp.close();
   }
-});
+}
 
-test('validate_save legacy v0 payload stays semantically aligned across CLI and MCP after migration', async () => {
-  const cliResult = runCli(['validate-save', legacySavePath, '--json']);
-  assert.equal(cliResult.status, 0, cliResult.stderr);
-  const cliSuccess = normalizeSaveSuccess(JSON.parse(cliResult.stdout), {
-    ...legacySaveEnvelope,
-    saveVersion: 1
+test('validate_save v1 report stays strictly aligned across CLI and MCP', async () => {
+  const { cliReport, mcpReport } = await assertCliMcpParity({
+    cliPathArg: validSavePath,
+    mcpPathArg: './fixtures/savegame/valid.savegame.json',
+    expectedIsError: false
   });
 
-  const mcp = createMcpClient();
-  try {
-    const initResponse = await mcp.request('initialize', {
-      protocolVersion: '2025-06-18',
-      capabilities: {},
-      clientInfo: {
-        name: 'node-test',
-        version: '1.0.0'
-      }
-    });
-
-    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
-    mcp.notify('notifications/initialized');
-
-    const mcpResponse = await mcp.request('tools/call', {
-      name: 'validate_save',
-      arguments: {
-        path: './fixtures/savegame/legacy.v0.savegame.json'
-      }
-    });
-
-    assert.equal(mcpResponse.result.isError, false);
-    const mcpSuccess = normalizeSaveSuccess(mcpResponse.result.structuredContent, {
-      ...legacySaveEnvelope,
-      saveVersion: 1
-    });
-
-    assert.equal(cliSuccess.ok, true);
-    assert.equal(mcpSuccess.ok, true);
-    assert.equal(cliSuccess.saveVersion, 1);
-    assert.equal(mcpSuccess.saveVersion, 1);
-    assert.deepEqual(cliSuccess, mcpSuccess);
-  } finally {
-    await mcp.close();
-  }
+  assert.equal(cliReport.ok, true);
+  assert.equal(mcpReport.ok, true);
+  assert.equal(cliReport.reportVersion, 1);
 });
 
-test('validate_save unsupported saveVersion error stays semantically aligned across CLI and MCP', async () => {
-  const cliResult = runCli(['validate-save', unsupportedVersionSavePath, '--json']);
-  assert.equal(cliResult.status, 1, cliResult.stderr);
-  const cliError = normalizeSaveVersionError(JSON.parse(cliResult.stdout));
+test('validate_save legacy v0 report stays strictly aligned across CLI and MCP', async () => {
+  const { cliReport, mcpReport } = await assertCliMcpParity({
+    cliPathArg: legacySavePath,
+    mcpPathArg: './fixtures/savegame/legacy.v0.savegame.json',
+    expectedIsError: false
+  });
 
-  const mcp = createMcpClient();
-  try {
-    const initResponse = await mcp.request('initialize', {
-      protocolVersion: '2025-06-18',
-      capabilities: {},
-      clientInfo: {
-        name: 'node-test',
-        version: '1.0.0'
-      }
-    });
+  assert.equal(cliReport.ok, true);
+  assert.equal(mcpReport.ok, true);
+  assert.equal(cliReport.reportVersion, 1);
+  assert.equal(cliReport.save.saveVersion, 1);
+  assert.equal(cliReport.save.contentVersion, 1);
+  assert.equal(cliReport.save.seed, 42);
+  assert.equal(cliReport.save.checksum, 'sha256:dummy-checksum-v0');
+  assert.equal(cliReport.save.payloadRef, 'saves/tutorial/slot-legacy-v0.payload.json');
+});
 
-    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
-    mcp.notify('notifications/initialized');
+test('validate_save unsupported version report stays strictly aligned across CLI and MCP', async () => {
+  const { cliReport, mcpReport } = await assertCliMcpParity({
+    cliPathArg: unsupportedVersionSavePath,
+    mcpPathArg: './fixtures/savegame/invalid.unsupported-version.savegame.json',
+    expectedIsError: true
+  });
 
-    const mcpResponse = await mcp.request('tools/call', {
-      name: 'validate_save',
-      arguments: {
-        path: './fixtures/savegame/invalid.unsupported-version.savegame.json'
-      }
-    });
-
-    assert.equal(mcpResponse.result.isError, true);
-    const mcpError = normalizeSaveVersionError(mcpResponse.result.structuredContent);
-
-    assert.equal(cliError.ok, false);
-    assert.equal(mcpError.ok, false);
-    assert.equal(cliError.hasSaveVersionPath, true);
-    assert.equal(mcpError.hasSaveVersionPath, true);
-    assert.equal(cliError.isUnsupportedVersionFamily, true);
-    assert.equal(mcpError.isUnsupportedVersionFamily, true);
-    assert.deepEqual(cliError, mcpError);
-  } finally {
-    await mcp.close();
-  }
+  assert.equal(cliReport.ok, false);
+  assert.equal(mcpReport.ok, false);
+  assert.equal(cliReport.reportVersion, 1);
+  assert.ok(
+    cliReport.errors.some(
+      (error) => error.path === '$.saveVersion' && error.message === 'unsupported saveVersion: 2; supported: 1'
+    )
+  );
 });

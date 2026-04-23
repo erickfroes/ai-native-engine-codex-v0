@@ -102,7 +102,7 @@ async function run() {
     if (asJson) {
       console.log(JSON.stringify(report, null, 2));
     } else {
-      console.log(`Save: ${report.absolutePath}`);
+      console.log(`Save: ${report.path}`);
       console.log(`Version: ${report.save.saveVersion}`);
       console.log(`Content version: ${report.save.contentVersion}`);
       console.log(`Seed: ${report.save.seed}`);
