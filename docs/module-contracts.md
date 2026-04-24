@@ -99,6 +99,21 @@ Separação explícita:
 - `LoopTrace v1`: diagnóstico opt-in de execução;
 - `System Registry v1`: catálogo de systems conhecidos.
 
+## Execution plan v1 (planejamento sem execução)
+
+Contrato público interno para planejar ordem de execução do loop sem rodar handlers:
+
+- ver `docs/EXECUTION_PLAN_V1.md`.
+- schema formal: `docs/schemas/execution-plan-v1.schema.json`.
+
+Separação explícita:
+
+- `SceneValidationReport v1`: validação prévia;
+- `ExecutionPlan v1`: planejamento de ticks/systems e estimativa;
+- `LoopReport v1`: resultado real após execução;
+- `LoopTrace v1`: diagnóstico real por tick/system;
+- `System Registry v1`: base de systems conhecidos para metadados/deltas.
+
 ## System Registry v1 (fonte de verdade de systems mínimos)
 
 Contrato público interno para catalogar os systems mínimos conhecidos do loop headless:

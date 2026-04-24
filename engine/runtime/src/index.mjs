@@ -11,4 +11,5 @@ export { buildReplayArtifact } from './replay/replay-artifact.mjs';
 export { generateReplaySignature } from './replay/replay-signature.mjs';
 export { runMinimalSystemLoop } from './loop/run-minimal-system-loop.mjs';
 export { runMinimalSystemLoopWithTrace } from './loop/run-minimal-system-loop.mjs';
+export { createLoopExecutionPlan } from './loop/create-loop-execution-plan.mjs';
 export { getSystemRegistryV1, getKnownSystemDefinition } from './systems/system-registry.mjs';

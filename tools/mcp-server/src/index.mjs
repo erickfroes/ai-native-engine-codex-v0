@@ -7,6 +7,7 @@ import {
   formatSceneValidationReportV1,
   validateSaveFile,
   loadSceneFile,
+  createLoopExecutionPlan,
   buildWorldSnapshotMessage,
   runDeterministicReplay,
   buildReplayArtifact,
@@ -83,6 +84,7 @@ async function handleToolCall(params) {
     params.name !== 'validate_scene' &&
     params.name !== 'validate_save' &&
     params.name !== 'emit_world_snapshot' &&
+    params.name !== 'plan_loop' &&
     params.name !== 'run_loop' &&
     params.name !== 'run_replay' &&
     params.name !== 'run_replay_artifact'
@@ -101,7 +103,12 @@ async function handleToolCall(params) {
   try {
     const targetPath = resolveRepoPath(args.path);
 
-    if (params.name === 'run_loop' || params.name === 'run_replay' || params.name === 'run_replay_artifact') {
+    if (
+      params.name === 'plan_loop' ||
+      params.name === 'run_loop' ||
+      params.name === 'run_replay' ||
+      params.name === 'run_replay_artifact'
+    ) {
       if (!Number.isInteger(args.ticks) || args.ticks < 0) {
         const toolName = params.name;
         return {
@@ -122,6 +129,18 @@ async function handleToolCall(params) {
         return {
           content: toTextContent('run_loop: `trace` must be a boolean when provided.'),
           isError: true
+        };
+      }
+
+      if (params.name === 'plan_loop') {
+        const plan = await createLoopExecutionPlan(targetPath, {
+          ticks: args.ticks,
+          seed: args.seed
+        });
+        return {
+          content: toTextContent(`Execution plan built for ${plan.scene} at tick ${plan.ticks}.`),
+          structuredContent: plan,
+          isError: !plan.valid
         };
       }
 

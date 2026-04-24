@@ -11,6 +11,7 @@ import {
   buildWorldSnapshotMessage,
   runDeterministicReplay,
   buildReplayArtifact,
+  createLoopExecutionPlan,
   runMinimalSystemLoop,
   runMinimalSystemLoopWithTrace
 } from './index.mjs';
@@ -22,6 +23,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
+  node engine/runtime/src/cli.mjs plan-loop <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
@@ -256,6 +258,37 @@ async function run() {
       console.log(`Final state: ${artifact.finalState}`);
     }
 
+    return;
+  }
+
+  if (command === 'plan-loop') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    if (!hasFlag('--ticks')) {
+      throw new Error('plan-loop: --ticks is required');
+    }
+
+    const ticks = readNumberFlag('plan-loop', '--ticks', 1);
+    const seed = readNumberFlag('plan-loop', '--seed', undefined);
+    const plan = await createLoopExecutionPlan(maybePath, { ticks, seed });
+
+    if (asJson) {
+      console.log(JSON.stringify(plan, null, 2));
+    } else {
+      console.log(`Scene: ${plan.scene}`);
+      console.log(`Execution plan version: ${plan.executionPlanVersion}`);
+      console.log(`Ticks: ${plan.ticks}`);
+      console.log(`Seed: ${plan.seed}`);
+      console.log(`Valid: ${plan.valid ? 'yes' : 'no'}`);
+      console.log(`Planned ticks: ${plan.systemsPerTick.length}`);
+      console.log(`Estimated final state: ${plan.estimated.finalState}`);
+    }
+
+    process.exitCode = plan.valid ? 0 : 1;
     return;
   }
 

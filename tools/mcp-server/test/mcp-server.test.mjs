@@ -82,6 +82,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_save'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'emit_world_snapshot'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
+    assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'plan_loop'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay_artifact'));
 
@@ -286,6 +287,21 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       runLoopDefaultSeedA.result.structuredContent,
       runLoopDefaultSeedB.result.structuredContent
     );
+
+    const planLoopResponse = await client.request('tools/call', {
+      name: 'plan_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 4,
+        seed: 10
+      }
+    });
+
+    assert.equal(planLoopResponse.result.isError, false);
+    assert.equal(planLoopResponse.result.structuredContent.executionPlanVersion, 1);
+    assert.equal(planLoopResponse.result.structuredContent.valid, true);
+    assert.equal(planLoopResponse.result.structuredContent.estimated.finalState, 34);
+    assert.equal(planLoopResponse.result.structuredContent.systemsPerTick.length, 4);
 
     const replayArtifactResponseA = await client.request('tools/call', {
       name: 'run_replay_artifact',

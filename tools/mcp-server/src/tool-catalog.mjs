@@ -100,6 +100,30 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'plan_loop',
+    title: 'Plan Loop',
+    description: 'Plan headless loop execution without running handlers and return ExecutionPlan v1.',
+    inputSchema: {
+      type: 'object',
+      required: ['path', 'ticks'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        ticks: {
+          type: 'integer',
+          description: 'Number of ticks to plan.'
+        },
+        seed: {
+          type: 'integer',
+          description: 'Optional deterministic seed override.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'run_replay_artifact',
     title: 'Run Replay Artifact',
     description: 'Run deterministic replay for a scene and return the compact replay artifact.',
