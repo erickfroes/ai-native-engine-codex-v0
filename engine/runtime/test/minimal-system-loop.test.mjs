@@ -96,3 +96,21 @@ test('loopable fixture with ticks=0 executes nothing and preserves normalized in
   assert.deepEqual(result.executedSystems, []);
   assert.equal(result.finalState, 21);
 });
+
+test('core.loop applies explicit minimal state increment semantics', () => {
+  const coreLoopOnlyScene = {
+    entities: [],
+    systems: ['core.loop']
+  };
+
+  const seed = 21;
+  const ticks0 = runMinimalSystemLoop(coreLoopOnlyScene, { ticks: 0, seed });
+  const ticks1 = runMinimalSystemLoop(coreLoopOnlyScene, { ticks: 1, seed });
+  const ticks5 = runMinimalSystemLoop(coreLoopOnlyScene, { ticks: 5, seed });
+  const ticks5Again = runMinimalSystemLoop(coreLoopOnlyScene, { ticks: 5, seed });
+
+  assert.equal(ticks0.finalState, seed);
+  assert.equal(ticks1.finalState, (seed + 1) >>> 0);
+  assert.equal(ticks5.finalState, (seed + 5) >>> 0);
+  assert.equal(ticks5.finalState, ticks5Again.finalState);
+});
