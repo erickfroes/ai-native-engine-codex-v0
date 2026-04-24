@@ -115,6 +115,33 @@ Relações:
 - `LoopReport v1`: resultado real de execução;
 - `LoopTrace v1`: diagnóstico real opt-in.
 
+## State Model v1 (interno)
+
+Representação estruturada de estado inicial derivada do Scene Document v1:
+
+- ver `docs/STATE_MODEL_V1.md`.
+
+Regras:
+
+- interno ao runtime;
+- permite evolução futura além de `finalState` numérico;
+- não altera contratos v1 já publicados.
+
+## State Snapshot v1 (opt-in)
+
+Contrato serializável de inspeção de estado:
+
+- ver `docs/STATE_SNAPSHOT_V1.md`.
+- schema formal: `docs/schemas/state-snapshot-v1.schema.json`.
+
+Compatibilidade:
+
+- não altera `LoopReport v1`;
+- não altera `LoopTrace v1`;
+- não altera `ExecutionPlan v1`;
+- não altera `SceneValidationReport v1`;
+- não altera `run-loop`/`run_loop` padrão.
+
 ## Execution plan v1 (planejamento sem execução)
 
 Contrato público interno para planejar ordem de execução do loop sem rodar handlers:

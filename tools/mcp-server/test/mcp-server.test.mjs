@@ -85,6 +85,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'plan_loop'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay_artifact'));
+    assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'inspect_state'));
 
     const callResponse = await client.request('tools/call', {
       name: 'validate_scene',

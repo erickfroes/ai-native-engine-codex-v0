@@ -13,7 +13,9 @@ import {
   buildReplayArtifact,
   createLoopExecutionPlan,
   runMinimalSystemLoop,
-  runMinimalSystemLoopWithTrace
+  runMinimalSystemLoopWithTrace,
+  createInitialStateFromScene,
+  snapshotStateV1
 } from './index.mjs';
 
 function printUsage() {
@@ -24,6 +26,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs plan-loop <path> --ticks <n> [--seed <n>] [--json]
+  node engine/runtime/src/cli.mjs inspect-state <path> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
@@ -259,6 +262,30 @@ async function run() {
       console.log(`Snapshot opcode: ${artifact.snapshotOpcode}`);
       console.log(`Executed systems: ${artifact.executedSystemCount}`);
       console.log(`Final state: ${artifact.finalState}`);
+    }
+
+    return;
+  }
+
+  if (command === 'inspect-state') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const seed = readNumberFlag('inspect-state', '--seed', undefined);
+    const state = await createInitialStateFromScene(maybePath, { seed });
+    const snapshot = snapshotStateV1(state);
+
+    if (asJson) {
+      console.log(JSON.stringify(snapshot, null, 2));
+    } else {
+      console.log(`Scene: ${snapshot.scene}`);
+      console.log(`State snapshot version: ${snapshot.stateSnapshotVersion}`);
+      console.log(`Seed: ${snapshot.seed}`);
+      console.log(`Tick: ${snapshot.tick}`);
+      console.log(`Entities: ${snapshot.entities.length}`);
     }
 
     return;

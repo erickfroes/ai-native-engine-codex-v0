@@ -146,5 +146,25 @@ export const toolCatalog = [
       },
       additionalProperties: false
     }
+  },
+  {
+    name: 'inspect_state',
+    title: 'Inspect State',
+    description: 'Build State Snapshot v1 from Scene Document v1 without running loop handlers.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        seed: {
+          type: 'integer',
+          description: 'Optional deterministic seed override.'
+        }
+      },
+      additionalProperties: false
+    }
   }
 ];

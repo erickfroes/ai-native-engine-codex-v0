@@ -8,9 +8,11 @@ import {
   validateSaveFile,
   loadSceneFile,
   createLoopExecutionPlan,
+  createInitialStateFromScene,
   buildWorldSnapshotMessage,
   runDeterministicReplay,
   buildReplayArtifact,
+  snapshotStateV1,
   runMinimalSystemLoop,
   runMinimalSystemLoopWithTrace
 } from '../../../engine/runtime/src/index.mjs';
@@ -87,7 +89,8 @@ async function handleToolCall(params) {
     params.name !== 'plan_loop' &&
     params.name !== 'run_loop' &&
     params.name !== 'run_replay' &&
-    params.name !== 'run_replay_artifact'
+    params.name !== 'run_replay_artifact' &&
+    params.name !== 'inspect_state'
   ) {
     throw Object.assign(new Error(`Unknown tool: ${params.name}`), { code: -32602 });
   }
@@ -204,6 +207,23 @@ async function handleToolCall(params) {
       return {
         content: toTextContent(`Replay completed with ${replayMetrics.snapshotOpcode} at tick ${replayMetrics.ticks}.`),
         structuredContent: replayMetrics,
+        isError: false
+      };
+    }
+
+    if (params.name === 'inspect_state') {
+      if (args.seed !== undefined && !Number.isInteger(args.seed)) {
+        return {
+          content: toTextContent('inspect_state: `seed` must be an integer when provided.'),
+          isError: true
+        };
+      }
+
+      const state = await createInitialStateFromScene(targetPath, { seed: args.seed });
+      const snapshot = snapshotStateV1(state);
+      return {
+        content: toTextContent(`State snapshot built for ${snapshot.scene} with ${snapshot.entities.length} entities.`),
+        structuredContent: snapshot,
         isError: false
       };
     }

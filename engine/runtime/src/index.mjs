@@ -14,6 +14,11 @@ export { runMinimalSystemLoopWithTrace } from './loop/run-minimal-system-loop.mj
 export { createLoopExecutionPlan } from './loop/create-loop-execution-plan.mjs';
 export { createLoopSchedule } from './loop/loop-scheduler.mjs';
 export { createPhasedLoopSchedulePreview } from './loop/phased-scheduler-preview.mjs';
+export {
+  createStateModelV1FromScene,
+  createInitialStateFromScene,
+  snapshotStateV1
+} from './state/state-model-v1.mjs';
 export { getSystemRegistryV1, getKnownSystemDefinition } from './systems/system-registry.mjs';
 export {
   getSystemPhaseRegistryV1,
