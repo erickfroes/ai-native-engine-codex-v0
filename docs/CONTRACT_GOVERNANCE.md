@@ -13,6 +13,7 @@ Definir como evoluir contratos v1 para v2 sem quebrar compatibilidade operaciona
 - `ExecutionPlan v1`
 - `StateSnapshot v1` (opt-in)
 - `StateSimulationReport v1` (opt-in)
+- `StateMutationTrace v1` (opt-in)
 - `ComponentRegistry v1` (interno)
 - `StateProcessorRegistry v1` (interno, opt-in)
 - `System Registry v1`
@@ -51,6 +52,7 @@ Definir como evoluir contratos v1 para v2 sem quebrar compatibilidade operaciona
 - `ComponentRegistry v1` cataloga componentes conhecidos do state model.
 - `StateProcessorRegistry v1` cataloga processadores de estado opt-in.
 - `StateSimulationReport v1` é saída opt-in independente de `LoopReport v1`.
+- `StateMutationTrace v1` é diagnóstico opt-in complementar ao `StateSimulationReport v1`.
 - `Loop Scheduler v1` define ordem real por tick.
 - `System Registry v1` define metadados semânticos de systems conhecidos.
 - `System Phase Registry v1` é metadata de classificação e **não** altera ordem em v1.
