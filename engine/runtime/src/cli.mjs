@@ -16,7 +16,8 @@ import {
   runMinimalSystemLoopWithTrace,
   createInitialStateFromScene,
   snapshotStateV1,
-  simulateStateV1
+  simulateStateV1,
+  simulateStateV1WithMutationTrace
 } from './index.mjs';
 
 function printUsage() {
@@ -28,7 +29,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs plan-loop <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs inspect-state <path> [--seed <n>] [--json]
-  node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json]
+  node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
@@ -306,6 +307,26 @@ async function run() {
 
     const ticks = readNumberFlag('simulate-state', '--ticks', 0);
     const seed = readNumberFlag('simulate-state', '--seed', undefined);
+    const withTrace = hasFlag('--trace');
+
+    if (withTrace) {
+      const traced = await simulateStateV1WithMutationTrace(maybePath, { ticks, seed });
+
+      if (asJson) {
+        console.log(JSON.stringify(traced, null, 2));
+      } else {
+        console.log(`Scene: ${traced.report.scene}`);
+        console.log(`State simulation report version: ${traced.report.stateSimulationReportVersion}`);
+        console.log(`Ticks: ${traced.report.ticks}`);
+        console.log(`Seed: ${traced.report.seed}`);
+        console.log(`Ticks executed: ${traced.report.ticksExecuted}`);
+        console.log(`Processors: ${traced.report.processors.map((processor) => processor.name).join(', ') || '(none)'}`);
+        console.log(`Mutation trace version: ${traced.mutationTrace.stateMutationTraceVersion}`);
+      }
+
+      return;
+    }
+
     const report = await simulateStateV1(maybePath, { ticks, seed });
 
     if (asJson) {
