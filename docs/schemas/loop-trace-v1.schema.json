@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loop-trace-v1.schema.json",
+  "title": "LoopTraceV1",
+  "type": "object",
+  "required": [
+    "traceVersion",
+    "scene",
+    "ticks",
+    "seed",
+    "ticksExecuted",
+    "systemsPerTick"
+  ],
+  "properties": {
+    "traceVersion": { "const": 1 },
+    "scene": { "type": "string" },
+    "ticks": { "type": "integer" },
+    "seed": { "type": "integer" },
+    "ticksExecuted": { "type": "integer" },
+    "systemsPerTick": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tick", "systems"],
+        "properties": {
+          "tick": { "type": "integer" },
+          "systems": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "delta", "stateBefore", "stateAfter"],
+              "properties": {
+                "name": { "type": "string" },
+                "delta": { "type": "integer" },
+                "stateBefore": { "type": "integer" },
+                "stateAfter": { "type": "integer" }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
