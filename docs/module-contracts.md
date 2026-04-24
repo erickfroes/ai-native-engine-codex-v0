@@ -129,6 +129,21 @@ Regra atual:
 - ordem de systems por tick segue exatamente a ordem declarada na scene;
 - sem fases/prioridades nesta versão.
 
+## Phased Scheduler Preview v1 (interno, opt-in)
+
+Preview interno que anota phase por system sem alterar ordem real do scheduler:
+
+- derivado de `Loop Scheduler v1` + `System Phase Registry v1`;
+- não substitui o scheduler real;
+- não altera contratos públicos v1.
+
+## Governança de contratos
+
+Evolução controlada v1 -> v2:
+
+- ver `docs/CONTRACT_GOVERNANCE.md`.
+- mudanças incompatíveis exigem novo contrato versionado, sem mutar v1 em-place.
+
 ## System Registry v1 (fonte de verdade de systems mínimos)
 
 Contrato público interno para catalogar os systems mínimos conhecidos do loop headless:
