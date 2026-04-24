@@ -27,6 +27,7 @@ export {
   runStateProcessorsForTick
 } from './state/state-processor-registry-v1.mjs';
 export { simulateStateV1 } from './state/simulate-state-v1.mjs';
+export { simulateStateV1WithMutationTrace } from './state/simulate-state-v1.mjs';
 export {
   getComponentRegistryV1,
   listKnownComponents,
@@ -42,4 +43,3 @@ export {
   assertSystemHasPhase,
   assertPhaseRegistryIntegrity
 } from './systems/system-phase-registry.mjs';
-export { getSystemRegistryV1, getKnownSystemDefinition } from './systems/system-registry.mjs';
