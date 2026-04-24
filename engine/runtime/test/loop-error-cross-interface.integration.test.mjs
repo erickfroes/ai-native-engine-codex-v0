@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 
 import { loadSceneFile, runMinimalSystemLoop } from '../src/index.mjs';
+import { assertLoopReportV1, assertLoopReportV1Rejects } from './helpers/assertLoopReportV1.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
@@ -87,6 +88,7 @@ test('run-loop tick validation contract stays stable across runtime, CLI and MCP
   const scene = await loadSceneFile(tutorialScenePath);
 
   const runtimeTicksZero = runMinimalSystemLoop(scene, { ticks: 0, seed: 10 });
+  assertLoopReportV1Rejects(runtimeTicksZero);
   assert.equal(runtimeTicksZero.ticksExecuted, 0);
   assert.equal(runtimeTicksZero.finalState, 10);
   assert.deepEqual(runtimeTicksZero.executedSystems, []);
@@ -94,6 +96,7 @@ test('run-loop tick validation contract stays stable across runtime, CLI and MCP
   const cliTicksZero = runCli(['run-loop', tutorialScenePath, '--ticks', '0', '--seed', '10', '--json']);
   assert.equal(cliTicksZero.status, 0, cliTicksZero.stderr);
   const cliTicksZeroReport = JSON.parse(cliTicksZero.stdout);
+  assertLoopReportV1(cliTicksZeroReport);
   assert.equal(cliTicksZeroReport.ticksExecuted, 0);
   assert.equal(cliTicksZeroReport.finalState, 10);
   assert.deepEqual(cliTicksZeroReport.executedSystems, []);
@@ -117,6 +120,7 @@ test('run-loop tick validation contract stays stable across runtime, CLI and MCP
       }
     });
     assert.equal(mcpTicksZero.result.isError, false);
+    assertLoopReportV1(mcpTicksZero.result.structuredContent);
     assert.equal(mcpTicksZero.result.structuredContent.ticksExecuted, 0);
     assert.equal(mcpTicksZero.result.structuredContent.finalState, 10);
     assert.deepEqual(mcpTicksZero.result.structuredContent.executedSystems, []);
@@ -247,6 +251,7 @@ test('run-loop scene loading and validation errors stay predictable across runti
     const cliNoSystems = runCli(['run-loop', noSystemsScenePath, '--ticks', '4', '--seed', '10', '--json']);
     assert.equal(cliNoSystems.status, 0, cliNoSystems.stderr);
     const cliNoSystemsReport = JSON.parse(cliNoSystems.stdout);
+    assertLoopReportV1(cliNoSystemsReport);
     assert.equal(cliNoSystemsReport.ticksExecuted, 4);
     assert.equal(cliNoSystemsReport.finalState, 10);
     assert.deepEqual(cliNoSystemsReport.executedSystems, []);
@@ -260,6 +265,7 @@ test('run-loop scene loading and validation errors stay predictable across runti
       }
     });
     assert.equal(mcpNoSystems.result.isError, false);
+    assertLoopReportV1(mcpNoSystems.result.structuredContent);
     assert.equal(mcpNoSystems.result.structuredContent.ticksExecuted, 4);
     assert.equal(mcpNoSystems.result.structuredContent.finalState, 10);
     assert.deepEqual(mcpNoSystems.result.structuredContent.executedSystems, []);
@@ -309,6 +315,7 @@ test('run-loop omitted seed uses default 1337 across runtime, CLI and MCP', asyn
   const cli = runCli(['run-loop', tutorialScenePath, '--ticks', String(ticks), '--json']);
   assert.equal(cli.status, 0, cli.stderr);
   const cliReport = JSON.parse(cli.stdout);
+  assertLoopReportV1(cliReport);
   assert.equal(cliReport.seed, 1337);
   assert.equal(cliReport.ticksExecuted, 4);
   assert.equal(cliReport.finalState, 1361);
@@ -331,6 +338,7 @@ test('run-loop omitted seed uses default 1337 across runtime, CLI and MCP', asyn
       }
     });
     assert.equal(mcpResponse.result.isError, false);
+    assertLoopReportV1(mcpResponse.result.structuredContent);
     assert.equal(mcpResponse.result.structuredContent.seed, 1337);
     assert.equal(mcpResponse.result.structuredContent.ticksExecuted, 4);
     assert.equal(mcpResponse.result.structuredContent.finalState, 1361);

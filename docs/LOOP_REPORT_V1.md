@@ -22,6 +22,8 @@ Descrever o contrato público interno usado pelo loop headless do engine nas int
 }
 ```
 
+Schema formal: `docs/schemas/loop-report-v1.schema.json`.
+
 ## Semântica dos campos
 
 - `loopReportVersion`:

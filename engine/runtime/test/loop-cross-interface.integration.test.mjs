@@ -5,6 +5,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { loadSceneFile, runMinimalSystemLoop } from '../src/index.mjs';
+import { assertLoopReportV1 } from './helpers/assertLoopReportV1.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
@@ -103,18 +104,7 @@ test('run-loop stays semantically aligned across runtime, CLI and MCP', async ()
     ...runMinimalSystemLoop(scene, { ticks, seed })
   });
 
-  const expectedKeys = [
-    'executedSystems',
-    'finalState',
-    'loopReportVersion',
-    'scene',
-    'seed',
-    'ticks',
-    'ticksExecuted'
-  ];
-
-  assert.deepEqual(Object.keys(runtimeFirst).sort(), expectedKeys);
-  assert.equal(runtimeFirst.loopReportVersion, 1);
+  assertLoopReportV1(runtimeFirst);
   assert.equal(runtimeFirst.finalState, 34);
   assert.equal(runtimeFirst.ticksExecuted, 4);
   assert.deepEqual(runtimeFirst, runtimeSecond);
@@ -126,8 +116,7 @@ test('run-loop stays semantically aligned across runtime, CLI and MCP', async ()
 
   const cliFirst = normalizeLoopReport(JSON.parse(cliFirstResult.stdout));
   const cliSecond = normalizeLoopReport(JSON.parse(cliSecondResult.stdout));
-  assert.deepEqual(Object.keys(cliFirst).sort(), expectedKeys);
-  assert.equal(cliFirst.loopReportVersion, 1);
+  assertLoopReportV1(cliFirst);
   assert.equal(cliFirst.finalState, 34);
   assert.equal(cliFirst.ticksExecuted, 4);
   assert.deepEqual(cliFirst, cliSecond);
@@ -165,8 +154,7 @@ test('run-loop stays semantically aligned across runtime, CLI and MCP', async ()
 
     const mcpFirst = normalizeLoopReport(mcpFirstResponse.result.structuredContent);
     const mcpSecond = normalizeLoopReport(mcpSecondResponse.result.structuredContent);
-    assert.deepEqual(Object.keys(mcpFirst).sort(), expectedKeys);
-    assert.equal(mcpFirst.loopReportVersion, 1);
+    assertLoopReportV1(mcpFirst);
     assert.equal(mcpFirst.finalState, 34);
     assert.equal(mcpFirst.ticksExecuted, 4);
     assert.deepEqual(mcpFirst, mcpSecond);

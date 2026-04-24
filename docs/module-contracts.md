@@ -82,6 +82,7 @@ Regra de evolução:
 Contrato público interno de `runMinimalSystemLoop` (runtime), `run-loop --json` (CLI) e `run_loop` (MCP):
 
 - ver `docs/LOOP_REPORT_V1.md`.
+- schema formal: `docs/schemas/loop-report-v1.schema.json`.
 
 ## Save versioning (política operacional mínima)
 
