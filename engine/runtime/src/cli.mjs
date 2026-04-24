@@ -9,7 +9,8 @@ import {
   buildWorldSnapshotMessage,
   runDeterministicReplay,
   buildReplayArtifact,
-  runMinimalSystemLoop
+  runMinimalSystemLoop,
+  runMinimalSystemLoopWithTrace
 } from './index.mjs';
 
 function printUsage() {
@@ -19,7 +20,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
-  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--json]
+  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
 }
@@ -269,14 +270,33 @@ async function run() {
 
     const ticks = readNumberFlag('run-loop', '--ticks', 1);
     const seed = readNumberFlag('run-loop', '--seed', undefined);
+    const withTrace = hasFlag('--trace');
     const scene = await loadSceneFile(maybePath);
+
+    if (withTrace) {
+      const traced = runMinimalSystemLoopWithTrace(scene, { ticks, seed });
+
+      if (asJson) {
+        console.log(JSON.stringify(traced, null, 2));
+      } else {
+        console.log(`Scene: ${traced.report.scene}`);
+        console.log(`Loop report version: ${traced.report.loopReportVersion}`);
+        console.log(`Ticks: ${traced.report.ticks}`);
+        console.log(`Seed: ${traced.report.seed}`);
+        console.log(`Ticks executed: ${traced.report.ticksExecuted}`);
+        console.log(`Final state: ${traced.report.finalState}`);
+        console.log(`Executed systems: ${traced.report.executedSystems.join(', ') || '(none)'}`);
+        console.log(`Trace version: ${traced.trace.traceVersion}`);
+      }
+      return;
+    }
+
     const loopResult = runMinimalSystemLoop(scene, { ticks, seed });
-    const resolvedSeed = seed ?? 1337;
     const loopReport = {
       loopReportVersion: 1,
       scene: scene.metadata.name,
       ticks,
-      seed: resolvedSeed,
+      seed: seed ?? 1337,
       ticksExecuted: loopResult.ticksExecuted,
       finalState: loopResult.finalState,
       executedSystems: loopResult.executedSystems

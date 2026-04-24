@@ -84,6 +84,18 @@ Contrato público interno de `runMinimalSystemLoop` (runtime), `run-loop --json`
 - ver `docs/LOOP_REPORT_V1.md`.
 - schema formal: `docs/schemas/loop-report-v1.schema.json`.
 
+## Loop trace headless (diagnóstico opt-in)
+
+Contrato opt-in de diagnóstico por tick/system:
+
+- ver `docs/LOOP_TRACE_V1.md`.
+- schema formal: `docs/schemas/loop-trace-v1.schema.json`.
+
+Regra de compatibilidade:
+
+- `LoopReport v1` permanece o contrato estável de resultado;
+- habilitar trace não altera shape nem semântica do report padrão.
+
 ## Save versioning (política operacional mínima)
 
 - `saveVersion: 1` é a única versão atualmente suportada.

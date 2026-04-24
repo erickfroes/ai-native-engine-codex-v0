@@ -23,6 +23,7 @@ Descrever o contrato público interno usado pelo loop headless do engine nas int
 ```
 
 Schema formal: `docs/schemas/loop-report-v1.schema.json`.
+Diagnóstico opt-in separado: `docs/LOOP_TRACE_V1.md` (não altera o shape do report v1).
 
 ## Semântica dos campos
 

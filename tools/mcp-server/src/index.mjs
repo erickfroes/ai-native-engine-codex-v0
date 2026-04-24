@@ -10,7 +10,8 @@ import {
   buildWorldSnapshotMessage,
   runDeterministicReplay,
   buildReplayArtifact,
-  runMinimalSystemLoop
+  runMinimalSystemLoop,
+  runMinimalSystemLoopWithTrace
 } from '../../../engine/runtime/src/index.mjs';
 import { toolCatalog } from './tool-catalog.mjs';
 
@@ -117,9 +118,28 @@ async function handleToolCall(params) {
         };
       }
 
+      if (params.name === 'run_loop' && args.trace !== undefined && typeof args.trace !== 'boolean') {
+        return {
+          content: toTextContent('run_loop: `trace` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
       const scene = await loadSceneFile(targetPath);
 
       if (params.name === 'run_loop') {
+        if (args.trace === true) {
+          const traced = runMinimalSystemLoopWithTrace(scene, {
+            ticks: args.ticks,
+            seed: args.seed
+          });
+          return {
+            content: toTextContent(`Loop trace completed for ${traced.report.scene} at tick ${traced.report.ticks}.`),
+            structuredContent: traced,
+            isError: false
+          };
+        }
+
         const loopResult = runMinimalSystemLoop(scene, {
           ticks: args.ticks,
           seed: args.seed

@@ -90,6 +90,10 @@ export const toolCatalog = [
         seed: {
           type: 'integer',
           description: 'Optional deterministic seed override.'
+        },
+        trace: {
+          type: 'boolean',
+          description: 'Optional diagnostics flag. When true, returns LoopTrace envelope.'
         }
       },
       additionalProperties: false
