@@ -72,6 +72,30 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'run_loop',
+    title: 'Run Loop',
+    description: 'Run headless minimal loop for a scene and return deterministic loop report.',
+    inputSchema: {
+      type: 'object',
+      required: ['path', 'ticks'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        ticks: {
+          type: 'integer',
+          description: 'Number of ticks to execute in the minimal loop.'
+        },
+        seed: {
+          type: 'integer',
+          description: 'Optional deterministic seed override.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'run_replay_artifact',
     title: 'Run Replay Artifact',
     description: 'Run deterministic replay for a scene and return the compact replay artifact.',
