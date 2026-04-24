@@ -271,7 +271,7 @@ async function run() {
     const seed = readNumberFlag('run-loop', '--seed', undefined);
     const scene = await loadSceneFile(maybePath);
     const loopResult = runMinimalSystemLoop(scene, { ticks, seed });
-    const resolvedSeed = seed ?? 0;
+    const resolvedSeed = seed ?? 1337;
     const loopReport = {
       loopReportVersion: 1,
       scene: scene.metadata.name,
