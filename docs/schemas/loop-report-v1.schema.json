@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loop-report-v1.schema.json",
+  "title": "LoopReportV1",
+  "type": "object",
+  "required": [
+    "loopReportVersion",
+    "scene",
+    "ticks",
+    "seed",
+    "ticksExecuted",
+    "finalState",
+    "executedSystems"
+  ],
+  "properties": {
+    "loopReportVersion": { "const": 1 },
+    "scene": { "type": "string" },
+    "ticks": { "type": "integer" },
+    "seed": { "type": "integer" },
+    "ticksExecuted": { "type": "integer" },
+    "finalState": { "type": "integer" },
+    "executedSystems": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

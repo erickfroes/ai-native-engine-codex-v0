@@ -81,6 +81,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_scene'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_save'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'emit_world_snapshot'));
+    assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay_artifact'));
 
@@ -92,8 +93,18 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     });
 
     assert.equal(callResponse.result.isError, false);
-    assert.equal(callResponse.result.structuredContent.ok, true);
-    assert.equal(callResponse.result.structuredContent.summary.entityCount, 2);
+    assert.equal(callResponse.result.structuredContent.sceneValidationReportVersion, 1);
+    assert.equal(callResponse.result.structuredContent.valid, true);
+    assert.equal(callResponse.result.structuredContent.scene, 'tutorial');
+    assert.equal(callResponse.result.structuredContent.errors.length, 0);
+    assert.deepEqual(
+      callResponse.result.structuredContent.systems.map((system) => [system.name, system.known, system.delta]),
+      [
+        ['core.loop', true, 1],
+        ['input.keyboard', true, 3],
+        ['networking.replication', true, 2]
+      ]
+    );
 
     const validSaveResponse = await client.request('tools/call', {
       name: 'validate_save',
@@ -202,6 +213,78 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.deepEqual(
       replayResponseA.result.structuredContent,
       replayResponseB.result.structuredContent
+    );
+
+    const runLoopWithSeedA = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 4,
+        seed: 10
+      }
+    });
+
+    const runLoopWithSeedB = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 4,
+        seed: 10
+      }
+    });
+
+    const expectedRunLoopKeys = [
+      'executedSystems',
+      'finalState',
+      'loopReportVersion',
+      'scene',
+      'seed',
+      'ticks',
+      'ticksExecuted'
+    ];
+
+    assert.equal(runLoopWithSeedA.result.isError, false);
+    assert.deepEqual(
+      Object.keys(runLoopWithSeedA.result.structuredContent).sort(),
+      expectedRunLoopKeys
+    );
+    assert.equal(runLoopWithSeedA.result.structuredContent.loopReportVersion, 1);
+    assert.equal(runLoopWithSeedA.result.structuredContent.seed, 10);
+    assert.equal(runLoopWithSeedA.result.structuredContent.ticksExecuted, 4);
+    assert.equal(runLoopWithSeedA.result.structuredContent.finalState, 34);
+    assert.deepEqual(
+      runLoopWithSeedA.result.structuredContent,
+      runLoopWithSeedB.result.structuredContent
+    );
+
+    const runLoopDefaultSeedA = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 4
+      }
+    });
+
+    const runLoopDefaultSeedB = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 4
+      }
+    });
+
+    assert.equal(runLoopDefaultSeedA.result.isError, false);
+    assert.deepEqual(
+      Object.keys(runLoopDefaultSeedA.result.structuredContent).sort(),
+      expectedRunLoopKeys
+    );
+    assert.equal(runLoopDefaultSeedA.result.structuredContent.loopReportVersion, 1);
+    assert.equal(runLoopDefaultSeedA.result.structuredContent.seed, 1337);
+    assert.equal(runLoopDefaultSeedA.result.structuredContent.ticksExecuted, 4);
+    assert.equal(runLoopDefaultSeedA.result.structuredContent.finalState, 1361);
+    assert.deepEqual(
+      runLoopDefaultSeedA.result.structuredContent,
+      runLoopDefaultSeedB.result.structuredContent
     );
 
     const replayArtifactResponseA = await client.request('tools/call', {

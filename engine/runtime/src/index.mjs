@@ -1,5 +1,6 @@
 export { loadSchemaRegistry, getRepoRoot } from './schema/registry.mjs';
 export { validateSceneFile, formatValidationReport } from './scene/validate-scene.mjs';
+export { validateLoopScene, formatSceneValidationReportV1 } from './scene/validate-loop-scene.mjs';
 export { validateSaveFile } from './save/validate-save.mjs';
 export { loadSceneFile } from './scene/load-scene.mjs';
 export { summarizeScene } from './scene/summary.mjs';
@@ -9,3 +10,5 @@ export { runDeterministicReplay } from './replay/run-deterministic-replay.mjs';
 export { buildReplayArtifact } from './replay/replay-artifact.mjs';
 export { generateReplaySignature } from './replay/replay-signature.mjs';
 export { runMinimalSystemLoop } from './loop/run-minimal-system-loop.mjs';
+export { runMinimalSystemLoopWithTrace } from './loop/run-minimal-system-loop.mjs';
+export { getSystemRegistryV1, getKnownSystemDefinition } from './systems/system-registry.mjs';

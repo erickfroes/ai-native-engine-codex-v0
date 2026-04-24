@@ -3,13 +3,15 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
-  validateSceneFile,
-  formatValidationReport,
+  validateLoopScene,
+  formatSceneValidationReportV1,
   validateSaveFile,
   loadSceneFile,
   buildWorldSnapshotMessage,
   runDeterministicReplay,
-  buildReplayArtifact
+  buildReplayArtifact,
+  runMinimalSystemLoop,
+  runMinimalSystemLoopWithTrace
 } from '../../../engine/runtime/src/index.mjs';
 import { toolCatalog } from './tool-catalog.mjs';
 
@@ -81,6 +83,7 @@ async function handleToolCall(params) {
     params.name !== 'validate_scene' &&
     params.name !== 'validate_save' &&
     params.name !== 'emit_world_snapshot' &&
+    params.name !== 'run_loop' &&
     params.name !== 'run_replay' &&
     params.name !== 'run_replay_artifact'
   ) {
@@ -98,7 +101,7 @@ async function handleToolCall(params) {
   try {
     const targetPath = resolveRepoPath(args.path);
 
-    if (params.name === 'run_replay' || params.name === 'run_replay_artifact') {
+    if (params.name === 'run_loop' || params.name === 'run_replay' || params.name === 'run_replay_artifact') {
       if (!Number.isInteger(args.ticks) || args.ticks < 0) {
         const toolName = params.name;
         return {
@@ -115,7 +118,48 @@ async function handleToolCall(params) {
         };
       }
 
+      if (params.name === 'run_loop' && args.trace !== undefined && typeof args.trace !== 'boolean') {
+        return {
+          content: toTextContent('run_loop: `trace` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
       const scene = await loadSceneFile(targetPath);
+
+      if (params.name === 'run_loop') {
+        if (args.trace === true) {
+          const traced = runMinimalSystemLoopWithTrace(scene, {
+            ticks: args.ticks,
+            seed: args.seed
+          });
+          return {
+            content: toTextContent(`Loop trace completed for ${traced.report.scene} at tick ${traced.report.ticks}.`),
+            structuredContent: traced,
+            isError: false
+          };
+        }
+
+        const loopResult = runMinimalSystemLoop(scene, {
+          ticks: args.ticks,
+          seed: args.seed
+        });
+        const loopReport = {
+          loopReportVersion: 1,
+          scene: scene.metadata.name,
+          ticks: args.ticks,
+          seed: args.seed ?? 1337,
+          ticksExecuted: loopResult.ticksExecuted,
+          finalState: loopResult.finalState,
+          executedSystems: loopResult.executedSystems
+        };
+        return {
+          content: toTextContent(`Loop completed for ${loopReport.scene} at tick ${loopReport.ticks}.`),
+          structuredContent: loopReport,
+          isError: false
+        };
+      }
+
       const replay = runDeterministicReplay(scene, {
         ticks: args.ticks,
         seed: args.seed
@@ -167,17 +211,11 @@ async function handleToolCall(params) {
       };
     }
 
-    const report = await validateSceneFile(targetPath);
+    const report = await validateLoopScene(targetPath);
     return {
-      content: toTextContent(formatValidationReport(report)),
-      structuredContent: {
-        ok: report.ok,
-        path: report.absolutePath,
-        summary: report.summary,
-        errors: report.errors,
-        warnings: report.warnings
-      },
-      isError: !report.ok
+      content: toTextContent(formatSceneValidationReportV1(report)),
+      structuredContent: report,
+      isError: !report.valid
     };
   } catch (error) {
     const errorMessage = params.name === 'run_replay' && error.name === 'ToolInputError'
@@ -216,7 +254,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_save, emit_world_snapshot, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_save, emit_world_snapshot, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }

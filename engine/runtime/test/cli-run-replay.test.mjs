@@ -62,3 +62,65 @@ test('run-replay fails when --seed is not an integer', () => {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /run-replay: --seed must be an integer/);
 });
+
+test('run-loop returns deterministic JSON with exact shape and expected +6 composition', () => {
+  const first = runCli(['run-loop', scenePath, '--ticks', '4', '--seed', '10', '--json']);
+  const second = runCli(['run-loop', scenePath, '--ticks', '4', '--seed', '10', '--json']);
+
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(second.status, 0, second.stderr);
+
+  const firstReport = JSON.parse(first.stdout);
+  const secondReport = JSON.parse(second.stdout);
+  const expectedKeys = [
+    'executedSystems',
+    'finalState',
+    'loopReportVersion',
+    'scene',
+    'seed',
+    'ticks',
+    'ticksExecuted'
+  ];
+
+  assert.deepEqual(Object.keys(firstReport).sort(), expectedKeys);
+  assert.equal(firstReport.loopReportVersion, 1);
+  assert.equal(firstReport.seed, 10);
+  assert.equal(firstReport.ticks, 4);
+  assert.equal(firstReport.ticksExecuted, 4);
+  assert.equal(firstReport.finalState, 34);
+  assert.deepEqual(firstReport, secondReport);
+});
+
+test('run-loop --json without --seed uses default seed deterministically', () => {
+  const first = runCli(['run-loop', scenePath, '--ticks', '4', '--json']);
+  const second = runCli(['run-loop', scenePath, '--ticks', '4', '--json']);
+
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(second.status, 0, second.stderr);
+
+  const firstReport = JSON.parse(first.stdout);
+  const secondReport = JSON.parse(second.stdout);
+  const expectedKeys = [
+    'executedSystems',
+    'finalState',
+    'loopReportVersion',
+    'scene',
+    'seed',
+    'ticks',
+    'ticksExecuted'
+  ];
+
+  assert.deepEqual(Object.keys(firstReport).sort(), expectedKeys);
+  assert.equal(firstReport.loopReportVersion, 1);
+  assert.equal(firstReport.seed, 1337);
+  assert.equal(firstReport.ticksExecuted, 4);
+  assert.equal(firstReport.finalState, 1361);
+  assert.deepEqual(firstReport, secondReport);
+});
+
+test('run-loop fails when --ticks is missing', () => {
+  const result = runCli(['run-loop', scenePath, '--seed', '10', '--json']);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /run-loop: --ticks is required/);
+});
