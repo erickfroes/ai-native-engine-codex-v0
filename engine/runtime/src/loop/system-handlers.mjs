@@ -15,7 +15,7 @@ function coreLoopHandler(context) {
 }
 
 function keyboardStubHandler(context) {
-  return mix(context.state, context.seed);
+  return (context.state + 3) >>> 0;
 }
 
 function replicationStubHandler(context) {

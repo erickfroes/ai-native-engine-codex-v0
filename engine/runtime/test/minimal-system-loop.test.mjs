@@ -134,3 +134,22 @@ test('networking.replication applies explicit minimal state increment semantics'
   assert.equal(ticksN.finalState, (seed + 2 * ticksNValue) >>> 0);
   assert.deepEqual(ticksN, ticksNAgain);
 });
+
+test('input.keyboard applies explicit minimal state increment semantics', () => {
+  const inputKeyboardOnlyScene = {
+    entities: [],
+    systems: ['input.keyboard']
+  };
+
+  const seed = 21;
+  const ticksNValue = 7;
+  const ticks0 = runMinimalSystemLoop(inputKeyboardOnlyScene, { ticks: 0, seed });
+  const ticks1 = runMinimalSystemLoop(inputKeyboardOnlyScene, { ticks: 1, seed });
+  const ticksN = runMinimalSystemLoop(inputKeyboardOnlyScene, { ticks: ticksNValue, seed });
+  const ticksNAgain = runMinimalSystemLoop(inputKeyboardOnlyScene, { ticks: ticksNValue, seed });
+
+  assert.equal(ticks0.finalState, seed);
+  assert.equal(ticks1.finalState, (seed + 3) >>> 0);
+  assert.equal(ticksN.finalState, (seed + 3 * ticksNValue) >>> 0);
+  assert.deepEqual(ticksN, ticksNAgain);
+});
