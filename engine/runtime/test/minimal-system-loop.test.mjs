@@ -153,3 +153,27 @@ test('input.keyboard applies explicit minimal state increment semantics', () => 
   assert.equal(ticksN.finalState, (seed + 3 * ticksNValue) >>> 0);
   assert.deepEqual(ticksN, ticksNAgain);
 });
+
+test('headless composition of known systems applies +6 per tick and preserves declared order', () => {
+  const composedScene = {
+    entities: [],
+    systems: ['core.loop', 'input.keyboard', 'networking.replication']
+  };
+
+  const seed = 21;
+  const ticksNValue = 7;
+  const ticks0 = runMinimalSystemLoop(composedScene, { ticks: 0, seed });
+  const ticks1 = runMinimalSystemLoop(composedScene, { ticks: 1, seed });
+  const ticksN = runMinimalSystemLoop(composedScene, { ticks: ticksNValue, seed });
+  const ticksNAgain = runMinimalSystemLoop(composedScene, { ticks: ticksNValue, seed });
+
+  assert.equal(ticks0.finalState, seed);
+  assert.equal(ticks1.finalState, (seed + 6) >>> 0);
+  assert.equal(ticksN.finalState, (seed + 6 * ticksNValue) >>> 0);
+  assert.deepEqual(ticksN, ticksNAgain);
+  assert.deepEqual(ticks1.executedSystems, ['core.loop', 'input.keyboard', 'networking.replication']);
+  assert.deepEqual(
+    ticksN.executedSystems,
+    Array.from({ length: ticksNValue }, () => ['core.loop', 'input.keyboard', 'networking.replication']).flat()
+  );
+});
