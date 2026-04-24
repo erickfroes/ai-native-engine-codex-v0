@@ -1,0 +1,27 @@
+{
+  "format": "first-loop-replay.v1",
+  "createdAt": "2026-04-22T19:29:15.021Z",
+  "scenePath": "./scenes/tutorial.scene.json",
+  "ticks": 3,
+  "digest": "djb2:1299272902",
+  "frames": [
+    {
+      "tick": 1,
+      "healthByEntity": {
+        "player.hero": 99
+      }
+    },
+    {
+      "tick": 2,
+      "healthByEntity": {
+        "player.hero": 98
+      }
+    },
+    {
+      "tick": 3,
+      "healthByEntity": {
+        "player.hero": 97
+      }
+    }
+  ]
+}

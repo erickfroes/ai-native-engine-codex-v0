@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "pipeline": {
+    "backend": "wgpu-like",
+    "passes": [
+      { "name": "geometry", "enabled": true },
+      { "name": "ui_overlay", "enabled": true }
+    ]
+  }
+}

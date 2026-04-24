@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "actions": [
+    { "name": "move_up", "keys": ["KeyW", "ArrowUp"] },
+    { "name": "move_down", "keys": ["KeyS", "ArrowDown"] },
+    { "name": "confirm", "keys": ["Enter", "Space"] }
+  ]
+}

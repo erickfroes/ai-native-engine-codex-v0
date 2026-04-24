@@ -1,0 +1,10 @@
+{
+  "opcode": "world.snapshot",
+  "version": 1,
+  "direction": "server_to_client",
+  "reliability": "sometimes",
+  "payload": {
+    "tick": 44,
+    "entities": []
+  }
+}

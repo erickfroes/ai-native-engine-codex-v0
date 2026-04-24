@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "screen": "hud.main",
+  "widgets": [
+    {
+      "id": "hud.root",
+      "kind": "panel",
+      "children": [
+        {
+          "id": "hud.health",
+          "kind": "label",
+          "text": "HP: 100"
+        },
+        {
+          "id": "hud.prompt",
+          "kind": "label",
+          "text": "Press Enter"
+        }
+      ]
+    }
+  ]
+}

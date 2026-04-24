@@ -1,0 +1,25 @@
+{
+  "id": "hero.base",
+  "version": 1,
+  "tags": ["player", "starter"],
+  "components": [
+    {
+      "kind": "transform",
+      "version": 1,
+      "replicated": false,
+      "fields": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "kind": "health",
+      "version": 1,
+      "replicated": true,
+      "fields": {
+        "hp": 100,
+        "maxHp": 100
+      }
+    }
+  ]
+}

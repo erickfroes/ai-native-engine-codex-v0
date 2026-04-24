@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "scene-with-prefab"
+  },
+  "systems": [
+    "core.loop",
+    "networking.replication"
+  ],
+  "entities": [
+    {
+      "id": "hero.from.prefab",
+      "prefab": "./prefabs/hero.base.prefab.json",
+      "components": []
+    }
+  ]
+}

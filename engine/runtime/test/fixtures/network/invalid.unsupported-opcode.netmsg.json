@@ -1,0 +1,10 @@
+{
+  "opcode": "chat.message",
+  "version": 1,
+  "direction": "server_to_client",
+  "reliability": "reliable",
+  "payload": {
+    "tick": 44,
+    "entities": []
+  }
+}

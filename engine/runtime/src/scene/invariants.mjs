@@ -30,7 +30,11 @@ export function validateSceneInvariants(scene) {
     }
 
     if (!Array.isArray(entity.components) || entity.components.length === 0) {
-      pushMessage(errors, `${entityPath}.components`, 'entity must contain at least one component');
+      if (typeof entity.prefab === 'string' && entity.prefab.length > 0) {
+        pushMessage(warnings, `${entityPath}.components`, 'entity has no local components; expecting prefab resolution at load time');
+      } else {
+        pushMessage(errors, `${entityPath}.components`, 'entity must contain at least one component');
+      }
       continue;
     }
 

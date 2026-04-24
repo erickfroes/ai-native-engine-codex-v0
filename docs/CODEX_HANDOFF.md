@@ -36,20 +36,25 @@ Ordem recomendada:
 
 1. rodar `npm run smoke`;
 2. validar `./scenes/tutorial.scene.json`;
-3. usar a tool MCP `validate_scene` na mesma cena;
+3. usar as tools MCP `validate_scene`, `describe_scene`, `validate_prefab`, `validate_scene_assets`, `validate_save`, `validate_input`, `inspect_world`, `inspect_scene_hierarchy`, `validate_ui`, `validate_render`, `validate_network`, `diff_network_snapshots`, `validate_network_sequence`, `simulate_network_replication`, `simulate_first_loop`, `benchmark_first_loop`, `replay_first_loop`, `verify_replay_determinism`, `playback_replay_artifact`;
 4. comparar CLI e MCP;
 5. propor os próximos 3 commits pequenos;
 6. executar só o primeiro commit.
+7. validar o loop inicial com `npm run simulate:first-loop -- ./scenes/tutorial.scene.json 3`.
 
-## Próxima entrega sugerida para o Codex
+## Próxima entrega sugerida para o Codex (Fase 2)
 
-A melhor continuação da V0 é:
+A base da Fase 1 já cobre prefab, assets, `describe_scene` e loop inicial.
 
-- adicionar `prefab.schema.json`;
-- criar loader de prefab;
-- criar a tool MCP `describe_scene`;
-- ligar cenas a manifesto de assets;
-- começar o primeiro system loop do runtime.
+Próxima continuação recomendada (Fase 2 — editor e rede):
+
+- evoluir inspector/hierarchy serializável já disponível (`inspect_world` + `inspect_scene_hierarchy`, com filtros por `componentKind` e `systemName`) com views especializadas de domínio/editor;
+- expandir replicação básica cliente-servidor a partir do contrato de mensagem já validável (`validate_network`), da inspeção de delta (`diff_network_snapshots`), da validação de sequência (`validate_network_sequence`) e da simulação de stream (`simulate_network_replication`);
+- evoluir o replay já disponível (`replay_first_loop` + `verify_replay_determinism` + `playback_replay_artifact`) para capture/playback completo de ticks e múltiplos sistemas;
+- expandir métricas de performance (frame/tick) para além do primeiro loop em formato consumível por automação;
+- manter paridade CLI/MCP para todos os novos fluxos.
+
+Checklist consolidado das fases: `docs/PHASE_CHECKLIST.md`.
 
 ## Observação importante
 

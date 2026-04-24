@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "warnings-fixture",
+    "author": "codex"
+  },
+  "systems": ["core.loop"],
+  "assetRefs": [
+    "sprites/player_idle.png",
+    "sprites/player_idle.png"
+  ],
+  "entities": [
+    {
+      "id": "entity.without.name",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 0,
+            "y": 0
+          }
+        }
+      ]
+    }
+  ]
+}

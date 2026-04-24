@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "assets": [
+    "sprites/player_idle.png",
+    "sprites/camera_icon.png"
+  ]
+}

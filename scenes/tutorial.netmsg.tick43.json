@@ -1,0 +1,31 @@
+{
+  "opcode": "world.snapshot",
+  "version": 1,
+  "direction": "server_to_client",
+  "reliability": "reliable",
+  "payload": {
+    "tick": 43,
+    "entities": [
+      {
+        "id": "player.hero",
+        "components": {
+          "transform": {
+            "x": 3,
+            "y": 1,
+            "z": 0
+          }
+        }
+      },
+      {
+        "id": "enemy.slime.01",
+        "components": {
+          "transform": {
+            "x": 7,
+            "y": 2,
+            "z": 0
+          }
+        }
+      }
+    ]
+  }
+}

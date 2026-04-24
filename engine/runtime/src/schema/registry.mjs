@@ -23,7 +23,13 @@ export async function loadSchemaRegistry() {
   const files = [
     'scene.schema.json',
     'component.schema.json',
-    'net_message.schema.json'
+    'net_message.schema.json',
+    'prefab.schema.json',
+    'asset_manifest.schema.json',
+    'savegame.schema.json',
+    'input_bindings.schema.json',
+    'ui_layout.schema.json',
+    'render_profile.schema.json'
   ];
 
   const entries = await Promise.all(

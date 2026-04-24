@@ -1,0 +1,9 @@
+{
+  "opcode": "world.snapshot",
+  "version": 1,
+  "reliability": "reliable",
+  "payload": {
+    "tick": 44,
+    "entities": []
+  }
+}

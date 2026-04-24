@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "savegame.schema.json",
+  "title": "SaveGame",
+  "type": "object",
+  "required": [
+    "formatVersion",
+    "contentVersion",
+    "checksum",
+    "world"
+  ],
+  "properties": {
+    "formatVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "contentVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "checksum": {
+      "type": "string"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "world": {
+      "type": "object",
+      "required": [
+        "scene",
+        "entities"
+      ],
+      "properties": {
+        "scene": {
+          "type": "string"
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": { "type": "string" },
+              "components": {
+                "type": "array",
+                "items": { "$ref": "component.schema.json" }
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

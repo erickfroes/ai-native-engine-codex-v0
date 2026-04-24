@@ -1,0 +1,23 @@
+{
+  "opcode": "world.snapshot",
+  "version": 1,
+  "direction": "client_to_server",
+  "reliability": "unreliable",
+  "payload": {
+    "tick": -1,
+    "entities": [
+      {
+        "id": "player.hero",
+        "components": {}
+      },
+      {
+        "id": "player.hero",
+        "components": {}
+      },
+      {
+        "id": " ",
+        "components": {}
+      }
+    ]
+  }
+}

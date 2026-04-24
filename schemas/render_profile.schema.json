@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "render_profile.schema.json",
+  "title": "RenderProfile",
+  "type": "object",
+  "required": ["version", "pipeline"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "pipeline": {
+      "type": "object",
+      "required": ["backend", "passes"],
+      "properties": {
+        "backend": { "type": "string" },
+        "passes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "enabled"],
+            "properties": {
+              "name": { "type": "string" },
+              "enabled": { "type": "boolean" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

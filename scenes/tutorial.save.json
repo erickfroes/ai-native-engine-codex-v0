@@ -1,0 +1,25 @@
+{
+  "formatVersion": 1,
+  "contentVersion": 1,
+  "checksum": "sha256:demo-v0",
+  "seed": 42,
+  "world": {
+    "scene": "tutorial",
+    "entities": [
+      {
+        "id": "player.hero",
+        "components": [
+          {
+            "kind": "health",
+            "version": 1,
+            "replicated": true,
+            "fields": {
+              "current": 97,
+              "max": 100
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

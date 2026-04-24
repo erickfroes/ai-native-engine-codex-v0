@@ -10,9 +10,27 @@
   "scripts": {
     "validate:scene": "node ./engine/runtime/src/cli.mjs validate-scene",
     "describe:scene": "node ./engine/runtime/src/cli.mjs describe-scene",
+    "validate:prefab": "node ./engine/runtime/src/cli.mjs validate-prefab",
+    "validate:scene:assets": "node ./engine/runtime/src/cli.mjs validate-scene-assets",
+    "simulate:first-loop": "node ./engine/runtime/src/cli.mjs run-first-loop",
+    "replay:first-loop": "node ./engine/runtime/src/cli.mjs replay-first-loop",
+    "verify:replay": "node ./engine/runtime/src/cli.mjs verify-replay-determinism",
+    "capture:replay": "node ./engine/runtime/src/cli.mjs capture-first-loop-replay",
+    "playback:replay": "node ./engine/runtime/src/cli.mjs playback-first-loop-replay",
+    "benchmark:first-loop": "node ./engine/runtime/src/cli.mjs benchmark-first-loop",
+    "validate:save": "node ./engine/runtime/src/cli.mjs validate-save",
+    "validate:input": "node ./engine/runtime/src/cli.mjs validate-input",
+    "inspect:world": "node ./engine/runtime/src/cli.mjs inspect-world",
+    "inspect:hierarchy": "node ./engine/runtime/src/cli.mjs inspect-scene-hierarchy",
+    "validate:ui": "node ./engine/runtime/src/cli.mjs validate-ui",
+    "validate:render": "node ./engine/runtime/src/cli.mjs validate-render",
+    "validate:network": "node ./engine/runtime/src/cli.mjs validate-network",
+    "diff:network": "node ./engine/runtime/src/cli.mjs diff-network-snapshots",
+    "validate:network:sequence": "node ./engine/runtime/src/cli.mjs validate-network-sequence",
+    "simulate:replication": "node ./engine/runtime/src/cli.mjs simulate-network-replication",
     "validate:scenes": "node ./engine/runtime/src/cli.mjs validate-all-scenes ./scenes",
     "mcp:server": "node ./tools/mcp-server/src/index.mjs",
-    "test": "node --test ./engine/runtime/test/scene-validation.test.mjs ./tools/mcp-server/test/mcp-server.test.mjs",
+    "test": "node --test ./engine/runtime/test/scene-validation.test.mjs ./engine/runtime/test/prefab-validation.test.mjs ./engine/runtime/test/asset-manifest-validation.test.mjs ./engine/runtime/test/first-loop.test.mjs ./engine/runtime/test/replay-first-loop.test.mjs ./engine/runtime/test/replay-artifact.test.mjs ./engine/runtime/test/first-loop-benchmark.test.mjs ./engine/runtime/test/verify-replay-determinism.test.mjs ./engine/runtime/test/save-validation.test.mjs ./engine/runtime/test/input-validation.test.mjs ./engine/runtime/test/ecs-world.test.mjs ./engine/runtime/test/scene-hierarchy.test.mjs ./engine/runtime/test/ui-validation.test.mjs ./engine/runtime/test/render-validation.test.mjs ./engine/runtime/test/network-validation.test.mjs ./engine/runtime/test/network-snapshot-diff.test.mjs ./engine/runtime/test/network-sequence-validation.test.mjs ./engine/runtime/test/network-replication-simulation.test.mjs ./tools/mcp-server/test/mcp-server.test.mjs",
     "smoke": "npm run validate:scene -- ./scenes/tutorial.scene.json && npm test"
   }
 }
