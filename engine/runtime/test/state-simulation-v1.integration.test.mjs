@@ -137,6 +137,59 @@ test('simulate-state CLI and simulate_state MCP return StateSimulationReport v1'
   }
 });
 
+test('simulate-state CLI --json keeps pure StateSimulationReport v1 without --trace', () => {
+  const cliResult = runCli(['simulate-state', movementPath, '--ticks', '3', '--seed', '10', '--json']);
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+
+  const cliReport = JSON.parse(cliResult.stdout);
+  assertStateSimulationReportV1(cliReport);
+  assert.deepEqual(Object.keys(cliReport).sort(), [
+    'finalSnapshot',
+    'initialSnapshot',
+    'processors',
+    'scene',
+    'seed',
+    'stateSimulationReportVersion',
+    'steps',
+    'ticks',
+    'ticksExecuted'
+  ]);
+  assert.equal(cliReport.finalSnapshot.entities[0].components.transform.fields.x, 6);
+  assert.equal(cliReport.finalSnapshot.entities[0].components.transform.fields.y, 9);
+});
+
+test('simulate-state CLI --json --trace returns deterministic envelope with report + mutationTrace', () => {
+  const firstResult = runCli(['simulate-state', movementPath, '--ticks', '3', '--seed', '10', '--json', '--trace']);
+  const secondResult = runCli(['simulate-state', movementPath, '--ticks', '3', '--seed', '10', '--json', '--trace']);
+
+  assert.equal(firstResult.status, 0, firstResult.stderr);
+  assert.equal(secondResult.status, 0, secondResult.stderr);
+
+  const first = JSON.parse(firstResult.stdout);
+  const second = JSON.parse(secondResult.stdout);
+  assert.deepEqual(Object.keys(first).sort(), ['mutationTrace', 'report']);
+  assertStateSimulationReportV1(first.report);
+  assert.equal(first.report.finalSnapshot.entities[0].components.transform.fields.x, 6);
+  assert.equal(first.report.finalSnapshot.entities[0].components.transform.fields.y, 9);
+
+  assert.equal(first.mutationTrace.stateMutationTraceVersion, 1);
+  assert.equal(first.mutationTrace.ticks, 3);
+  assert.equal(first.mutationTrace.seed, 10);
+  assert.equal(first.mutationTrace.mutationsByTick.length, 3);
+
+  for (const [index, tick] of first.mutationTrace.mutationsByTick.entries()) {
+    assert.equal(tick.tick, index + 1);
+    assert.equal(tick.processors.length, 1);
+    assert.equal(tick.processors[0].name, 'movement.integrate');
+    assert.equal(tick.processors[0].mutations.length, 1);
+    assert.equal(tick.processors[0].mutations[0].component, 'transform');
+    assert.ok(tick.processors[0].mutations[0].fieldsChanged.includes('x'));
+    assert.ok(tick.processors[0].mutations[0].fieldsChanged.includes('y'));
+  }
+
+  assert.deepEqual(first, second);
+});
+
 test('non-regression: existing loop/report/trace/plan/validation/inspect contracts stay intact', async () => {
   const scene = await loadSceneFile(tutorialPath);
   const explicitLoop = runMinimalSystemLoop(scene, { ticks: 4, seed: 10 });
