@@ -193,6 +193,10 @@ export const toolCatalog = [
             type: 'string'
           },
           description: 'Optional ordered list of state processor names.'
+        },
+        trace: {
+          type: 'boolean',
+          description: 'When true, returns report plus mutationTrace envelope.'
         }
       },
       additionalProperties: false
