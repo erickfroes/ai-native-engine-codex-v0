@@ -114,6 +114,21 @@ Separação explícita:
 - `LoopTrace v1`: diagnóstico real por tick/system;
 - `System Registry v1`: base de systems conhecidos para metadados/deltas.
 
+## Loop Scheduler v1 (interno)
+
+Fonte interna única da ordem por tick usada por:
+
+- `ExecutionPlan v1`;
+- `LoopReport v1` (via execução);
+- `LoopTrace v1`.
+
+Referência: `docs/LOOP_SCHEDULER_V1.md`.
+
+Regra atual:
+
+- ordem de systems por tick segue exatamente a ordem declarada na scene;
+- sem fases/prioridades nesta versão.
+
 ## System Registry v1 (fonte de verdade de systems mínimos)
 
 Contrato público interno para catalogar os systems mínimos conhecidos do loop headless:

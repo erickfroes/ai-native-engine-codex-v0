@@ -1,4 +1,6 @@
 import { validateLoopScene } from '../scene/validate-loop-scene.mjs';
+import { loadSceneFile } from '../scene/load-scene.mjs';
+import { createLoopSchedule } from './loop-scheduler.mjs';
 
 const DEFAULT_SEED = 1337;
 
@@ -19,16 +21,6 @@ function normalizeSeed(value) {
   }
 
   return value;
-}
-
-function toPlannedSystem(system, order) {
-  return {
-    name: system.name,
-    known: system.known,
-    ...(system.delta === undefined ? {} : { delta: system.delta }),
-    ...(system.deterministic === undefined ? {} : { deterministic: system.deterministic }),
-    order
-  };
 }
 
 export async function createLoopExecutionPlan(scenePath, options = {}) {
@@ -54,17 +46,14 @@ export async function createLoopExecutionPlan(scenePath, options = {}) {
     };
   }
 
-  const perTickSystems = validation.systems.map((system, index) => toPlannedSystem(system, index));
-  const systemsPerTick = [];
-
-  for (let tick = 1; tick <= ticks; tick += 1) {
-    systemsPerTick.push({
-      tick,
-      systems: perTickSystems
-    });
-  }
-
-  const deltaPerTick = perTickSystems.reduce((sum, system) => sum + (system.delta ?? 0), 0);
+  const sceneData = await loadSceneFile(scenePath);
+  const schedule = createLoopSchedule(sceneData, {
+    ticks,
+    seed,
+    scenePath
+  });
+  const systemsPerTick = schedule.systemsPerTick;
+  const deltaPerTick = (systemsPerTick[0]?.systems ?? []).reduce((sum, system) => sum + (system.delta ?? 0), 0);
   const totalDelta = deltaPerTick * ticks;
 
   return {
@@ -82,4 +71,3 @@ export async function createLoopExecutionPlan(scenePath, options = {}) {
     }
   };
 }
-
