@@ -184,6 +184,18 @@ Compatibilidade:
 - não altera `LoopTrace v1`;
 - não altera `ExecutionPlan v1`.
 
+## State Mutation Trace v1 (opt-in)
+
+Contrato de diagnóstico de mutações por tick/processador da simulação de estado:
+
+- ver `docs/STATE_MUTATION_TRACE_V1.md`.
+- schema formal: `docs/schemas/state-mutation-trace-v1.schema.json`.
+
+Compatibilidade:
+
+- complementar ao `StateSimulationReport v1`;
+- não altera contratos v1 existentes.
+
 ## Execution plan v1 (planejamento sem execução)
 
 Contrato público interno para planejar ordem de execução do loop sem rodar handlers:

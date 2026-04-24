@@ -10,6 +10,7 @@ import {
   createLoopExecutionPlan,
   createInitialStateFromScene,
   simulateStateV1,
+  simulateStateV1WithMutationTrace,
   buildWorldSnapshotMessage,
   runDeterministicReplay,
   buildReplayArtifact,
@@ -245,6 +246,13 @@ async function handleToolCall(params) {
         };
       }
 
+      if (args.trace !== undefined && typeof args.trace !== 'boolean') {
+        return {
+          content: toTextContent('simulate_state: `trace` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
       if (
         args.processors !== undefined &&
         (!Array.isArray(args.processors) || args.processors.some((name) => typeof name !== 'string'))
@@ -255,14 +263,20 @@ async function handleToolCall(params) {
         };
       }
 
-      const report = await simulateStateV1(targetPath, {
+      const withTrace = args.trace === true;
+      const simulationInput = {
         ticks: args.ticks,
         seed: args.seed,
         processors: args.processors
-      });
+      };
+      const structuredContent = withTrace
+        ? await simulateStateV1WithMutationTrace(targetPath, simulationInput)
+        : await simulateStateV1(targetPath, simulationInput);
+      const report = withTrace ? structuredContent.report : structuredContent;
+
       return {
         content: toTextContent(`State simulation completed for ${report.scene} at tick ${report.ticks}.`),
-        structuredContent: report,
+        structuredContent,
         isError: false
       };
     }

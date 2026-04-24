@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state-mutation-trace-v1.schema.json",
+  "title": "StateMutationTraceV1",
+  "type": "object",
+  "required": [
+    "stateMutationTraceVersion",
+    "scene",
+    "ticks",
+    "seed",
+    "ticksExecuted",
+    "mutationsByTick"
+  ],
+  "properties": {
+    "stateMutationTraceVersion": { "type": "integer", "const": 1 },
+    "scene": { "type": "string" },
+    "ticks": { "type": "integer", "minimum": 0 },
+    "seed": { "type": "integer" },
+    "ticksExecuted": { "type": "integer", "minimum": 0 },
+    "mutationsByTick": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tick", "processors"],
+        "properties": {
+          "tick": { "type": "integer", "minimum": 1 },
+          "processors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "mutations"],
+              "properties": {
+                "name": { "type": "string" },
+                "mutations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "entityId",
+                      "component",
+                      "before",
+                      "after",
+                      "fieldsChanged"
+                    ],
+                    "properties": {
+                      "entityId": { "type": "string" },
+                      "component": { "type": "string" },
+                      "before": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "after": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "fieldsChanged": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
