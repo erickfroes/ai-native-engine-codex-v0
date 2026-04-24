@@ -19,7 +19,7 @@ function keyboardStubHandler(context) {
 }
 
 function replicationStubHandler(context) {
-  return mix(context.state, context.tick ^ context.seed);
+  return (context.state + 2) >>> 0;
 }
 
 const KNOWN_SYSTEM_HANDLERS = Object.freeze({
