@@ -50,6 +50,8 @@ Diagnóstico opt-in separado: `docs/LOOP_TRACE_V1.md` (não altera o shape do re
 
 ## Systems conhecidos no contrato atual
 
+Fonte de verdade: `docs/SYSTEM_REGISTRY_V1.md`.
+
 - `core.loop`: `+1` por tick
 - `input.keyboard`: `+3` por tick
 - `networking.replication`: `+2` por tick

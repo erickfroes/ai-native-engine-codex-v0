@@ -1,3 +1,5 @@
+import { getKnownSystemDefinition } from '../systems/system-registry.mjs';
+
 function mix(state, value) {
   return (Math.imul(state, 1664525) + value + 1013904223) >>> 0;
 }
@@ -10,30 +12,17 @@ function hashString(value) {
   return state;
 }
 
-function coreLoopHandler(context) {
-  return (context.state + 1) >>> 0;
+function knownSystemHandler(context) {
+  const definition = getKnownSystemDefinition(context.systemName);
+  return (context.state + definition.delta) >>> 0;
 }
-
-function keyboardStubHandler(context) {
-  return (context.state + 3) >>> 0;
-}
-
-function replicationStubHandler(context) {
-  return (context.state + 2) >>> 0;
-}
-
-const KNOWN_SYSTEM_HANDLERS = Object.freeze({
-  'core.loop': coreLoopHandler,
-  'input.keyboard': keyboardStubHandler,
-  'networking.replication': replicationStubHandler
-});
 
 function unknownSystemHandler(context) {
   return mix(context.state, hashString(`unknown:${context.systemName}`) ^ context.tick);
 }
 
 export function resolveSystemHandler(systemName) {
-  return KNOWN_SYSTEM_HANDLERS[systemName] ?? unknownSystemHandler;
+  return getKnownSystemDefinition(systemName) ? knownSystemHandler : unknownSystemHandler;
 }
 
 export function runResolvedSystem(systemName, context) {

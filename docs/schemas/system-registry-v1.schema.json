@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "system-registry-v1.schema.json",
+  "title": "SystemRegistryV1",
+  "type": "object",
+  "required": [
+    "registryVersion",
+    "systems"
+  ],
+  "properties": {
+    "registryVersion": { "const": 1 },
+    "systems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "delta", "deterministic"],
+        "properties": {
+          "name": { "type": "string" },
+          "delta": { "type": "integer" },
+          "deterministic": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
+

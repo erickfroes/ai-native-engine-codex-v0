@@ -83,6 +83,14 @@ Contrato público interno de `runMinimalSystemLoop` (runtime), `run-loop --json`
 
 - ver `docs/LOOP_REPORT_V1.md`.
 - schema formal: `docs/schemas/loop-report-v1.schema.json`.
+- systems conhecidos e deltas: `docs/SYSTEM_REGISTRY_V1.md`.
+
+## System Registry v1 (fonte de verdade de systems mínimos)
+
+Contrato público interno para catalogar os systems mínimos conhecidos do loop headless:
+
+- ver `docs/SYSTEM_REGISTRY_V1.md`.
+- schema formal: `docs/schemas/system-registry-v1.schema.json`.
 
 ## Loop trace headless (diagnóstico opt-in)
 
