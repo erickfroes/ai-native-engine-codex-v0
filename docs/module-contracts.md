@@ -99,6 +99,22 @@ Separação explícita:
 - `LoopTrace v1`: diagnóstico opt-in de execução;
 - `System Registry v1`: catálogo de systems conhecidos.
 
+## Scene Document v1 (contrato de input)
+
+Contrato formal do formato atual de cena aceito pelo engine:
+
+- ver `docs/SCENE_DOCUMENT_V1.md`.
+- schema formal: `docs/schemas/scene-document-v1.schema.json`.
+
+Relações:
+
+- `Scene Document v1`: input de cena;
+- `SceneValidationReport v1`: resultado da validação do input;
+- `ExecutionPlan v1`: planejamento sobre input válido;
+- `Loop Scheduler v1`: ordem real por tick;
+- `LoopReport v1`: resultado real de execução;
+- `LoopTrace v1`: diagnóstico real opt-in.
+
 ## Execution plan v1 (planejamento sem execução)
 
 Contrato público interno para planejar ordem de execução do loop sem rodar handlers:

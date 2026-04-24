@@ -36,6 +36,9 @@ async function collectSceneFiles(dirPath) {
   for (const entry of entries) {
     const absolutePath = path.join(dirPath, entry.name);
     if (entry.isDirectory()) {
+      if (entry.name === 'invalid') {
+        continue;
+      }
       found.push(...await collectSceneFiles(absolutePath));
       continue;
     }

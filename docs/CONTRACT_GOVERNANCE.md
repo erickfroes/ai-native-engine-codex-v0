@@ -6,6 +6,7 @@ Definir como evoluir contratos v1 para v2 sem quebrar compatibilidade operaciona
 
 ## Contratos v1 governados
 
+- `SceneDocument v1` (input)
 - `LoopReport v1`
 - `LoopTrace v1`
 - `SceneValidationReport v1`
@@ -40,7 +41,7 @@ Definir como evoluir contratos v1 para v2 sem quebrar compatibilidade operaciona
 
 ## Relação com scheduler/registry
 
+- `SceneDocument v1` define o shape do input aceito.
 - `Loop Scheduler v1` define ordem real por tick.
 - `System Registry v1` define metadados semânticos de systems conhecidos.
 - `System Phase Registry v1` é metadata de classificação e **não** altera ordem em v1.
-

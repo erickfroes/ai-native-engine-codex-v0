@@ -23,6 +23,59 @@ function buildReport(scene, errors, warnings, systems) {
   };
 }
 
+function validateSceneDocumentV1Systems(sceneData, errors, warnings, systems) {
+  if (!Object.prototype.hasOwnProperty.call(sceneData, 'systems')) {
+    errors.push(toIssue('SCENE_SYSTEMS_MISSING', 'scene must declare `systems`', { path: '$.systems' }));
+    return false;
+  }
+
+  if (!Array.isArray(sceneData.systems)) {
+    errors.push(toIssue('SCENE_SYSTEMS_EMPTY', 'scene `systems` must be a non-empty array', { path: '$.systems' }));
+    return false;
+  }
+
+  if (sceneData.systems.length === 0) {
+    errors.push(toIssue('SCENE_SYSTEMS_EMPTY', 'scene `systems` must not be empty', { path: '$.systems' }));
+    return false;
+  }
+
+  for (let index = 0; index < sceneData.systems.length; index += 1) {
+    const systemName = sceneData.systems[index];
+    if (typeof systemName !== 'string' || systemName.trim().length === 0) {
+      errors.push(
+        toIssue('SCENE_SYSTEM_NAME_INVALID', 'system name must be a non-empty string', {
+          path: `$.systems[${index}]`
+        })
+      );
+      continue;
+    }
+
+    const definition = getKnownSystemDefinition(systemName);
+    if (!definition) {
+      systems.push({
+        name: systemName,
+        known: false
+      });
+      errors.push(
+        toIssue('SCENE_SYSTEM_UNKNOWN', `unknown system: ${systemName}`, {
+          path: `$.systems[${index}]`,
+          system: systemName
+        })
+      );
+      continue;
+    }
+
+    systems.push({
+      name: definition.name,
+      known: true,
+      delta: definition.delta,
+      deterministic: definition.deterministic
+    });
+  }
+
+  return true;
+}
+
 export async function validateLoopScene(scenePath) {
   const absolutePath = path.resolve(scenePath);
   const warnings = [];
@@ -60,53 +113,9 @@ export async function validateLoopScene(scenePath) {
     ? sceneData.metadata.name
     : absolutePath;
 
-  if (!Object.prototype.hasOwnProperty.call(sceneData, 'systems')) {
-    errors.push(toIssue('SCENE_SYSTEMS_MISSING', 'scene must declare `systems`', { path: '$.systems' }));
+  const hasSystems = validateSceneDocumentV1Systems(sceneData, errors, warnings, systems);
+  if (!hasSystems) {
     return buildReport(sceneName, errors, warnings, systems);
-  }
-
-  if (!Array.isArray(sceneData.systems)) {
-    errors.push(toIssue('SCENE_SYSTEMS_EMPTY', 'scene `systems` must be a non-empty array', { path: '$.systems' }));
-    return buildReport(sceneName, errors, warnings, systems);
-  }
-
-  if (sceneData.systems.length === 0) {
-    errors.push(toIssue('SCENE_SYSTEMS_EMPTY', 'scene `systems` must not be empty', { path: '$.systems' }));
-    return buildReport(sceneName, errors, warnings, systems);
-  }
-
-  for (let index = 0; index < sceneData.systems.length; index += 1) {
-    const systemName = sceneData.systems[index];
-    if (typeof systemName !== 'string' || systemName.trim().length === 0) {
-      errors.push(
-        toIssue('SCENE_SYSTEM_NAME_INVALID', 'system name must be a non-empty string', {
-          path: `$.systems[${index}]`
-        })
-      );
-      continue;
-    }
-
-    const definition = getKnownSystemDefinition(systemName);
-    if (!definition) {
-      systems.push({
-        name: systemName,
-        known: false
-      });
-      errors.push(
-        toIssue('SCENE_SYSTEM_UNKNOWN', `unknown system: ${systemName}`, {
-          path: `$.systems[${index}]`,
-          system: systemName
-        })
-      );
-      continue;
-    }
-
-    systems.push({
-      name: definition.name,
-      known: true,
-      delta: definition.delta,
-      deterministic: definition.deterministic
-    });
   }
 
   return buildReport(sceneName, errors, warnings, systems);
@@ -141,4 +150,3 @@ export function formatSceneValidationReportV1(report) {
 
   return lines.join('\n');
 }
-
