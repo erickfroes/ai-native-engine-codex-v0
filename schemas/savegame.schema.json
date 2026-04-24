@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "savegame.schema.json",
+  "title": "SaveGameEnvelope",
+  "type": "object",
+  "required": [
+    "saveVersion",
+    "contentVersion",
+    "seed",
+    "checksum",
+    "payloadRef"
+  ],
+  "properties": {
+    "saveVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "contentVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "checksum": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payloadRef": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}

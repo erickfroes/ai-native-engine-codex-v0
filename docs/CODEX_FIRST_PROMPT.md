@@ -8,10 +8,11 @@ Depois execute esta sequência:
 2. Descreva rapidamente o que já funciona na V0.
 3. Confirme se o MCP `ai_engine_tools` está ativo.
 4. Use a tool `validate_scene` em `./scenes/tutorial.scene.json`.
-5. Compare o resultado da tool com `npm run validate:scene -- ./scenes/tutorial.scene.json`.
-6. Proponha um plano em 3 commits pequenos para evoluir a V0 sem quebrar contratos.
-7. Execute apenas o primeiro commit.
-8. Ao final, mostre quais arquivos mudaram, quais testes rodaram e o que ainda falta.
+5. Use a tool `emit_world_snapshot` em `./scenes/tutorial.scene.json`.
+6. Compare runtime/CLI/MCP para `world.snapshot`.
+7. Proponha um plano em 3 commits pequenos para evoluir a V0 sem quebrar contratos.
+8. Execute apenas o primeiro commit.
+9. Ao final, mostre quais arquivos mudaram, quais testes rodaram e o que ainda falta.
 
 Restrições:
 - mantenha mudanças pequenas;

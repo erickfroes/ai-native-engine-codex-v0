@@ -60,7 +60,7 @@ function createClient() {
   return { request, notify, close };
 }
 
-test('mcp server lists tools and validates a scene', async () => {
+test('mcp server lists tools, validates scenes, emits snapshots and runs deterministic replay', async () => {
   const client = createClient();
 
   try {
@@ -78,7 +78,11 @@ test('mcp server lists tools and validates a scene', async () => {
 
     const toolsResponse = await client.request('tools/list');
     assert.ok(Array.isArray(toolsResponse.result.tools));
-    assert.equal(toolsResponse.result.tools[0].name, 'validate_scene');
+    assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_scene'));
+    assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_save'));
+    assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'emit_world_snapshot'));
+    assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay'));
+    assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay_artifact'));
 
     const callResponse = await client.request('tools/call', {
       name: 'validate_scene',
@@ -90,6 +94,229 @@ test('mcp server lists tools and validates a scene', async () => {
     assert.equal(callResponse.result.isError, false);
     assert.equal(callResponse.result.structuredContent.ok, true);
     assert.equal(callResponse.result.structuredContent.summary.entityCount, 2);
+
+    const validSaveResponse = await client.request('tools/call', {
+      name: 'validate_save',
+      arguments: {
+        path: './fixtures/savegame/valid.savegame.json'
+      }
+    });
+
+    assert.equal(validSaveResponse.result.isError, false);
+    assert.equal(validSaveResponse.result.structuredContent.reportVersion, 1);
+    assert.equal(validSaveResponse.result.structuredContent.ok, true);
+    assert.equal(validSaveResponse.result.structuredContent.save.saveVersion, 1);
+    assert.equal(validSaveResponse.result.structuredContent.save.contentVersion, 1);
+    assert.equal(validSaveResponse.result.structuredContent.errors.length, 0);
+
+    const invalidSaveResponse = await client.request('tools/call', {
+      name: 'validate_save',
+      arguments: {
+        path: './fixtures/savegame/invalid.missing-checksum.savegame.json'
+      }
+    });
+
+    assert.equal(invalidSaveResponse.result.isError, true);
+    assert.equal(invalidSaveResponse.result.structuredContent.ok, false);
+    assert.ok(
+      invalidSaveResponse.result.structuredContent.errors.some(
+        (error) => error.path === '$.checksum' && error.message === 'is required'
+      )
+    );
+
+    const unsupportedVersionSaveResponse = await client.request('tools/call', {
+      name: 'validate_save',
+      arguments: {
+        path: './fixtures/savegame/invalid.unsupported-version.savegame.json'
+      }
+    });
+
+    assert.equal(unsupportedVersionSaveResponse.result.isError, true);
+    assert.equal(unsupportedVersionSaveResponse.result.structuredContent.reportVersion, 1);
+    assert.equal(unsupportedVersionSaveResponse.result.structuredContent.ok, false);
+    assert.ok(
+      unsupportedVersionSaveResponse.result.structuredContent.errors.some(
+        (error) =>
+          error.path === '$.saveVersion' &&
+          error.message === 'unsupported saveVersion: 2; supported: 1'
+      )
+    );
+
+    const snapshotResponseA = await client.request('tools/call', {
+      name: 'emit_world_snapshot',
+      arguments: {
+        path: './scenes/tutorial.scene.json'
+      }
+    });
+
+    const snapshotResponseB = await client.request('tools/call', {
+      name: 'emit_world_snapshot',
+      arguments: {
+        path: './scenes/tutorial.scene.json'
+      }
+    });
+
+    assert.equal(snapshotResponseA.result.isError, false);
+    assert.equal(snapshotResponseA.result.structuredContent.snapshot.opcode, 'world.snapshot');
+    assert.deepEqual(
+      snapshotResponseA.result.structuredContent.snapshot,
+      snapshotResponseB.result.structuredContent.snapshot
+    );
+
+    const replayResponseA = await client.request('tools/call', {
+      name: 'run_replay',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 3,
+        seed: 42
+      }
+    });
+
+    const replayResponseB = await client.request('tools/call', {
+      name: 'run_replay',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 3,
+        seed: 42
+      }
+    });
+
+    const expectedReplayKeys = [
+      'ciPayloadVersion',
+      'replaySignature',
+      'scene',
+      'seed',
+      'snapshotOpcode',
+      'ticks'
+    ];
+
+    assert.equal(replayResponseA.result.isError, false);
+    assert.deepEqual(
+      Object.keys(replayResponseA.result.structuredContent).sort(),
+      expectedReplayKeys
+    );
+    assert.equal(replayResponseA.result.structuredContent.ciPayloadVersion, 1);
+    assert.equal(replayResponseA.result.structuredContent.snapshotOpcode, 'world.snapshot');
+    assert.equal(typeof replayResponseA.result.structuredContent.replaySignature, 'string');
+    assert.ok(replayResponseA.result.structuredContent.replaySignature.length > 0);
+    assert.deepEqual(
+      replayResponseA.result.structuredContent,
+      replayResponseB.result.structuredContent
+    );
+
+    const replayArtifactResponseA = await client.request('tools/call', {
+      name: 'run_replay_artifact',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 3,
+        seed: 42
+      }
+    });
+
+    const replayArtifactResponseB = await client.request('tools/call', {
+      name: 'run_replay_artifact',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 3,
+        seed: 42
+      }
+    });
+
+    const expectedArtifactKeys = [
+      'executedSystemCount',
+      'finalState',
+      'replayArtifactVersion',
+      'replaySignature',
+      'scene',
+      'seed',
+      'snapshotOpcode',
+      'ticks'
+    ];
+
+    assert.equal(replayArtifactResponseA.result.isError, false);
+    assert.deepEqual(
+      Object.keys(replayArtifactResponseA.result.structuredContent).sort(),
+      expectedArtifactKeys
+    );
+    assert.equal(replayArtifactResponseA.result.structuredContent.replayArtifactVersion, 1);
+    assert.equal(replayArtifactResponseA.result.structuredContent.snapshotOpcode, 'world.snapshot');
+    assert.deepEqual(
+      replayArtifactResponseA.result.structuredContent,
+      replayArtifactResponseB.result.structuredContent
+    );
+
+    const missingTicksResponse = await client.request('tools/call', {
+      name: 'run_replay',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        seed: 42
+      }
+    });
+
+    assert.equal(missingTicksResponse.result.isError, true);
+    assert.match(
+      missingTicksResponse.result.content[0].text,
+      /run_replay: `ticks` is required and must be an integer >= 0/
+    );
+
+    const invalidTicksResponse = await client.request('tools/call', {
+      name: 'run_replay',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 'abc',
+        seed: 42
+      }
+    });
+
+    assert.equal(invalidTicksResponse.result.isError, true);
+    assert.match(
+      invalidTicksResponse.result.content[0].text,
+      /run_replay: `ticks` is required and must be an integer >= 0/
+    );
+
+    const invalidSeedResponse = await client.request('tools/call', {
+      name: 'run_replay',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 3,
+        seed: 'not-an-integer'
+      }
+    });
+
+    assert.equal(invalidSeedResponse.result.isError, true);
+    assert.match(
+      invalidSeedResponse.result.content[0].text,
+      /run_replay: `seed` must be an integer when provided/
+    );
+
+    const artifactMissingTicksResponse = await client.request('tools/call', {
+      name: 'run_replay_artifact',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        seed: 42
+      }
+    });
+
+    assert.equal(artifactMissingTicksResponse.result.isError, true);
+    assert.match(
+      artifactMissingTicksResponse.result.content[0].text,
+      /run_replay_artifact: `ticks` is required and must be an integer >= 0/
+    );
+
+    const invalidPathResponse = await client.request('tools/call', {
+      name: 'run_replay',
+      arguments: {
+        path: '/tmp/outside.scene.json',
+        ticks: 3,
+        seed: 42
+      }
+    });
+
+    assert.equal(invalidPathResponse.result.isError, true);
+    assert.match(
+      invalidPathResponse.result.content[0].text,
+      /run_replay: path must stay inside the repository root/
+    );
   } finally {
     await client.close();
   }
