@@ -8,7 +8,8 @@ import {
   loadSceneFile,
   buildWorldSnapshotMessage,
   runDeterministicReplay,
-  buildReplayArtifact
+  buildReplayArtifact,
+  runMinimalSystemLoop
 } from './index.mjs';
 
 function printUsage() {
@@ -18,6 +19,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
+  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
 }
@@ -45,7 +47,7 @@ function hasFlag(flag) {
   return process.argv.includes(flag);
 }
 
-function readNumberFlag(flag, fallbackValue) {
+function readNumberFlag(commandName, flag, fallbackValue) {
   const index = process.argv.indexOf(flag);
   if (index === -1) {
     return fallbackValue;
@@ -53,12 +55,12 @@ function readNumberFlag(flag, fallbackValue) {
 
   const rawValue = process.argv[index + 1];
   if (!rawValue) {
-    throw new Error(`run-replay: ${flag} requires an integer value`);
+    throw new Error(`${commandName}: ${flag} requires an integer value`);
   }
 
   const numericValue = Number(rawValue);
   if (!Number.isInteger(numericValue)) {
-    throw new Error(`run-replay: ${flag} must be an integer`);
+    throw new Error(`${commandName}: ${flag} must be an integer`);
   }
 
   return numericValue;
@@ -191,8 +193,8 @@ async function run() {
       throw new Error('run-replay: --ticks is required');
     }
 
-    const ticks = readNumberFlag('--ticks', 1);
-    const seed = readNumberFlag('--seed', undefined);
+    const ticks = readNumberFlag('run-replay', '--ticks', 1);
+    const seed = readNumberFlag('run-replay', '--seed', undefined);
 
     const scene = await loadSceneFile(maybePath);
     const replayReport = runDeterministicReplay(scene, { ticks, seed });
@@ -231,8 +233,8 @@ async function run() {
       throw new Error('run-replay-artifact: --ticks is required');
     }
 
-    const ticks = readNumberFlag('--ticks', 1);
-    const seed = readNumberFlag('--seed', undefined);
+    const ticks = readNumberFlag('run-replay-artifact', '--ticks', 1);
+    const seed = readNumberFlag('run-replay-artifact', '--seed', undefined);
 
     const scene = await loadSceneFile(maybePath);
     const replay = runDeterministicReplay(scene, { ticks, seed });
@@ -249,6 +251,47 @@ async function run() {
       console.log(`Snapshot opcode: ${artifact.snapshotOpcode}`);
       console.log(`Executed systems: ${artifact.executedSystemCount}`);
       console.log(`Final state: ${artifact.finalState}`);
+    }
+
+    return;
+  }
+
+  if (command === 'run-loop') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    if (!hasFlag('--ticks')) {
+      throw new Error('run-loop: --ticks is required');
+    }
+
+    const ticks = readNumberFlag('run-loop', '--ticks', 1);
+    const seed = readNumberFlag('run-loop', '--seed', undefined);
+    const scene = await loadSceneFile(maybePath);
+    const loopResult = runMinimalSystemLoop(scene, { ticks, seed });
+    const resolvedSeed = seed ?? 0;
+    const loopReport = {
+      loopReportVersion: 1,
+      scene: scene.metadata.name,
+      ticks,
+      seed: resolvedSeed,
+      ticksExecuted: loopResult.ticksExecuted,
+      finalState: loopResult.finalState,
+      executedSystems: loopResult.executedSystems
+    };
+
+    if (asJson) {
+      console.log(JSON.stringify(loopReport, null, 2));
+    } else {
+      console.log(`Scene: ${loopReport.scene}`);
+      console.log(`Loop report version: ${loopReport.loopReportVersion}`);
+      console.log(`Ticks: ${loopReport.ticks}`);
+      console.log(`Seed: ${loopReport.seed}`);
+      console.log(`Ticks executed: ${loopReport.ticksExecuted}`);
+      console.log(`Final state: ${loopReport.finalState}`);
+      console.log(`Executed systems: ${loopReport.executedSystems.join(', ') || '(none)'}`);
     }
 
     return;
