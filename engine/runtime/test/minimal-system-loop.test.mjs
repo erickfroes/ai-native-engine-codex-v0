@@ -84,3 +84,15 @@ test('loopable fixture evolves final state per tick in deterministic way', async
     'networking.replication'
   ]);
 });
+
+
+test('loopable fixture with ticks=0 executes nothing and preserves normalized initial state', async () => {
+  const scene = await loadSceneFile(scenePath('loopable-minimal.scene.json'));
+
+  const result = runMinimalSystemLoop(scene, { ticks: 0, seed: 21 });
+
+  assert.deepEqual(Object.keys(result).sort(), ['executedSystems', 'finalState', 'ticksExecuted']);
+  assert.equal(result.ticksExecuted, 0);
+  assert.deepEqual(result.executedSystems, []);
+  assert.equal(result.finalState, 21);
+});
