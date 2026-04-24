@@ -114,3 +114,22 @@ test('core.loop applies explicit minimal state increment semantics', () => {
   assert.equal(ticks5.finalState, (seed + 5) >>> 0);
   assert.equal(ticks5.finalState, ticks5Again.finalState);
 });
+
+
+test('networking.replication applies explicit minimal state increment semantics', () => {
+  const replicationOnlyScene = {
+    entities: [],
+    systems: ['networking.replication']
+  };
+
+  const seed = 21;
+  const ticks0 = runMinimalSystemLoop(replicationOnlyScene, { ticks: 0, seed });
+  const ticks1 = runMinimalSystemLoop(replicationOnlyScene, { ticks: 1, seed });
+  const ticks5 = runMinimalSystemLoop(replicationOnlyScene, { ticks: 5, seed });
+  const ticks5Again = runMinimalSystemLoop(replicationOnlyScene, { ticks: 5, seed });
+
+  assert.equal(ticks0.finalState, seed);
+  assert.equal(ticks1.finalState, (seed + 2) >>> 0);
+  assert.equal(ticks5.finalState, (seed + 10) >>> 0);
+  assert.equal(ticks5.finalState, ticks5Again.finalState);
+});
