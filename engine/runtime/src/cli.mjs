@@ -17,8 +17,6 @@ import {
   createInitialStateFromScene,
   snapshotStateV1,
   simulateStateV1
-  runMinimalSystemLoop,
-  runMinimalSystemLoopWithTrace
 } from './index.mjs';
 
 function printUsage() {
