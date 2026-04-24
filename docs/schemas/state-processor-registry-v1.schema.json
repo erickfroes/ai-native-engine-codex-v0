@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state-processor-registry-v1.schema.json",
+  "title": "StateProcessorRegistryV1",
+  "type": "object",
+  "required": ["stateProcessorRegistryVersion", "processors"],
+  "properties": {
+    "stateProcessorRegistryVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "processors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "version", "deterministic", "requiredComponents"],
+        "properties": {
+          "name": { "type": "string" },
+          "version": { "type": "integer", "minimum": 1 },
+          "deterministic": { "type": "boolean" },
+          "requiredComponents": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

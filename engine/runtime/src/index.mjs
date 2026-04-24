@@ -19,6 +19,20 @@ export {
   createInitialStateFromScene,
   snapshotStateV1
 } from './state/state-model-v1.mjs';
+export {
+  getStateProcessorRegistryV1,
+  listStateProcessors,
+  getStateProcessor,
+  runStateProcessor,
+  runStateProcessorsForTick
+} from './state/state-processor-registry-v1.mjs';
+export { simulateStateV1 } from './state/simulate-state-v1.mjs';
+export {
+  getComponentRegistryV1,
+  listKnownComponents,
+  getKnownComponent,
+  isKnownComponent
+} from './components/component-registry-v1.mjs';
 export { getSystemRegistryV1, getKnownSystemDefinition } from './systems/system-registry.mjs';
 export {
   getSystemPhaseRegistryV1,

@@ -166,5 +166,36 @@ export const toolCatalog = [
       },
       additionalProperties: false
     }
+  },
+  {
+    name: 'simulate_state',
+    title: 'Simulate State',
+    description: 'Run opt-in State Simulation v1 processors over a scene-derived state model.',
+    inputSchema: {
+      type: 'object',
+      required: ['path', 'ticks'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        ticks: {
+          type: 'integer',
+          description: 'Number of state simulation ticks to execute.'
+        },
+        seed: {
+          type: 'integer',
+          description: 'Optional deterministic seed override.'
+        },
+        processors: {
+          type: 'array',
+          items: {
+            type: 'string'
+          },
+          description: 'Optional ordered list of state processor names.'
+        }
+      },
+      additionalProperties: false
+    }
   }
 ];

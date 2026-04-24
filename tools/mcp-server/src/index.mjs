@@ -9,6 +9,7 @@ import {
   loadSceneFile,
   createLoopExecutionPlan,
   createInitialStateFromScene,
+  simulateStateV1,
   buildWorldSnapshotMessage,
   runDeterministicReplay,
   buildReplayArtifact,
@@ -90,7 +91,8 @@ async function handleToolCall(params) {
     params.name !== 'run_loop' &&
     params.name !== 'run_replay' &&
     params.name !== 'run_replay_artifact' &&
-    params.name !== 'inspect_state'
+    params.name !== 'inspect_state' &&
+    params.name !== 'simulate_state'
   ) {
     throw Object.assign(new Error(`Unknown tool: ${params.name}`), { code: -32602 });
   }
@@ -224,6 +226,43 @@ async function handleToolCall(params) {
       return {
         content: toTextContent(`State snapshot built for ${snapshot.scene} with ${snapshot.entities.length} entities.`),
         structuredContent: snapshot,
+        isError: false
+      };
+    }
+
+    if (params.name === 'simulate_state') {
+      if (!Number.isInteger(args.ticks) || args.ticks < 0) {
+        return {
+          content: toTextContent('simulate_state: `ticks` is required and must be an integer >= 0.'),
+          isError: true
+        };
+      }
+
+      if (args.seed !== undefined && !Number.isInteger(args.seed)) {
+        return {
+          content: toTextContent('simulate_state: `seed` must be an integer when provided.'),
+          isError: true
+        };
+      }
+
+      if (
+        args.processors !== undefined &&
+        (!Array.isArray(args.processors) || args.processors.some((name) => typeof name !== 'string'))
+      ) {
+        return {
+          content: toTextContent('simulate_state: `processors` must be an array of strings when provided.'),
+          isError: true
+        };
+      }
+
+      const report = await simulateStateV1(targetPath, {
+        ticks: args.ticks,
+        seed: args.seed,
+        processors: args.processors
+      });
+      return {
+        content: toTextContent(`State simulation completed for ${report.scene} at tick ${report.ticks}.`),
+        structuredContent: report,
         isError: false
       };
     }

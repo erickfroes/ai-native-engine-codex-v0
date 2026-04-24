@@ -142,6 +142,48 @@ Compatibilidade:
 - não altera `SceneValidationReport v1`;
 - não altera `run-loop`/`run_loop` padrão.
 
+## Component Registry v1 (interno)
+
+Catálogo de componentes conhecidos para State Model v1:
+
+- ver `docs/COMPONENT_REGISTRY_V1.md`.
+- schema formal: `docs/schemas/component-registry-v1.schema.json`.
+
+Componentes iniciais:
+
+- `transform` v1;
+- `velocity` v1.
+
+## State Processor Registry v1 (interno, opt-in)
+
+Catálogo de processadores de estado para simulação opt-in:
+
+- ver `docs/STATE_PROCESSOR_REGISTRY_V1.md`.
+- schema formal: `docs/schemas/state-processor-registry-v1.schema.json`.
+
+Processador inicial:
+
+- `movement.integrate`.
+
+Regras:
+
+- não altera `Loop Scheduler v1`;
+- não altera `System Registry v1`;
+- não altera `run-loop` padrão.
+
+## State Simulation Report v1 (opt-in)
+
+Contrato de saída da simulação de estado:
+
+- ver `docs/STATE_SIMULATION_REPORT_V1.md`.
+- schema formal: `docs/schemas/state-simulation-report-v1.schema.json`.
+
+Compatibilidade:
+
+- independente de `LoopReport v1`;
+- não altera `LoopTrace v1`;
+- não altera `ExecutionPlan v1`.
+
 ## Execution plan v1 (planejamento sem execução)
 
 Contrato público interno para planejar ordem de execução do loop sem rodar handlers:

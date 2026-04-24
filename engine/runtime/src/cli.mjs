@@ -15,7 +15,8 @@ import {
   runMinimalSystemLoop,
   runMinimalSystemLoopWithTrace,
   createInitialStateFromScene,
-  snapshotStateV1
+  snapshotStateV1,
+  simulateStateV1
 } from './index.mjs';
 
 function printUsage() {
@@ -27,6 +28,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs plan-loop <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs inspect-state <path> [--seed <n>] [--json]
+  node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
@@ -286,6 +288,35 @@ async function run() {
       console.log(`Seed: ${snapshot.seed}`);
       console.log(`Tick: ${snapshot.tick}`);
       console.log(`Entities: ${snapshot.entities.length}`);
+    }
+
+    return;
+  }
+
+  if (command === 'simulate-state') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    if (!hasFlag('--ticks')) {
+      throw new Error('simulate-state: --ticks is required');
+    }
+
+    const ticks = readNumberFlag('simulate-state', '--ticks', 0);
+    const seed = readNumberFlag('simulate-state', '--seed', undefined);
+    const report = await simulateStateV1(maybePath, { ticks, seed });
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`State simulation report version: ${report.stateSimulationReportVersion}`);
+      console.log(`Ticks: ${report.ticks}`);
+      console.log(`Seed: ${report.seed}`);
+      console.log(`Ticks executed: ${report.ticksExecuted}`);
+      console.log(`Processors: ${report.processors.map((processor) => processor.name).join(', ') || '(none)'}`);
     }
 
     return;

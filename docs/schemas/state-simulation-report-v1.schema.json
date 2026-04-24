@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state-simulation-report-v1.schema.json",
+  "title": "StateSimulationReportV1",
+  "type": "object",
+  "required": [
+    "stateSimulationReportVersion",
+    "scene",
+    "ticks",
+    "seed",
+    "ticksExecuted",
+    "processors",
+    "initialSnapshot",
+    "finalSnapshot",
+    "steps"
+  ],
+  "properties": {
+    "stateSimulationReportVersion": { "type": "integer", "const": 1 },
+    "scene": { "type": "string" },
+    "ticks": { "type": "integer", "minimum": 0 },
+    "seed": { "type": "integer" },
+    "ticksExecuted": { "type": "integer", "minimum": 0 },
+    "processors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "deterministic", "requiredComponents"],
+        "properties": {
+          "name": { "type": "string" },
+          "deterministic": { "type": "boolean" },
+          "requiredComponents": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "initialSnapshot": {
+      "$ref": "./state-snapshot-v1.schema.json"
+    },
+    "finalSnapshot": {
+      "$ref": "./state-snapshot-v1.schema.json"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tick", "processors"],
+        "properties": {
+          "tick": { "type": "integer", "minimum": 1 },
+          "processors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "mutatedEntities"],
+              "properties": {
+                "name": { "type": "string" },
+                "mutatedEntities": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
