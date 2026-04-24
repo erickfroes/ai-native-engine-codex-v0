@@ -123,13 +123,33 @@ test('networking.replication applies explicit minimal state increment semantics'
   };
 
   const seed = 21;
+  const ticksNValue = 7;
   const ticks0 = runMinimalSystemLoop(replicationOnlyScene, { ticks: 0, seed });
   const ticks1 = runMinimalSystemLoop(replicationOnlyScene, { ticks: 1, seed });
-  const ticks5 = runMinimalSystemLoop(replicationOnlyScene, { ticks: 5, seed });
-  const ticks5Again = runMinimalSystemLoop(replicationOnlyScene, { ticks: 5, seed });
+  const ticksN = runMinimalSystemLoop(replicationOnlyScene, { ticks: ticksNValue, seed });
+  const ticksNAgain = runMinimalSystemLoop(replicationOnlyScene, { ticks: ticksNValue, seed });
 
   assert.equal(ticks0.finalState, seed);
   assert.equal(ticks1.finalState, (seed + 2) >>> 0);
-  assert.equal(ticks5.finalState, (seed + 10) >>> 0);
-  assert.equal(ticks5.finalState, ticks5Again.finalState);
+  assert.equal(ticksN.finalState, (seed + 2 * ticksNValue) >>> 0);
+  assert.deepEqual(ticksN, ticksNAgain);
+});
+
+test('input.keyboard applies explicit minimal state increment semantics', () => {
+  const inputKeyboardOnlyScene = {
+    entities: [],
+    systems: ['input.keyboard']
+  };
+
+  const seed = 21;
+  const ticksNValue = 7;
+  const ticks0 = runMinimalSystemLoop(inputKeyboardOnlyScene, { ticks: 0, seed });
+  const ticks1 = runMinimalSystemLoop(inputKeyboardOnlyScene, { ticks: 1, seed });
+  const ticksN = runMinimalSystemLoop(inputKeyboardOnlyScene, { ticks: ticksNValue, seed });
+  const ticksNAgain = runMinimalSystemLoop(inputKeyboardOnlyScene, { ticks: ticksNValue, seed });
+
+  assert.equal(ticks0.finalState, seed);
+  assert.equal(ticks1.finalState, (seed + 3) >>> 0);
+  assert.equal(ticksN.finalState, (seed + 3 * ticksNValue) >>> 0);
+  assert.deepEqual(ticksN, ticksNAgain);
 });
