@@ -11,7 +11,7 @@ function hashString(value) {
 }
 
 function coreLoopHandler(context) {
-  return mix(context.state, context.tick);
+  return (context.state + 1) >>> 0;
 }
 
 function keyboardStubHandler(context) {
