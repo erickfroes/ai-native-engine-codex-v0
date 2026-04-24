@@ -42,3 +42,4 @@ export {
   assertSystemHasPhase,
   assertPhaseRegistryIntegrity
 } from './systems/system-phase-registry.mjs';
+export { getSystemRegistryV1, getKnownSystemDefinition } from './systems/system-registry.mjs';

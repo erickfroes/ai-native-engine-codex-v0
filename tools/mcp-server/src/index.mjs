@@ -114,6 +114,7 @@ async function handleToolCall(params) {
       params.name === 'run_replay' ||
       params.name === 'run_replay_artifact'
     ) {
+    if (params.name === 'run_loop' || params.name === 'run_replay' || params.name === 'run_replay_artifact') {
       if (!Number.isInteger(args.ticks) || args.ticks < 0) {
         const toolName = params.name;
         return {
