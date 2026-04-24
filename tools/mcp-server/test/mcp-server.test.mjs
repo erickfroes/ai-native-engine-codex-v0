@@ -290,6 +290,101 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       runLoopDefaultSeedB.result.structuredContent
     );
 
+    const simulateStateNoTraceResponse = await client.request('tools/call', {
+      name: 'simulate_state',
+      arguments: {
+        path: './scenes/state/movement.scene.json',
+        ticks: 3,
+        seed: 10
+      }
+    });
+
+    assert.equal(simulateStateNoTraceResponse.result.isError, false);
+    assert.deepEqual(
+      Object.keys(simulateStateNoTraceResponse.result.structuredContent).sort(),
+      [
+        'finalSnapshot',
+        'initialSnapshot',
+        'processors',
+        'scene',
+        'seed',
+        'stateSimulationReportVersion',
+        'steps',
+        'ticks',
+        'ticksExecuted'
+      ]
+    );
+    assert.equal(simulateStateNoTraceResponse.result.structuredContent.stateSimulationReportVersion, 1);
+    assert.equal(
+      simulateStateNoTraceResponse.result.structuredContent.finalSnapshot.entities[0].components.transform.fields.x,
+      6
+    );
+    assert.equal(
+      simulateStateNoTraceResponse.result.structuredContent.finalSnapshot.entities[0].components.transform.fields.y,
+      9
+    );
+
+    const simulateStateTraceResponseA = await client.request('tools/call', {
+      name: 'simulate_state',
+      arguments: {
+        path: './scenes/state/movement.scene.json',
+        ticks: 3,
+        seed: 10,
+        trace: true
+      }
+    });
+
+    const simulateStateTraceResponseB = await client.request('tools/call', {
+      name: 'simulate_state',
+      arguments: {
+        path: './scenes/state/movement.scene.json',
+        ticks: 3,
+        seed: 10,
+        trace: true
+      }
+    });
+
+    assert.equal(simulateStateTraceResponseA.result.isError, false);
+    assert.deepEqual(
+      Object.keys(simulateStateTraceResponseA.result.structuredContent).sort(),
+      ['mutationTrace', 'report']
+    );
+    assert.deepEqual(
+      simulateStateTraceResponseA.result.structuredContent,
+      simulateStateTraceResponseB.result.structuredContent
+    );
+    assert.equal(
+      simulateStateTraceResponseA.result.structuredContent.report.stateSimulationReportVersion,
+      1
+    );
+    assert.equal(
+      simulateStateTraceResponseA.result.structuredContent.report.finalSnapshot.entities[0].components.transform.fields.x,
+      6
+    );
+    assert.equal(
+      simulateStateTraceResponseA.result.structuredContent.report.finalSnapshot.entities[0].components.transform.fields.y,
+      9
+    );
+
+    const trace = simulateStateTraceResponseA.result.structuredContent.mutationTrace;
+    assert.equal(trace.stateMutationTraceVersion, 1);
+    assert.equal(trace.ticks, 3);
+    assert.equal(trace.mutationsByTick.length, 3);
+    for (const tick of trace.mutationsByTick) {
+      assert.ok(
+        tick.processors.some(
+          (processor) =>
+            processor.name === 'movement.integrate' &&
+            processor.mutations.some(
+              (mutation) =>
+                mutation.component === 'transform' &&
+                mutation.fieldsChanged.includes('x') &&
+                mutation.fieldsChanged.includes('y')
+            )
+        )
+      );
+    }
+
     const planLoopResponse = await client.request('tools/call', {
       name: 'plan_loop',
       arguments: {
