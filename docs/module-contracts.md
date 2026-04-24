@@ -77,6 +77,12 @@ Regra de evolução:
 - qualquer mudança de shape do payload CI exige bump de `ciPayloadVersion`;
 - CLI e MCP devem permanecer alinhados no mesmo shape/versionamento.
 
+## Loop report headless (governança mínima)
+
+Contrato público interno de `runMinimalSystemLoop` (runtime), `run-loop --json` (CLI) e `run_loop` (MCP):
+
+- ver `docs/LOOP_REPORT_V1.md`.
+
 ## Save versioning (política operacional mínima)
 
 - `saveVersion: 1` é a única versão atualmente suportada.
