@@ -1,5 +1,6 @@
 import { runDeterministicReplay } from '../replay/run-deterministic-replay.mjs';
 import { runResolvedSystem } from './system-handlers.mjs';
+import { createLoopSchedule } from './loop-scheduler.mjs';
 
 const DEFAULT_SEED = 1337;
 
@@ -33,6 +34,21 @@ export function runMinimalSystemLoop(scene, options = {}) {
 }
 
 export function runMinimalSystemLoopWithTrace(scene, options = {}) {
+  const schedule = createLoopSchedule(scene, options);
+  const { ticks, seed, systemsPerTick } = schedule;
+
+  let state = seed >>> 0;
+  const executedSystems = [];
+  const tracedSystemsPerTick = [];
+
+  for (const tickPlan of systemsPerTick) {
+    const tickSystems = [];
+
+    for (const system of tickPlan.systems) {
+      const stateBefore = state;
+      const stateAfter = runResolvedSystem(system.name, { state, tick: tickPlan.tick, seed });
+      tickSystems.push({
+        name: system.name,
   const ticks = normalizeTicks(options.ticks ?? 1);
   const seed = normalizeSeed(options.seed);
   const systems = Array.isArray(scene.systems) ? scene.systems : [];
@@ -53,6 +69,12 @@ export function runMinimalSystemLoopWithTrace(scene, options = {}) {
         stateBefore,
         stateAfter
       });
+      executedSystems.push(system.name);
+      state = stateAfter;
+    }
+
+    tracedSystemsPerTick.push({
+      tick: tickPlan.tick,
       executedSystems.push(systemName);
       state = stateAfter;
     }
@@ -79,6 +101,7 @@ export function runMinimalSystemLoopWithTrace(scene, options = {}) {
       ticks,
       seed,
       ticksExecuted: ticks,
+      systemsPerTick: tracedSystemsPerTick
       systemsPerTick
     }
   };

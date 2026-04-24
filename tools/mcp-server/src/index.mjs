@@ -3,13 +3,17 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
-  validateSceneFile,
-  formatValidationReport,
+  validateLoopScene,
+  formatSceneValidationReportV1,
   validateSaveFile,
   loadSceneFile,
+  createLoopExecutionPlan,
+  createInitialStateFromScene,
+  simulateStateV1,
   buildWorldSnapshotMessage,
   runDeterministicReplay,
   buildReplayArtifact,
+  snapshotStateV1,
   runMinimalSystemLoop,
   runMinimalSystemLoopWithTrace
 } from '../../../engine/runtime/src/index.mjs';
@@ -83,9 +87,12 @@ async function handleToolCall(params) {
     params.name !== 'validate_scene' &&
     params.name !== 'validate_save' &&
     params.name !== 'emit_world_snapshot' &&
+    params.name !== 'plan_loop' &&
     params.name !== 'run_loop' &&
     params.name !== 'run_replay' &&
-    params.name !== 'run_replay_artifact'
+    params.name !== 'run_replay_artifact' &&
+    params.name !== 'inspect_state' &&
+    params.name !== 'simulate_state'
   ) {
     throw Object.assign(new Error(`Unknown tool: ${params.name}`), { code: -32602 });
   }
@@ -101,6 +108,12 @@ async function handleToolCall(params) {
   try {
     const targetPath = resolveRepoPath(args.path);
 
+    if (
+      params.name === 'plan_loop' ||
+      params.name === 'run_loop' ||
+      params.name === 'run_replay' ||
+      params.name === 'run_replay_artifact'
+    ) {
     if (params.name === 'run_loop' || params.name === 'run_replay' || params.name === 'run_replay_artifact') {
       if (!Number.isInteger(args.ticks) || args.ticks < 0) {
         const toolName = params.name;
@@ -122,6 +135,18 @@ async function handleToolCall(params) {
         return {
           content: toTextContent('run_loop: `trace` must be a boolean when provided.'),
           isError: true
+        };
+      }
+
+      if (params.name === 'plan_loop') {
+        const plan = await createLoopExecutionPlan(targetPath, {
+          ticks: args.ticks,
+          seed: args.seed
+        });
+        return {
+          content: toTextContent(`Execution plan built for ${plan.scene} at tick ${plan.ticks}.`),
+          structuredContent: plan,
+          isError: !plan.valid
         };
       }
 
@@ -189,6 +214,60 @@ async function handleToolCall(params) {
       };
     }
 
+    if (params.name === 'inspect_state') {
+      if (args.seed !== undefined && !Number.isInteger(args.seed)) {
+        return {
+          content: toTextContent('inspect_state: `seed` must be an integer when provided.'),
+          isError: true
+        };
+      }
+
+      const state = await createInitialStateFromScene(targetPath, { seed: args.seed });
+      const snapshot = snapshotStateV1(state);
+      return {
+        content: toTextContent(`State snapshot built for ${snapshot.scene} with ${snapshot.entities.length} entities.`),
+        structuredContent: snapshot,
+        isError: false
+      };
+    }
+
+    if (params.name === 'simulate_state') {
+      if (!Number.isInteger(args.ticks) || args.ticks < 0) {
+        return {
+          content: toTextContent('simulate_state: `ticks` is required and must be an integer >= 0.'),
+          isError: true
+        };
+      }
+
+      if (args.seed !== undefined && !Number.isInteger(args.seed)) {
+        return {
+          content: toTextContent('simulate_state: `seed` must be an integer when provided.'),
+          isError: true
+        };
+      }
+
+      if (
+        args.processors !== undefined &&
+        (!Array.isArray(args.processors) || args.processors.some((name) => typeof name !== 'string'))
+      ) {
+        return {
+          content: toTextContent('simulate_state: `processors` must be an array of strings when provided.'),
+          isError: true
+        };
+      }
+
+      const report = await simulateStateV1(targetPath, {
+        ticks: args.ticks,
+        seed: args.seed,
+        processors: args.processors
+      });
+      return {
+        content: toTextContent(`State simulation completed for ${report.scene} at tick ${report.ticks}.`),
+        structuredContent: report,
+        isError: false
+      };
+    }
+
     if (params.name === 'emit_world_snapshot') {
       const scene = await loadSceneFile(targetPath);
       const snapshot = buildWorldSnapshotMessage(scene);
@@ -211,17 +290,11 @@ async function handleToolCall(params) {
       };
     }
 
-    const report = await validateSceneFile(targetPath);
+    const report = await validateLoopScene(targetPath);
     return {
-      content: toTextContent(formatValidationReport(report)),
-      structuredContent: {
-        ok: report.ok,
-        path: report.absolutePath,
-        summary: report.summary,
-        errors: report.errors,
-        warnings: report.warnings
-      },
-      isError: !report.ok
+      content: toTextContent(formatSceneValidationReportV1(report)),
+      structuredContent: report,
+      isError: !report.valid
     };
   } catch (error) {
     const errorMessage = params.name === 'run_replay' && error.name === 'ToolInputError'

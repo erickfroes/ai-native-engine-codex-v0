@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "execution-plan-v1.schema.json",
+  "title": "ExecutionPlanV1",
+  "type": "object",
+  "required": [
+    "executionPlanVersion",
+    "scene",
+    "ticks",
+    "seed",
+    "valid",
+    "validation",
+    "systemsPerTick",
+    "estimated"
+  ],
+  "properties": {
+    "executionPlanVersion": { "const": 1 },
+    "scene": { "type": "string" },
+    "ticks": { "type": "integer" },
+    "seed": { "type": "integer" },
+    "valid": { "type": "boolean" },
+    "validation": { "$ref": "scene-validation-report-v1.schema.json" },
+    "systemsPerTick": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tick", "systems"],
+        "properties": {
+          "tick": { "type": "integer" },
+          "systems": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "known", "order"],
+              "properties": {
+                "name": { "type": "string" },
+                "known": { "type": "boolean" },
+                "delta": { "type": "integer" },
+                "deterministic": { "type": "boolean" },
+                "order": { "type": "integer", "minimum": 0 }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "estimated": {
+      "type": "object",
+      "required": ["initialState", "totalDelta", "finalState"],
+      "properties": {
+        "initialState": { "type": "integer" },
+        "totalDelta": { "type": "integer" },
+        "finalState": { "type": "integer" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
+

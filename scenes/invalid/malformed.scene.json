@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "malformed"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    { "id": "broken", "components": [] }
+  ]
+

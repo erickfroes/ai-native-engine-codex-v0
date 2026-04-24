@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state-snapshot-v1.schema.json",
+  "title": "StateSnapshotV1",
+  "type": "object",
+  "required": [
+    "stateSnapshotVersion",
+    "scene",
+    "seed",
+    "tick",
+    "entities"
+  ],
+  "properties": {
+    "stateSnapshotVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "scene": {
+      "type": "string"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "tick": {
+      "type": "integer"
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "components"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "components": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

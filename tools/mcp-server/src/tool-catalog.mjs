@@ -100,6 +100,30 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'plan_loop',
+    title: 'Plan Loop',
+    description: 'Plan headless loop execution without running handlers and return ExecutionPlan v1.',
+    inputSchema: {
+      type: 'object',
+      required: ['path', 'ticks'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        ticks: {
+          type: 'integer',
+          description: 'Number of ticks to plan.'
+        },
+        seed: {
+          type: 'integer',
+          description: 'Optional deterministic seed override.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'run_replay_artifact',
     title: 'Run Replay Artifact',
     description: 'Run deterministic replay for a scene and return the compact replay artifact.',
@@ -118,6 +142,57 @@ export const toolCatalog = [
         seed: {
           type: 'integer',
           description: 'Optional deterministic seed override.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
+    name: 'inspect_state',
+    title: 'Inspect State',
+    description: 'Build State Snapshot v1 from Scene Document v1 without running loop handlers.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        seed: {
+          type: 'integer',
+          description: 'Optional deterministic seed override.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
+    name: 'simulate_state',
+    title: 'Simulate State',
+    description: 'Run opt-in State Simulation v1 processors over a scene-derived state model.',
+    inputSchema: {
+      type: 'object',
+      required: ['path', 'ticks'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        ticks: {
+          type: 'integer',
+          description: 'Number of state simulation ticks to execute.'
+        },
+        seed: {
+          type: 'integer',
+          description: 'Optional deterministic seed override.'
+        },
+        processors: {
+          type: 'array',
+          items: {
+            type: 'string'
+          },
+          description: 'Optional ordered list of state processor names.'
         }
       },
       additionalProperties: false

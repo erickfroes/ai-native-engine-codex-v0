@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "movement"
+  },
+  "systems": [
+    "core.loop",
+    "input.keyboard",
+    "networking.replication"
+  ],
+  "entities": [
+    {
+      "id": "player",
+      "name": "Player",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "kind": "velocity",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 2,
+            "y": 3
+          }
+        }
+      ]
+    }
+  ]
+}

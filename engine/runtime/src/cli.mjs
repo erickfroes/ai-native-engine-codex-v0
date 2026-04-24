@@ -4,11 +4,19 @@ import path from 'node:path';
 import {
   validateSceneFile,
   formatValidationReport,
+  validateLoopScene,
+  formatSceneValidationReportV1,
   validateSaveFile,
   loadSceneFile,
   buildWorldSnapshotMessage,
   runDeterministicReplay,
   buildReplayArtifact,
+  createLoopExecutionPlan,
+  runMinimalSystemLoop,
+  runMinimalSystemLoopWithTrace,
+  createInitialStateFromScene,
+  snapshotStateV1,
+  simulateStateV1
   runMinimalSystemLoop,
   runMinimalSystemLoopWithTrace
 } from './index.mjs';
@@ -20,6 +28,9 @@ function printUsage() {
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
+  node engine/runtime/src/cli.mjs plan-loop <path> --ticks <n> [--seed <n>] [--json]
+  node engine/runtime/src/cli.mjs inspect-state <path> [--seed <n>] [--json]
+  node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
@@ -32,6 +43,9 @@ async function collectSceneFiles(dirPath) {
   for (const entry of entries) {
     const absolutePath = path.join(dirPath, entry.name);
     if (entry.isDirectory()) {
+      if (entry.name === 'invalid') {
+        continue;
+      }
       found.push(...await collectSceneFiles(absolutePath));
       continue;
     }
@@ -84,13 +98,13 @@ async function run() {
       return;
     }
 
-    const report = await validateSceneFile(maybePath);
+    const report = await validateLoopScene(maybePath);
     if (asJson) {
       console.log(JSON.stringify(report, null, 2));
     } else {
-      console.log(formatValidationReport(report));
+      console.log(formatSceneValidationReportV1(report));
     }
-    process.exitCode = report.ok ? 0 : 1;
+    process.exitCode = report.valid ? 0 : 1;
     return;
   }
 
@@ -254,6 +268,90 @@ async function run() {
       console.log(`Final state: ${artifact.finalState}`);
     }
 
+    return;
+  }
+
+  if (command === 'inspect-state') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const seed = readNumberFlag('inspect-state', '--seed', undefined);
+    const state = await createInitialStateFromScene(maybePath, { seed });
+    const snapshot = snapshotStateV1(state);
+
+    if (asJson) {
+      console.log(JSON.stringify(snapshot, null, 2));
+    } else {
+      console.log(`Scene: ${snapshot.scene}`);
+      console.log(`State snapshot version: ${snapshot.stateSnapshotVersion}`);
+      console.log(`Seed: ${snapshot.seed}`);
+      console.log(`Tick: ${snapshot.tick}`);
+      console.log(`Entities: ${snapshot.entities.length}`);
+    }
+
+    return;
+  }
+
+  if (command === 'simulate-state') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    if (!hasFlag('--ticks')) {
+      throw new Error('simulate-state: --ticks is required');
+    }
+
+    const ticks = readNumberFlag('simulate-state', '--ticks', 0);
+    const seed = readNumberFlag('simulate-state', '--seed', undefined);
+    const report = await simulateStateV1(maybePath, { ticks, seed });
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`State simulation report version: ${report.stateSimulationReportVersion}`);
+      console.log(`Ticks: ${report.ticks}`);
+      console.log(`Seed: ${report.seed}`);
+      console.log(`Ticks executed: ${report.ticksExecuted}`);
+      console.log(`Processors: ${report.processors.map((processor) => processor.name).join(', ') || '(none)'}`);
+    }
+
+    return;
+  }
+
+  if (command === 'plan-loop') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    if (!hasFlag('--ticks')) {
+      throw new Error('plan-loop: --ticks is required');
+    }
+
+    const ticks = readNumberFlag('plan-loop', '--ticks', 1);
+    const seed = readNumberFlag('plan-loop', '--seed', undefined);
+    const plan = await createLoopExecutionPlan(maybePath, { ticks, seed });
+
+    if (asJson) {
+      console.log(JSON.stringify(plan, null, 2));
+    } else {
+      console.log(`Scene: ${plan.scene}`);
+      console.log(`Execution plan version: ${plan.executionPlanVersion}`);
+      console.log(`Ticks: ${plan.ticks}`);
+      console.log(`Seed: ${plan.seed}`);
+      console.log(`Valid: ${plan.valid ? 'yes' : 'no'}`);
+      console.log(`Planned ticks: ${plan.systemsPerTick.length}`);
+      console.log(`Estimated final state: ${plan.estimated.finalState}`);
+    }
+
+    process.exitCode = plan.valid ? 0 : 1;
     return;
   }
 

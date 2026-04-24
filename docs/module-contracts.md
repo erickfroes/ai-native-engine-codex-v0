@@ -85,12 +85,169 @@ Contrato público interno de `runMinimalSystemLoop` (runtime), `run-loop --json`
 - schema formal: `docs/schemas/loop-report-v1.schema.json`.
 - systems conhecidos e deltas: `docs/SYSTEM_REGISTRY_V1.md`.
 
+## Scene validation report v1 (pré-execução)
+
+Contrato público interno para validação de cena antes da execução do loop:
+
+- ver `docs/SCENE_VALIDATION_REPORT_V1.md`.
+- schema formal: `docs/schemas/scene-validation-report-v1.schema.json`.
+
+Separação explícita:
+
+- `SceneValidationReport v1`: validação da cena;
+- `LoopReport v1`: resultado de execução;
+- `LoopTrace v1`: diagnóstico opt-in de execução;
+- `System Registry v1`: catálogo de systems conhecidos.
+
+## Scene Document v1 (contrato de input)
+
+Contrato formal do formato atual de cena aceito pelo engine:
+
+- ver `docs/SCENE_DOCUMENT_V1.md`.
+- schema formal: `docs/schemas/scene-document-v1.schema.json`.
+
+Relações:
+
+- `Scene Document v1`: input de cena;
+- `SceneValidationReport v1`: resultado da validação do input;
+- `ExecutionPlan v1`: planejamento sobre input válido;
+- `Loop Scheduler v1`: ordem real por tick;
+- `LoopReport v1`: resultado real de execução;
+- `LoopTrace v1`: diagnóstico real opt-in.
+
+## State Model v1 (interno)
+
+Representação estruturada de estado inicial derivada do Scene Document v1:
+
+- ver `docs/STATE_MODEL_V1.md`.
+
+Regras:
+
+- interno ao runtime;
+- permite evolução futura além de `finalState` numérico;
+- não altera contratos v1 já publicados.
+
+## State Snapshot v1 (opt-in)
+
+Contrato serializável de inspeção de estado:
+
+- ver `docs/STATE_SNAPSHOT_V1.md`.
+- schema formal: `docs/schemas/state-snapshot-v1.schema.json`.
+
+Compatibilidade:
+
+- não altera `LoopReport v1`;
+- não altera `LoopTrace v1`;
+- não altera `ExecutionPlan v1`;
+- não altera `SceneValidationReport v1`;
+- não altera `run-loop`/`run_loop` padrão.
+
+## Component Registry v1 (interno)
+
+Catálogo de componentes conhecidos para State Model v1:
+
+- ver `docs/COMPONENT_REGISTRY_V1.md`.
+- schema formal: `docs/schemas/component-registry-v1.schema.json`.
+
+Componentes iniciais:
+
+- `transform` v1;
+- `velocity` v1.
+
+## State Processor Registry v1 (interno, opt-in)
+
+Catálogo de processadores de estado para simulação opt-in:
+
+- ver `docs/STATE_PROCESSOR_REGISTRY_V1.md`.
+- schema formal: `docs/schemas/state-processor-registry-v1.schema.json`.
+
+Processador inicial:
+
+- `movement.integrate`.
+
+Regras:
+
+- não altera `Loop Scheduler v1`;
+- não altera `System Registry v1`;
+- não altera `run-loop` padrão.
+
+## State Simulation Report v1 (opt-in)
+
+Contrato de saída da simulação de estado:
+
+- ver `docs/STATE_SIMULATION_REPORT_V1.md`.
+- schema formal: `docs/schemas/state-simulation-report-v1.schema.json`.
+
+Compatibilidade:
+
+- independente de `LoopReport v1`;
+- não altera `LoopTrace v1`;
+- não altera `ExecutionPlan v1`.
+
+## Execution plan v1 (planejamento sem execução)
+
+Contrato público interno para planejar ordem de execução do loop sem rodar handlers:
+
+- ver `docs/EXECUTION_PLAN_V1.md`.
+- schema formal: `docs/schemas/execution-plan-v1.schema.json`.
+
+Separação explícita:
+
+- `SceneValidationReport v1`: validação prévia;
+- `ExecutionPlan v1`: planejamento de ticks/systems e estimativa;
+- `LoopReport v1`: resultado real após execução;
+- `LoopTrace v1`: diagnóstico real por tick/system;
+- `System Registry v1`: base de systems conhecidos para metadados/deltas.
+
+## Loop Scheduler v1 (interno)
+
+Fonte interna única da ordem por tick usada por:
+
+- `ExecutionPlan v1`;
+- `LoopReport v1` (via execução);
+- `LoopTrace v1`.
+
+Referência: `docs/LOOP_SCHEDULER_V1.md`.
+
+Regra atual:
+
+- ordem de systems por tick segue exatamente a ordem declarada na scene;
+- sem fases/prioridades nesta versão.
+
+## Phased Scheduler Preview v1 (interno, opt-in)
+
+Preview interno que anota phase por system sem alterar ordem real do scheduler:
+
+- derivado de `Loop Scheduler v1` + `System Phase Registry v1`;
+- não substitui o scheduler real;
+- não altera contratos públicos v1.
+
+## Governança de contratos
+
+Evolução controlada v1 -> v2:
+
+- ver `docs/CONTRACT_GOVERNANCE.md`.
+- mudanças incompatíveis exigem novo contrato versionado, sem mutar v1 em-place.
+
 ## System Registry v1 (fonte de verdade de systems mínimos)
 
 Contrato público interno para catalogar os systems mínimos conhecidos do loop headless:
 
 - ver `docs/SYSTEM_REGISTRY_V1.md`.
 - schema formal: `docs/schemas/system-registry-v1.schema.json`.
+
+## System Phase Registry v1 (metadata interna de classificação)
+
+Classificação lógica de phases para systems conhecidos, sem reorganizar execução nesta versão:
+
+- ver `docs/SYSTEM_PHASE_REGISTRY_V1.md`.
+- schema formal: `docs/schemas/system-phase-registry-v1.schema.json`.
+
+Regras:
+
+- `System Registry v1` continua fonte de verdade de `name`/`delta`/`deterministic`;
+- `Loop Scheduler v1` continua fonte de verdade para ordem real por tick;
+- `System Phase Registry v1` não altera ordem de execução em v1.
 
 ## Loop trace headless (diagnóstico opt-in)
 

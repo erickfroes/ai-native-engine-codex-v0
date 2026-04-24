@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "missing-systems"
+  },
+  "entities": [
+    {
+      "id": "player",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 0,
+            "y": 0
+          }
+        }
+      ]
+    }
+  ]
+}
+
