@@ -56,11 +56,9 @@ Slice de paridade mínima de `world.snapshot` concluído:
 
 A melhor continuação da V0 é:
 
-- adicionar `prefab.schema.json`;
-- criar loader de prefab;
-- criar a tool MCP `describe_scene`;
-- ligar cenas a manifesto de assets;
-- começar o primeiro system loop do runtime.
+- entregar replicação real-time mínima no runtime;
+- expandir replay para multi-sistema;
+- publicar métricas de tick para CI.
 
 ## Observação importante
 
