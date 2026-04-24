@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "system-phase-registry-v1.schema.json",
+  "title": "SystemPhaseRegistryV1",
+  "type": "object",
+  "required": [
+    "phaseRegistryVersion",
+    "phases",
+    "systemPhases"
+  ],
+  "properties": {
+    "phaseRegistryVersion": { "const": 1 },
+    "phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "order"],
+        "properties": {
+          "name": { "type": "string" },
+          "order": { "type": "integer" },
+          "description": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "systemPhases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["system", "phase"],
+        "properties": {
+          "system": { "type": "string" },
+          "phase": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
+

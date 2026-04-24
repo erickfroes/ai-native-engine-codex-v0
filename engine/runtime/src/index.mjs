@@ -14,3 +14,11 @@ export { runMinimalSystemLoopWithTrace } from './loop/run-minimal-system-loop.mj
 export { createLoopExecutionPlan } from './loop/create-loop-execution-plan.mjs';
 export { createLoopSchedule } from './loop/loop-scheduler.mjs';
 export { getSystemRegistryV1, getKnownSystemDefinition } from './systems/system-registry.mjs';
+export {
+  getSystemPhaseRegistryV1,
+  getSystemPhase,
+  getKnownSystemPhase,
+  listSystemPhases,
+  assertSystemHasPhase,
+  assertPhaseRegistryIntegrity
+} from './systems/system-phase-registry.mjs';

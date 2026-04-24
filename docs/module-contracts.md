@@ -136,6 +136,19 @@ Contrato público interno para catalogar os systems mínimos conhecidos do loop 
 - ver `docs/SYSTEM_REGISTRY_V1.md`.
 - schema formal: `docs/schemas/system-registry-v1.schema.json`.
 
+## System Phase Registry v1 (metadata interna de classificação)
+
+Classificação lógica de phases para systems conhecidos, sem reorganizar execução nesta versão:
+
+- ver `docs/SYSTEM_PHASE_REGISTRY_V1.md`.
+- schema formal: `docs/schemas/system-phase-registry-v1.schema.json`.
+
+Regras:
+
+- `System Registry v1` continua fonte de verdade de `name`/`delta`/`deterministic`;
+- `Loop Scheduler v1` continua fonte de verdade para ordem real por tick;
+- `System Phase Registry v1` não altera ordem de execução em v1.
+
 ## Loop trace headless (diagnóstico opt-in)
 
 Contrato opt-in de diagnóstico por tick/system:
