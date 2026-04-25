@@ -44,6 +44,9 @@ Definir um contrato headless e deterministico para declarar teclas por tick, sem
 - sem script, `run-loop` e `run_loop` mantem exatamente o comportamento padrao atual;
 - com script, cada tick declarado gera um `InputIntent v1` via `createInputIntentFromKeyboardV1`;
 - ticks omitidos no script mantem a semantica padrao de `input.keyboard`;
+- keys desconhecidas sao ignoradas pelo tradutor;
+- tick declarado fora do range efetivo do loop nao altera a execucao;
+- script com tick duplicado falha na validacao e nao roda;
 - o fluxo continua headless e deterministico;
 - nao ha captura real de teclado do sistema.
 

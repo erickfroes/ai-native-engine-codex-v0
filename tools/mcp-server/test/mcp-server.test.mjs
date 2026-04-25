@@ -421,6 +421,10 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     });
 
     assert.equal(runLoopWithKeyboardScriptInvalid.result.isError, true);
+    assert.equal(
+      runLoopWithKeyboardScriptInvalid.result.structuredContent.errorName,
+      'KeyboardInputScriptValidationError'
+    );
     assert.match(
       runLoopWithKeyboardScriptInvalid.result.content[0].text,
       /keyboard input script is invalid/
@@ -428,6 +432,27 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(
       runLoopWithKeyboardScriptInvalid.result.content[0].text,
       /\$\.ticks\[1\]\.tick: must be unique/
+    );
+
+    const runLoopWithKeyboardScriptMissing = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 2,
+        seed: 10,
+        keyboardScriptPath: './fixtures/input-script/missing.keyboard-input-script.json'
+      }
+    });
+
+    assert.equal(runLoopWithKeyboardScriptMissing.result.isError, true);
+    assert.equal(runLoopWithKeyboardScriptMissing.result.structuredContent.errorName, 'Error');
+    assert.match(
+      runLoopWithKeyboardScriptMissing.result.content[0].text,
+      /ENOENT: no such file or directory/
+    );
+    assert.match(
+      runLoopWithKeyboardScriptMissing.result.content[0].text,
+      /missing\.keyboard-input-script\.json/
     );
 
     const runLoopDefaultSeedA = await client.request('tools/call', {
