@@ -6,6 +6,7 @@ import {
   validateLoopScene,
   formatSceneValidationReportV1,
   validateSaveFile,
+  loadValidatedInputIntentV1,
   loadSceneFile,
   createLoopExecutionPlan,
   createInitialStateFromScene,
@@ -138,6 +139,17 @@ async function handleToolCall(params) {
         };
       }
 
+      if (
+        params.name === 'run_loop' &&
+        args.inputIntentPath !== undefined &&
+        (typeof args.inputIntentPath !== 'string' || args.inputIntentPath.trim().length === 0)
+      ) {
+        return {
+          content: toTextContent('run_loop: `inputIntentPath` must be a non-empty string when provided.'),
+          isError: true
+        };
+      }
+
       if (params.name === 'plan_loop') {
         const plan = await createLoopExecutionPlan(targetPath, {
           ticks: args.ticks,
@@ -153,10 +165,18 @@ async function handleToolCall(params) {
       const scene = await loadSceneFile(targetPath);
 
       if (params.name === 'run_loop') {
+        const inputIntentPath = args.inputIntentPath === undefined
+          ? undefined
+          : resolveRepoPath(args.inputIntentPath);
+        const inputIntent = inputIntentPath === undefined
+          ? undefined
+          : await loadValidatedInputIntentV1(inputIntentPath);
+
         if (args.trace === true) {
           const traced = runMinimalSystemLoopWithTrace(scene, {
             ticks: args.ticks,
-            seed: args.seed
+            seed: args.seed,
+            inputIntent
           });
           return {
             content: toTextContent(`Loop trace completed for ${traced.report.scene} at tick ${traced.report.ticks}.`),
@@ -167,7 +187,8 @@ async function handleToolCall(params) {
 
         const loopResult = runMinimalSystemLoop(scene, {
           ticks: args.ticks,
-          seed: args.seed
+          seed: args.seed,
+          inputIntent
         });
         const loopReport = {
           loopReportVersion: 1,

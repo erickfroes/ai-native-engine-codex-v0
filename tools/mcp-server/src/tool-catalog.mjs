@@ -91,6 +91,10 @@ export const toolCatalog = [
           type: 'integer',
           description: 'Optional deterministic seed override.'
         },
+        inputIntentPath: {
+          type: 'string',
+          description: 'Optional repository-relative or absolute path to an Input Intent v1 JSON file.'
+        },
         trace: {
           type: 'boolean',
           description: 'Optional diagnostics flag. When true, returns LoopTrace envelope.'
