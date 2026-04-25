@@ -473,32 +473,38 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       /render_canvas_demo: `width` must be an integer >= 1 when provided/
     );
 
-    const renderCanvasDemoInvalidHeightResponse = await client.request('tools/call', {
-      name: 'render_canvas_demo',
+    const renderBrowserDemoInvalidHeightResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
       arguments: {
         path: './scenes/tutorial.scene.json',
         height: 0
       }
     });
 
-    assert.equal(renderCanvasDemoInvalidHeightResponse.result.isError, true);
+    assert.equal(renderBrowserDemoInvalidHeightResponse.result.isError, true);
     assert.match(
-      renderCanvasDemoInvalidHeightResponse.result.content[0].text,
-      /render_canvas_demo: `height` must be an integer >= 1 when provided/
+      renderBrowserDemoInvalidHeightResponse.result.content[0].text,
+      /render_browser_demo: `height` must be an integer >= 1 when provided\./
     );
 
-    const renderCanvasDemoMissingPathResponse = await client.request('tools/call', {
-      name: 'render_canvas_demo',
+    const renderBrowserDemoMissingPathResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
       arguments: {
-        path: './scenes/missing.scene.json'
+        path: './scenes/does-not-exist.scene.json'
       }
     });
 
-    assert.equal(renderCanvasDemoMissingPathResponse.result.isError, true);
-    assert.equal(renderCanvasDemoMissingPathResponse.result.structuredContent.ok, false);
-    assert.equal(renderCanvasDemoMissingPathResponse.result.structuredContent.errorName, 'Error');
-    assert.match(renderCanvasDemoMissingPathResponse.result.content[0].text, /ENOENT/);
-    assert.match(renderCanvasDemoMissingPathResponse.result.content[0].text, /missing\.scene\.json/);
+    assert.equal(renderBrowserDemoMissingPathResponse.result.isError, true);
+    assert.equal(renderBrowserDemoMissingPathResponse.result.structuredContent.ok, false);
+    assert.equal(renderBrowserDemoMissingPathResponse.result.structuredContent.errorName, 'Error');
+    assert.match(
+      renderBrowserDemoMissingPathResponse.result.content[0].text,
+      /ENOENT: no such file or directory/
+    );
+    assert.match(
+      renderBrowserDemoMissingPathResponse.result.structuredContent.errorMessage,
+      /does-not-exist\.scene\.json/
+    );
 
     const replayResponseA = await client.request('tools/call', {
       name: 'run_replay',
