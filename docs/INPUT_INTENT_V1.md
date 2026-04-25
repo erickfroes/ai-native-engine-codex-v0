@@ -2,9 +2,9 @@
 
 ## Objetivo
 
-Definir um contrato isolado para input headless orientado a intenção, sem alterar `input.keyboard`, `run-loop`, `simulate-state`, `Scene Document v1` ou contratos de saída já publicados.
+Definir um contrato isolado para input headless orientado a intenÃ§Ã£o, sem alterar `input.keyboard`, `run-loop`, `simulate-state`, `Scene Document v1` ou contratos de saÃ­da jÃ¡ publicados.
 
-## Shape mínimo
+## Shape mÃ­nimo
 
 ```json
 {
@@ -26,24 +26,23 @@ Definir um contrato isolado para input headless orientado a intenção, sem alte
 ## Regras v1
 
 - `inputIntentVersion` deve ser exatamente `1`.
-- `tick` é inteiro e começa em `1`.
+- `tick` Ã© inteiro e comeÃ§a em `1`.
 - `entityId` identifica a entidade alvo do intent.
 - `actions` preserva a ordem declarada no documento.
 - v1 suporta apenas `actions[].type = "move"`.
-- `axis.x` e `axis.y` são inteiros no intervalo `[-1, 1]`.
-- não há campos extras nos níveis controlados do contrato.
+- `axis.x` e `axis.y` sÃ£o inteiros no intervalo `[-1, 1]`.
+- nÃ£o hÃ¡ campos extras nos nÃ­veis controlados do contrato.
 
 ## Escopo
 
 - contrato de input headless isolado;
-- validação local no runtime;
-- CLI mínima de validação local;
-- fixtures mínimas válidas/inválidas.
+- validaÃ§Ã£o local no runtime;
+- validaÃ§Ã£o por CLI e MCP reutilizando o mesmo validador de runtime;
+- fixtures mÃ­nimas vÃ¡lidas/invÃ¡lidas.
 
 ## Fora deste slice
 
-- integração com `Scene Document v1`;
-- integração com `run-loop`;
-- integração com `simulate-state`;
-- binding de teclado;
-- MCP.
+- integraÃ§Ã£o com `Scene Document v1`;
+- integraÃ§Ã£o com `run-loop`;
+- integraÃ§Ã£o com `simulate-state`;
+- binding de teclado.
