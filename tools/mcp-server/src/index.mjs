@@ -6,6 +6,8 @@ import {
   validateLoopScene,
   formatSceneValidationReportV1,
   validateSaveFile,
+  loadStateSnapshotSaveV1,
+  saveStateSnapshotV1,
   validateInputIntentV1File,
   loadSceneFile,
   createLoopExecutionPlan,
@@ -89,6 +91,8 @@ async function handleToolCall(params) {
     params.name !== 'validate_scene' &&
     params.name !== 'validate_input_intent' &&
     params.name !== 'validate_save' &&
+    params.name !== 'save_state_snapshot' &&
+    params.name !== 'load_save' &&
     params.name !== 'emit_world_snapshot' &&
     params.name !== 'plan_loop' &&
     params.name !== 'run_loop' &&
@@ -110,6 +114,65 @@ async function handleToolCall(params) {
 
   try {
     const targetPath = resolveRepoPath(args.path);
+
+    if (params.name === 'load_save') {
+      const loaded = await loadStateSnapshotSaveV1(targetPath);
+      return {
+        content: toTextContent(`Loaded save for ${loaded.snapshot.scene} at tick ${loaded.snapshot.tick}.`),
+        structuredContent: {
+          savePath: loaded.savePath,
+          payloadPath: loaded.payloadPath,
+          save: loaded.envelope,
+          snapshot: loaded.snapshot
+        },
+        isError: false
+      };
+    }
+
+    if (params.name === 'save_state_snapshot') {
+      if (!Number.isInteger(args.ticks) || args.ticks < 0) {
+        return {
+          content: toTextContent('save_state_snapshot: `ticks` is required and must be an integer >= 0.'),
+          isError: true
+        };
+      }
+
+      if (args.seed !== undefined && !Number.isInteger(args.seed)) {
+        return {
+          content: toTextContent('save_state_snapshot: `seed` must be an integer when provided.'),
+          isError: true
+        };
+      }
+
+      if (typeof args.outDir !== 'string' || args.outDir.trim().length === 0) {
+        return {
+          content: toTextContent('save_state_snapshot: `outDir` is required and must be a non-empty string.'),
+          isError: true
+        };
+      }
+
+      const resolvedOutDir = resolveRepoPath(args.outDir);
+      const simulation = await simulateStateV1(targetPath, {
+        ticks: args.ticks,
+        seed: args.seed
+      });
+      const saved = await saveStateSnapshotV1({
+        snapshot: simulation.finalSnapshot,
+        outDir: resolvedOutDir,
+        seed: simulation.seed,
+        contentVersion: 1
+      });
+
+      return {
+        content: toTextContent(`Saved state snapshot for ${simulation.scene} at tick ${simulation.ticks}.`),
+        structuredContent: {
+          savePath: saved.savePath,
+          payloadPath: saved.payloadPath,
+          save: saved.envelope
+        },
+        isError: false
+      };
+    }
 
     if (
       params.name === 'plan_loop' ||
@@ -377,7 +440,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_input_intent, validate_save, emit_world_snapshot, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }

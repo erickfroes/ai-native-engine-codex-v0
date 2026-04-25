@@ -48,6 +48,50 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'save_state_snapshot',
+    title: 'Save State Snapshot',
+    description: 'Simulate state ticks for a scene and write a minimal savegame v1 envelope plus snapshot payload.',
+    inputSchema: {
+      type: 'object',
+      required: ['path', 'ticks', 'outDir'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        ticks: {
+          type: 'integer',
+          description: 'Number of state simulation ticks to execute before saving the final snapshot.'
+        },
+        seed: {
+          type: 'integer',
+          description: 'Optional deterministic seed override.'
+        },
+        outDir: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root where save files will be written.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
+    name: 'load_save',
+    title: 'Load Save',
+    description: 'Load a minimal savegame v1 envelope, verify checksum, and return the referenced State Snapshot v1 payload.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'emit_world_snapshot',
     title: 'Emit World Snapshot',
     description: 'Load a scene and emit a deterministic world.snapshot message from replicated components.',
