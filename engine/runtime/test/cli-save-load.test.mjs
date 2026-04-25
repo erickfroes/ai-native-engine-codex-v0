@@ -28,6 +28,20 @@ async function createTempSaveDir(t) {
   return directory;
 }
 
+test('save-state fails predictably when --out is missing', () => {
+  const result = runCli([
+    'save-state',
+    movementScenePath,
+    '--ticks',
+    '3',
+    '--seed',
+    '10'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /save-state: --out is required/);
+});
+
 test('save-state writes deterministic envelope paths and load-save returns loaded snapshot', async (t) => {
   const outDir = await createTempSaveDir(t);
 
@@ -95,6 +109,39 @@ test('load-save fails predictably when payload checksum diverges', async (t) => 
   const loadResult = runCli(['load-save', saveJson.savePath, '--json']);
   assert.notEqual(loadResult.status, 0);
   assert.match(loadResult.stderr, /save payload checksum mismatch/);
+});
+
+test('load-save fails predictably when save path does not exist', async (t) => {
+  const outDir = await createTempSaveDir(t);
+  const missingSavePath = path.join(outDir, 'missing.savegame.json');
+  const loadResult = runCli(['load-save', missingSavePath, '--json']);
+
+  assert.notEqual(loadResult.status, 0);
+  assert.match(loadResult.stderr, /ENOENT/);
+});
+
+test('load-save fails predictably when payload JSON is malformed', async (t) => {
+  const outDir = await createTempSaveDir(t);
+  const saveResult = runCli([
+    'save-state',
+    movementScenePath,
+    '--ticks',
+    '3',
+    '--seed',
+    '10',
+    '--out',
+    outDir,
+    '--json'
+  ]);
+
+  assert.equal(saveResult.status, 0, saveResult.stderr);
+  const saveJson = JSON.parse(saveResult.stdout);
+
+  await writeFile(saveJson.payloadPath, '{"stateSnapshotVersion": 1,\n', 'utf8');
+
+  const loadResult = runCli(['load-save', saveJson.savePath, '--json']);
+  assert.notEqual(loadResult.status, 0);
+  assert.match(loadResult.stderr, /failed to read state snapshot payload/);
 });
 
 test('load-save fails predictably when payloadRef escapes the save directory', async (t) => {

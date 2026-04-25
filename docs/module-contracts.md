@@ -301,5 +301,8 @@ Regra de compatibilidade:
 - O envelope `savegame v1` preenche `saveVersion`, `contentVersion`, `seed`, `checksum` e `payloadRef`.
 - `checksum` usa `sha256` sobre o payload canônico.
 - `payloadRef` é resolvido relativo ao diretório do save e não pode escapar desse diretório.
+- Load falha de forma previsível quando o envelope é inválido para `validateSaveFile`.
+- Load falha de forma previsível quando o `checksum` diverge do payload salvo.
+- Load falha de forma previsível quando o payload JSON está malformado.
 - Sem usar save/load explicitamente, `run-loop`, `simulate-state`, `validate-save` e os demais comandos continuam com o mesmo comportamento padrão.
 - Fora de escopo neste slice: persistência automática, autosave, editor e slots avançados.
