@@ -136,6 +136,36 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.equal(BROWSER_PLAYABLE_DEMO_VERSION, 1);
 });
 
+test('renderBrowserPlayableDemoHtmlV1 renders deterministic empty HTML when drawCalls is empty', () => {
+  const renderSnapshot = {
+    renderSnapshotVersion: 1,
+    scene: 'empty-scene',
+    tick: 0,
+    viewport: {
+      width: 32,
+      height: 24
+    },
+    drawCalls: []
+  };
+
+  const first = renderBrowserPlayableDemoHtmlV1({
+    title: 'empty-scene Browser Playable Demo',
+    renderSnapshot
+  });
+  const second = renderBrowserPlayableDemoHtmlV1({
+    title: 'empty-scene Browser Playable Demo',
+    renderSnapshot
+  });
+
+  assert.equal(first, second);
+  assert.match(
+    first,
+    /<canvas id="browser-playable-demo-canvas" data-browser-demo-version="1" data-scene="empty-scene" data-tick="0" data-controllable-entity="" width="32" height="24" tabindex="0"/
+  );
+  assert.ok(first.includes('"drawCalls":[]'));
+  assert.match(first, /No controllable rect\. Step 4 px\./);
+});
+
 test('renderBrowserPlayableDemoHtmlV1 escapes HTML and JSON payload safely', () => {
   const html = renderBrowserPlayableDemoHtmlV1({
     title: 'Arena <Demo> & "alpha"',
@@ -165,6 +195,11 @@ test('renderBrowserPlayableDemoHtmlV1 escapes HTML and JSON payload safely', () 
   });
 
   assert.match(html, /<title>Arena &lt;Demo&gt; &amp; &quot;alpha&quot;<\/title>/);
+  assert.match(html, /<h1>Arena &lt;Demo&gt; &amp; &quot;alpha&quot;<\/h1>/);
+  assert.match(
+    html,
+    /data-scene="arena &lt;\/script&gt;&lt;script&gt;alert\(&quot;x&quot;\)&lt;\/script&gt; &amp; &quot;alpha&quot;"/
+  );
   assert.ok(
     html.includes(
       '"scene":"arena \\u003C/script\\u003E\\u003Cscript\\u003Ealert(\\"x\\")\\u003C/script\\u003E \\u0026 \\"alpha\\""'
@@ -176,6 +211,96 @@ test('renderBrowserPlayableDemoHtmlV1 escapes HTML and JSON payload safely', () 
     )
   );
   assert.doesNotMatch(html, /<\/script><script>/);
+  assert.doesNotMatch(html, /<script[^>]+src=|<link[^>]+href=|https?:\/\//);
+  assert.doesNotMatch(html, /Date\.now|new Date|performance\.now|fetch\(|XMLHttpRequest|WebSocket|toISOString/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 preserves snapshot order for multiple rect draw calls', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'multi-rect Browser Playable Demo',
+    renderSnapshot: {
+      renderSnapshotVersion: 1,
+      scene: 'multi-rect',
+      tick: 2,
+      viewport: {
+        width: 64,
+        height: 48
+      },
+      drawCalls: [
+        {
+          kind: 'rect',
+          id: 'background',
+          x: 0,
+          y: 0,
+          width: 64,
+          height: 48,
+          layer: -1
+        },
+        {
+          kind: 'rect',
+          id: 'mid',
+          x: 10,
+          y: 12,
+          width: 20,
+          height: 8,
+          layer: 1
+        },
+        {
+          kind: 'rect',
+          id: 'front',
+          x: 14,
+          y: 18,
+          width: 6,
+          height: 6,
+          layer: 9
+        }
+      ]
+    },
+    metadata: {
+      controllableEntityId: 'mid'
+    }
+  });
+
+  assert.ok(html.indexOf('"id":"background"') < html.indexOf('"id":"mid"'));
+  assert.ok(html.indexOf('"id":"mid"') < html.indexOf('"id":"front"'));
+  assert.match(
+    html,
+    /<canvas id="browser-playable-demo-canvas" data-browser-demo-version="1" data-scene="multi-rect" data-tick="2" data-controllable-entity="mid" width="64" height="48" tabindex="0"/
+  );
+});
+
+test('renderBrowserPlayableDemoHtmlV1 falls back to the first rect when player.hero is absent', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'fallback Browser Playable Demo',
+    renderSnapshot: {
+      renderSnapshotVersion: 1,
+      scene: 'fallback-scene',
+      tick: 1,
+      viewport: {
+        width: 64,
+        height: 48
+      },
+      drawCalls: [
+        { kind: 'rect', id: 'camera.main', x: 0, y: 4, width: 16, height: 16, layer: 0 },
+        { kind: 'rect', id: 'npc.guide', x: 10, y: 12, width: 8, height: 8, layer: 1 }
+      ]
+    },
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.listeners.get('keydown');
+
+  assert.equal(typeof keydown, 'function');
+  assert.match(html, /data-controllable-entity="camera\.main"/);
+
+  keydown({
+    code: 'ArrowDown',
+    preventDefault() {}
+  });
+
+  assert.match(harness.statusElement.textContent, /Controlled rect camera\.main at \(0, 8\)/);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 moves the nominated controllable rect by the fixed step', () => {
