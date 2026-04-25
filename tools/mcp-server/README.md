@@ -2,9 +2,18 @@
 
 Servidor MCP local via stdio.
 
-## Tool atual
+## Tools atuais
 
 - `validate_scene`
+- `validate_input_intent`
+- `validate_save`
+- `emit_world_snapshot`
+- `plan_loop`
+- `run_loop`
+- `run_replay`
+- `run_replay_artifact`
+- `inspect_state`
+- `simulate_state`
 
 ## Execução manual
 
@@ -14,4 +23,4 @@ node ./tools/mcp-server/src/index.mjs
 
 ## Papel da V0
 
-Expor o validador de cena para o Codex sem depender de GUI.
+Expor validação e inspeção headless para o Codex sem depender de GUI.
