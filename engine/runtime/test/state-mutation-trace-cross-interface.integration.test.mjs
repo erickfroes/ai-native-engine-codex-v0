@@ -4,6 +4,7 @@ import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
+import { assertStateMutationTraceV1 } from './helpers/assertStateMutationTraceV1.mjs';
 import { assertStateSimulationReportV1 } from './helpers/assertStateSimulationReportV1.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
@@ -81,13 +82,13 @@ function normalizeTraceEnvelope(envelope) {
 function assertTraceEnvelope(envelope) {
   assert.deepEqual(Object.keys(envelope).sort(), ['mutationTrace', 'report']);
   assertStateSimulationReportV1(envelope.report);
+  assertStateMutationTraceV1(envelope.mutationTrace);
 
   assert.equal(envelope.report.stateSimulationReportVersion, 1);
   assert.equal(envelope.report.ticksExecuted, 3);
   assert.equal(envelope.report.finalSnapshot.entities[0].components.transform.fields.x, 6);
   assert.equal(envelope.report.finalSnapshot.entities[0].components.transform.fields.y, 9);
 
-  assert.equal(envelope.mutationTrace.stateMutationTraceVersion, 1);
   assert.equal(envelope.mutationTrace.ticks, 3);
   assert.equal(envelope.mutationTrace.ticksExecuted, 3);
   assert.equal(envelope.mutationTrace.seed, 10);
