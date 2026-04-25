@@ -12,6 +12,8 @@ Nao existe canvas real, Pixi, Three, WebGL ou runtime visual neste slice.
 - a saida e uma string SVG estavel com `<?xml ...?>`, `<svg ...>` e draw calls `rect`.
 - a ordem dos elementos segue exatamente `renderSnapshot.drawCalls`.
 - `viewport.width` e `viewport.height` viram `width`, `height` e `viewBox` do documento SVG.
+- `scene` e `drawCalls[].id` sao escapados para atributos XML seguros.
+- `drawCalls: []` continua valido e gera um SVG vazio, mas deterministico.
 
 ## CLI e MCP
 
@@ -40,6 +42,7 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 ## Fora deste slice
 
 - rasterizacao real;
+- canvas real;
 - backend grafico;
 - assets reais;
 - editor visual.

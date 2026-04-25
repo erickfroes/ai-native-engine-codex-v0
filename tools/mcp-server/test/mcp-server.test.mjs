@@ -103,12 +103,12 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'tick'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'width'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'height'));
-    const renderBrowserDemoTool = toolsResponse.result.tools.find((tool) => tool.name === 'render_browser_demo');
-    assert.ok(renderBrowserDemoTool);
-    assert.deepEqual(renderBrowserDemoTool.inputSchema.required, ['path']);
-    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'tick'));
-    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'width'));
-    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'height'));
+    const renderCanvasDemoTool = toolsResponse.result.tools.find((tool) => tool.name === 'render_canvas_demo');
+    assert.ok(renderCanvasDemoTool);
+    assert.deepEqual(renderCanvasDemoTool.inputSchema.required, ['path']);
+    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'tick'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'width'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'height'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
     assert.ok(
       Object.prototype.hasOwnProperty.call(
@@ -379,57 +379,98 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(renderSvgResponseA.result.structuredContent.svg, /<rect id="player\.hero"/);
     assert.deepEqual(renderSvgResponseA.result.structuredContent, renderSvgResponseB.result.structuredContent);
 
-    const renderBrowserDemoResponseA = await client.request('tools/call', {
-      name: 'render_browser_demo',
-      arguments: {
-        path: './scenes/tutorial.scene.json',
-        tick: 4,
-        width: 320,
-        height: 180
-      }
-    });
-
-    const renderBrowserDemoResponseB = await client.request('tools/call', {
-      name: 'render_browser_demo',
-      arguments: {
-        path: './scenes/tutorial.scene.json',
-        tick: 4,
-        width: 320,
-        height: 180
-      }
-    });
-
-    assert.equal(renderBrowserDemoResponseA.result.isError, false);
-    assert.deepEqual(
-      Object.keys(renderBrowserDemoResponseA.result.structuredContent).sort(),
-      ['browserDemoVersion', 'html', 'scene', 'tick']
-    );
-    assert.equal(renderBrowserDemoResponseA.result.structuredContent.browserDemoVersion, 1);
-    assert.equal(renderBrowserDemoResponseA.result.structuredContent.scene, 'tutorial');
-    assert.equal(renderBrowserDemoResponseA.result.structuredContent.tick, 4);
-    assert.match(renderBrowserDemoResponseA.result.structuredContent.html, /^<!DOCTYPE html>/);
-    assert.match(
-      renderBrowserDemoResponseA.result.structuredContent.html,
-      /<canvas id="browser-playable-demo-canvas" data-browser-demo-version="1" data-scene="tutorial" data-tick="4" data-controllable-entity="player\.hero" width="320" height="180" tabindex="0"/
-    );
-    assert.match(renderBrowserDemoResponseA.result.structuredContent.html, /addEventListener\("keydown"/);
-    assert.deepEqual(
-      renderBrowserDemoResponseA.result.structuredContent,
-      renderBrowserDemoResponseB.result.structuredContent
-    );
-
-    const renderBrowserDemoInvalidWidthResponse = await client.request('tools/call', {
-      name: 'render_browser_demo',
+    const renderSvgInvalidWidthResponse = await client.request('tools/call', {
+      name: 'render_svg',
       arguments: {
         path: './scenes/tutorial.scene.json',
         width: 0
       }
     });
 
-    assert.equal(renderBrowserDemoInvalidWidthResponse.result.isError, true);
+    assert.equal(renderSvgInvalidWidthResponse.result.isError, true);
     assert.match(
-      renderBrowserDemoInvalidWidthResponse.result.content[0].text,
-      /render_browser_demo: `width` must be an integer >= 1 when provided\./
+      renderSvgInvalidWidthResponse.result.content[0].text,
+      /render_svg: `width` must be an integer >= 1 when provided/
+    );
+
+    const renderSvgInvalidHeightResponse = await client.request('tools/call', {
+      name: 'render_svg',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        height: 0
+      }
+    });
+
+    assert.equal(renderSvgInvalidHeightResponse.result.isError, true);
+    assert.match(
+      renderSvgInvalidHeightResponse.result.content[0].text,
+      /render_svg: `height` must be an integer >= 1 when provided/
+    );
+
+    const renderSvgMissingPathResponse = await client.request('tools/call', {
+      name: 'render_svg',
+      arguments: {
+        path: './scenes/missing.scene.json'
+      }
+    });
+
+    assert.equal(renderSvgMissingPathResponse.result.isError, true);
+    assert.equal(renderSvgMissingPathResponse.result.structuredContent.ok, false);
+    assert.equal(renderSvgMissingPathResponse.result.structuredContent.errorName, 'Error');
+    assert.match(renderSvgMissingPathResponse.result.content[0].text, /ENOENT/);
+    assert.match(renderSvgMissingPathResponse.result.content[0].text, /missing\.scene\.json/);
+
+    const renderCanvasDemoResponseA = await client.request('tools/call', {
+      name: 'render_canvas_demo',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        tick: 4,
+        width: 320,
+        height: 180
+      }
+    });
+
+    const renderCanvasDemoResponseB = await client.request('tools/call', {
+      name: 'render_canvas_demo',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        tick: 4,
+        width: 320,
+        height: 180
+      }
+    });
+
+    assert.equal(renderCanvasDemoResponseA.result.isError, false);
+    assert.deepEqual(
+      Object.keys(renderCanvasDemoResponseA.result.structuredContent).sort(),
+      ['canvasDemoVersion', 'html', 'scene', 'tick']
+    );
+    assert.equal(renderCanvasDemoResponseA.result.structuredContent.canvasDemoVersion, 1);
+    assert.equal(renderCanvasDemoResponseA.result.structuredContent.scene, 'tutorial');
+    assert.equal(renderCanvasDemoResponseA.result.structuredContent.tick, 4);
+    assert.match(renderCanvasDemoResponseA.result.structuredContent.html, /<!DOCTYPE html>/);
+    assert.match(renderCanvasDemoResponseA.result.structuredContent.html, /<canvas id="render-canvas-demo"/);
+    assert.match(
+      renderCanvasDemoResponseA.result.structuredContent.html,
+      /context\.strokeRect\(drawCall\.x, drawCall\.y, drawCall\.width, drawCall\.height\);/
+    );
+    assert.deepEqual(
+      renderCanvasDemoResponseA.result.structuredContent,
+      renderCanvasDemoResponseB.result.structuredContent
+    );
+
+    const renderCanvasDemoInvalidWidthResponse = await client.request('tools/call', {
+      name: 'render_canvas_demo',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        width: 0
+      }
+    });
+
+    assert.equal(renderCanvasDemoInvalidWidthResponse.result.isError, true);
+    assert.match(
+      renderCanvasDemoInvalidWidthResponse.result.content[0].text,
+      /render_canvas_demo: `width` must be an integer >= 1 when provided/
     );
 
     const renderBrowserDemoInvalidHeightResponse = await client.request('tools/call', {
