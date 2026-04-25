@@ -191,6 +191,34 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'render_canvas_demo',
+    title: 'Render Canvas Demo',
+    description: 'Build deterministic Canvas 2D demo HTML from a scene via RenderSnapshot v1.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        tick: {
+          type: 'integer',
+          description: 'Optional render tick. Defaults to 0.'
+        },
+        width: {
+          type: 'integer',
+          description: 'Optional viewport width. Defaults to 320.'
+        },
+        height: {
+          type: 'integer',
+          description: 'Optional viewport height. Defaults to 180.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'run_replay',
     title: 'Run Replay',
     description: 'Run deterministic replay for a scene and return the final snapshot.',
