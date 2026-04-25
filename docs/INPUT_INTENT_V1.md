@@ -27,17 +27,18 @@ Definir um contrato isolado para input headless orientado a intenção, sem alte
 
 - `inputIntentVersion` deve ser exatamente `1`.
 - `tick` é inteiro e começa em `1`.
-- `entityId` identifica a entidade alvo do intent.
+- `entityId` identifica a entidade alvo do intent e não pode ser blank.
 - `actions` preserva a ordem declarada no documento.
 - v1 suporta apenas `actions[].type = "move"`.
 - `axis.x` e `axis.y` são inteiros no intervalo `[-1, 1]`.
-- não há campos extras nos níveis controlados do contrato.
+- o intervalo completo `[-1, 1]` é garantido pelo schema base com validação complementar do runtime neste slice.
+- não há campos extras nos níveis raiz, `actions[]` e `axis`.
 
 ## Escopo
 
 - contrato de input headless isolado;
 - validação local no runtime;
-- validação por CLI e MCP reutilizando o mesmo validador de runtime;
+- CLI mínima de validação local;
 - fixtures mínimas válidas/inválidas.
 
 ## Fora deste slice
@@ -45,4 +46,5 @@ Definir um contrato isolado para input headless orientado a intenção, sem alte
 - integração com `Scene Document v1`;
 - integração com `run-loop`;
 - integração com `simulate-state`;
-- binding de teclado.
+- binding de teclado;
+- MCP.

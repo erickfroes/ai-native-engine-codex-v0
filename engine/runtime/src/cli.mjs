@@ -7,6 +7,7 @@ import {
   validateLoopScene,
   formatSceneValidationReportV1,
   validateSaveFile,
+  validateInputIntentV1File,
   loadSceneFile,
   buildWorldSnapshotMessage,
   runDeterministicReplay,
@@ -24,6 +25,7 @@ function printUsage() {
   console.log(`Usage:
   node engine/runtime/src/cli.mjs validate-scene <path> [--json]
   node engine/runtime/src/cli.mjs validate-save <path> [--json]
+  node engine/runtime/src/cli.mjs validate-input-intent <path> [--json]
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
@@ -80,6 +82,14 @@ function readNumberFlag(commandName, flag, fallbackValue) {
   return numericValue;
 }
 
+function formatInputIntentAction(action) {
+  if (action?.type !== 'move' || !action.axis || typeof action.axis !== 'object') {
+    return action?.type ?? 'unknown';
+  }
+
+  return `move(${action.axis.x},${action.axis.y})`;
+}
+
 async function run() {
   const [, , command, maybePath] = process.argv;
   const asJson = hasFlag('--json');
@@ -123,6 +133,36 @@ async function run() {
       console.log(`Content version: ${report.save.contentVersion}`);
       console.log(`Seed: ${report.save.seed}`);
       console.log(`Payload ref: ${report.save.payloadRef}`);
+      console.log('');
+      console.log(report.ok ? 'Status: OK' : 'Status: INVALID');
+      if (report.errors.length > 0) {
+        console.log('');
+        console.log('Errors:');
+        for (const error of report.errors) {
+          console.log(`- ${error.path}: ${error.message}`);
+        }
+      }
+    }
+    process.exitCode = report.ok ? 0 : 1;
+    return;
+  }
+
+  if (command === 'validate-input-intent') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await validateInputIntentV1File(maybePath);
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Input intent: ${report.absolutePath}`);
+      console.log(`Version: ${report.inputIntent?.inputIntentVersion ?? '(missing)'}`);
+      console.log(`Tick: ${report.inputIntent?.tick ?? '(missing)'}`);
+      console.log(`Entity: ${report.inputIntent?.entityId ?? '(missing)'}`);
+      console.log(`Actions: ${(report.inputIntent?.actions ?? []).map(formatInputIntentAction).join(', ') || '(none)'}`);
       console.log('');
       console.log(report.ok ? 'Status: OK' : 'Status: INVALID');
       if (report.errors.length > 0) {
