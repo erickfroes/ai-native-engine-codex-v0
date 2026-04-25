@@ -181,6 +181,85 @@ test('load_save reports checksum mismatch predictably', async (t) => {
   }
 });
 
+test('save_state_snapshot rejects outDir outside the repository root predictably', async () => {
+  const client = await initializeClient();
+
+  try {
+    const saveResponse = await client.request('tools/call', {
+      name: 'save_state_snapshot',
+      arguments: {
+        path: './scenes/state/movement.scene.json',
+        ticks: 3,
+        seed: 10,
+        outDir: '../outside-save-root'
+      }
+    });
+
+    assert.equal(saveResponse.result.isError, true);
+    assert.match(saveResponse.result.content[0].text, /path must stay inside the repository root/);
+    assert.equal(saveResponse.result.structuredContent.ok, false);
+    assert.equal(saveResponse.result.structuredContent.errorName, 'ToolInputError');
+    assert.match(saveResponse.result.structuredContent.errorMessage, /path must stay inside the repository root/);
+  } finally {
+    await client.close();
+  }
+});
+
+test('load_save reports missing save path predictably', async () => {
+  const client = await initializeClient();
+
+  try {
+    const loadResponse = await client.request('tools/call', {
+      name: 'load_save',
+      arguments: {
+        path: './fixtures/savegame/does-not-exist.savegame.json'
+      }
+    });
+
+    assert.equal(loadResponse.result.isError, true);
+    assert.match(loadResponse.result.content[0].text, /ENOENT/);
+    assert.equal(loadResponse.result.structuredContent.ok, false);
+    assert.match(loadResponse.result.structuredContent.errorMessage, /ENOENT/);
+  } finally {
+    await client.close();
+  }
+});
+
+test('load_save reports malformed payload predictably', async (t) => {
+  const client = await initializeClient();
+  const outDir = path.join(await createTempRepoDir(t), 'save');
+
+  try {
+    const saveResponse = await client.request('tools/call', {
+      name: 'save_state_snapshot',
+      arguments: {
+        path: './scenes/state/movement.scene.json',
+        ticks: 3,
+        seed: 10,
+        outDir: toRepoRelativePath(outDir)
+      }
+    });
+
+    assert.equal(saveResponse.result.isError, false);
+    const payloadPath = saveResponse.result.structuredContent.payloadPath;
+    await writeFile(payloadPath, '{"stateSnapshotVersion": 1,\n', 'utf8');
+
+    const loadResponse = await client.request('tools/call', {
+      name: 'load_save',
+      arguments: {
+        path: toRepoRelativePath(saveResponse.result.structuredContent.savePath)
+      }
+    });
+
+    assert.equal(loadResponse.result.isError, true);
+    assert.match(loadResponse.result.content[0].text, /failed to read state snapshot payload/);
+    assert.equal(loadResponse.result.structuredContent.ok, false);
+    assert.match(loadResponse.result.structuredContent.errorMessage, /failed to read state snapshot payload/);
+  } finally {
+    await client.close();
+  }
+});
+
 test('load_save rejects payloadRef traversal predictably', async (t) => {
   const client = await initializeClient();
   const outDir = path.join(await createTempRepoDir(t), 'save');
