@@ -198,6 +198,49 @@ test('input.keyboard applies explicit minimal state increment semantics', () => 
   assert.deepEqual(ticksN, ticksNAgain);
 });
 
+test('input.keyboard applies opt-in move axis contribution on matching tick', () => {
+  const inputKeyboardOnlyScene = {
+    entities: [],
+    systems: ['input.keyboard']
+  };
+
+  const seed = 21;
+  const inputIntent = createValidInputIntent({
+    tick: 1,
+    actions: [
+      {
+        type: 'move',
+        axis: {
+          x: 1,
+          y: 0
+        }
+      },
+      {
+        type: 'move',
+        axis: {
+          x: 0,
+          y: -1
+        }
+      }
+    ]
+  });
+
+  const result = runMinimalSystemLoop(inputKeyboardOnlyScene, {
+    ticks: 1,
+    seed,
+    inputIntent
+  });
+  const traced = runMinimalSystemLoopWithTrace(inputKeyboardOnlyScene, {
+    ticks: 1,
+    seed,
+    inputIntent
+  });
+
+  assert.equal(result.finalState, seed);
+  assert.equal(traced.report.finalState, seed);
+  assert.equal(traced.trace.systemsPerTick[0].systems[0].delta, 0);
+});
+
 test('headless composition of known systems applies +6 per tick and preserves declared order', () => {
   const composedScene = {
     entities: [],
