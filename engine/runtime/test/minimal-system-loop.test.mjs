@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { createInputIntentFromKeyboardV1, loadSceneFile, runMinimalSystemLoop } from '../src/index.mjs';
+import { loadSceneFile, runMinimalSystemLoop, runMinimalSystemLoopWithTrace } from '../src/index.mjs';
 import { runDeterministicReplay } from '../src/replay/run-deterministic-replay.mjs';
 import { resolveSystemHandler } from '../src/loop/system-handlers.mjs';
 
@@ -12,6 +12,24 @@ const repoRoot = path.resolve(testDir, '../../..');
 
 function scenePath(relativePath) {
   return path.join(repoRoot, 'scenes', relativePath);
+}
+
+function createValidInputIntent(overrides = {}) {
+  return {
+    inputIntentVersion: 1,
+    tick: 99,
+    entityId: 'player',
+    actions: [
+      {
+        type: 'move',
+        axis: {
+          x: 1,
+          y: 0
+        }
+      }
+    ],
+    ...overrides
+  };
 }
 
 test('runMinimalSystemLoop is deterministic with same scene, seed and ticks', async () => {
@@ -38,6 +56,32 @@ test('runMinimalSystemLoop executes systems in declared stable order per tick', 
     'input.keyboard',
     'networking.replication'
   ]);
+});
+
+test('runMinimalSystemLoop accepts opt-in input intent without changing unmatched ticks', async () => {
+  const scene = await loadSceneFile(scenePath('tutorial.scene.json'));
+
+  const baseline = runMinimalSystemLoop(scene, { ticks: 2, seed: 7 });
+  const withInputIntent = runMinimalSystemLoop(scene, {
+    ticks: 2,
+    seed: 7,
+    inputIntent: createValidInputIntent()
+  });
+
+  assert.deepEqual(withInputIntent, baseline);
+});
+
+test('runMinimalSystemLoopWithTrace accepts opt-in input intent without changing unmatched ticks', async () => {
+  const scene = await loadSceneFile(scenePath('tutorial.scene.json'));
+
+  const baseline = runMinimalSystemLoopWithTrace(scene, { ticks: 2, seed: 7 });
+  const withInputIntent = runMinimalSystemLoopWithTrace(scene, {
+    ticks: 2,
+    seed: 7,
+    inputIntent: createValidInputIntent()
+  });
+
+  assert.deepEqual(withInputIntent, baseline);
 });
 
 test('known systems resolve to deterministic stub handlers', () => {
@@ -154,25 +198,47 @@ test('input.keyboard applies explicit minimal state increment semantics', () => 
   assert.deepEqual(ticksN, ticksNAgain);
 });
 
-test('input.keyboard falls back to default semantics on ticks omitted by inputIntentResolver', () => {
+test('input.keyboard applies opt-in move axis contribution on matching tick', () => {
   const inputKeyboardOnlyScene = {
     entities: [],
     systems: ['input.keyboard']
   };
 
-  const result = runMinimalSystemLoop(inputKeyboardOnlyScene, {
-    ticks: 2,
-    seed: 21,
-    inputIntentResolver: (tick) => (tick === 1
-      ? createInputIntentFromKeyboardV1({
-        tick: 1,
-        entityId: 'player',
-        keys: ['ArrowRight']
-      })
-      : undefined)
+  const seed = 21;
+  const inputIntent = createValidInputIntent({
+    tick: 1,
+    actions: [
+      {
+        type: 'move',
+        axis: {
+          x: 1,
+          y: 0
+        }
+      },
+      {
+        type: 'move',
+        axis: {
+          x: 0,
+          y: -1
+        }
+      }
+    ]
   });
 
-  assert.equal(result.finalState, 25);
+  const result = runMinimalSystemLoop(inputKeyboardOnlyScene, {
+    ticks: 1,
+    seed,
+    inputIntent
+  });
+  const traced = runMinimalSystemLoopWithTrace(inputKeyboardOnlyScene, {
+    ticks: 1,
+    seed,
+    inputIntent
+  });
+
+  assert.equal(result.finalState, seed);
+  assert.equal(traced.report.finalState, seed);
+  assert.equal(traced.trace.systemsPerTick[0].systems[0].delta, 0);
 });
 
 test('headless composition of known systems applies +6 per tick and preserves declared order', () => {
