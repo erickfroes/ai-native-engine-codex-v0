@@ -28,6 +28,7 @@ export { createLoopSchedule } from './loop/loop-scheduler.mjs';
 export { createPhasedLoopSchedulePreview } from './loop/phased-scheduler-preview.mjs';
 export { buildRenderSnapshotV1 } from './render/build-render-snapshot-v1.mjs';
 export { renderSnapshotToSvgV1, RENDER_SVG_VERSION } from './render/render-snapshot-to-svg-v1.mjs';
+export { renderSvgDemoHtmlV1, SVG_DEMO_HTML_VERSION } from './render/render-svg-demo-html-v1.mjs';
 export {
   createStateModelV1FromScene,
   createInitialStateFromScene,
