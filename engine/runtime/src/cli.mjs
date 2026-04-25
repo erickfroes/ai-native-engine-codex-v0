@@ -7,6 +7,7 @@ import {
   validateLoopScene,
   formatSceneValidationReportV1,
   validateSaveFile,
+  loadValidatedInputIntentV1,
   loadSceneFile,
   buildWorldSnapshotMessage,
   runDeterministicReplay,
@@ -30,7 +31,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs plan-loop <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs inspect-state <path> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json] [--trace]
-  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--json] [--trace]
+  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--input-intent <path>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
 }
@@ -78,6 +79,20 @@ function readNumberFlag(commandName, flag, fallbackValue) {
   }
 
   return numericValue;
+}
+
+function readStringFlag(commandName, flag, fallbackValue) {
+  const index = process.argv.indexOf(flag);
+  if (index === -1) {
+    return fallbackValue;
+  }
+
+  const rawValue = process.argv[index + 1];
+  if (!rawValue || rawValue.startsWith('--')) {
+    throw new Error(`${commandName}: ${flag} requires a path value`);
+  }
+
+  return rawValue;
 }
 
 async function run() {
@@ -387,11 +402,15 @@ async function run() {
 
     const ticks = readNumberFlag('run-loop', '--ticks', 1);
     const seed = readNumberFlag('run-loop', '--seed', undefined);
+    const inputIntentPath = readStringFlag('run-loop', '--input-intent', undefined);
     const withTrace = hasFlag('--trace');
     const scene = await loadSceneFile(maybePath);
+    const inputIntent = inputIntentPath
+      ? await loadValidatedInputIntentV1(inputIntentPath)
+      : undefined;
 
     if (withTrace) {
-      const traced = runMinimalSystemLoopWithTrace(scene, { ticks, seed });
+      const traced = runMinimalSystemLoopWithTrace(scene, { ticks, seed, inputIntent });
 
       if (asJson) {
         console.log(JSON.stringify(traced, null, 2));
@@ -408,7 +427,7 @@ async function run() {
       return;
     }
 
-    const loopResult = runMinimalSystemLoop(scene, { ticks, seed });
+    const loopResult = runMinimalSystemLoop(scene, { ticks, seed, inputIntent });
     const loopReport = {
       loopReportVersion: 1,
       scene: scene.metadata.name,
