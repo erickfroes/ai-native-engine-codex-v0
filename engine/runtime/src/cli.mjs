@@ -32,7 +32,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs plan-loop <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs inspect-state <path> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json] [--trace]
-  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--json] [--trace]
+  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--input-intent <path>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
 }
@@ -427,11 +427,15 @@ async function run() {
 
     const ticks = readNumberFlag('run-loop', '--ticks', 1);
     const seed = readNumberFlag('run-loop', '--seed', undefined);
+    const inputIntentPath = readStringFlag('run-loop', '--input-intent', undefined);
     const withTrace = hasFlag('--trace');
     const scene = await loadSceneFile(maybePath);
+    const inputIntent = inputIntentPath
+      ? await loadValidatedInputIntentV1(inputIntentPath)
+      : undefined;
 
     if (withTrace) {
-      const traced = runMinimalSystemLoopWithTrace(scene, { ticks, seed });
+      const traced = runMinimalSystemLoopWithTrace(scene, { ticks, seed, inputIntent });
 
       if (asJson) {
         console.log(JSON.stringify(traced, null, 2));
@@ -448,7 +452,7 @@ async function run() {
       return;
     }
 
-    const loopResult = runMinimalSystemLoop(scene, { ticks, seed });
+    const loopResult = runMinimalSystemLoop(scene, { ticks, seed, inputIntent });
     const loopReport = {
       loopReportVersion: 1,
       scene: scene.metadata.name,

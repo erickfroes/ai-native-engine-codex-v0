@@ -1,4 +1,5 @@
 import { getKnownSystemDefinition } from '../systems/system-registry.mjs';
+import { resolveInputKeyboardDelta } from '../input/loop-input-intent-v1.mjs';
 
 function mix(state, value) {
   return (Math.imul(state, 1664525) + value + 1013904223) >>> 0;
@@ -17,11 +18,20 @@ function knownSystemHandler(context) {
   return (context.state + definition.delta) >>> 0;
 }
 
+function inputKeyboardHandler(context) {
+  const delta = resolveInputKeyboardDelta(context.inputIntent, context.tick);
+  return (context.state + delta) >>> 0;
+}
+
 function unknownSystemHandler(context) {
   return mix(context.state, hashString(`unknown:${context.systemName}`) ^ context.tick);
 }
 
 export function resolveSystemHandler(systemName) {
+  if (systemName === 'input.keyboard') {
+    return inputKeyboardHandler;
+  }
+
   return getKnownSystemDefinition(systemName) ? knownSystemHandler : unknownSystemHandler;
 }
 

@@ -115,12 +115,18 @@ Relações:
 - `LoopReport v1`: resultado real de execução;
 - `LoopTrace v1`: diagnóstico real opt-in.
 
-## Input Intent v1 (input headless isolado)
+## Input Intent v1 (input headless opt-in no loop)
 
-Contrato isolado para intenção de input headless, sem acoplamento com `Scene Document v1`, `run-loop` ou `simulate-state` neste slice:
+Contrato de intenção de input headless, com integração opt-in no `run-loop`/`run_loop` e sem acoplamento com `Scene Document v1` ou `simulate-state`:
 
 - ver `docs/INPUT_INTENT_V1.md`.
 - schema formal: `docs/schemas/input-intent-v1.schema.json`.
+
+Compatibilidade:
+
+- sem input intent, o comportamento padrão de `run-loop`/`run_loop` permanece inalterado;
+- `LoopReport v1` e `LoopTrace v1` mantêm o mesmo shape;
+- `simulate-state` continua isolado deste contrato neste slice.
 
 ## State Model v1 (interno)
 

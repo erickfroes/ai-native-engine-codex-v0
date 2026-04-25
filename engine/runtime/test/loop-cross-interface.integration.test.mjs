@@ -4,7 +4,7 @@ import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-import { loadSceneFile, runMinimalSystemLoop } from '../src/index.mjs';
+import { loadSceneFile, loadValidatedInputIntentV1, runMinimalSystemLoop } from '../src/index.mjs';
 import { assertLoopReportV1 } from './helpers/assertLoopReportV1.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
@@ -12,6 +12,7 @@ const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const inputIntentPath = path.join(repoRoot, 'fixtures', 'input', 'valid.move.intent.json');
 
 function normalizeLoopReport(report) {
   return {
@@ -161,6 +162,139 @@ test('run-loop stays semantically aligned across runtime, CLI and MCP', async ()
 
     assert.deepEqual(runtimeFirst, cliFirst);
     assert.deepEqual(runtimeFirst, mcpFirst);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('run-loop input intent stays opt-in and semantically aligned across runtime, CLI and MCP', async () => {
+  const ticks = 4;
+  const seed = 10;
+  const scene = await loadSceneFile(tutorialScenePath);
+  const inputIntent = await loadValidatedInputIntentV1(inputIntentPath);
+
+  const runtimeWithoutIntent = normalizeLoopReport({
+    loopReportVersion: 1,
+    scene: scene.metadata.name,
+    ticks,
+    seed,
+    ...runMinimalSystemLoop(scene, { ticks, seed })
+  });
+  const runtimeWithIntentFirst = normalizeLoopReport({
+    loopReportVersion: 1,
+    scene: scene.metadata.name,
+    ticks,
+    seed,
+    ...runMinimalSystemLoop(scene, { ticks, seed, inputIntent })
+  });
+  const runtimeWithIntentSecond = normalizeLoopReport({
+    loopReportVersion: 1,
+    scene: scene.metadata.name,
+    ticks,
+    seed,
+    ...runMinimalSystemLoop(scene, { ticks, seed, inputIntent })
+  });
+
+  assertLoopReportV1(runtimeWithoutIntent);
+  assertLoopReportV1(runtimeWithIntentFirst);
+  assert.equal(runtimeWithoutIntent.finalState, 34);
+  assert.equal(runtimeWithIntentFirst.finalState, 31);
+  assert.equal(runtimeWithoutIntent.ticksExecuted, 4);
+  assert.equal(runtimeWithIntentFirst.ticksExecuted, 4);
+  assert.deepEqual(runtimeWithIntentFirst, runtimeWithIntentSecond);
+  assert.notEqual(runtimeWithoutIntent.finalState, runtimeWithIntentFirst.finalState);
+
+  const cliWithoutIntentResult = runCli(['run-loop', tutorialScenePath, '--ticks', String(ticks), '--seed', String(seed), '--json']);
+  const cliWithIntentFirstResult = runCli([
+    'run-loop',
+    tutorialScenePath,
+    '--ticks',
+    String(ticks),
+    '--seed',
+    String(seed),
+    '--input-intent',
+    inputIntentPath,
+    '--json'
+  ]);
+  const cliWithIntentSecondResult = runCli([
+    'run-loop',
+    tutorialScenePath,
+    '--ticks',
+    String(ticks),
+    '--seed',
+    String(seed),
+    '--input-intent',
+    inputIntentPath,
+    '--json'
+  ]);
+  assert.equal(cliWithoutIntentResult.status, 0, cliWithoutIntentResult.stderr);
+  assert.equal(cliWithIntentFirstResult.status, 0, cliWithIntentFirstResult.stderr);
+  assert.equal(cliWithIntentSecondResult.status, 0, cliWithIntentSecondResult.stderr);
+
+  const cliWithoutIntent = normalizeLoopReport(JSON.parse(cliWithoutIntentResult.stdout));
+  const cliWithIntentFirst = normalizeLoopReport(JSON.parse(cliWithIntentFirstResult.stdout));
+  const cliWithIntentSecond = normalizeLoopReport(JSON.parse(cliWithIntentSecondResult.stdout));
+  assertLoopReportV1(cliWithoutIntent);
+  assertLoopReportV1(cliWithIntentFirst);
+  assert.equal(cliWithoutIntent.finalState, 34);
+  assert.equal(cliWithIntentFirst.finalState, 31);
+  assert.deepEqual(cliWithIntentFirst, cliWithIntentSecond);
+  assert.deepEqual(cliWithoutIntent, runtimeWithoutIntent);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpWithoutIntentResponse = await mcp.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks,
+        seed
+      }
+    });
+    const mcpWithIntentFirstResponse = await mcp.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks,
+        seed,
+        inputIntentPath: './fixtures/input/valid.move.intent.json'
+      }
+    });
+    const mcpWithIntentSecondResponse = await mcp.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks,
+        seed,
+        inputIntentPath: './fixtures/input/valid.move.intent.json'
+      }
+    });
+
+    assert.equal(mcpWithoutIntentResponse.result.isError, false);
+    assert.equal(mcpWithIntentFirstResponse.result.isError, false);
+    assert.equal(mcpWithIntentSecondResponse.result.isError, false);
+
+    const mcpWithoutIntent = normalizeLoopReport(mcpWithoutIntentResponse.result.structuredContent);
+    const mcpWithIntentFirst = normalizeLoopReport(mcpWithIntentFirstResponse.result.structuredContent);
+    const mcpWithIntentSecond = normalizeLoopReport(mcpWithIntentSecondResponse.result.structuredContent);
+    assertLoopReportV1(mcpWithoutIntent);
+    assertLoopReportV1(mcpWithIntentFirst);
+    assert.equal(mcpWithoutIntent.finalState, 34);
+    assert.equal(mcpWithIntentFirst.finalState, 31);
+    assert.deepEqual(mcpWithIntentFirst, mcpWithIntentSecond);
+
+    assert.deepEqual(runtimeWithoutIntent, mcpWithoutIntent);
+    assert.deepEqual(runtimeWithIntentFirst, cliWithIntentFirst);
+    assert.deepEqual(runtimeWithIntentFirst, mcpWithIntentFirst);
+    assert.deepEqual(cliWithIntentFirst, mcpWithIntentFirst);
   } finally {
     await mcp.close();
   }

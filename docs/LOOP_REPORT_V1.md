@@ -56,6 +56,12 @@ Fonte de verdade: `docs/SYSTEM_REGISTRY_V1.md`.
 - `input.keyboard`: `+3` por tick
 - `networking.replication`: `+2` por tick
 
+## Integração opt-in com Input Intent v1
+
+- sem input intent, a semântica acima permanece inalterada;
+- com input intent opt-in e `tick` correspondente, `input.keyboard` pode aplicar `sum(actions[].axis.x + actions[].axis.y)` no lugar do `+3`;
+- o shape do `LoopReport v1` não muda por causa dessa opção.
+
 ## Exemplo
 
 Input:
