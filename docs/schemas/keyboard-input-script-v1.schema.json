@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "keyboard-input-script-v1.schema.json",
+  "title": "KeyboardInputScriptV1",
+  "type": "object",
+  "required": [
+    "keyboardInputScriptVersion",
+    "entityId",
+    "ticks"
+  ],
+  "properties": {
+    "keyboardInputScriptVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "entityId": {
+      "type": "string"
+    },
+    "ticks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "tick",
+          "keys"
+        ],
+        "properties": {
+          "tick": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "keys": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
