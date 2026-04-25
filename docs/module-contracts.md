@@ -143,6 +143,20 @@ Compatibilidade:
 - nao altera `InputIntent v1`;
 - nao adiciona backend grafico ou assets reais.
 
+## Render SVG v1 (serializacao textual deterministica)
+
+Contrato textual minimo derivado de `RenderSnapshot v1` para comparacao headless:
+
+- ver `docs/RENDER_SVG_V1.md`.
+
+Compatibilidade:
+
+- nao altera `RenderSnapshot v1`;
+- nao altera `run-loop`;
+- nao altera Save/Load v1;
+- nao introduz backend grafico;
+- nao representa runtime visual real nesta versao.
+
 ## State Model v1 (interno)
 
 Representação estruturada de estado inicial derivada do Scene Document v1:
