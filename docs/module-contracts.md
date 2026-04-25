@@ -170,6 +170,7 @@ Compatibilidade:
 - nao altera `run-loop`;
 - nao altera `InputIntent v1`;
 - nao altera Save/Load v1.
+- o loop visual do browser e local ao HTML e nao avanca simulacao sozinho.
 
 ## State Model v1 (interno)
 
