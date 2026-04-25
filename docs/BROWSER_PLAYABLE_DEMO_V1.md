@@ -19,7 +19,8 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - mantem um loop visual local de redraw no browser;
 - o loop visual nao altera simulacao, tick, systems ou posicao por conta propria;
 - captura teclado real via `keydown` no proprio `canvas`;
-- o `canvas` precisa estar com foco para receber input; o HTML tenta focar no load e volta a focar no clique;
+- o `canvas` permanece focavel com `tabindex="0"`; o HTML tenta focar no load e volta a focar no clique;
+- o HTML expoe instrucoes locais estaveis para clique/foco e movimento por teclado;
 - usa a convencao compativel com `InputIntent v1`:
   - `ArrowRight` ou `KeyD` -> `x +1`
   - `ArrowLeft` ou `KeyA` -> `x -1`
@@ -29,6 +30,7 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - faz redraw continuo e tambem logo apos cada input valido;
 - expoe controle local `Pause rendering` / `Resume rendering` para pausar ou retomar apenas o redraw loop;
 - o botao `Reset` restaura a posicao inicial do snapshot e zera o contador local de inputs;
+- `Pause rendering`, `Resume rendering` e `Reset` sao controles locais do HTML autocontido e nao alteram contratos v1 publicados;
 - se a entidade controlavel configurada nao existir, faz fallback deterministico para o primeiro rect do snapshot; se nao houver rect, a demo permanece sem alvo controlavel;
 - nao importa o runtime Node no browser;
 - nao usa `Date.now`, `new Date`, `performance.now`, `fetch`, rede, scripts externos, `localStorage` ou dependencia de canvas libs;

@@ -171,6 +171,7 @@ Compatibilidade:
 - nao altera `InputIntent v1`;
 - nao altera Save/Load v1.
 - o loop visual do browser e local ao HTML e nao avanca simulacao sozinho.
+- foco do canvas e controles locais de pause/reset pertencem ao HTML autocontido, nao ao loop headless.
 
 ## State Model v1 (interno)
 
