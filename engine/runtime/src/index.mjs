@@ -2,7 +2,7 @@ export { loadSchemaRegistry, getRepoRoot } from './schema/registry.mjs';
 export { validateSceneFile, formatValidationReport } from './scene/validate-scene.mjs';
 export { validateLoopScene, formatSceneValidationReportV1 } from './scene/validate-loop-scene.mjs';
 export { validateSaveFile } from './save/validate-save.mjs';
-export { validateInputIntentV1File } from './input/validate-input-intent-v1.mjs';
+export { validateInputIntentV1, validateInputIntentV1File } from './input/validate-input-intent-v1.mjs';
 export { createInputIntentFromKeyboardV1 } from './input/create-input-intent-from-keyboard-v1.mjs';
 export { loadSceneFile } from './scene/load-scene.mjs';
 export { summarizeScene } from './scene/summary.mjs';
