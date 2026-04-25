@@ -37,19 +37,28 @@ function validateControlledFields(inputIntent, errors) {
   }
 }
 
-export async function validateInputIntentV1File(inputIntentPath) {
-  const absolutePath = path.resolve(inputIntentPath);
-  const raw = await readFile(absolutePath, 'utf8');
-  const inputIntent = JSON.parse(raw);
-
+export async function validateInputIntentV1(inputIntent) {
   const registry = await loadInputIntentV1SchemaRegistry();
   const errors = validateWithSchema(inputIntent, registry[schemaFileName].schema, registry, '$', []);
   validateControlledFields(inputIntent, errors);
 
   return {
     ok: errors.length === 0,
-    absolutePath,
     inputIntent,
     errors
+  };
+}
+
+export async function validateInputIntentV1File(inputIntentPath) {
+  const absolutePath = path.resolve(inputIntentPath);
+  const raw = await readFile(absolutePath, 'utf8');
+  const inputIntent = JSON.parse(raw);
+  const report = await validateInputIntentV1(inputIntent);
+
+  return {
+    ok: report.ok,
+    absolutePath,
+    inputIntent,
+    errors: report.errors
   };
 }

@@ -1,48 +1,75 @@
-import { runDeterministicReplay } from '../replay/run-deterministic-replay.mjs';
 import { runResolvedSystem } from './system-handlers.mjs';
 import { createLoopSchedule } from './loop-scheduler.mjs';
 
-export function runMinimalSystemLoop(scene, options = {}) {
-  const replay = runDeterministicReplay(scene, options);
+function executeLoopSchedule(schedule, options = {}) {
+  const { seed, systemsPerTick } = schedule;
+  let state = seed >>> 0;
+  const executedSystems = [];
+  const tracedSystemsPerTick = [];
+
+  for (const tickPlan of systemsPerTick) {
+    const inputIntent = options.inputIntentResolver?.(tickPlan.tick) ?? options.inputIntent;
+    const tickSystems = [];
+
+    for (const system of tickPlan.systems) {
+      const stateBefore = state;
+      const stateAfter = runResolvedSystem(system.name, {
+        state,
+        tick: tickPlan.tick,
+        seed,
+        inputIntent
+      });
+
+      if (options.trace === true) {
+        tickSystems.push({
+          name: system.name,
+          delta: stateAfter - stateBefore,
+          stateBefore,
+          stateAfter
+        });
+      }
+
+      executedSystems.push(system.name);
+      state = stateAfter;
+    }
+
+    if (options.trace === true) {
+      tracedSystemsPerTick.push({
+        tick: tickPlan.tick,
+        systems: tickSystems
+      });
+    }
+  }
 
   return {
-    ticksExecuted: replay.ticks,
-    executedSystems: replay.systemExecutionOrder,
-    finalState: replay.finalState
+    finalState: state,
+    executedSystems,
+    tracedSystemsPerTick
+  };
+}
+
+export function runMinimalSystemLoop(scene, options = {}) {
+  const schedule = createLoopSchedule(scene, options);
+  const executed = executeLoopSchedule(schedule, {
+    inputIntent: options.inputIntent,
+    inputIntentResolver: options.inputIntentResolver
+  });
+
+  return {
+    ticksExecuted: schedule.ticks,
+    executedSystems: executed.executedSystems,
+    finalState: executed.finalState
   };
 }
 
 export function runMinimalSystemLoopWithTrace(scene, options = {}) {
   const schedule = createLoopSchedule(scene, options);
   const { ticks, seed, systemsPerTick } = schedule;
-
-  let state = seed >>> 0;
-  const executedSystems = [];
-  const tracedSystemsPerTick = [];
-
-  for (const tickPlan of systemsPerTick) {
-    const tickSystems = [];
-
-    for (const system of tickPlan.systems) {
-      const stateBefore = state;
-      const stateAfter = runResolvedSystem(system.name, { state, tick: tickPlan.tick, seed });
-
-      tickSystems.push({
-        name: system.name,
-        delta: stateAfter - stateBefore,
-        stateBefore,
-        stateAfter
-      });
-
-      executedSystems.push(system.name);
-      state = stateAfter;
-    }
-
-    tracedSystemsPerTick.push({
-      tick: tickPlan.tick,
-      systems: tickSystems
-    });
-  }
+  const executed = executeLoopSchedule(schedule, {
+    inputIntent: options.inputIntent,
+    inputIntentResolver: options.inputIntentResolver,
+    trace: true
+  });
 
   return {
     report: {
@@ -51,8 +78,8 @@ export function runMinimalSystemLoopWithTrace(scene, options = {}) {
       ticks,
       seed,
       ticksExecuted: ticks,
-      finalState: state,
-      executedSystems
+      finalState: executed.finalState,
+      executedSystems: executed.executedSystems
     },
     trace: {
       traceVersion: 1,
@@ -60,7 +87,7 @@ export function runMinimalSystemLoopWithTrace(scene, options = {}) {
       ticks,
       seed,
       ticksExecuted: ticks,
-      systemsPerTick: tracedSystemsPerTick
+      systemsPerTick: executed.tracedSystemsPerTick
     }
   };
 }

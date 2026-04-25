@@ -1,0 +1,14 @@
+{
+  "keyboardInputScriptVersion": 1,
+  "entityId": "player",
+  "ticks": [
+    {
+      "tick": 1,
+      "keys": ["ArrowRight"]
+    },
+    {
+      "tick": 1,
+      "keys": ["ArrowLeft"]
+    }
+  ]
+}

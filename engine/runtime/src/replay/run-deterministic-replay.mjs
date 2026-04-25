@@ -11,9 +11,11 @@ export function runDeterministicReplay(scene, options = {}) {
   const systemExecutionOrder = [];
 
   for (const tickPlan of schedule.systemsPerTick) {
+    const inputIntent = options.inputIntentResolver?.(tickPlan.tick);
+
     for (const system of tickPlan.systems) {
       systemExecutionOrder.push(system.name);
-      state = runResolvedSystem(system.name, { state, tick: tickPlan.tick, seed });
+      state = runResolvedSystem(system.name, { state, tick: tickPlan.tick, seed, inputIntent });
     }
   }
 

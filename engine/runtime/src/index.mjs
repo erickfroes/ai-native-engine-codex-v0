@@ -2,7 +2,17 @@ export { loadSchemaRegistry, getRepoRoot } from './schema/registry.mjs';
 export { validateSceneFile, formatValidationReport } from './scene/validate-scene.mjs';
 export { validateLoopScene, formatSceneValidationReportV1 } from './scene/validate-loop-scene.mjs';
 export { validateSaveFile } from './save/validate-save.mjs';
-export { validateInputIntentV1File } from './input/validate-input-intent-v1.mjs';
+export { canonicalJSONStringify, sha256Hex, createSha256Checksum } from './save/canonical-json.mjs';
+export { saveStateSnapshotV1, loadStateSnapshotSaveV1 } from './save/state-snapshot-save.mjs';
+export { validateInputIntentV1, validateInputIntentV1File } from './input/validate-input-intent-v1.mjs';
+export { loadValidatedInputIntentV1 } from './input/load-validated-input-intent-v1.mjs';
+export { createInputIntentFromKeyboardV1 } from './input/create-input-intent-from-keyboard-v1.mjs';
+export {
+  validateKeyboardInputScriptV1,
+  validateKeyboardInputScriptV1File
+} from './input/validate-keyboard-input-script-v1.mjs';
+export { loadValidatedKeyboardInputScriptV1 } from './input/load-validated-keyboard-input-script-v1.mjs';
+export { createKeyboardInputIntentResolverFromScriptV1 } from './input/create-keyboard-input-intent-resolver-v1.mjs';
 export { loadSceneFile } from './scene/load-scene.mjs';
 export { summarizeScene } from './scene/summary.mjs';
 export { validateSceneInvariants } from './scene/invariants.mjs';
@@ -12,6 +22,7 @@ export { buildReplayArtifact } from './replay/replay-artifact.mjs';
 export { generateReplaySignature } from './replay/replay-signature.mjs';
 export { runMinimalSystemLoop } from './loop/run-minimal-system-loop.mjs';
 export { runMinimalSystemLoopWithTrace } from './loop/run-minimal-system-loop.mjs';
+export { runLoopWithKeyboardInputScriptV1 } from './loop/run-loop-with-keyboard-input-script-v1.mjs';
 export { createLoopExecutionPlan } from './loop/create-loop-execution-plan.mjs';
 export { createLoopSchedule } from './loop/loop-scheduler.mjs';
 export { createPhasedLoopSchedulePreview } from './loop/phased-scheduler-preview.mjs';

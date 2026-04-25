@@ -32,9 +32,80 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'keyboard_to_input_intent',
+    title: 'Keyboard To Input Intent',
+    description: 'Translate declared keyboard keys into a deterministic Input Intent v1 payload.',
+    inputSchema: {
+      type: 'object',
+      required: ['tick', 'entityId', 'keys'],
+      properties: {
+        tick: {
+          type: 'integer',
+          description: 'Target tick for the generated intent.'
+        },
+        entityId: {
+          type: 'string',
+          description: 'Entity identifier that will receive the generated intent.'
+        },
+        keys: {
+          type: 'array',
+          items: {
+            type: 'string'
+          },
+          description: 'Ordered list of declared keyboard keys such as ArrowRight or KeyW.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'validate_save',
     title: 'Validate Save',
     description: 'Validate a savegame envelope JSON file against repository save schema.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
+    name: 'save_state_snapshot',
+    title: 'Save State Snapshot',
+    description: 'Simulate state ticks for a scene and write a minimal savegame v1 envelope plus snapshot payload.',
+    inputSchema: {
+      type: 'object',
+      required: ['path', 'ticks', 'outDir'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        ticks: {
+          type: 'integer',
+          description: 'Number of state simulation ticks to execute before saving the final snapshot.'
+        },
+        seed: {
+          type: 'integer',
+          description: 'Optional deterministic seed override.'
+        },
+        outDir: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root where save files will be written.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
+    name: 'load_save',
+    title: 'Load Save',
+    description: 'Load a minimal savegame v1 envelope, verify checksum, and return the referenced State Snapshot v1 payload.',
     inputSchema: {
       type: 'object',
       required: ['path'],
@@ -134,6 +205,14 @@ export const toolCatalog = [
         seed: {
           type: 'integer',
           description: 'Optional deterministic seed override.'
+        },
+        inputIntentPath: {
+          type: 'string',
+          description: 'Optional repository-relative or absolute path to an Input Intent v1 JSON file.'
+        },
+        keyboardScriptPath: {
+          type: 'string',
+          description: 'Optional repository-relative or absolute path to a KeyboardInputScript v1 JSON file.'
         },
         trace: {
           type: 'boolean',

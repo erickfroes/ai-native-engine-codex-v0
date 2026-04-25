@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+
+import { createInputIntentFromKeyboardV1, validateInputIntentV1File } from '../src/index.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
@@ -167,4 +170,145 @@ test('validate_input_intent invalid axis-above-max report stays semantically ali
       message: 'must be <= 1'
     }
   ]);
+});
+
+test('keyboard input intent generation stays semantically aligned across runtime, CLI and MCP', async () => {
+  const runtimeFirst = createInputIntentFromKeyboardV1({
+    tick: 1,
+    entityId: 'player',
+    keys: ['ArrowRight', 'ArrowUp']
+  });
+  const runtimeSecond = createInputIntentFromKeyboardV1({
+    tick: 1,
+    entityId: 'player',
+    keys: ['ArrowRight', 'ArrowUp']
+  });
+  const cliFirst = runCli([
+    'keyboard-to-input-intent',
+    '--tick',
+    '1',
+    '--entity',
+    'player',
+    '--keys',
+    'ArrowRight,ArrowUp',
+    '--json'
+  ]);
+  const cliSecond = runCli([
+    'keyboard-to-input-intent',
+    '--tick',
+    '1',
+    '--entity',
+    'player',
+    '--keys',
+    'ArrowRight,ArrowUp',
+    '--json'
+  ]);
+
+  assert.equal(cliFirst.status, 0, cliFirst.stderr);
+  assert.equal(cliSecond.status, 0, cliSecond.stderr);
+
+  const cliFirstIntent = JSON.parse(cliFirst.stdout);
+  const cliSecondIntent = JSON.parse(cliSecond.stdout);
+  const mcp = createMcpClient();
+
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: {
+        name: 'node-test',
+        version: '1.0.0'
+      }
+    });
+
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpFirst = await mcp.request('tools/call', {
+      name: 'keyboard_to_input_intent',
+      arguments: {
+        tick: 1,
+        entityId: 'player',
+        keys: ['ArrowRight', 'ArrowUp']
+      }
+    });
+    const mcpSecond = await mcp.request('tools/call', {
+      name: 'keyboard_to_input_intent',
+      arguments: {
+        tick: 1,
+        entityId: 'player',
+        keys: ['ArrowRight', 'ArrowUp']
+      }
+    });
+
+    assert.equal(mcpFirst.result.isError, false);
+    assert.equal(mcpSecond.result.isError, false);
+
+    assert.deepEqual(runtimeFirst, runtimeSecond);
+    assert.deepEqual(runtimeFirst, cliFirstIntent);
+    assert.deepEqual(cliFirstIntent, cliSecondIntent);
+    assert.deepEqual(cliFirstIntent, mcpFirst.result.structuredContent);
+    assert.deepEqual(mcpFirst.result.structuredContent, mcpSecond.result.structuredContent);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('generated keyboard input intent passes validation across runtime, CLI and MCP', async () => {
+  const tempDir = await mkdtemp(path.join(repoRoot, '.tmp-keyboard-input-intent-'));
+  const generatedIntentPath = path.join(tempDir, 'generated.keyboard.intent.json');
+  const inputIntent = createInputIntentFromKeyboardV1({
+    tick: 1,
+    entityId: 'player',
+    keys: ['ArrowRight', 'ArrowUp']
+  });
+
+  try {
+    await writeFile(generatedIntentPath, JSON.stringify(inputIntent, null, 2), 'utf8');
+
+    const runtimeReport = normalizeInputIntentValidationReport(
+      await validateInputIntentV1File(generatedIntentPath)
+    );
+    assertReportShape(runtimeReport);
+    assert.equal(runtimeReport.ok, true);
+
+    const cliResult = runCli(['validate-input-intent', generatedIntentPath, '--json']);
+    assert.equal(cliResult.status, 0, cliResult.stderr);
+
+    const cliReport = normalizeInputIntentValidationReport(JSON.parse(cliResult.stdout));
+    assertReportShape(cliReport);
+
+    const mcp = createMcpClient();
+    try {
+      const initResponse = await mcp.request('initialize', {
+        protocolVersion: '2025-06-18',
+        capabilities: {},
+        clientInfo: {
+          name: 'node-test',
+          version: '1.0.0'
+        }
+      });
+
+      assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+      mcp.notify('notifications/initialized');
+
+      const mcpResponse = await mcp.request('tools/call', {
+        name: 'validate_input_intent',
+        arguments: {
+          path: generatedIntentPath
+        }
+      });
+
+      assert.equal(mcpResponse.result.isError, false);
+      const mcpReport = normalizeInputIntentValidationReport(mcpResponse.result.structuredContent);
+      assertReportShape(mcpReport);
+
+      assert.deepEqual(runtimeReport, cliReport);
+      assert.deepEqual(cliReport, mcpReport);
+    } finally {
+      await mcp.close();
+    }
+  } finally {
+    await rm(tempDir, { recursive: true, force: true });
+  }
 });
