@@ -157,6 +157,20 @@ Compatibilidade:
 - nao introduz backend grafico;
 - nao representa runtime visual real nesta versao.
 
+## Browser Playable Demo v1 (HTML autocontido jogavel)
+
+Contrato textual minimo derivado de `RenderSnapshot v1` para abrir uma demo jogavel em browser sem runtime Node no cliente:
+
+- ver `docs/BROWSER_PLAYABLE_DEMO_V1.md`.
+
+Compatibilidade:
+
+- nao altera `RenderSnapshot v1`;
+- nao altera `Render SVG v1`;
+- nao altera `run-loop`;
+- nao altera `InputIntent v1`;
+- nao altera Save/Load v1.
+
 ## State Model v1 (interno)
 
 Representação estruturada de estado inicial derivada do Scene Document v1:
