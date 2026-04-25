@@ -143,6 +143,16 @@ function createInitialStatusText(renderSnapshot, drawCalls, controllableEntityId
   return `Snapshot tick ${renderSnapshot.tick}. Inputs 0. Controlled rect ${controllableDrawCall.id} at (${controllableDrawCall.x}, ${controllableDrawCall.y}). Step ${stepPx} px.`;
 }
 
+function createInitialPositionText(drawCalls, controllableEntityId) {
+  const controllableDrawCall = drawCalls.find((drawCall) => drawCall.id === controllableEntityId);
+
+  if (!controllableDrawCall) {
+    return 'Position: none';
+  }
+
+  return `Position: x ${controllableDrawCall.x}, y ${controllableDrawCall.y}`;
+}
+
 export function createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overrides = {}) {
   assertObject(scene, 'scene');
   validateRenderSnapshot(renderSnapshot);
@@ -185,6 +195,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     controllableEntityId,
     stepPx
   );
+  const initialPositionText = createInitialPositionText(renderSnapshot.drawCalls, controllableEntityId);
   const inlineData = escapeInlineJson({
     metadata: normalizedMetadata,
     renderSnapshot,
@@ -208,6 +219,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '    .instructions p { margin: 0; }',
     '    .controls-list { display: grid; gap: 4px; margin: 0; padding-left: 20px; }',
     '    .hint { margin: 0 0 12px; }',
+    '    .hud { margin: 0 0 12px; font-weight: 700; }',
     '    canvas { display: block; width: min(100%, 640px); height: auto; border: 1px solid #d7cfc2; background: #fffdf8; image-rendering: pixelated; }',
     '    canvas:focus { outline: 2px solid #201a13; outline-offset: 3px; }',
     '    .meta { display: grid; gap: 8px; margin: 0; }',
@@ -233,6 +245,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '        </ul>',
     '      </div>',
     `      <p class="hint">Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by ${stepPx} px per keydown.</p>`,
+    `      <p id="browser-playable-demo-position" class="hud" aria-live="polite">${escapeHtml(initialPositionText)}</p>`,
     '      <noscript>This demo needs JavaScript enabled to capture keyboard input.</noscript>',
     `      <canvas id="browser-playable-demo-canvas" data-browser-demo-version="${BROWSER_PLAYABLE_DEMO_VERSION}" data-scene="${escapeHtml(renderSnapshot.scene)}" data-tick="${renderSnapshot.tick}" data-controllable-entity="${escapeHtml(controllableEntityId ?? '')}" width="${renderSnapshot.viewport.width}" height="${renderSnapshot.viewport.height}" tabindex="0" aria-label="Browser playable demo canvas" aria-describedby="browser-playable-demo-instructions browser-playable-demo-status"></canvas>`,
     '    </section>',
@@ -246,6 +259,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '    (() => {',
     '      const dataElement = document.getElementById("browser-playable-demo-data");',
     '      const canvas = document.getElementById("browser-playable-demo-canvas");',
+    '      const positionElement = document.getElementById("browser-playable-demo-position");',
     '      const statusElement = document.getElementById("browser-playable-demo-status");',
     '      const payload = JSON.parse(dataElement.textContent);',
     '      const context = canvas.getContext("2d");',
@@ -264,6 +278,14 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '      const stepPx = payload.metadata.stepPx;',
     '      const snapshotTick = payload.renderSnapshot.tick;',
     '      let inputCount = 0;',
+    '      function updatePositionHud() {',
+    '        if (controllableIndex === -1) {',
+    '          positionElement.textContent = "Position: none";',
+    '          return;',
+    '        }',
+    '        const controlled = drawCalls[controllableIndex];',
+    '        positionElement.textContent = "Position: x " + controlled.x + ", y " + controlled.y;',
+    '      }',
     '      function updateStatus() {',
     '        if (controllableIndex === -1) {',
     '          statusElement.textContent = "Snapshot tick " + snapshotTick + ". No controllable rect. Step " + stepPx + " px.";',
@@ -295,6 +317,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '          context.fillRect(drawCall.x, drawCall.y, drawCall.width, drawCall.height);',
     '          context.strokeRect(drawCall.x, drawCall.y, drawCall.width, drawCall.height);',
     '        }',
+    '        updatePositionHud();',
     '        updateStatus();',
     '      }',
     '      function getMovementDelta(code) {',

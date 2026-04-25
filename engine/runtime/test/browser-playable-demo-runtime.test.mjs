@@ -26,6 +26,7 @@ function createCanvasHarness(html) {
   const operations = [];
   const listeners = new Map();
   const statusElement = { textContent: '' };
+  const positionElement = { textContent: '' };
   const dataElement = { textContent: extractInlineJson(html) };
   const context2d = {
     fillStyle: '#000000',
@@ -67,6 +68,9 @@ function createCanvasHarness(html) {
         if (id === 'browser-playable-demo-canvas') {
           return canvas;
         }
+        if (id === 'browser-playable-demo-position') {
+          return positionElement;
+        }
         if (id === 'browser-playable-demo-status') {
           return statusElement;
         }
@@ -79,6 +83,7 @@ function createCanvasHarness(html) {
     canvas,
     listeners,
     operations,
+    positionElement,
     statusElement
   };
 }
@@ -133,6 +138,9 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
     htmlA,
     /aria-describedby="browser-playable-demo-instructions browser-playable-demo-status"/
   );
+  assert.match(htmlA, /<p id="browser-playable-demo-position" class="hud" aria-live="polite">Position: x 0, y 0<\/p>/);
+  assert.match(htmlA, /function updatePositionHud\(\)/);
+  assert.match(htmlA, /positionElement\.textContent = "Position: x " \+ controlled\.x \+ ", y " \+ controlled\.y;/);
   assert.match(htmlA, /addEventListener\("keydown"/);
   assert.match(htmlA, /ArrowRight/);
   assert.match(htmlA, /KeyD/);
@@ -343,6 +351,7 @@ test('renderBrowserPlayableDemoHtmlV1 moves the nominated controllable rect by t
   );
   assert.deepEqual(highlightedRects[0].args, [0, 0, 16, 16]);
   assert.deepEqual(highlightedRects[1].args, [4, 0, 16, 16]);
+  assert.equal(harness.positionElement.textContent, 'Position: x 4, y 0');
   assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 0\)/);
 });
 
