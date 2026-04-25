@@ -18,6 +18,13 @@ function runCli(args) {
   });
 }
 
+function assertBrowserDemoEnvelopeShape(payload, { hasOutputPath }) {
+  const expectedKeys = hasOutputPath
+    ? ['browserDemoVersion', 'scene', 'tick', 'outputPath', 'html']
+    : ['browserDemoVersion', 'scene', 'tick', 'html'];
+  assert.deepEqual(Object.keys(payload), expectedKeys);
+}
+
 async function createTempDir(t) {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'cli-render-browser-demo-'));
   t.after(async () => {
@@ -46,7 +53,14 @@ test('render-browser-demo prints deterministic HTML to stdout when --out is omit
   assert.match(first.stdout, /^<!DOCTYPE html>/);
   assert.match(first.stdout, /<title>tutorial Browser Playable Demo<\/title>/);
   assert.match(first.stdout, /<canvas id="browser-playable-demo-canvas"/);
+  assert.match(first.stdout, /requestAnimationFrame\(renderFrame\)/);
+  assert.match(first.stdout, /Pause rendering/);
+  assert.match(first.stdout, /Reset/);
   assert.match(first.stdout, /addEventListener\("keydown"/);
+  assert.doesNotMatch(
+    first.stdout,
+    /<script[^>]+src=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|Date\.now|new Date|performance\.now|localStorage/
+  );
 });
 
 test('render-browser-demo writes HTML to --out and returns a small JSON envelope', async (t) => {
@@ -69,15 +83,41 @@ test('render-browser-demo writes HTML to --out and returns a small JSON envelope
   assert.equal(result.status, 0, result.stderr);
 
   const payload = JSON.parse(result.stdout);
-  assert.deepEqual(Object.keys(payload).sort(), ['browserDemoVersion', 'html', 'outputPath', 'scene', 'tick']);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: true });
   assert.equal(payload.browserDemoVersion, 1);
   assert.equal(payload.scene, 'tutorial');
   assert.equal(payload.tick, 4);
   assert.equal(payload.outputPath, path.resolve(outPath));
+  assert.match(payload.html, /requestAnimationFrame\(renderFrame\)/);
+  assert.match(payload.html, /Pause rendering/);
   assert.match(payload.html, /data-controllable-entity="player\.hero"/);
 
   const writtenHtml = await readFile(payload.outputPath, 'utf8');
   assert.equal(writtenHtml, payload.html);
+});
+
+test('render-browser-demo --json keeps the same envelope shape when --out is omitted', () => {
+  const result = runCli([
+    'render-browser-demo',
+    tutorialScenePath,
+    '--tick',
+    '4',
+    '--width',
+    '320',
+    '--height',
+    '180',
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.browserDemoVersion, 1);
+  assert.equal(payload.scene, 'tutorial');
+  assert.equal(payload.tick, 4);
+  assert.equal('outputPath' in payload, false);
+  assert.match(payload.html, /^<!DOCTYPE html>/);
 });
 
 test('render-browser-demo --json stays deterministic for the same scene options', () => {
