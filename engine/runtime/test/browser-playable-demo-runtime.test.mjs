@@ -207,6 +207,34 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.equal(BROWSER_PLAYABLE_DEMO_VERSION, 1);
 });
 
+test('renderBrowserPlayableDemoHtmlV1 keeps canvas focus affordances and stable local instructions', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'tutorial Browser Playable Demo',
+    renderSnapshot: createTutorialSnapshot(),
+    metadata: {
+      controllableEntityId: 'player.hero',
+      stepPx: DEFAULT_BROWSER_PLAYABLE_STEP_PX
+    }
+  });
+  const harness = createCanvasHarness(html);
+  const click = harness.canvasListeners.get('click');
+  const focusCountBeforeClick = harness.canvas.focusedCount;
+
+  assert.match(html, /tabindex="0"/);
+  assert.match(html, /aria-label="Browser playable demo canvas"/);
+  assert.match(
+    html,
+    /Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by 4 px per keydown\./
+  );
+  assert.match(html, />Pause rendering<\/button>/);
+  assert.match(html, />Reset<\/button>/);
+  assert.equal(typeof click, 'function');
+
+  click();
+
+  assert.equal(harness.canvas.focusedCount, focusCountBeforeClick + 1);
+});
+
 test('renderBrowserPlayableDemoHtmlV1 renders deterministic empty HTML when drawCalls is empty', () => {
   const renderSnapshot = {
     renderSnapshotVersion: 1,
