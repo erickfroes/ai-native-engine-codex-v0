@@ -15,6 +15,7 @@ export { runMinimalSystemLoopWithTrace } from './loop/run-minimal-system-loop.mj
 export { createLoopExecutionPlan } from './loop/create-loop-execution-plan.mjs';
 export { createLoopSchedule } from './loop/loop-scheduler.mjs';
 export { createPhasedLoopSchedulePreview } from './loop/phased-scheduler-preview.mjs';
+export { buildRenderSnapshotV1 } from './render/build-render-snapshot-v1.mjs';
 export {
   createStateModelV1FromScene,
   createInitialStateFromScene,
