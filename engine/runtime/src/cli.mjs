@@ -17,6 +17,7 @@ import {
   createLoopExecutionPlan,
   runMinimalSystemLoop,
   runMinimalSystemLoopWithTrace,
+  runLoopWithKeyboardInputScriptV1,
   createInitialStateFromScene,
   snapshotStateV1,
   simulateStateV1,
@@ -35,7 +36,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs plan-loop <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs inspect-state <path> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json] [--trace]
-  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--json] [--trace]
+  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--keyboard-script <path>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
 }
@@ -499,7 +500,57 @@ async function run() {
 
     const ticks = readNumberFlag('run-loop', '--ticks', 1);
     const seed = readNumberFlag('run-loop', '--seed', undefined);
+    const keyboardScriptPath = readStringFlag('run-loop', '--keyboard-script', undefined);
     const withTrace = hasFlag('--trace');
+
+    if (keyboardScriptPath) {
+      const result = await runLoopWithKeyboardInputScriptV1(maybePath, keyboardScriptPath, {
+        ticks,
+        seed,
+        trace: withTrace
+      });
+
+      if (withTrace) {
+        if (asJson) {
+          console.log(JSON.stringify(result, null, 2));
+        } else {
+          console.log(`Scene: ${result.report.scene}`);
+          console.log(`Loop report version: ${result.report.loopReportVersion}`);
+          console.log(`Ticks: ${result.report.ticks}`);
+          console.log(`Seed: ${result.report.seed}`);
+          console.log(`Ticks executed: ${result.report.ticksExecuted}`);
+          console.log(`Final state: ${result.report.finalState}`);
+          console.log(`Executed systems: ${result.report.executedSystems.join(', ') || '(none)'}`);
+          console.log(`Trace version: ${result.trace.traceVersion}`);
+        }
+        return;
+      }
+
+      const loopReport = {
+        loopReportVersion: 1,
+        scene: path.basename(maybePath, '.scene.json'),
+        ticks,
+        seed: seed ?? 1337,
+        ticksExecuted: result.ticksExecuted,
+        finalState: result.finalState,
+        executedSystems: result.executedSystems
+      };
+
+      if (asJson) {
+        console.log(JSON.stringify(loopReport, null, 2));
+      } else {
+        console.log(`Scene: ${loopReport.scene}`);
+        console.log(`Loop report version: ${loopReport.loopReportVersion}`);
+        console.log(`Ticks: ${loopReport.ticks}`);
+        console.log(`Seed: ${loopReport.seed}`);
+        console.log(`Ticks executed: ${loopReport.ticksExecuted}`);
+        console.log(`Final state: ${loopReport.finalState}`);
+        console.log(`Executed systems: ${loopReport.executedSystems.join(', ') || '(none)'}`);
+      }
+
+      return;
+    }
+
     const scene = await loadSceneFile(maybePath);
 
     if (withTrace) {
