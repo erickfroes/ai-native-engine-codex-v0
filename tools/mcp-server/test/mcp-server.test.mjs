@@ -67,15 +67,21 @@ function assertBrowserDemoStructuredContent(payload) {
   assert.equal(payload.browserDemoVersion, 1);
   assert.equal(payload.scene, 'tutorial');
   assert.equal(payload.tick, 4);
+  assert.equal('outputPath' in payload, false);
   assert.match(payload.html, /^<!DOCTYPE html>/);
   assert.match(
     payload.html,
     /<canvas id="browser-playable-demo-canvas" data-browser-demo-version="1" data-scene="tutorial" data-tick="4" data-controllable-entity="player\.hero" width="320" height="180" tabindex="0"/
   );
+  assert.match(payload.html, /aria-label="Browser playable demo canvas"/);
   assert.match(payload.html, /requestAnimationFrame\(renderFrame\)/);
-  assert.match(payload.html, /Pause rendering/);
+  assert.match(payload.html, />Pause rendering<\/button>/);
   assert.match(payload.html, /Resume rendering/);
   assert.match(payload.html, />Reset<\/button>/);
+  assert.match(
+    payload.html,
+    /Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by 4 px per keydown\./
+  );
   assert.match(payload.html, /addEventListener\("keydown"/);
   assert.doesNotMatch(
     payload.html,

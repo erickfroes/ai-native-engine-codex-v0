@@ -30,12 +30,19 @@ function assertBrowserDemoEnvelope(payload) {
   assert.equal(payload.browserDemoVersion, 1);
   assert.equal(payload.scene, 'tutorial');
   assert.equal(payload.tick, 4);
+  assert.equal('outputPath' in payload, false);
   assert.match(payload.html, /^<!DOCTYPE html>/);
   assert.match(payload.html, /<canvas id="browser-playable-demo-canvas"/);
+  assert.match(payload.html, /tabindex="0"/);
+  assert.match(payload.html, /aria-label="Browser playable demo canvas"/);
   assert.match(payload.html, /requestAnimationFrame\(renderFrame\)/);
-  assert.match(payload.html, /Pause rendering/);
+  assert.match(payload.html, />Pause rendering<\/button>/);
   assert.match(payload.html, /Resume rendering/);
   assert.match(payload.html, />Reset<\/button>/);
+  assert.match(
+    payload.html,
+    /Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by 4 px per keydown\./
+  );
   assert.match(payload.html, /addEventListener\("keydown"/);
   assert.doesNotMatch(
     payload.html,
@@ -153,6 +160,8 @@ test('browser playable demo stays aligned across runtime, CLI and MCP for the sa
     assertBrowserDemoEnvelope(mcpEnvelope);
     assert.deepEqual(runtimeEnvelope, cliEnvelope);
     assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+    assert.equal(runtimeEnvelope.html, cliEnvelope.html);
+    assert.equal(runtimeEnvelope.html, mcpEnvelope.html);
   } finally {
     await mcp.close();
   }
