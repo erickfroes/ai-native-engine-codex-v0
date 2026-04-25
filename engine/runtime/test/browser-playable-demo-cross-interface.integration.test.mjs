@@ -25,6 +25,24 @@ function runCli(args) {
   });
 }
 
+function assertBrowserDemoEnvelope(payload) {
+  assert.deepEqual(Object.keys(payload), ['browserDemoVersion', 'scene', 'tick', 'html']);
+  assert.equal(payload.browserDemoVersion, 1);
+  assert.equal(payload.scene, 'tutorial');
+  assert.equal(payload.tick, 4);
+  assert.match(payload.html, /^<!DOCTYPE html>/);
+  assert.match(payload.html, /<canvas id="browser-playable-demo-canvas"/);
+  assert.match(payload.html, /requestAnimationFrame\(renderFrame\)/);
+  assert.match(payload.html, /Pause rendering/);
+  assert.match(payload.html, /Resume rendering/);
+  assert.match(payload.html, />Reset<\/button>/);
+  assert.match(payload.html, /addEventListener\("keydown"/);
+  assert.doesNotMatch(
+    payload.html,
+    /<script[^>]+src=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|Date\.now|new Date|performance\.now|localStorage/
+  );
+}
+
 function createMcpClient() {
   const child = spawn(process.execPath, [mcpServerPath], {
     cwd: repoRoot,
@@ -130,17 +148,11 @@ test('browser playable demo stays aligned across runtime, CLI and MCP for the sa
     assert.equal(mcpResponse.result.isError, false);
     const mcpEnvelope = mcpResponse.result.structuredContent;
 
-    assert.deepEqual(Object.keys(runtimeEnvelope).sort(), ['browserDemoVersion', 'html', 'scene', 'tick']);
+    assertBrowserDemoEnvelope(runtimeEnvelope);
+    assertBrowserDemoEnvelope(cliEnvelope);
+    assertBrowserDemoEnvelope(mcpEnvelope);
     assert.deepEqual(runtimeEnvelope, cliEnvelope);
     assert.deepEqual(runtimeEnvelope, mcpEnvelope);
-    assert.equal(runtimeEnvelope.browserDemoVersion, 1);
-    assert.equal(runtimeEnvelope.scene, 'tutorial');
-    assert.equal(runtimeEnvelope.tick, 4);
-    assert.match(runtimeEnvelope.html, /^<!DOCTYPE html>/);
-    assert.match(runtimeEnvelope.html, /<canvas id="browser-playable-demo-canvas"/);
-    assert.match(runtimeEnvelope.html, /addEventListener\("keydown"/);
-    assert.doesNotMatch(runtimeEnvelope.html, /<script[^>]+src=/);
-    assert.doesNotMatch(runtimeEnvelope.html, /https?:\/\/|fetch\(|XMLHttpRequest|WebSocket/);
   } finally {
     await mcp.close();
   }
