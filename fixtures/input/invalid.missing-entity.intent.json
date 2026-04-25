@@ -1,0 +1,13 @@
+{
+  "inputIntentVersion": 1,
+  "tick": 1,
+  "actions": [
+    {
+      "type": "move",
+      "axis": {
+        "x": 1,
+        "y": 0
+      }
+    }
+  ]
+}
