@@ -83,6 +83,10 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(validateInputIntentTool);
     assert.equal(validateInputIntentTool.title, 'Validate Input Intent');
     assert.deepEqual(validateInputIntentTool.inputSchema.required, ['path']);
+    const keyboardToInputIntentTool = toolsResponse.result.tools.find((tool) => tool.name === 'keyboard_to_input_intent');
+    assert.ok(keyboardToInputIntentTool);
+    assert.equal(keyboardToInputIntentTool.title, 'Keyboard To Input Intent');
+    assert.deepEqual(keyboardToInputIntentTool.inputSchema.required, ['tick', 'entityId', 'keys']);
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_save'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'emit_world_snapshot'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
@@ -177,6 +181,46 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       invalidInputIntentResponse.result.structuredContent.errors.some(
         (error) => error.path === '$.entityId' && error.message === 'is required'
       )
+    );
+
+    const keyboardInputIntentResponse = await client.request('tools/call', {
+      name: 'keyboard_to_input_intent',
+      arguments: {
+        tick: 1,
+        entityId: 'player',
+        keys: ['ArrowRight', 'ArrowUp']
+      }
+    });
+
+    assert.equal(keyboardInputIntentResponse.result.isError, false);
+    assert.deepEqual(keyboardInputIntentResponse.result.structuredContent, {
+      inputIntentVersion: 1,
+      tick: 1,
+      entityId: 'player',
+      actions: [
+        {
+          type: 'move',
+          axis: {
+            x: 1,
+            y: -1
+          }
+        }
+      ]
+    });
+
+    const keyboardInputIntentInvalidResponse = await client.request('tools/call', {
+      name: 'keyboard_to_input_intent',
+      arguments: {
+        tick: 1,
+        entityId: 'player',
+        keys: []
+      }
+    });
+
+    assert.equal(keyboardInputIntentInvalidResponse.result.isError, true);
+    assert.match(
+      keyboardInputIntentInvalidResponse.result.content[0].text,
+      /keyboard_to_input_intent: `keys` is required and must be a non-empty array of strings/
     );
 
     const validSaveResponse = await client.request('tools/call', {

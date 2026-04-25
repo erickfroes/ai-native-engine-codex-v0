@@ -32,6 +32,33 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'keyboard_to_input_intent',
+    title: 'Keyboard To Input Intent',
+    description: 'Translate declared keyboard keys into a deterministic Input Intent v1 payload.',
+    inputSchema: {
+      type: 'object',
+      required: ['tick', 'entityId', 'keys'],
+      properties: {
+        tick: {
+          type: 'integer',
+          description: 'Target tick for the generated intent.'
+        },
+        entityId: {
+          type: 'string',
+          description: 'Entity identifier that will receive the generated intent.'
+        },
+        keys: {
+          type: 'array',
+          items: {
+            type: 'string'
+          },
+          description: 'Ordered list of declared keyboard keys such as ArrowRight or KeyW.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'validate_save',
     title: 'Validate Save',
     description: 'Validate a savegame envelope JSON file against repository save schema.',
