@@ -121,6 +121,18 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.match(htmlA, /^<!DOCTYPE html>/);
   assert.match(htmlA, /<canvas id="browser-playable-demo-canvas"/);
   assert.match(htmlA, /tabindex="0"/);
+  assert.match(htmlA, /<section class="frame" aria-labelledby="browser-playable-demo-instructions-title">/);
+  assert.match(htmlA, /<h2 id="browser-playable-demo-instructions-title">tutorial Browser Playable Demo<\/h2>/);
+  assert.match(htmlA, /Click the canvas and use WASD or Arrow Keys to move\./);
+  assert.match(htmlA, /<ul class="controls-list" aria-label="Controls">/);
+  assert.match(htmlA, /W or ArrowUp moves up by 4 px\./);
+  assert.match(htmlA, /A or ArrowLeft moves left by 4 px\./);
+  assert.match(htmlA, /S or ArrowDown moves down by 4 px\./);
+  assert.match(htmlA, /D or ArrowRight moves right by 4 px\./);
+  assert.match(
+    htmlA,
+    /aria-describedby="browser-playable-demo-instructions browser-playable-demo-status"/
+  );
   assert.match(htmlA, /addEventListener\("keydown"/);
   assert.match(htmlA, /ArrowRight/);
   assert.match(htmlA, /KeyD/);
