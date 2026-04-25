@@ -18,6 +18,9 @@ import {
   buildRenderSnapshotV1,
   renderSnapshotToSvgV1,
   RENDER_SVG_VERSION,
+  renderBrowserPlayableDemoHtmlV1,
+  createBrowserPlayableDemoMetadataV1,
+  BROWSER_PLAYABLE_DEMO_VERSION,
   runDeterministicReplay,
   buildReplayArtifact,
   createLoopExecutionPlan,
@@ -40,6 +43,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs render-snapshot <path> [--tick <n>] [--width <n>] [--height <n>] [--json]
   node engine/runtime/src/cli.mjs render-svg <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
+  node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs save-state <path> --ticks <n> [--seed <n>] --out <dir> [--json]
   node engine/runtime/src/cli.mjs load-save <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
@@ -374,6 +378,52 @@ async function run() {
       console.log(outputPath);
     } else {
       process.stdout.write(svg);
+    }
+
+    return;
+  }
+
+  if (command === 'render-browser-demo') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const tick = readNumberFlag('render-browser-demo', '--tick', undefined);
+    const width = readNumberFlag('render-browser-demo', '--width', undefined);
+    const height = readNumberFlag('render-browser-demo', '--height', undefined);
+    const requestedOutPath = readStringFlag('render-browser-demo', '--out', undefined);
+    const scene = await loadSceneFile(maybePath);
+    const snapshot = await buildRenderSnapshotV1(scene, { tick, width, height });
+    const title = `${snapshot.scene} Browser Playable Demo`;
+    const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot);
+    const html = renderBrowserPlayableDemoHtmlV1({
+      title,
+      renderSnapshot: snapshot,
+      metadata
+    });
+    const outputPath = requestedOutPath ? path.resolve(requestedOutPath) : undefined;
+
+    if (outputPath) {
+      await mkdir(path.dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, html, 'utf8');
+    }
+
+    const envelope = {
+      browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+      scene: snapshot.scene,
+      tick: snapshot.tick,
+      ...(outputPath ? { outputPath } : {}),
+      html
+    };
+
+    if (asJson) {
+      console.log(JSON.stringify(envelope, null, 2));
+    } else if (outputPath) {
+      console.log(outputPath);
+    } else {
+      process.stdout.write(html);
     }
 
     return;
