@@ -29,6 +29,12 @@ export { createPhasedLoopSchedulePreview } from './loop/phased-scheduler-preview
 export { buildRenderSnapshotV1 } from './render/build-render-snapshot-v1.mjs';
 export { renderSnapshotToSvgV1, RENDER_SVG_VERSION } from './render/render-snapshot-to-svg-v1.mjs';
 export {
+  renderBrowserPlayableDemoHtmlV1,
+  createBrowserPlayableDemoMetadataV1,
+  BROWSER_PLAYABLE_DEMO_VERSION,
+  DEFAULT_BROWSER_PLAYABLE_STEP_PX
+} from './render/render-browser-playable-demo-html-v1.mjs';
+export {
   createStateModelV1FromScene,
   createInitialStateFromScene,
   snapshotStateV1
