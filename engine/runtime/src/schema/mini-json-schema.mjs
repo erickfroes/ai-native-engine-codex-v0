@@ -55,6 +55,10 @@ function validateInteger(value, schema, valuePath, errors) {
   if (typeof schema.minimum === 'number' && value < schema.minimum) {
     pushError(errors, valuePath, `must be >= ${schema.minimum}`);
   }
+
+  if (typeof schema.maximum === 'number' && value > schema.maximum) {
+    pushError(errors, valuePath, `must be <= ${schema.maximum}`);
+  }
 }
 
 function validateBoolean(value, _schema, valuePath, errors) {

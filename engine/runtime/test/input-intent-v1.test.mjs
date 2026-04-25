@@ -48,3 +48,19 @@ test('input intent v1: rejects extra fields at controlled levels', async () => {
   assert.ok(report.errors.some((error) => error.path === '$.actions[0].debug' && error.message === 'is not allowed by schema'));
   assert.ok(report.errors.some((error) => error.path === '$.unexpected' && error.message === 'is not allowed by schema'));
 });
+
+test('input intent v1: rejects axis values above the upper bound once', async () => {
+  const invalidFixturePath = inputFixturePath('invalid.axis-above-max.intent.json');
+  const fixture = JSON.parse(await readFile(invalidFixturePath, 'utf8'));
+
+  assertInputIntentV1Rejects(fixture);
+
+  const report = await validateInputIntentV1File(invalidFixturePath);
+  assert.equal(report.ok, false);
+  assert.deepEqual(report.errors, [
+    {
+      path: '$.actions[0].axis.x',
+      message: 'must be <= 1'
+    }
+  ]);
+});
