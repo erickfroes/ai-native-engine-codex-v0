@@ -47,3 +47,40 @@ test('runLoopWithKeyboardInputScriptV1 can return trace envelope with per-tick o
     [1, 0]
   );
 });
+
+test('runLoopWithKeyboardInputScriptV1 rejects duplicate tick scripts predictably', async () => {
+  await assert.rejects(
+    () =>
+      runLoopWithKeyboardInputScriptV1(
+        scenePath('tutorial.scene.json'),
+        inputScriptPath('invalid.duplicate-tick.keyboard-input-script.json'),
+        { ticks: 2, seed: 10 }
+      ),
+    (error) => {
+      assert.equal(error.name, 'KeyboardInputScriptValidationError');
+      assert.match(error.message, /keyboard input script is invalid/);
+      assert.match(error.message, /\$\.ticks\[1\]\.tick: must be unique/);
+      return true;
+    }
+  );
+});
+
+test('runLoopWithKeyboardInputScriptV1 ignores unknown keys and out-of-range ticks deterministically', async () => {
+  const first = await runLoopWithKeyboardInputScriptV1(
+    scenePath('tutorial.scene.json'),
+    inputScriptPath('valid.unknown-keys-and-out-of-range.keyboard-input-script.json'),
+    { ticks: 2, seed: 10, trace: true }
+  );
+  const second = await runLoopWithKeyboardInputScriptV1(
+    scenePath('tutorial.scene.json'),
+    inputScriptPath('valid.unknown-keys-and-out-of-range.keyboard-input-script.json'),
+    { ticks: 2, seed: 10, trace: true }
+  );
+
+  assert.deepEqual(first, second);
+  assert.equal(first.report.finalState, 20);
+  assert.deepEqual(
+    first.trace.systemsPerTick.map((tickEntry) => tickEntry.systems.find((system) => system.name === 'input.keyboard')?.delta),
+    [1, 3]
+  );
+});
