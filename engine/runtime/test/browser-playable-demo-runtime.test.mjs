@@ -24,9 +24,24 @@ function extractInlineScript(html) {
 function createCanvasHarness(html) {
   const script = extractInlineScript(html);
   const operations = [];
-  const listeners = new Map();
+  const canvasListeners = new Map();
+  const resetButtonListeners = new Map();
+  const animationFrames = [];
+  const cancelledAnimationFrames = new Set();
+  let nextAnimationFrameHandle = 1;
   const statusElement = { textContent: '' };
   const dataElement = { textContent: extractInlineJson(html) };
+  const resetButton = {
+    addEventListener(eventName, handler) {
+      resetButtonListeners.set(eventName, handler);
+    },
+    click() {
+      const handler = resetButtonListeners.get('click');
+      if (handler) {
+        handler({ preventDefault() {} });
+      }
+    }
+  };
   const context2d = {
     fillStyle: '#000000',
     strokeStyle: '#000000',
@@ -50,7 +65,7 @@ function createCanvasHarness(html) {
       return context2d;
     },
     addEventListener(eventName, handler) {
-      listeners.set(eventName, handler);
+      canvasListeners.set(eventName, handler);
     },
     focus() {
       this.focusedCount += 1;
@@ -59,6 +74,15 @@ function createCanvasHarness(html) {
 
   vm.runInNewContext(script, {
     JSON,
+    requestAnimationFrame(callback) {
+      const handle = nextAnimationFrameHandle;
+      nextAnimationFrameHandle += 1;
+      animationFrames.push({ handle, callback });
+      return handle;
+    },
+    cancelAnimationFrame(handle) {
+      cancelledAnimationFrames.add(handle);
+    },
     document: {
       getElementById(id) {
         if (id === 'browser-playable-demo-data') {
@@ -66,6 +90,9 @@ function createCanvasHarness(html) {
         }
         if (id === 'browser-playable-demo-canvas') {
           return canvas;
+        }
+        if (id === 'browser-playable-demo-reset') {
+          return resetButton;
         }
         if (id === 'browser-playable-demo-status') {
           return statusElement;
@@ -76,9 +103,20 @@ function createCanvasHarness(html) {
   });
 
   return {
+    animationFrames,
     canvas,
-    listeners,
+    canvasListeners,
+    flushAnimationFrames(count) {
+      for (let index = 0; index < count; index += 1) {
+        const frame = animationFrames.shift();
+        assert.ok(frame, 'expected a scheduled animation frame');
+        if (!cancelledAnimationFrames.has(frame.handle)) {
+          frame.callback();
+        }
+      }
+    },
     operations,
+    resetButton,
     statusElement
   };
 }
@@ -122,6 +160,8 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.match(htmlA, /<canvas id="browser-playable-demo-canvas"/);
   assert.match(htmlA, /tabindex="0"/);
   assert.match(htmlA, /addEventListener\("keydown"/);
+  assert.match(htmlA, /requestAnimationFrame\(renderFrame\)/);
+  assert.match(htmlA, /id="browser-playable-demo-reset"/);
   assert.match(htmlA, /ArrowRight/);
   assert.match(htmlA, /KeyD/);
   assert.match(htmlA, /ArrowLeft/);
@@ -132,7 +172,7 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.match(htmlA, /KeyS/);
   assert.match(htmlA, /4 px per keydown/);
   assert.doesNotMatch(htmlA, /<script[^>]+src=/);
-  assert.doesNotMatch(htmlA, /https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|Date\.now|new Date|performance\.now|toISOString/);
+  assert.doesNotMatch(htmlA, /https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|Date\.now|new Date|performance\.now|toISOString|localStorage/);
   assert.equal(BROWSER_PLAYABLE_DEMO_VERSION, 1);
 });
 
@@ -212,7 +252,7 @@ test('renderBrowserPlayableDemoHtmlV1 escapes HTML and JSON payload safely', () 
   );
   assert.doesNotMatch(html, /<\/script><script>/);
   assert.doesNotMatch(html, /<script[^>]+src=|<link[^>]+href=|https?:\/\//);
-  assert.doesNotMatch(html, /Date\.now|new Date|performance\.now|fetch\(|XMLHttpRequest|WebSocket|toISOString/);
+  assert.doesNotMatch(html, /Date\.now|new Date|performance\.now|fetch\(|XMLHttpRequest|WebSocket|toISOString|localStorage/);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 preserves snapshot order for multiple rect draw calls', () => {
@@ -290,7 +330,7 @@ test('renderBrowserPlayableDemoHtmlV1 falls back to the first rect when player.h
     }
   });
   const harness = createCanvasHarness(html);
-  const keydown = harness.listeners.get('keydown');
+  const keydown = harness.canvasListeners.get('keydown');
 
   assert.equal(typeof keydown, 'function');
   assert.match(html, /data-controllable-entity="camera\.main"/);
@@ -312,7 +352,7 @@ test('renderBrowserPlayableDemoHtmlV1 moves the nominated controllable rect by t
     }
   });
   const harness = createCanvasHarness(html);
-  const keydown = harness.listeners.get('keydown');
+  const keydown = harness.canvasListeners.get('keydown');
 
   assert.equal(typeof keydown, 'function');
   assert.equal(harness.canvas.focusedCount > 0, true);
@@ -332,6 +372,53 @@ test('renderBrowserPlayableDemoHtmlV1 moves the nominated controllable rect by t
   assert.deepEqual(highlightedRects[0].args, [0, 0, 16, 16]);
   assert.deepEqual(highlightedRects[1].args, [4, 0, 16, 16]);
   assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 0\)/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 keeps redrawing through requestAnimationFrame without moving state on its own', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'tutorial Browser Playable Demo',
+    renderSnapshot: createTutorialSnapshot(),
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const harness = createCanvasHarness(html);
+  const initialOperationCount = harness.operations.length;
+
+  assert.equal(harness.animationFrames.length, 1);
+
+  harness.flushAnimationFrames(3);
+
+  assert.equal(harness.animationFrames.length, 1);
+  assert.ok(harness.operations.length > initialOperationCount);
+  assert.match(harness.statusElement.textContent, /Inputs 0/);
+  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(0, 0\)/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 reset button restores the initial rect position and HUD', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'tutorial Browser Playable Demo',
+    renderSnapshot: createTutorialSnapshot(),
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+
+  harness.resetButton.click();
+
+  assert.match(harness.statusElement.textContent, /Inputs 0/);
+  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(0, 0\)/);
+  const highlightedRects = harness.operations.filter(
+    (entry) => entry.method === 'fillRect' && entry.fillStyle === '#b74f2a'
+  );
+  assert.deepEqual(highlightedRects.at(-1).args, [0, 0, 16, 16]);
 });
 
 test('createBrowserPlayableDemoMetadataV1 picks the first scene rect before falling back to snapshot order', () => {
