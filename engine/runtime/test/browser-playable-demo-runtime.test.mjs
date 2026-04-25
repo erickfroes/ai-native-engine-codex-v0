@@ -405,6 +405,31 @@ test('renderBrowserPlayableDemoHtmlV1 moves the nominated controllable rect by t
   assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 0\)/);
 });
 
+test('renderBrowserPlayableDemoHtmlV1 ignores invalid keydown events without moving the controlled rect', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'tutorial Browser Playable Demo',
+    renderSnapshot: createTutorialSnapshot(),
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+  const initialPosition = extractControlledPosition(harness.statusElement.textContent);
+  let prevented = false;
+
+  keydown({
+    code: 'KeyQ',
+    preventDefault() {
+      prevented = true;
+    }
+  });
+
+  assert.equal(prevented, false);
+  assert.deepEqual(extractControlledPosition(harness.statusElement.textContent), initialPosition);
+  assert.match(harness.statusElement.textContent, /Inputs 0/);
+});
+
 test('renderBrowserPlayableDemoHtmlV1 keeps redrawing through requestAnimationFrame without moving state on its own', () => {
   const html = renderBrowserPlayableDemoHtmlV1({
     title: 'tutorial Browser Playable Demo',
@@ -435,7 +460,14 @@ test('renderBrowserPlayableDemoHtmlV1 toggles pause and resume for the local red
     }
   });
   const harness = createCanvasHarness(html);
-  const initialPosition = extractControlledPosition(harness.statusElement.textContent);
+  const keydown = harness.canvasListeners.get('keydown');
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+
+  const movedPosition = extractControlledPosition(harness.statusElement.textContent);
 
   assert.equal(harness.pauseButton.textContent, 'Pause rendering');
   assert.equal(harness.animationFrames.length, 1);
@@ -444,14 +476,14 @@ test('renderBrowserPlayableDemoHtmlV1 toggles pause and resume for the local red
 
   assert.equal(harness.pauseButton.textContent, 'Resume rendering');
   assert.equal(harness.animationFrames.length, 0);
-  assert.deepEqual(extractControlledPosition(harness.statusElement.textContent), initialPosition);
+  assert.deepEqual(extractControlledPosition(harness.statusElement.textContent), movedPosition);
 
   harness.pauseButton.click();
 
   assert.equal(harness.pauseButton.textContent, 'Pause rendering');
   assert.equal(harness.animationFrames.length, 1);
   harness.flushAnimationFrames(1);
-  assert.deepEqual(extractControlledPosition(harness.statusElement.textContent), initialPosition);
+  assert.deepEqual(extractControlledPosition(harness.statusElement.textContent), movedPosition);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 reset button restores the initial rect position and HUD', () => {
@@ -469,6 +501,13 @@ test('renderBrowserPlayableDemoHtmlV1 reset button restores the initial rect pos
     code: 'ArrowRight',
     preventDefault() {}
   });
+  keydown({
+    code: 'ArrowDown',
+    preventDefault() {}
+  });
+
+  assert.match(harness.statusElement.textContent, /Inputs 2/);
+  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 4\)/);
 
   harness.resetButton.click();
 
