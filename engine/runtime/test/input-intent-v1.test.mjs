@@ -67,7 +67,7 @@ test('input intent v1: runtime closes axis upper bound to keep full [-1, 1] cont
     const report = await validateInputIntentV1File(invalidFixturePath);
     assert.equal(report.ok, false);
     assert.ok(
-      report.errors.some((error) => error.path === '$.actions[0].axis.x' && error.message === 'must be between -1 and 1')
+      report.errors.some((error) => error.path === '$.actions[0].axis.x' && error.message === 'must be <= 1')
     );
   } finally {
     await rm(tempDir, { recursive: true, force: true });
