@@ -373,6 +373,47 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(renderSvgResponseA.result.structuredContent.svg, /<rect id="player\.hero"/);
     assert.deepEqual(renderSvgResponseA.result.structuredContent, renderSvgResponseB.result.structuredContent);
 
+    const renderSvgInvalidWidthResponse = await client.request('tools/call', {
+      name: 'render_svg',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        width: 0
+      }
+    });
+
+    assert.equal(renderSvgInvalidWidthResponse.result.isError, true);
+    assert.match(
+      renderSvgInvalidWidthResponse.result.content[0].text,
+      /render_svg: `width` must be an integer >= 1 when provided/
+    );
+
+    const renderSvgInvalidHeightResponse = await client.request('tools/call', {
+      name: 'render_svg',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        height: 0
+      }
+    });
+
+    assert.equal(renderSvgInvalidHeightResponse.result.isError, true);
+    assert.match(
+      renderSvgInvalidHeightResponse.result.content[0].text,
+      /render_svg: `height` must be an integer >= 1 when provided/
+    );
+
+    const renderSvgMissingPathResponse = await client.request('tools/call', {
+      name: 'render_svg',
+      arguments: {
+        path: './scenes/missing.scene.json'
+      }
+    });
+
+    assert.equal(renderSvgMissingPathResponse.result.isError, true);
+    assert.equal(renderSvgMissingPathResponse.result.structuredContent.ok, false);
+    assert.equal(renderSvgMissingPathResponse.result.structuredContent.errorName, 'Error');
+    assert.match(renderSvgMissingPathResponse.result.content[0].text, /ENOENT/);
+    assert.match(renderSvgMissingPathResponse.result.content[0].text, /missing\.scene\.json/);
+
     const replayResponseA = await client.request('tools/call', {
       name: 'run_replay',
       arguments: {
