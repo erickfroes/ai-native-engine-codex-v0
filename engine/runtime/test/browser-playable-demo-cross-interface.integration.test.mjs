@@ -138,9 +138,14 @@ test('browser playable demo stays aligned across runtime, CLI and MCP for the sa
     assert.equal(runtimeEnvelope.tick, 4);
     assert.match(runtimeEnvelope.html, /^<!DOCTYPE html>/);
     assert.match(runtimeEnvelope.html, /<canvas id="browser-playable-demo-canvas"/);
+    assert.match(runtimeEnvelope.html, /Click the canvas and use WASD or Arrow Keys to move\./);
+    assert.match(runtimeEnvelope.html, /<p id="browser-playable-demo-position" class="hud" aria-live="polite">Position: x 0, y 0<\/p>/);
+    assert.match(runtimeEnvelope.html, /<button id="browser-playable-demo-reset" type="button" aria-controls="browser-playable-demo-canvas">Reset position<\/button>/);
     assert.match(runtimeEnvelope.html, /addEventListener\("keydown"/);
+    assert.match(runtimeEnvelope.html, /resetButton\.addEventListener\("click"/);
     assert.doesNotMatch(runtimeEnvelope.html, /<script[^>]+src=/);
-    assert.doesNotMatch(runtimeEnvelope.html, /https?:\/\/|fetch\(|XMLHttpRequest|WebSocket/);
+    assert.doesNotMatch(runtimeEnvelope.html, /<link[^>]+href=/);
+    assert.doesNotMatch(runtimeEnvelope.html, /https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|localStorage|requestAnimationFrame|Date\.now|new Date|performance\.now/);
   } finally {
     await mcp.close();
   }

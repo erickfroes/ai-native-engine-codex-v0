@@ -143,6 +143,16 @@ function createInitialStatusText(renderSnapshot, drawCalls, controllableEntityId
   return `Snapshot tick ${renderSnapshot.tick}. Inputs 0. Controlled rect ${controllableDrawCall.id} at (${controllableDrawCall.x}, ${controllableDrawCall.y}). Step ${stepPx} px.`;
 }
 
+function createInitialPositionText(drawCalls, controllableEntityId) {
+  const controllableDrawCall = drawCalls.find((drawCall) => drawCall.id === controllableEntityId);
+
+  if (!controllableDrawCall) {
+    return 'Position: none';
+  }
+
+  return `Position: x ${controllableDrawCall.x}, y ${controllableDrawCall.y}`;
+}
+
 export function createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overrides = {}) {
   assertObject(scene, 'scene');
   validateRenderSnapshot(renderSnapshot);
@@ -185,6 +195,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     controllableEntityId,
     stepPx
   );
+  const initialPositionText = createInitialPositionText(renderSnapshot.drawCalls, controllableEntityId);
   const inlineData = escapeInlineJson({
     metadata: normalizedMetadata,
     renderSnapshot,
@@ -203,8 +214,18 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '    body { margin: 0; padding: 24px; font-family: "Courier New", monospace; background: #f4efe6; color: #201a13; }',
     '    main { display: grid; gap: 16px; max-width: 960px; margin: 0 auto; }',
     '    .frame { background: #fffdf8; border: 1px solid #d7cfc2; padding: 16px; overflow: auto; }',
+    '    .instructions { display: grid; gap: 8px; margin: 0 0 12px; }',
+    '    .instructions h2 { margin: 0; font-size: 1rem; }',
+    '    .instructions p { margin: 0; }',
+    '    .controls-list { display: grid; gap: 4px; margin: 0; padding-left: 20px; }',
     '    .hint { margin: 0 0 12px; }',
+    '    .hud { margin: 0 0 12px; font-weight: 700; }',
     '    canvas { display: block; width: min(100%, 640px); height: auto; border: 1px solid #d7cfc2; background: #fffdf8; image-rendering: pixelated; }',
+    '    canvas:focus { outline: 2px solid #201a13; outline-offset: 3px; }',
+    '    .actions { display: flex; gap: 12px; margin-top: 12px; }',
+    '    button { font: inherit; padding: 8px 12px; border: 1px solid #201a13; background: #fffdf8; color: #201a13; cursor: pointer; }',
+    '    button:focus { outline: 2px solid #201a13; outline-offset: 3px; }',
+    '    button:disabled { cursor: not-allowed; opacity: 0.6; }',
     '    .meta { display: grid; gap: 8px; margin: 0; }',
     '    .meta div { display: grid; gap: 2px; }',
     '    .meta dt { font-weight: 700; }',
@@ -216,10 +237,22 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '    <header>',
     `      <h1>${escapeHtml(resolvedTitle)}</h1>`,
     '    </header>',
-    '    <section class="frame">',
+    '    <section class="frame" aria-labelledby="browser-playable-demo-instructions-title">',
+    '      <div class="instructions">',
+    `        <h2 id="browser-playable-demo-instructions-title">${escapeHtml(resolvedTitle)}</h2>`,
+    '        <p id="browser-playable-demo-instructions">Click the canvas and use WASD or Arrow Keys to move.</p>',
+    '        <ul class="controls-list" aria-label="Controls">',
+    `          <li>W or ArrowUp moves up by ${stepPx} px.</li>`,
+    `          <li>A or ArrowLeft moves left by ${stepPx} px.</li>`,
+    `          <li>S or ArrowDown moves down by ${stepPx} px.</li>`,
+    `          <li>D or ArrowRight moves right by ${stepPx} px.</li>`,
+    '        </ul>',
+    '      </div>',
     `      <p class="hint">Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by ${stepPx} px per keydown.</p>`,
+    `      <p id="browser-playable-demo-position" class="hud" aria-live="polite">${escapeHtml(initialPositionText)}</p>`,
     '      <noscript>This demo needs JavaScript enabled to capture keyboard input.</noscript>',
-    `      <canvas id="browser-playable-demo-canvas" data-browser-demo-version="${BROWSER_PLAYABLE_DEMO_VERSION}" data-scene="${escapeHtml(renderSnapshot.scene)}" data-tick="${renderSnapshot.tick}" data-controllable-entity="${escapeHtml(controllableEntityId ?? '')}" width="${renderSnapshot.viewport.width}" height="${renderSnapshot.viewport.height}" tabindex="0" aria-label="Browser playable demo canvas"></canvas>`,
+    `      <canvas id="browser-playable-demo-canvas" data-browser-demo-version="${BROWSER_PLAYABLE_DEMO_VERSION}" data-scene="${escapeHtml(renderSnapshot.scene)}" data-tick="${renderSnapshot.tick}" data-controllable-entity="${escapeHtml(controllableEntityId ?? '')}" width="${renderSnapshot.viewport.width}" height="${renderSnapshot.viewport.height}" tabindex="0" aria-label="Browser playable demo canvas" aria-describedby="browser-playable-demo-instructions browser-playable-demo-status"></canvas>`,
+    `      <div class="actions"><button id="browser-playable-demo-reset" type="button" aria-controls="browser-playable-demo-canvas"${controllableEntityId ? '' : ' disabled'}>Reset position</button></div>`,
     '    </section>',
     '    <section class="frame">',
     `      <p id="browser-playable-demo-status" aria-live="polite">${escapeHtml(initialStatusText)}</p>`,
@@ -231,10 +264,15 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '    (() => {',
     '      const dataElement = document.getElementById("browser-playable-demo-data");',
     '      const canvas = document.getElementById("browser-playable-demo-canvas");',
+    '      const positionElement = document.getElementById("browser-playable-demo-position");',
+    '      const resetButton = document.getElementById("browser-playable-demo-reset");',
     '      const statusElement = document.getElementById("browser-playable-demo-status");',
     '      const payload = JSON.parse(dataElement.textContent);',
     '      const context = canvas.getContext("2d");',
     '      if (!context) {',
+    '        if (resetButton) {',
+    '          resetButton.disabled = true;',
+    '        }',
     '        statusElement.textContent = "Canvas 2D is unavailable in this browser.";',
     '        return;',
     '      }',
@@ -246,9 +284,23 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '      if (controllableIndex === -1 && drawCalls.length > 0) {',
     '        controllableIndex = 0;',
     '      }',
+    '      const initialControlledPosition = controllableIndex === -1',
+    '        ? null',
+    '        : { x: drawCalls[controllableIndex].x, y: drawCalls[controllableIndex].y };',
     '      const stepPx = payload.metadata.stepPx;',
     '      const snapshotTick = payload.renderSnapshot.tick;',
     '      let inputCount = 0;',
+    '      if (resetButton && controllableIndex === -1) {',
+    '        resetButton.disabled = true;',
+    '      }',
+    '      function updatePositionHud() {',
+    '        if (controllableIndex === -1) {',
+    '          positionElement.textContent = "Position: none";',
+    '          return;',
+    '        }',
+    '        const controlled = drawCalls[controllableIndex];',
+    '        positionElement.textContent = "Position: x " + controlled.x + ", y " + controlled.y;',
+    '      }',
     '      function updateStatus() {',
     '        if (controllableIndex === -1) {',
     '          statusElement.textContent = "Snapshot tick " + snapshotTick + ". No controllable rect. Step " + stepPx + " px.";',
@@ -270,6 +322,15 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '          stepPx +',
     '          " px.";',
     '      }',
+    '      function resetControlledPosition() {',
+    '        if (controllableIndex === -1 || initialControlledPosition === null) {',
+    '          return;',
+    '        }',
+    '        drawCalls[controllableIndex].x = initialControlledPosition.x;',
+    '        drawCalls[controllableIndex].y = initialControlledPosition.y;',
+    '        redraw();',
+    '        canvas.focus();',
+    '      }',
     '      function redraw() {',
     '        context.clearRect(0, 0, canvas.width, canvas.height);',
     '        context.strokeStyle = "#201a13";',
@@ -280,6 +341,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '          context.fillRect(drawCall.x, drawCall.y, drawCall.width, drawCall.height);',
     '          context.strokeRect(drawCall.x, drawCall.y, drawCall.width, drawCall.height);',
     '        }',
+    '        updatePositionHud();',
     '        updateStatus();',
     '      }',
     '      function getMovementDelta(code) {',
@@ -300,6 +362,11 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '      canvas.addEventListener("click", () => {',
     '        canvas.focus();',
     '      });',
+    '      if (resetButton) {',
+    '        resetButton.addEventListener("click", () => {',
+    '          resetControlledPosition();',
+    '        });',
+    '      }',
     '      canvas.addEventListener("keydown", (event) => {',
     '        const delta = getMovementDelta(event.code);',
     '        if (!delta || controllableIndex === -1) {',
