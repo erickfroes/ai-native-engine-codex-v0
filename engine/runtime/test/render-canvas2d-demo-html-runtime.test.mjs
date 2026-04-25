@@ -105,6 +105,98 @@ test('renderCanvas2DDemoHtmlV1 returns deterministic HTML with canvas and rect d
   assert.match(first, /context\.strokeRect\(drawCall\.x, drawCall\.y, drawCall\.width, drawCall\.height\);/);
 });
 
+test('renderCanvas2DDemoHtmlV1 renders deterministic empty HTML when drawCalls is empty', () => {
+  const renderSnapshot = {
+    renderSnapshotVersion: 1,
+    scene: 'empty-scene',
+    tick: 0,
+    viewport: {
+      width: 32,
+      height: 24
+    },
+    drawCalls: []
+  };
+
+  const first = renderCanvas2DDemoHtmlV1({
+    title: 'empty-scene Canvas 2D Demo',
+    renderSnapshot,
+    metadata: {
+      scene: 'empty-scene',
+      tick: 0,
+      viewport: '32x24'
+    }
+  });
+  const second = renderCanvas2DDemoHtmlV1({
+    title: 'empty-scene Canvas 2D Demo',
+    renderSnapshot,
+    metadata: {
+      scene: 'empty-scene',
+      tick: 0,
+      viewport: '32x24'
+    }
+  });
+
+  assert.equal(first, second);
+  assert.match(
+    first,
+    /<canvas id="render-canvas-demo" data-canvas-demo-version="1" data-scene="empty-scene" data-tick="0" width="32" height="24"><\/canvas>/
+  );
+  assert.ok(first.includes('"drawCalls":[]'));
+});
+
+test('renderCanvas2DDemoHtmlV1 preserves the snapshot order for multiple rect draw calls', () => {
+  const html = renderCanvas2DDemoHtmlV1({
+    title: 'multi-rect Canvas 2D Demo',
+    renderSnapshot: {
+      renderSnapshotVersion: 1,
+      scene: 'multi-rect',
+      tick: 2,
+      viewport: {
+        width: 64,
+        height: 48
+      },
+      drawCalls: [
+        {
+          kind: 'rect',
+          id: 'background',
+          x: 0,
+          y: 0,
+          width: 64,
+          height: 48,
+          layer: -1
+        },
+        {
+          kind: 'rect',
+          id: 'mid',
+          x: 10,
+          y: 12,
+          width: 20,
+          height: 8,
+          layer: 1
+        },
+        {
+          kind: 'rect',
+          id: 'front',
+          x: 14,
+          y: 18,
+          width: 6,
+          height: 6,
+          layer: 9
+        }
+      ]
+    },
+    metadata: {
+      scene: 'multi-rect',
+      tick: 2,
+      viewport: '64x48'
+    }
+  });
+
+  assert.ok(html.indexOf('"id":"background"') < html.indexOf('"id":"mid"'));
+  assert.ok(html.indexOf('"id":"mid"') < html.indexOf('"id":"front"'));
+  assert.match(html, /<canvas id="render-canvas-demo" data-canvas-demo-version="1" data-scene="multi-rect" data-tick="2" width="64" height="48"><\/canvas>/);
+});
+
 test('renderCanvas2DDemoHtmlV1 escapes title and scene for HTML and serializes snapshot safely for inline script', () => {
   const html = renderCanvas2DDemoHtmlV1({
     title: 'Arena <Demo> & "alpha"',
@@ -150,5 +242,6 @@ test('renderCanvas2DDemoHtmlV1 escapes title and scene for HTML and serializes s
     )
   );
   assert.doesNotMatch(html, /<\/script><script>/);
+  assert.doesNotMatch(html, /<script[^>]+src=|<link[^>]+href=|https?:\/\//);
   assert.doesNotMatch(html, /Date\.now|new Date|performance\.now|toISOString/);
 });
