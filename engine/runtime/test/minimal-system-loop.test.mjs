@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { loadSceneFile, runMinimalSystemLoop } from '../src/index.mjs';
+import { loadSceneFile, runMinimalSystemLoop, runMinimalSystemLoopWithTrace } from '../src/index.mjs';
 import { runDeterministicReplay } from '../src/replay/run-deterministic-replay.mjs';
 import { resolveSystemHandler } from '../src/loop/system-handlers.mjs';
 
@@ -12,6 +12,24 @@ const repoRoot = path.resolve(testDir, '../../..');
 
 function scenePath(relativePath) {
   return path.join(repoRoot, 'scenes', relativePath);
+}
+
+function createValidInputIntent(overrides = {}) {
+  return {
+    inputIntentVersion: 1,
+    tick: 99,
+    entityId: 'player',
+    actions: [
+      {
+        type: 'move',
+        axis: {
+          x: 1,
+          y: 0
+        }
+      }
+    ],
+    ...overrides
+  };
 }
 
 test('runMinimalSystemLoop is deterministic with same scene, seed and ticks', async () => {
@@ -38,6 +56,32 @@ test('runMinimalSystemLoop executes systems in declared stable order per tick', 
     'input.keyboard',
     'networking.replication'
   ]);
+});
+
+test('runMinimalSystemLoop accepts opt-in input intent without changing unmatched ticks', async () => {
+  const scene = await loadSceneFile(scenePath('tutorial.scene.json'));
+
+  const baseline = runMinimalSystemLoop(scene, { ticks: 2, seed: 7 });
+  const withInputIntent = runMinimalSystemLoop(scene, {
+    ticks: 2,
+    seed: 7,
+    inputIntent: createValidInputIntent()
+  });
+
+  assert.deepEqual(withInputIntent, baseline);
+});
+
+test('runMinimalSystemLoopWithTrace accepts opt-in input intent without changing unmatched ticks', async () => {
+  const scene = await loadSceneFile(scenePath('tutorial.scene.json'));
+
+  const baseline = runMinimalSystemLoopWithTrace(scene, { ticks: 2, seed: 7 });
+  const withInputIntent = runMinimalSystemLoopWithTrace(scene, {
+    ticks: 2,
+    seed: 7,
+    inputIntent: createValidInputIntent()
+  });
+
+  assert.deepEqual(withInputIntent, baseline);
 });
 
 test('known systems resolve to deterministic stub handlers', () => {
