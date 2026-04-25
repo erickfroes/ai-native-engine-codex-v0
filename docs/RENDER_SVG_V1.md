@@ -1,0 +1,48 @@
+# Render SVG v1
+
+## Objetivo
+
+Definir uma serializacao SVG textual, deterministica e headless derivada de `RenderSnapshot v1`.
+
+Nao existe canvas real, Pixi, Three, WebGL ou runtime visual neste slice.
+
+## Runtime
+
+- `renderSnapshotToSvgV1(renderSnapshot)` recebe um `RenderSnapshot v1` valido.
+- a saida e uma string SVG estavel com `<?xml ...?>`, `<svg ...>` e draw calls `rect`.
+- a ordem dos elementos segue exatamente `renderSnapshot.drawCalls`.
+- `viewport.width` e `viewport.height` viram `width`, `height` e `viewBox` do documento SVG.
+- `scene` e `drawCalls[].id` sao escapados para atributos XML seguros.
+- `drawCalls: []` continua valido e gera um SVG vazio, mas deterministico.
+
+## CLI e MCP
+
+- CLI: `render-svg <scene> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]`
+- MCP: `render_svg(path, tick?, width?, height?)`
+
+Envelope JSON minimo de CLI `--json` e MCP `structuredContent`:
+
+```json
+{
+  "svgVersion": 1,
+  "scene": "tutorial",
+  "tick": 4,
+  "svg": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n..."
+}
+```
+
+No CLI, `outputPath` so aparece quando `--out` e usado.
+
+## Compatibilidade
+
+- deriva de `RenderSnapshot v1` sem alterar o contrato JSON existente;
+- nao altera `run-loop`, `InputIntent v1`, Save/Load v1 ou `world.snapshot`;
+- serve para comparacao textual deterministica entre runtime, CLI e MCP.
+
+## Fora deste slice
+
+- rasterizacao real;
+- canvas real;
+- backend grafico;
+- assets reais;
+- editor visual.

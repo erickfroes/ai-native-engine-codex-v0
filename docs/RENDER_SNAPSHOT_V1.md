@@ -42,12 +42,15 @@ Definir um contrato JSON headless e deterministico para descrever uma vista rend
 ## Builder runtime
 
 - `buildRenderSnapshotV1(scenePathOuScene, options)` retorna este contrato sem canvas real.
+- `renderSnapshotToSvgV1(renderSnapshot)` pode serializar esse contrato para SVG textual deterministico.
 - `tick` padrao e `0`; viewport padrao e `320x180`.
 - nesta versao, entidades com componente `transform` viram `rect`.
 - `x` e `y` vem de `transform.fields.position` ou de `transform.fields`.
 - `width` e `height` podem vir de `sprite.fields`; se ausentes, usam fallback deterministico `16x16`.
 - `layer` pode vir de `sprite.fields.layer`; se ausente, usa `0`.
 - `drawCalls` sao ordenados por `layer` e depois `id`.
+
+Ver tambem: `docs/RENDER_SVG_V1.md`.
 
 ## Escopo
 
