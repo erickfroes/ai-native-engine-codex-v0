@@ -8,6 +8,7 @@ function executeLoopSchedule(schedule, options = {}) {
   const tracedSystemsPerTick = [];
 
   for (const tickPlan of systemsPerTick) {
+    const inputIntent = options.inputIntentResolver?.(tickPlan.tick);
     const tickSystems = [];
 
     for (const system of tickPlan.systems) {

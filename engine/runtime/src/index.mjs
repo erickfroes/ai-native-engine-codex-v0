@@ -15,6 +15,7 @@ export { buildReplayArtifact } from './replay/replay-artifact.mjs';
 export { generateReplaySignature } from './replay/replay-signature.mjs';
 export { runMinimalSystemLoop } from './loop/run-minimal-system-loop.mjs';
 export { runMinimalSystemLoopWithTrace } from './loop/run-minimal-system-loop.mjs';
+export { runLoopWithKeyboardInputScriptV1 } from './loop/run-loop-with-keyboard-input-script-v1.mjs';
 export { createLoopExecutionPlan } from './loop/create-loop-execution-plan.mjs';
 export { createLoopSchedule } from './loop/loop-scheduler.mjs';
 export { createPhasedLoopSchedulePreview } from './loop/phased-scheduler-preview.mjs';

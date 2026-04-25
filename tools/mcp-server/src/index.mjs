@@ -11,6 +11,8 @@ import {
   saveStateSnapshotV1,
   validateInputIntentV1File,
   createInputIntentFromKeyboardV1,
+  loadValidatedKeyboardInputScriptV1,
+  createKeyboardInputIntentResolverFromScriptV1,
   loadSceneFile,
   createLoopExecutionPlan,
   createInitialStateFromScene,

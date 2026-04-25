@@ -18,6 +18,7 @@ import {
   createLoopExecutionPlan,
   runMinimalSystemLoop,
   runMinimalSystemLoopWithTrace,
+  runLoopWithKeyboardInputScriptV1,
   createInitialStateFromScene,
   snapshotStateV1,
   simulateStateV1,
@@ -557,6 +558,56 @@ async function run() {
     const seed = readNumberFlag('run-loop', '--seed', undefined);
     const inputIntentPath = readStringFlag('run-loop', '--input-intent', undefined);
     const withTrace = hasFlag('--trace');
+
+    if (keyboardScriptPath) {
+      const result = await runLoopWithKeyboardInputScriptV1(maybePath, keyboardScriptPath, {
+        ticks,
+        seed,
+        trace: withTrace
+      });
+      const scene = await loadSceneFile(maybePath);
+
+      if (withTrace) {
+        if (asJson) {
+          console.log(JSON.stringify(result, null, 2));
+        } else {
+          console.log(`Scene: ${result.report.scene}`);
+          console.log(`Loop report version: ${result.report.loopReportVersion}`);
+          console.log(`Ticks: ${result.report.ticks}`);
+          console.log(`Seed: ${result.report.seed}`);
+          console.log(`Ticks executed: ${result.report.ticksExecuted}`);
+          console.log(`Final state: ${result.report.finalState}`);
+          console.log(`Executed systems: ${result.report.executedSystems.join(', ') || '(none)'}`);
+          console.log(`Trace version: ${result.trace.traceVersion}`);
+        }
+        return;
+      }
+
+      const loopReport = {
+        loopReportVersion: 1,
+        scene: scene.metadata.name,
+        ticks,
+        seed: seed ?? 1337,
+        ticksExecuted: result.ticksExecuted,
+        finalState: result.finalState,
+        executedSystems: result.executedSystems
+      };
+
+      if (asJson) {
+        console.log(JSON.stringify(loopReport, null, 2));
+      } else {
+        console.log(`Scene: ${loopReport.scene}`);
+        console.log(`Loop report version: ${loopReport.loopReportVersion}`);
+        console.log(`Ticks: ${loopReport.ticks}`);
+        console.log(`Seed: ${loopReport.seed}`);
+        console.log(`Ticks executed: ${loopReport.ticksExecuted}`);
+        console.log(`Final state: ${loopReport.finalState}`);
+        console.log(`Executed systems: ${loopReport.executedSystems.join(', ') || '(none)'}`);
+      }
+
+      return;
+    }
+
     const scene = await loadSceneFile(maybePath);
     const inputIntent = inputIntentPath
       ? await loadValidatedInputIntentV1(inputIntentPath)
