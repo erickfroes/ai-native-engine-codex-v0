@@ -217,3 +217,52 @@ test('loadStateSnapshotSaveV1 rejects payloadRef traversal before reading payloa
 
   await assert.rejects(loadStateSnapshotSaveV1(saved.savePath), /unsafe payloadRef: \.\.\/outside\.payload\.json/);
 });
+
+test('validateSaveFile and loadStateSnapshotSaveV1 fail predictably when payloadRef is missing', async (t) => {
+  const outDir = await createTempSaveDir(t);
+  const snapshot = createSnapshotFixture();
+  const saved = await saveStateSnapshotV1({
+    snapshot,
+    outDir,
+    contentVersion: 2
+  });
+  const { payloadRef: _payloadRef, ...envelopeWithoutPayloadRef } = saved.envelope;
+
+  await writeFile(saved.savePath, `${canonicalJSONStringify(envelopeWithoutPayloadRef)}\n`, 'utf8');
+
+  const report = await validateSaveFile(saved.savePath);
+  assert.equal(report.ok, false);
+  assert.ok(report.errors.some((error) => error.path === '$.payloadRef' && error.message === 'is required'));
+
+  await assert.rejects(loadStateSnapshotSaveV1(saved.savePath), /invalid save file: \$\.payloadRef: is required/);
+});
+
+test('loadStateSnapshotSaveV1 fails predictably for known invalid savegame fixture', async () => {
+  const invalidSavePath = saveFixturePath('invalid.missing-checksum.savegame.json');
+  const report = await validateSaveFile(invalidSavePath);
+
+  assert.equal(report.ok, false);
+  assert.ok(report.errors.some((error) => error.path === '$.checksum' && error.message === 'is required'));
+  await assert.rejects(loadStateSnapshotSaveV1(invalidSavePath), /invalid save file: \$\.checksum: is required/);
+});
+
+test('loadStateSnapshotSaveV1 fails predictably when payload JSON is malformed', async (t) => {
+  const outDir = await createTempSaveDir(t);
+  const snapshot = createSnapshotFixture();
+  const saved = await saveStateSnapshotV1({
+    snapshot,
+    outDir,
+    contentVersion: 4
+  });
+
+  await writeFile(saved.payloadPath, '{"stateSnapshotVersion": 1,\n', 'utf8');
+
+  await assert.rejects(
+    loadStateSnapshotSaveV1(saved.savePath),
+    (error) => {
+      assert.match(error.message, /failed to read state snapshot payload:/);
+      assert.equal(error.cause instanceof SyntaxError, true);
+      return true;
+    }
+  );
+});
