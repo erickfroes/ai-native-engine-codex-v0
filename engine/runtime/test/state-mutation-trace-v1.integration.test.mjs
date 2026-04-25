@@ -7,6 +7,7 @@ import {
   simulateStateV1,
   simulateStateV1WithMutationTrace
 } from '../src/index.mjs';
+import { assertStateMutationTraceV1 } from './helpers/assertStateMutationTraceV1.mjs';
 import { assertStateSimulationReportV1 } from './helpers/assertStateSimulationReportV1.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
@@ -22,7 +23,7 @@ test('simulateStateV1WithMutationTrace returns report + deterministic StateMutat
   assertStateSimulationReportV1(first.report);
   assert.equal(first.report.stateSimulationReportVersion, 1);
 
-  assert.equal(first.mutationTrace.stateMutationTraceVersion, 1);
+  assertStateMutationTraceV1(first.mutationTrace);
   assert.equal(first.mutationTrace.scene, 'movement');
   assert.equal(first.mutationTrace.ticks, 3);
   assert.equal(first.mutationTrace.seed, 10);

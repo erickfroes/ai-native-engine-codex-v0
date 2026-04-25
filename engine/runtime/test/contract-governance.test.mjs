@@ -16,8 +16,10 @@ import { assertLoopReportV1 } from './helpers/assertLoopReportV1.mjs';
 import { assertLoopTraceV1 } from './helpers/assertLoopTraceV1.mjs';
 import { assertSceneValidationReportV1 } from './helpers/assertSceneValidationReportV1.mjs';
 import { assertExecutionPlanV1 } from './helpers/assertExecutionPlanV1.mjs';
+import { assertStateMutationTraceV1 } from './helpers/assertStateMutationTraceV1.mjs';
 import { assertSystemRegistryV1 } from './helpers/assertSystemRegistryV1.mjs';
 import { assertSystemPhaseRegistryV1 } from './helpers/assertSystemPhaseRegistryV1.mjs';
+import { simulateStateV1WithMutationTrace } from '../src/index.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
@@ -47,6 +49,12 @@ test('contract governance: v1 contract shapes remain strict and aligned', async 
 
   assertSystemRegistryV1(getSystemRegistryV1());
   assertSystemPhaseRegistryV1(getSystemPhaseRegistryV1());
+
+  const mutationTraceEnvelope = await simulateStateV1WithMutationTrace(
+    path.join(repoRoot, 'scenes', 'state', 'movement.scene.json'),
+    { ticks: 3, seed: 10 }
+  );
+  assertStateMutationTraceV1(mutationTraceEnvelope.mutationTrace);
 
   assert.equal(plan.estimated.finalState, report.finalState);
   assert.equal(

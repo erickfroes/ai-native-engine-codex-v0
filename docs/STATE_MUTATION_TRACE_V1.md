@@ -17,6 +17,11 @@ Schema formal:
 
 - `docs/schemas/state-mutation-trace-v1.schema.json`
 
+Envelope atual exposto por interface quando o trace opt-in estÃ¡ habilitado:
+
+- CLI `simulate-state --json --trace` retorna `{ "report": StateSimulationReportV1, "mutationTrace": StateMutationTraceV1 }`;
+- MCP `simulate_state` com `trace: true` retorna o mesmo envelope em `structuredContent`.
+
 Campos principais:
 
 - `stateMutationTraceVersion` (constante `1`);
