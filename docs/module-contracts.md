@@ -115,12 +115,18 @@ Relações:
 - `LoopReport v1`: resultado real de execução;
 - `LoopTrace v1`: diagnóstico real opt-in.
 
-## Input Intent v1 (input headless isolado)
+## Input Intent v1 (input headless opt-in no loop)
 
-Contrato isolado para intenção de input headless, sem acoplamento com `Scene Document v1`, `run-loop` ou `simulate-state` neste slice:
+Contrato de intenção de input headless, com integração opt-in no `run-loop`/`run_loop` e sem acoplamento com `Scene Document v1` ou `simulate-state`:
 
 - ver `docs/INPUT_INTENT_V1.md`.
 - schema formal: `docs/schemas/input-intent-v1.schema.json`.
+
+Compatibilidade:
+
+- sem input intent, o comportamento padrão de `run-loop`/`run_loop` permanece inalterado;
+- `LoopReport v1` e `LoopTrace v1` mantêm o mesmo shape;
+- `simulate-state` continua isolado deste contrato neste slice.
 
 ## State Model v1 (interno)
 
@@ -287,3 +293,16 @@ Regra de compatibilidade:
 - A falha é reportada em `$.saveVersion`.
 - A mensagem atual é estável e usada pelos testes: `unsupported saveVersion: <valor>; supported: 1`.
 - Ainda não existe migração automática de save.
+
+## Minimal Save/Load v1
+
+- Save/load real continua opt-in e mínimo: só acontece via runtime `saveStateSnapshotV1` / `loadStateSnapshotSaveV1`, CLI `save-state` / `load-save`, ou MCP `save_state_snapshot` / `load_save`.
+- O payload salvo é um `State Snapshot v1` serializado em JSON canônico e determinístico.
+- O envelope `savegame v1` preenche `saveVersion`, `contentVersion`, `seed`, `checksum` e `payloadRef`.
+- `checksum` usa `sha256` sobre o payload canônico.
+- `payloadRef` é resolvido relativo ao diretório do save e não pode escapar desse diretório.
+- Load falha de forma previsível quando o envelope é inválido para `validateSaveFile`.
+- Load falha de forma previsível quando o `checksum` diverge do payload salvo.
+- Load falha de forma previsível quando o payload JSON está malformado.
+- Sem usar save/load explicitamente, `run-loop`, `simulate-state`, `validate-save` e os demais comandos continuam com o mesmo comportamento padrão.
+- Fora de escopo neste slice: persistência automática, autosave, editor e slots avançados.

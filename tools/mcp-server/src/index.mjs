@@ -7,6 +7,8 @@ import {
   formatSceneValidationReportV1,
   validateInputIntentV1,
   validateSaveFile,
+  loadStateSnapshotSaveV1,
+  saveStateSnapshotV1,
   validateInputIntentV1File,
   createInputIntentFromKeyboardV1,
   loadSceneFile,
@@ -92,6 +94,8 @@ async function handleToolCall(params) {
     params.name !== 'validate_input_intent' &&
     params.name !== 'keyboard_to_input_intent' &&
     params.name !== 'validate_save' &&
+    params.name !== 'save_state_snapshot' &&
+    params.name !== 'load_save' &&
     params.name !== 'emit_world_snapshot' &&
     params.name !== 'plan_loop' &&
     params.name !== 'run_loop' &&
@@ -167,6 +171,65 @@ async function handleToolCall(params) {
 
     const targetPath = resolveRepoPath(args.path);
 
+    if (params.name === 'load_save') {
+      const loaded = await loadStateSnapshotSaveV1(targetPath);
+      return {
+        content: toTextContent(`Loaded save for ${loaded.snapshot.scene} at tick ${loaded.snapshot.tick}.`),
+        structuredContent: {
+          savePath: loaded.savePath,
+          payloadPath: loaded.payloadPath,
+          save: loaded.envelope,
+          snapshot: loaded.snapshot
+        },
+        isError: false
+      };
+    }
+
+    if (params.name === 'save_state_snapshot') {
+      if (!Number.isInteger(args.ticks) || args.ticks < 0) {
+        return {
+          content: toTextContent('save_state_snapshot: `ticks` is required and must be an integer >= 0.'),
+          isError: true
+        };
+      }
+
+      if (args.seed !== undefined && !Number.isInteger(args.seed)) {
+        return {
+          content: toTextContent('save_state_snapshot: `seed` must be an integer when provided.'),
+          isError: true
+        };
+      }
+
+      if (typeof args.outDir !== 'string' || args.outDir.trim().length === 0) {
+        return {
+          content: toTextContent('save_state_snapshot: `outDir` is required and must be a non-empty string.'),
+          isError: true
+        };
+      }
+
+      const resolvedOutDir = resolveRepoPath(args.outDir);
+      const simulation = await simulateStateV1(targetPath, {
+        ticks: args.ticks,
+        seed: args.seed
+      });
+      const saved = await saveStateSnapshotV1({
+        snapshot: simulation.finalSnapshot,
+        outDir: resolvedOutDir,
+        seed: simulation.seed,
+        contentVersion: 1
+      });
+
+      return {
+        content: toTextContent(`Saved state snapshot for ${simulation.scene} at tick ${simulation.ticks}.`),
+        structuredContent: {
+          savePath: saved.savePath,
+          payloadPath: saved.payloadPath,
+          save: saved.envelope
+        },
+        isError: false
+      };
+    }
+
     if (
       params.name === 'plan_loop' ||
       params.name === 'run_loop' ||
@@ -196,6 +259,17 @@ async function handleToolCall(params) {
         };
       }
 
+      if (
+        params.name === 'run_loop' &&
+        args.inputIntentPath !== undefined &&
+        (typeof args.inputIntentPath !== 'string' || args.inputIntentPath.trim().length === 0)
+      ) {
+        return {
+          content: toTextContent('run_loop: `inputIntentPath` must be a non-empty string when provided.'),
+          isError: true
+        };
+      }
+
       if (params.name === 'plan_loop') {
         const plan = await createLoopExecutionPlan(targetPath, {
           ticks: args.ticks,
@@ -211,10 +285,18 @@ async function handleToolCall(params) {
       const scene = await loadSceneFile(targetPath);
 
       if (params.name === 'run_loop') {
+        const inputIntentPath = args.inputIntentPath === undefined
+          ? undefined
+          : resolveRepoPath(args.inputIntentPath);
+        const inputIntent = inputIntentPath === undefined
+          ? undefined
+          : await loadValidatedInputIntentV1(inputIntentPath);
+
         if (args.trace === true) {
           const traced = runMinimalSystemLoopWithTrace(scene, {
             ticks: args.ticks,
-            seed: args.seed
+            seed: args.seed,
+            inputIntent
           });
           return {
             content: toTextContent(`Loop trace completed for ${traced.report.scene} at tick ${traced.report.ticks}.`),
@@ -225,7 +307,8 @@ async function handleToolCall(params) {
 
         const loopResult = runMinimalSystemLoop(scene, {
           ticks: args.ticks,
-          seed: args.seed
+          seed: args.seed,
+          inputIntent
         });
         const loopReport = {
           loopReportVersion: 1,
@@ -413,7 +496,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, emit_world_snapshot, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }
