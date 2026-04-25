@@ -28,6 +28,12 @@ function createCanvasHarness(html) {
   const statusElement = { textContent: '' };
   const positionElement = { textContent: '' };
   const dataElement = { textContent: extractInlineJson(html) };
+  const resetButton = {
+    disabled: false,
+    addEventListener(eventName, handler) {
+      listeners.set(`reset:${eventName}`, handler);
+    }
+  };
   const context2d = {
     fillStyle: '#000000',
     strokeStyle: '#000000',
@@ -71,6 +77,9 @@ function createCanvasHarness(html) {
         if (id === 'browser-playable-demo-position') {
           return positionElement;
         }
+        if (id === 'browser-playable-demo-reset') {
+          return resetButton;
+        }
         if (id === 'browser-playable-demo-status') {
           return statusElement;
         }
@@ -84,6 +93,7 @@ function createCanvasHarness(html) {
     listeners,
     operations,
     positionElement,
+    resetButton,
     statusElement
   };
 }
@@ -141,6 +151,10 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.match(htmlA, /<p id="browser-playable-demo-position" class="hud" aria-live="polite">Position: x 0, y 0<\/p>/);
   assert.match(htmlA, /function updatePositionHud\(\)/);
   assert.match(htmlA, /positionElement\.textContent = "Position: x " \+ controlled\.x \+ ", y " \+ controlled\.y;/);
+  assert.match(htmlA, /<button id="browser-playable-demo-reset" type="button" aria-controls="browser-playable-demo-canvas">Reset position<\/button>/);
+  assert.match(htmlA, /function resetControlledPosition\(\)/);
+  assert.match(htmlA, /resetButton\.addEventListener\("click"/);
+  assert.doesNotMatch(htmlA, /localStorage|requestAnimationFrame/);
   assert.match(htmlA, /addEventListener\("keydown"/);
   assert.match(htmlA, /ArrowRight/);
   assert.match(htmlA, /KeyD/);
@@ -184,6 +198,7 @@ test('renderBrowserPlayableDemoHtmlV1 renders deterministic empty HTML when draw
   );
   assert.ok(first.includes('"drawCalls":[]'));
   assert.match(first, /No controllable rect\. Step 4 px\./);
+  assert.match(first, /<button id="browser-playable-demo-reset" type="button" aria-controls="browser-playable-demo-canvas" disabled>Reset position<\/button>/);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 escapes HTML and JSON payload safely', () => {
@@ -353,6 +368,36 @@ test('renderBrowserPlayableDemoHtmlV1 moves the nominated controllable rect by t
   assert.deepEqual(highlightedRects[1].args, [4, 0, 16, 16]);
   assert.equal(harness.positionElement.textContent, 'Position: x 4, y 0');
   assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 0\)/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 resets the controllable rect to its initial position', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'tutorial Browser Playable Demo',
+    renderSnapshot: createTutorialSnapshot(),
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.listeners.get('keydown');
+  const reset = harness.listeners.get('reset:click');
+
+  assert.equal(typeof keydown, 'function');
+  assert.equal(typeof reset, 'function');
+  assert.equal(harness.resetButton.disabled, false);
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+  reset();
+
+  const highlightedRects = harness.operations.filter(
+    (entry) => entry.method === 'fillRect' && entry.fillStyle === '#b74f2a'
+  );
+  assert.deepEqual(highlightedRects.at(-1).args, [0, 0, 16, 16]);
+  assert.equal(harness.positionElement.textContent, 'Position: x 0, y 0');
+  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(0, 0\)/);
 });
 
 test('createBrowserPlayableDemoMetadataV1 picks the first scene rect before falling back to snapshot order', () => {
