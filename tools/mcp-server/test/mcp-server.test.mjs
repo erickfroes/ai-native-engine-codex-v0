@@ -4,6 +4,8 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
+import { assertRenderSnapshotV1 } from '../../../engine/runtime/test/helpers/assertRenderSnapshotV1.mjs';
+
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const serverPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
@@ -85,6 +87,12 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.deepEqual(validateInputIntentTool.inputSchema.required, ['path']);
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_save'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'emit_world_snapshot'));
+    const renderSnapshotTool = toolsResponse.result.tools.find((tool) => tool.name === 'render_snapshot');
+    assert.ok(renderSnapshotTool);
+    assert.deepEqual(renderSnapshotTool.inputSchema.required, ['path']);
+    assert.ok(Object.prototype.hasOwnProperty.call(renderSnapshotTool.inputSchema.properties, 'tick'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderSnapshotTool.inputSchema.properties, 'width'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderSnapshotTool.inputSchema.properties, 'height'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'plan_loop'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay'));
@@ -245,6 +253,35 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.deepEqual(
       snapshotResponseA.result.structuredContent.snapshot,
       snapshotResponseB.result.structuredContent.snapshot
+    );
+
+    const renderSnapshotResponseA = await client.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        tick: 4,
+        width: 320,
+        height: 180
+      }
+    });
+
+    const renderSnapshotResponseB = await client.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        tick: 4,
+        width: 320,
+        height: 180
+      }
+    });
+
+    assert.equal(renderSnapshotResponseA.result.isError, false);
+    assertRenderSnapshotV1(renderSnapshotResponseA.result.structuredContent);
+    assert.equal(renderSnapshotResponseA.result.structuredContent.scene, 'tutorial');
+    assert.equal(renderSnapshotResponseA.result.structuredContent.tick, 4);
+    assert.deepEqual(
+      renderSnapshotResponseA.result.structuredContent,
+      renderSnapshotResponseB.result.structuredContent
     );
 
     const replayResponseA = await client.request('tools/call', {

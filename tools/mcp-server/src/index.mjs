@@ -13,6 +13,7 @@ import {
   simulateStateV1,
   simulateStateV1WithMutationTrace,
   buildWorldSnapshotMessage,
+  buildRenderSnapshotV1,
   runDeterministicReplay,
   buildReplayArtifact,
   snapshotStateV1,
@@ -90,6 +91,7 @@ async function handleToolCall(params) {
     params.name !== 'validate_input_intent' &&
     params.name !== 'validate_save' &&
     params.name !== 'emit_world_snapshot' &&
+    params.name !== 'render_snapshot' &&
     params.name !== 'plan_loop' &&
     params.name !== 'run_loop' &&
     params.name !== 'run_replay' &&
@@ -296,6 +298,40 @@ async function handleToolCall(params) {
       };
     }
 
+    if (params.name === 'render_snapshot') {
+      if (args.tick !== undefined && (!Number.isInteger(args.tick) || args.tick < 0)) {
+        return {
+          content: toTextContent('render_snapshot: `tick` must be an integer >= 0 when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.width !== undefined && (!Number.isInteger(args.width) || args.width < 1)) {
+        return {
+          content: toTextContent('render_snapshot: `width` must be an integer >= 1 when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.height !== undefined && (!Number.isInteger(args.height) || args.height < 1)) {
+        return {
+          content: toTextContent('render_snapshot: `height` must be an integer >= 1 when provided.'),
+          isError: true
+        };
+      }
+
+      const snapshot = await buildRenderSnapshotV1(targetPath, {
+        tick: args.tick,
+        width: args.width,
+        height: args.height
+      });
+      return {
+        content: toTextContent(`Render snapshot built for ${snapshot.scene} at tick ${snapshot.tick}.`),
+        structuredContent: snapshot,
+        isError: false
+      };
+    }
+
     if (params.name === 'validate_save') {
       const report = await validateSaveFile(targetPath);
       return {
@@ -357,7 +393,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_input_intent, validate_save, emit_world_snapshot, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_input_intent, validate_save, emit_world_snapshot, render_snapshot, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }
