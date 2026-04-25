@@ -90,6 +90,12 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_save'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'emit_world_snapshot'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
+    assert.ok(
+      Object.prototype.hasOwnProperty.call(
+        toolsResponse.result.tools.find((tool) => tool.name === 'run_loop').inputSchema.properties,
+        'keyboardScriptPath'
+      )
+    );
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'plan_loop'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay_artifact'));
@@ -372,6 +378,56 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.deepEqual(
       runLoopWithSeedA.result.structuredContent,
       runLoopWithSeedB.result.structuredContent
+    );
+
+    const runLoopWithKeyboardScriptA = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 2,
+        seed: 10,
+        keyboardScriptPath: './fixtures/input-script/valid.keyboard-input-script.json'
+      }
+    });
+
+    const runLoopWithKeyboardScriptB = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 2,
+        seed: 10,
+        keyboardScriptPath: './fixtures/input-script/valid.keyboard-input-script.json'
+      }
+    });
+
+    assert.equal(runLoopWithKeyboardScriptA.result.isError, false);
+    assert.equal(runLoopWithKeyboardScriptA.result.structuredContent.loopReportVersion, 1);
+    assert.equal(runLoopWithKeyboardScriptA.result.structuredContent.seed, 10);
+    assert.equal(runLoopWithKeyboardScriptA.result.structuredContent.ticksExecuted, 2);
+    assert.equal(runLoopWithKeyboardScriptA.result.structuredContent.finalState, 17);
+    assert.deepEqual(
+      runLoopWithKeyboardScriptA.result.structuredContent,
+      runLoopWithKeyboardScriptB.result.structuredContent
+    );
+
+    const runLoopWithKeyboardScriptInvalid = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 2,
+        seed: 10,
+        keyboardScriptPath: './fixtures/input-script/invalid.duplicate-tick.keyboard-input-script.json'
+      }
+    });
+
+    assert.equal(runLoopWithKeyboardScriptInvalid.result.isError, true);
+    assert.match(
+      runLoopWithKeyboardScriptInvalid.result.content[0].text,
+      /keyboard input script is invalid/
+    );
+    assert.match(
+      runLoopWithKeyboardScriptInvalid.result.content[0].text,
+      /\$\.ticks\[1\]\.tick: must be unique/
     );
 
     const runLoopDefaultSeedA = await client.request('tools/call', {

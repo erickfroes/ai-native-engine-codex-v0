@@ -9,6 +9,8 @@ import {
   validateSaveFile,
   validateInputIntentV1File,
   createInputIntentFromKeyboardV1,
+  loadValidatedKeyboardInputScriptV1,
+  createKeyboardInputIntentResolverFromScriptV1,
   loadSceneFile,
   createLoopExecutionPlan,
   createInitialStateFromScene,
@@ -196,6 +198,17 @@ async function handleToolCall(params) {
         };
       }
 
+      if (
+        params.name === 'run_loop' &&
+        args.keyboardScriptPath !== undefined &&
+        (typeof args.keyboardScriptPath !== 'string' || args.keyboardScriptPath.trim().length === 0)
+      ) {
+        return {
+          content: toTextContent('run_loop: `keyboardScriptPath` must be a non-empty string when provided.'),
+          isError: true
+        };
+      }
+
       if (params.name === 'plan_loop') {
         const plan = await createLoopExecutionPlan(targetPath, {
           ticks: args.ticks,
@@ -211,10 +224,21 @@ async function handleToolCall(params) {
       const scene = await loadSceneFile(targetPath);
 
       if (params.name === 'run_loop') {
+        const keyboardScriptPath = args.keyboardScriptPath === undefined
+          ? undefined
+          : resolveRepoPath(args.keyboardScriptPath);
+        const keyboardInputScript = keyboardScriptPath === undefined
+          ? undefined
+          : await loadValidatedKeyboardInputScriptV1(keyboardScriptPath);
+        const inputIntentResolver = keyboardInputScript === undefined
+          ? undefined
+          : createKeyboardInputIntentResolverFromScriptV1(keyboardInputScript);
+
         if (args.trace === true) {
           const traced = runMinimalSystemLoopWithTrace(scene, {
             ticks: args.ticks,
-            seed: args.seed
+            seed: args.seed,
+            inputIntentResolver
           });
           return {
             content: toTextContent(`Loop trace completed for ${traced.report.scene} at tick ${traced.report.ticks}.`),
@@ -225,7 +249,8 @@ async function handleToolCall(params) {
 
         const loopResult = runMinimalSystemLoop(scene, {
           ticks: args.ticks,
-          seed: args.seed
+          seed: args.seed,
+          inputIntentResolver
         });
         const loopReport = {
           loopReportVersion: 1,
