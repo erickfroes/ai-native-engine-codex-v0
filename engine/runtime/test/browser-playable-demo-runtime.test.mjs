@@ -25,12 +25,25 @@ function createCanvasHarness(html) {
   const script = extractInlineScript(html);
   const operations = [];
   const canvasListeners = new Map();
+  const pauseButtonListeners = new Map();
   const resetButtonListeners = new Map();
   const animationFrames = [];
   const cancelledAnimationFrames = new Set();
   let nextAnimationFrameHandle = 1;
   const statusElement = { textContent: '' };
   const dataElement = { textContent: extractInlineJson(html) };
+  const pauseButton = {
+    textContent: '',
+    addEventListener(eventName, handler) {
+      pauseButtonListeners.set(eventName, handler);
+    },
+    click() {
+      const handler = pauseButtonListeners.get('click');
+      if (handler) {
+        handler({ preventDefault() {} });
+      }
+    }
+  };
   const resetButton = {
     addEventListener(eventName, handler) {
       resetButtonListeners.set(eventName, handler);
@@ -82,6 +95,10 @@ function createCanvasHarness(html) {
     },
     cancelAnimationFrame(handle) {
       cancelledAnimationFrames.add(handle);
+      const frameIndex = animationFrames.findIndex((frame) => frame.handle === handle);
+      if (frameIndex !== -1) {
+        animationFrames.splice(frameIndex, 1);
+      }
     },
     document: {
       getElementById(id) {
@@ -90,6 +107,9 @@ function createCanvasHarness(html) {
         }
         if (id === 'browser-playable-demo-canvas') {
           return canvas;
+        }
+        if (id === 'browser-playable-demo-pause') {
+          return pauseButton;
         }
         if (id === 'browser-playable-demo-reset') {
           return resetButton;
@@ -116,9 +136,16 @@ function createCanvasHarness(html) {
       }
     },
     operations,
+    pauseButton,
     resetButton,
     statusElement
   };
+}
+
+function extractControlledPosition(statusText) {
+  const match = statusText.match(/at \((-?\d+), (-?\d+)\)/);
+  assert.ok(match, `expected controlled position in status: ${statusText}`);
+  return [Number(match[1]), Number(match[2])];
 }
 
 function createTutorialSnapshot() {
@@ -160,7 +187,9 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.match(htmlA, /<canvas id="browser-playable-demo-canvas"/);
   assert.match(htmlA, /tabindex="0"/);
   assert.match(htmlA, /addEventListener\("keydown"/);
+  assert.match(htmlA, /id="browser-playable-demo-pause"/);
   assert.match(htmlA, /requestAnimationFrame\(renderFrame\)/);
+  assert.match(htmlA, /scheduleRedrawLoop\(\)/);
   assert.match(htmlA, /id="browser-playable-demo-reset"/);
   assert.match(htmlA, /ArrowRight/);
   assert.match(htmlA, /KeyD/);
@@ -171,6 +200,8 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.match(htmlA, /ArrowDown/);
   assert.match(htmlA, /KeyS/);
   assert.match(htmlA, /4 px per keydown/);
+  assert.match(htmlA, /Pause rendering/);
+  assert.match(htmlA, />Reset<\/button>/);
   assert.doesNotMatch(htmlA, /<script[^>]+src=/);
   assert.doesNotMatch(htmlA, /https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|Date\.now|new Date|performance\.now|toISOString|localStorage/);
   assert.equal(BROWSER_PLAYABLE_DEMO_VERSION, 1);
@@ -393,6 +424,34 @@ test('renderBrowserPlayableDemoHtmlV1 keeps redrawing through requestAnimationFr
   assert.ok(harness.operations.length > initialOperationCount);
   assert.match(harness.statusElement.textContent, /Inputs 0/);
   assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(0, 0\)/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 toggles pause and resume for the local redraw loop without moving state', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'tutorial Browser Playable Demo',
+    renderSnapshot: createTutorialSnapshot(),
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const harness = createCanvasHarness(html);
+  const initialPosition = extractControlledPosition(harness.statusElement.textContent);
+
+  assert.equal(harness.pauseButton.textContent, 'Pause rendering');
+  assert.equal(harness.animationFrames.length, 1);
+
+  harness.pauseButton.click();
+
+  assert.equal(harness.pauseButton.textContent, 'Resume rendering');
+  assert.equal(harness.animationFrames.length, 0);
+  assert.deepEqual(extractControlledPosition(harness.statusElement.textContent), initialPosition);
+
+  harness.pauseButton.click();
+
+  assert.equal(harness.pauseButton.textContent, 'Pause rendering');
+  assert.equal(harness.animationFrames.length, 1);
+  harness.flushAnimationFrames(1);
+  assert.deepEqual(extractControlledPosition(harness.statusElement.textContent), initialPosition);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 reset button restores the initial rect position and HUD', () => {
