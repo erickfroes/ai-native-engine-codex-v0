@@ -86,3 +86,35 @@ test('render-canvas-demo writes HTML to --out and returns a small JSON envelope'
   const writtenHtml = await readFile(payload.outputPath, 'utf8');
   assert.equal(writtenHtml, payload.html);
 });
+
+test('render-canvas-demo fails predictably for invalid width and height flags', () => {
+  const invalidWidth = runCli([
+    'render-canvas-demo',
+    tutorialScenePath,
+    '--width',
+    '0'
+  ]);
+  const invalidHeight = runCli([
+    'render-canvas-demo',
+    tutorialScenePath,
+    '--height',
+    '0'
+  ]);
+
+  assert.notEqual(invalidWidth.status, 0);
+  assert.match(invalidWidth.stderr, /buildRenderSnapshotV1: `width` must be an integer >= 1/);
+  assert.notEqual(invalidHeight.status, 0);
+  assert.match(invalidHeight.stderr, /buildRenderSnapshotV1: `height` must be an integer >= 1/);
+});
+
+test('render-canvas-demo fails predictably when --out is present with an empty path value', () => {
+  const result = runCli([
+    'render-canvas-demo',
+    tutorialScenePath,
+    '--out',
+    ''
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /render-canvas-demo: --out must be a non-empty string/);
+});
