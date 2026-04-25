@@ -184,6 +184,19 @@ Compatibilidade:
 - nao adiciona backend grafico real;
 - nao possui tool MCP dedicada nesta versao.
 
+## Canvas2D Demo v1 (visualizacao estatica no navegador)
+
+Contrato minimo para embutir `RenderSnapshot v1` em HTML deterministico com Canvas 2D nativo:
+
+- ver `docs/CANVAS2D_DEMO_V1.md`.
+
+Compatibilidade:
+
+- deriva de `RenderSnapshot v1` sem alterar `Render SVG v1` ou `SVG Demo HTML v1`;
+- nao altera `run-loop`;
+- nao usa Pixi, Three ou WebGL;
+- nao adiciona input real ou editor nesta versao.
+
 ## State Model v1 (interno)
 
 Representação estruturada de estado inicial derivada do Scene Document v1:
