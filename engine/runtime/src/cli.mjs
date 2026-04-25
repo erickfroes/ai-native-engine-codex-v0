@@ -1,4 +1,4 @@
-import { readdir } from 'node:fs/promises';
+import { mkdir, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import {
@@ -16,6 +16,8 @@ import {
   loadSceneFile,
   buildWorldSnapshotMessage,
   buildRenderSnapshotV1,
+  renderSnapshotToSvgV1,
+  RENDER_SVG_VERSION,
   runDeterministicReplay,
   buildReplayArtifact,
   createLoopExecutionPlan,
@@ -37,6 +39,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs render-snapshot <path> [--tick <n>] [--width <n>] [--height <n>] [--json]
+  node engine/runtime/src/cli.mjs render-svg <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs save-state <path> --ticks <n> [--seed <n>] --out <dir> [--json]
   node engine/runtime/src/cli.mjs load-save <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
@@ -332,6 +335,45 @@ async function run() {
       console.log(`Tick: ${snapshot.tick}`);
       console.log(`Viewport: ${snapshot.viewport.width}x${snapshot.viewport.height}`);
       console.log(`Draw calls: ${snapshot.drawCalls.length}`);
+    }
+
+    return;
+  }
+
+  if (command === 'render-svg') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const tick = readNumberFlag('render-svg', '--tick', undefined);
+    const width = readNumberFlag('render-svg', '--width', undefined);
+    const height = readNumberFlag('render-svg', '--height', undefined);
+    const requestedOutPath = readStringFlag('render-svg', '--out', undefined);
+    const snapshot = await buildRenderSnapshotV1(maybePath, { tick, width, height });
+    const svg = renderSnapshotToSvgV1(snapshot);
+    const outputPath = requestedOutPath ? path.resolve(requestedOutPath) : undefined;
+
+    if (outputPath) {
+      await mkdir(path.dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, svg, 'utf8');
+    }
+
+    const envelope = {
+      svgVersion: RENDER_SVG_VERSION,
+      scene: snapshot.scene,
+      tick: snapshot.tick,
+      ...(outputPath ? { outputPath } : {}),
+      svg
+    };
+
+    if (asJson) {
+      console.log(JSON.stringify(envelope, null, 2));
+    } else if (outputPath) {
+      console.log(outputPath);
+    } else {
+      process.stdout.write(svg);
     }
 
     return;
