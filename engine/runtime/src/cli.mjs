@@ -10,6 +10,7 @@ import {
   validateInputIntentV1File,
   loadSceneFile,
   buildWorldSnapshotMessage,
+  buildRenderSnapshotV1,
   runDeterministicReplay,
   buildReplayArtifact,
   createLoopExecutionPlan,
@@ -28,6 +29,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs validate-input-intent <path> [--json]
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
+  node engine/runtime/src/cli.mjs render-snapshot <path> [--tick <n>] [--width <n>] [--height <n>] [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs plan-loop <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs inspect-state <path> [--seed <n>] [--json]
@@ -231,6 +233,31 @@ async function run() {
         const kinds = entity.components.map((component) => component.kind).join(', ');
         console.log(`- ${entity.id}: ${kinds}`);
       }
+    }
+
+    return;
+  }
+
+  if (command === 'render-snapshot') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const tick = readNumberFlag('render-snapshot', '--tick', undefined);
+    const width = readNumberFlag('render-snapshot', '--width', undefined);
+    const height = readNumberFlag('render-snapshot', '--height', undefined);
+    const snapshot = await buildRenderSnapshotV1(maybePath, { tick, width, height });
+
+    if (asJson) {
+      console.log(JSON.stringify(snapshot, null, 2));
+    } else {
+      console.log(`Scene: ${snapshot.scene}`);
+      console.log(`Render snapshot version: ${snapshot.renderSnapshotVersion}`);
+      console.log(`Tick: ${snapshot.tick}`);
+      console.log(`Viewport: ${snapshot.viewport.width}x${snapshot.viewport.height}`);
+      console.log(`Draw calls: ${snapshot.drawCalls.length}`);
     }
 
     return;
