@@ -8,7 +8,7 @@ function executeLoopSchedule(schedule, options = {}) {
   const tracedSystemsPerTick = [];
 
   for (const tickPlan of systemsPerTick) {
-    const inputIntent = options.inputIntentResolver?.(tickPlan.tick);
+    const inputIntent = options.inputIntentResolver?.(tickPlan.tick) ?? options.inputIntent;
     const tickSystems = [];
 
     for (const system of tickPlan.systems) {
@@ -17,7 +17,7 @@ function executeLoopSchedule(schedule, options = {}) {
         state,
         tick: tickPlan.tick,
         seed,
-        inputIntent: options.inputIntent
+        inputIntent
       });
 
       if (options.trace === true) {
@@ -51,7 +51,8 @@ function executeLoopSchedule(schedule, options = {}) {
 export function runMinimalSystemLoop(scene, options = {}) {
   const schedule = createLoopSchedule(scene, options);
   const executed = executeLoopSchedule(schedule, {
-    inputIntent: options.inputIntent
+    inputIntent: options.inputIntent,
+    inputIntentResolver: options.inputIntentResolver
   });
 
   return {
@@ -66,6 +67,7 @@ export function runMinimalSystemLoopWithTrace(scene, options = {}) {
   const { ticks, seed, systemsPerTick } = schedule;
   const executed = executeLoopSchedule(schedule, {
     inputIntent: options.inputIntent,
+    inputIntentResolver: options.inputIntentResolver,
     trace: true
   });
 

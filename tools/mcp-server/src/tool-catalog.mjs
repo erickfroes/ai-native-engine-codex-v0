@@ -135,6 +135,34 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'render_snapshot',
+    title: 'Render Snapshot',
+    description: 'Build a deterministic headless RenderSnapshot v1 JSON payload from a scene.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        tick: {
+          type: 'integer',
+          description: 'Optional render tick. Defaults to 0.'
+        },
+        width: {
+          type: 'integer',
+          description: 'Optional viewport width. Defaults to 320.'
+        },
+        height: {
+          type: 'integer',
+          description: 'Optional viewport height. Defaults to 180.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'run_replay',
     title: 'Run Replay',
     description: 'Run deterministic replay for a scene and return the final snapshot.',
@@ -181,6 +209,10 @@ export const toolCatalog = [
         inputIntentPath: {
           type: 'string',
           description: 'Optional repository-relative or absolute path to an Input Intent v1 JSON file.'
+        },
+        keyboardScriptPath: {
+          type: 'string',
+          description: 'Optional repository-relative or absolute path to a KeyboardInputScript v1 JSON file.'
         },
         trace: {
           type: 'boolean',

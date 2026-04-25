@@ -9,10 +9,13 @@ import {
   validateSaveFile,
   loadStateSnapshotSaveV1,
   saveStateSnapshotV1,
+  validateInputIntentV1,
   validateInputIntentV1File,
   createInputIntentFromKeyboardV1,
+  loadValidatedInputIntentV1,
   loadSceneFile,
   buildWorldSnapshotMessage,
+  buildRenderSnapshotV1,
   runDeterministicReplay,
   buildReplayArtifact,
   createLoopExecutionPlan,
@@ -33,13 +36,14 @@ function printUsage() {
   node engine/runtime/src/cli.mjs keyboard-to-input-intent --tick <n> --entity <id> --keys <comma-list> [--json]
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
+  node engine/runtime/src/cli.mjs render-snapshot <path> [--tick <n>] [--width <n>] [--height <n>] [--json]
   node engine/runtime/src/cli.mjs save-state <path> --ticks <n> [--seed <n>] --out <dir> [--json]
   node engine/runtime/src/cli.mjs load-save <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs plan-loop <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs inspect-state <path> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json] [--trace]
-  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--input-intent <path>] [--json] [--trace]
+  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--input-intent <path>] [--keyboard-script <path>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
 }
@@ -97,10 +101,28 @@ function readStringFlag(commandName, flag, fallbackValue) {
 
   const rawValue = process.argv[index + 1];
   if (!rawValue || rawValue.trim().length === 0) {
-    throw new Error(`${commandName}: ${flag} requires a non-empty string value`);
+    throw new Error(`${commandName}: ${flag} must be a non-empty string`);
   }
 
   return rawValue;
+}
+
+function readCommaListFlag(commandName, flag) {
+  const rawValue = readStringFlag(commandName, flag, undefined);
+  if (rawValue === undefined) {
+    return undefined;
+  }
+
+  const values = rawValue
+    .split(',')
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+
+  if (values.length === 0) {
+    throw new Error(`${commandName}: ${flag} must contain at least one key`);
+  }
+
+  return values;
 }
 
 function formatInputIntentAction(action) {
@@ -285,6 +307,31 @@ async function run() {
         const kinds = entity.components.map((component) => component.kind).join(', ');
         console.log(`- ${entity.id}: ${kinds}`);
       }
+    }
+
+    return;
+  }
+
+  if (command === 'render-snapshot') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const tick = readNumberFlag('render-snapshot', '--tick', undefined);
+    const width = readNumberFlag('render-snapshot', '--width', undefined);
+    const height = readNumberFlag('render-snapshot', '--height', undefined);
+    const snapshot = await buildRenderSnapshotV1(maybePath, { tick, width, height });
+
+    if (asJson) {
+      console.log(JSON.stringify(snapshot, null, 2));
+    } else {
+      console.log(`Scene: ${snapshot.scene}`);
+      console.log(`Render snapshot version: ${snapshot.renderSnapshotVersion}`);
+      console.log(`Tick: ${snapshot.tick}`);
+      console.log(`Viewport: ${snapshot.viewport.width}x${snapshot.viewport.height}`);
+      console.log(`Draw calls: ${snapshot.drawCalls.length}`);
     }
 
     return;
@@ -557,6 +604,7 @@ async function run() {
     const ticks = readNumberFlag('run-loop', '--ticks', 1);
     const seed = readNumberFlag('run-loop', '--seed', undefined);
     const inputIntentPath = readStringFlag('run-loop', '--input-intent', undefined);
+    const keyboardScriptPath = readStringFlag('run-loop', '--keyboard-script', undefined);
     const withTrace = hasFlag('--trace');
 
     if (keyboardScriptPath) {
