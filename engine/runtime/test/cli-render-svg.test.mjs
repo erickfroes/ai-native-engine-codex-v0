@@ -91,3 +91,35 @@ test('render-svg writes SVG to --out and returns a small JSON envelope', async (
   const writtenSvg = await readFile(payload.outputPath, 'utf8');
   assert.equal(writtenSvg, payload.svg);
 });
+
+test('render-svg fails predictably for invalid width and height flags', () => {
+  const invalidWidth = runCli([
+    'render-svg',
+    tutorialScenePath,
+    '--width',
+    '0'
+  ]);
+  const invalidHeight = runCli([
+    'render-svg',
+    tutorialScenePath,
+    '--height',
+    '0'
+  ]);
+
+  assert.notEqual(invalidWidth.status, 0);
+  assert.match(invalidWidth.stderr, /buildRenderSnapshotV1: `width` must be an integer >= 1/);
+  assert.notEqual(invalidHeight.status, 0);
+  assert.match(invalidHeight.stderr, /buildRenderSnapshotV1: `height` must be an integer >= 1/);
+});
+
+test('render-svg fails predictably when --out is present with an empty path value', () => {
+  const result = runCli([
+    'render-svg',
+    tutorialScenePath,
+    '--out',
+    ''
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /render-svg: --out must be a non-empty string/);
+});
