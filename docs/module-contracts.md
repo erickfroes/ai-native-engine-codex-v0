@@ -122,6 +122,21 @@ Contrato isolado para intenção de input headless, sem acoplamento com `Scene D
 - ver `docs/INPUT_INTENT_V1.md`.
 - schema formal: `docs/schemas/input-intent-v1.schema.json`.
 
+## Render Snapshot v1 (render headless declarativo)
+
+Contrato JSON deterministico para descrever draw calls minimas sem canvas real:
+
+- ver `docs/RENDER_SNAPSHOT_V1.md`.
+- schema formal: `docs/schemas/render-snapshot-v1.schema.json`.
+
+Compatibilidade:
+
+- nao altera `run-loop`;
+- nao altera `StateSnapshot v1`;
+- nao altera Save/Load v1;
+- nao altera `InputIntent v1`;
+- nao adiciona backend grafico ou assets reais.
+
 ## State Model v1 (interno)
 
 Representação estruturada de estado inicial derivada do Scene Document v1:

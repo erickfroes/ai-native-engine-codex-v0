@@ -39,6 +39,16 @@ Definir um contrato JSON headless e deterministico para descrever uma vista rend
 - cada draw call declara `id`, `x`, `y`, `width`, `height` e `layer`.
 - campos extras nao sao permitidos nos niveis controlados do contrato.
 
+## Builder runtime
+
+- `buildRenderSnapshotV1(scenePathOuScene, options)` retorna este contrato sem canvas real.
+- `tick` padrao e `0`; viewport padrao e `320x180`.
+- nesta versao, entidades com componente `transform` viram `rect`.
+- `x` e `y` vem de `transform.fields.position` ou de `transform.fields`.
+- `width` e `height` podem vir de `sprite.fields`; se ausentes, usam fallback deterministico `16x16`.
+- `layer` pode vir de `sprite.fields.layer`; se ausente, usa `0`.
+- `drawCalls` sao ordenados por `layer` e depois `id`.
+
 ## Escopo
 
 - contrato serializavel e estavel para validacao visual headless;
