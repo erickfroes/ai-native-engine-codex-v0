@@ -83,11 +83,13 @@ function assertTraceEnvelope(envelope) {
   assertStateSimulationReportV1(envelope.report);
 
   assert.equal(envelope.report.stateSimulationReportVersion, 1);
+  assert.equal(envelope.report.ticksExecuted, 3);
   assert.equal(envelope.report.finalSnapshot.entities[0].components.transform.fields.x, 6);
   assert.equal(envelope.report.finalSnapshot.entities[0].components.transform.fields.y, 9);
 
   assert.equal(envelope.mutationTrace.stateMutationTraceVersion, 1);
   assert.equal(envelope.mutationTrace.ticks, 3);
+  assert.equal(envelope.mutationTrace.ticksExecuted, 3);
   assert.equal(envelope.mutationTrace.seed, 10);
   assert.equal(envelope.mutationTrace.mutationsByTick.length, 3);
 
