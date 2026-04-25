@@ -103,6 +103,12 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'tick'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'width'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'height'));
+    const renderCanvasDemoTool = toolsResponse.result.tools.find((tool) => tool.name === 'render_canvas_demo');
+    assert.ok(renderCanvasDemoTool);
+    assert.deepEqual(renderCanvasDemoTool.inputSchema.required, ['path']);
+    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'tick'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'width'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'height'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
     assert.ok(
       Object.prototype.hasOwnProperty.call(
@@ -413,6 +419,45 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.equal(renderSvgMissingPathResponse.result.structuredContent.errorName, 'Error');
     assert.match(renderSvgMissingPathResponse.result.content[0].text, /ENOENT/);
     assert.match(renderSvgMissingPathResponse.result.content[0].text, /missing\.scene\.json/);
+
+    const renderCanvasDemoResponseA = await client.request('tools/call', {
+      name: 'render_canvas_demo',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        tick: 4,
+        width: 320,
+        height: 180
+      }
+    });
+
+    const renderCanvasDemoResponseB = await client.request('tools/call', {
+      name: 'render_canvas_demo',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        tick: 4,
+        width: 320,
+        height: 180
+      }
+    });
+
+    assert.equal(renderCanvasDemoResponseA.result.isError, false);
+    assert.deepEqual(
+      Object.keys(renderCanvasDemoResponseA.result.structuredContent).sort(),
+      ['canvasDemoVersion', 'html', 'scene', 'tick']
+    );
+    assert.equal(renderCanvasDemoResponseA.result.structuredContent.canvasDemoVersion, 1);
+    assert.equal(renderCanvasDemoResponseA.result.structuredContent.scene, 'tutorial');
+    assert.equal(renderCanvasDemoResponseA.result.structuredContent.tick, 4);
+    assert.match(renderCanvasDemoResponseA.result.structuredContent.html, /<!DOCTYPE html>/);
+    assert.match(renderCanvasDemoResponseA.result.structuredContent.html, /<canvas id="render-canvas-demo"/);
+    assert.match(
+      renderCanvasDemoResponseA.result.structuredContent.html,
+      /context\.strokeRect\(drawCall\.x, drawCall\.y, drawCall\.width, drawCall\.height\);/
+    );
+    assert.deepEqual(
+      renderCanvasDemoResponseA.result.structuredContent,
+      renderCanvasDemoResponseB.result.structuredContent
+    );
 
     const replayResponseA = await client.request('tools/call', {
       name: 'run_replay',
