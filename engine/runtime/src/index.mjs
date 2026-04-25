@@ -2,6 +2,8 @@ export { loadSchemaRegistry, getRepoRoot } from './schema/registry.mjs';
 export { validateSceneFile, formatValidationReport } from './scene/validate-scene.mjs';
 export { validateLoopScene, formatSceneValidationReportV1 } from './scene/validate-loop-scene.mjs';
 export { validateSaveFile } from './save/validate-save.mjs';
+export { canonicalJSONStringify, sha256Hex, createSha256Checksum } from './save/canonical-json.mjs';
+export { saveStateSnapshotV1, loadStateSnapshotSaveV1 } from './save/state-snapshot-save.mjs';
 export { validateInputIntentV1File } from './input/validate-input-intent-v1.mjs';
 export { loadSceneFile } from './scene/load-scene.mjs';
 export { summarizeScene } from './scene/summary.mjs';

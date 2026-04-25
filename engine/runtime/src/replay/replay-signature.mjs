@@ -1,18 +1,4 @@
-import { createHash } from 'node:crypto';
-
-function canonicalStringify(value) {
-  if (Array.isArray(value)) {
-    return `[${value.map((item) => canonicalStringify(item)).join(',')}]`;
-  }
-
-  if (value !== null && typeof value === 'object') {
-    const keys = Object.keys(value).sort();
-    const entries = keys.map((key) => `${JSON.stringify(key)}:${canonicalStringify(value[key])}`);
-    return `{${entries.join(',')}}`;
-  }
-
-  return JSON.stringify(value);
-}
+import { sha256Hex } from '../save/canonical-json.mjs';
 
 function signatureInputFromReplay(replay) {
   return {
@@ -26,6 +12,5 @@ function signatureInputFromReplay(replay) {
 }
 
 export function generateReplaySignature(replay) {
-  const canonicalPayload = canonicalStringify(signatureInputFromReplay(replay));
-  return createHash('sha256').update(canonicalPayload).digest('hex');
+  return sha256Hex(signatureInputFromReplay(replay));
 }
