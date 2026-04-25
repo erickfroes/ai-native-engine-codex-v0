@@ -460,6 +460,40 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       runLoopDefaultSeedB.result.structuredContent
     );
 
+    const runLoopWithIntentA = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 4,
+        seed: 10,
+        inputIntentPath: './fixtures/input/valid.move.intent.json'
+      }
+    });
+
+    const runLoopWithIntentB = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 4,
+        seed: 10,
+        inputIntentPath: './fixtures/input/valid.move.intent.json'
+      }
+    });
+
+    assert.equal(runLoopWithIntentA.result.isError, false);
+    assert.deepEqual(
+      Object.keys(runLoopWithIntentA.result.structuredContent).sort(),
+      expectedRunLoopKeys
+    );
+    assert.equal(runLoopWithIntentA.result.structuredContent.loopReportVersion, 1);
+    assert.equal(runLoopWithIntentA.result.structuredContent.seed, 10);
+    assert.equal(runLoopWithIntentA.result.structuredContent.ticksExecuted, 4);
+    assert.equal(runLoopWithIntentA.result.structuredContent.finalState, 31);
+    assert.deepEqual(
+      runLoopWithIntentA.result.structuredContent,
+      runLoopWithIntentB.result.structuredContent
+    );
+
     const simulateStateNoTraceResponse = await client.request('tools/call', {
       name: 'simulate_state',
       arguments: {

@@ -7,7 +7,8 @@ import {
   validateLoopScene,
   formatSceneValidationReportV1,
   validateSaveFile,
-  validateInputIntentV1,
+  loadStateSnapshotSaveV1,
+  saveStateSnapshotV1,
   validateInputIntentV1File,
   createInputIntentFromKeyboardV1,
   loadSceneFile,
@@ -32,11 +33,13 @@ function printUsage() {
   node engine/runtime/src/cli.mjs keyboard-to-input-intent --tick <n> --entity <id> --keys <comma-list> [--json]
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
+  node engine/runtime/src/cli.mjs save-state <path> --ticks <n> [--seed <n>] --out <dir> [--json]
+  node engine/runtime/src/cli.mjs load-save <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs plan-loop <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs inspect-state <path> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json] [--trace]
-  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--keyboard-script <path>] [--json] [--trace]
+  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--input-intent <path>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
 }
@@ -93,33 +96,11 @@ function readStringFlag(commandName, flag, fallbackValue) {
   }
 
   const rawValue = process.argv[index + 1];
-  if (rawValue === undefined) {
-    throw new Error(`${commandName}: ${flag} requires a string value`);
+  if (!rawValue || rawValue.trim().length === 0) {
+    throw new Error(`${commandName}: ${flag} requires a non-empty string value`);
   }
 
-  if (rawValue.trim().length === 0) {
-    throw new Error(`${commandName}: ${flag} must be a non-empty string`);
-  }
-
-  return rawValue.trim();
-}
-
-function readCommaListFlag(commandName, flag) {
-  const rawValue = readStringFlag(commandName, flag, undefined);
-  if (rawValue === undefined) {
-    return undefined;
-  }
-
-  const values = rawValue
-    .split(',')
-    .map((value) => value.trim())
-    .filter((value) => value.length > 0);
-
-  if (values.length === 0) {
-    throw new Error(`${commandName}: ${flag} must contain at least one key`);
-  }
-
-  return values;
+  return rawValue;
 }
 
 function formatInputIntentAction(action) {
@@ -304,6 +285,81 @@ async function run() {
         const kinds = entity.components.map((component) => component.kind).join(', ');
         console.log(`- ${entity.id}: ${kinds}`);
       }
+    }
+
+    return;
+  }
+
+  if (command === 'save-state') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    if (!hasFlag('--ticks')) {
+      throw new Error('save-state: --ticks is required');
+    }
+
+    if (!hasFlag('--out')) {
+      throw new Error('save-state: --out is required');
+    }
+
+    const ticks = readNumberFlag('save-state', '--ticks', 0);
+    const seed = readNumberFlag('save-state', '--seed', undefined);
+    const outDir = readStringFlag('save-state', '--out', undefined);
+    const simulation = await simulateStateV1(maybePath, { ticks, seed });
+    const saved = await saveStateSnapshotV1({
+      snapshot: simulation.finalSnapshot,
+      outDir,
+      seed: simulation.seed,
+      contentVersion: 1
+    });
+    const saveResult = {
+      savePath: saved.savePath,
+      payloadPath: saved.payloadPath,
+      save: saved.envelope
+    };
+
+    if (asJson) {
+      console.log(JSON.stringify(saveResult, null, 2));
+    } else {
+      console.log(`Save: ${saveResult.savePath}`);
+      console.log(`Payload: ${saveResult.payloadPath}`);
+      console.log(`Version: ${saveResult.save.saveVersion}`);
+      console.log(`Content version: ${saveResult.save.contentVersion}`);
+      console.log(`Seed: ${saveResult.save.seed}`);
+      console.log(`Checksum: ${saveResult.save.checksum}`);
+      console.log(`Payload ref: ${saveResult.save.payloadRef}`);
+    }
+
+    return;
+  }
+
+  if (command === 'load-save') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const loaded = await loadStateSnapshotSaveV1(maybePath);
+    const loadResult = {
+      savePath: loaded.savePath,
+      payloadPath: loaded.payloadPath,
+      save: loaded.envelope,
+      snapshot: loaded.snapshot
+    };
+
+    if (asJson) {
+      console.log(JSON.stringify(loadResult, null, 2));
+    } else {
+      console.log(`Save: ${loadResult.savePath}`);
+      console.log(`Payload: ${loadResult.payloadPath}`);
+      console.log(`Scene: ${loadResult.snapshot.scene}`);
+      console.log(`Tick: ${loadResult.snapshot.tick}`);
+      console.log(`Entities: ${loadResult.snapshot.entities.length}`);
+      console.log(`Checksum: ${loadResult.save.checksum}`);
     }
 
     return;
@@ -500,7 +556,7 @@ async function run() {
 
     const ticks = readNumberFlag('run-loop', '--ticks', 1);
     const seed = readNumberFlag('run-loop', '--seed', undefined);
-    const keyboardScriptPath = readStringFlag('run-loop', '--keyboard-script', undefined);
+    const inputIntentPath = readStringFlag('run-loop', '--input-intent', undefined);
     const withTrace = hasFlag('--trace');
 
     if (keyboardScriptPath) {
@@ -553,9 +609,12 @@ async function run() {
     }
 
     const scene = await loadSceneFile(maybePath);
+    const inputIntent = inputIntentPath
+      ? await loadValidatedInputIntentV1(inputIntentPath)
+      : undefined;
 
     if (withTrace) {
-      const traced = runMinimalSystemLoopWithTrace(scene, { ticks, seed });
+      const traced = runMinimalSystemLoopWithTrace(scene, { ticks, seed, inputIntent });
 
       if (asJson) {
         console.log(JSON.stringify(traced, null, 2));
@@ -572,7 +631,7 @@ async function run() {
       return;
     }
 
-    const loopResult = runMinimalSystemLoop(scene, { ticks, seed });
+    const loopResult = runMinimalSystemLoop(scene, { ticks, seed, inputIntent });
     const loopReport = {
       loopReportVersion: 1,
       scene: scene.metadata.name,

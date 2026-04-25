@@ -8,8 +8,7 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const scenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
-const validKeyboardScriptPath = path.join(repoRoot, 'fixtures', 'input-script', 'valid.keyboard-input-script.json');
-const invalidKeyboardScriptPath = path.join(repoRoot, 'fixtures', 'input-script', 'invalid.duplicate-tick.keyboard-input-script.json');
+const inputIntentPath = path.join(repoRoot, 'fixtures', 'input', 'valid.move.intent.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -120,58 +119,32 @@ test('run-loop --json without --seed uses default seed deterministically', () =>
   assert.deepEqual(firstReport, secondReport);
 });
 
-test('run-loop --keyboard-script returns deterministic JSON and expected scripted finalState', () => {
-  const first = runCli([
-    'run-loop',
-    scenePath,
-    '--ticks',
-    '2',
-    '--seed',
-    '10',
-    '--keyboard-script',
-    validKeyboardScriptPath,
-    '--json'
-  ]);
-  const second = runCli([
-    'run-loop',
-    scenePath,
-    '--ticks',
-    '2',
-    '--seed',
-    '10',
-    '--keyboard-script',
-    validKeyboardScriptPath,
-    '--json'
-  ]);
+test('run-loop --input-intent keeps report shape and changes finalState predictably', () => {
+  const first = runCli(['run-loop', scenePath, '--ticks', '4', '--seed', '10', '--input-intent', inputIntentPath, '--json']);
+  const second = runCli(['run-loop', scenePath, '--ticks', '4', '--seed', '10', '--input-intent', inputIntentPath, '--json']);
 
   assert.equal(first.status, 0, first.stderr);
   assert.equal(second.status, 0, second.stderr);
 
   const firstReport = JSON.parse(first.stdout);
   const secondReport = JSON.parse(second.stdout);
+  const expectedKeys = [
+    'executedSystems',
+    'finalState',
+    'loopReportVersion',
+    'scene',
+    'seed',
+    'ticks',
+    'ticksExecuted'
+  ];
+
+  assert.deepEqual(Object.keys(firstReport).sort(), expectedKeys);
   assert.equal(firstReport.loopReportVersion, 1);
-  assert.equal(firstReport.scene, 'tutorial');
-  assert.equal(firstReport.finalState, 17);
-  assert.equal(firstReport.ticksExecuted, 2);
+  assert.equal(firstReport.seed, 10);
+  assert.equal(firstReport.ticks, 4);
+  assert.equal(firstReport.ticksExecuted, 4);
+  assert.equal(firstReport.finalState, 31);
   assert.deepEqual(firstReport, secondReport);
-});
-
-test('run-loop --keyboard-script fails predictably for invalid script', () => {
-  const result = runCli([
-    'run-loop',
-    scenePath,
-    '--ticks',
-    '2',
-    '--seed',
-    '10',
-    '--keyboard-script',
-    invalidKeyboardScriptPath,
-    '--json'
-  ]);
-
-  assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /keyboard input script is invalid/);
-  assert.match(result.stderr, /\$\.ticks\[1\]\.tick: must be unique/);
 });
 
 test('run-loop fails when --ticks is missing', () => {
