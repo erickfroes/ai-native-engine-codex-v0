@@ -31,6 +31,12 @@ export { renderSnapshotToSvgV1, RENDER_SVG_VERSION } from './render/render-snaps
 export { renderSvgDemoHtmlV1, SVG_DEMO_HTML_VERSION } from './render/render-svg-demo-html-v1.mjs';
 export { renderCanvas2DDemoHtmlV1, CANVAS_2D_DEMO_VERSION } from './render/render-canvas2d-demo-html-v1.mjs';
 export {
+  renderBrowserPlayableDemoHtmlV1,
+  createBrowserPlayableDemoMetadataV1,
+  BROWSER_PLAYABLE_DEMO_VERSION,
+  DEFAULT_BROWSER_PLAYABLE_STEP_PX
+} from './render/render-browser-playable-demo-html-v1.mjs';
+export {
   createStateModelV1FromScene,
   createInitialStateFromScene,
   snapshotStateV1
