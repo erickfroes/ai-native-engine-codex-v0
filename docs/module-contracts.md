@@ -128,6 +128,20 @@ Compatibilidade:
 - `LoopReport v1` e `LoopTrace v1` mantêm o mesmo shape;
 - `simulate-state` continua isolado deste contrato neste slice.
 
+## Keyboard Input Script v1 (input declarativo por tick)
+
+Contrato opt-in para declarar teclas por tick sem captura real de teclado:
+
+- ver `docs/KEYBOARD_INPUT_SCRIPT_V1.md`.
+- schema formal: `docs/schemas/keyboard-input-script-v1.schema.json`.
+
+Compatibilidade:
+
+- nao altera o comportamento padrao de `run-loop`/`run_loop` quando ausente;
+- alimenta o caminho opt-in de `run-loop --keyboard-script` e `run_loop.keyboardScriptPath`;
+- nao adiciona captura real de teclado;
+- nao altera `LoopReport v1` ou `LoopTrace v1` fora do fluxo opt-in.
+
 ## Render Snapshot v1 (render headless declarativo)
 
 Contrato JSON deterministico para descrever draw calls minimas sem canvas real:
@@ -156,6 +170,19 @@ Compatibilidade:
 - nao altera Save/Load v1;
 - nao introduz backend grafico;
 - nao representa runtime visual real nesta versao.
+
+## SVG Demo HTML v1 (visualizacao estatica textual)
+
+Contrato minimo para embutir `Render SVG v1` em HTML deterministico e estatico:
+
+- ver `docs/SVG_DEMO_HTML_V1.md`.
+
+Compatibilidade:
+
+- deriva de `Render SVG v1` sem alterar `RenderSnapshot v1`;
+- nao altera `run-loop`;
+- nao adiciona backend grafico real;
+- nao possui tool MCP dedicada nesta versao.
 
 ## State Model v1 (interno)
 
