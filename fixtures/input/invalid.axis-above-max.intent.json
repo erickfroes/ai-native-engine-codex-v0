@@ -1,0 +1,14 @@
+{
+  "inputIntentVersion": 1,
+  "tick": 1,
+  "entityId": "player",
+  "actions": [
+    {
+      "type": "move",
+      "axis": {
+        "x": 2,
+        "y": 0
+      }
+    }
+  ]
+}

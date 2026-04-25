@@ -28,32 +28,6 @@ async function loadInputIntentV1SchemaRegistry() {
   return cachedSchemaRegistry;
 }
 
-function validateAxisRange(inputIntent, errors) {
-  if (!Array.isArray(inputIntent?.actions)) {
-    return;
-  }
-
-  inputIntent.actions.forEach((action, index) => {
-    if (!action || typeof action !== 'object' || !action.axis || typeof action.axis !== 'object') {
-      return;
-    }
-
-    for (const axisKey of ['x', 'y']) {
-      const axisValue = action.axis[axisKey];
-      if (!Number.isInteger(axisValue)) {
-        continue;
-      }
-
-      if (axisValue < -1 || axisValue > 1) {
-        errors.push({
-          path: `$.actions[${index}].axis.${axisKey}`,
-          message: 'must be between -1 and 1'
-        });
-      }
-    }
-  });
-}
-
 function validateControlledFields(inputIntent, errors) {
   if (typeof inputIntent?.entityId === 'string' && inputIntent.entityId.trim().length === 0) {
     errors.push({
@@ -70,7 +44,6 @@ export async function validateInputIntentV1File(inputIntentPath) {
 
   const registry = await loadInputIntentV1SchemaRegistry();
   const errors = validateWithSchema(inputIntent, registry[schemaFileName].schema, registry, '$', []);
-  validateAxisRange(inputIntent, errors);
   validateControlledFields(inputIntent, errors);
 
   return {

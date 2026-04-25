@@ -16,6 +16,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'validate_input_intent',
+    title: 'Validate Input Intent',
+    description: 'Validate an Input Intent v1 JSON file against the runtime contract.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'validate_save',
     title: 'Validate Save',
     description: 'Validate a savegame envelope JSON file against repository save schema.',

@@ -2,9 +2,9 @@
 
 ## Objetivo
 
-Definir um contrato de input headless orientado a intenção, com integração opt-in no loop headless sem alterar `Scene Document v1`, `simulate-state` ou o shape dos contratos de saída já publicados.
+Definir um contrato isolado para input headless orientado a intenÃ§Ã£o, sem alterar `input.keyboard`, `run-loop`, `simulate-state`, `Scene Document v1` ou contratos de saÃ­da jÃ¡ publicados.
 
-## Shape mínimo
+## Shape mÃ­nimo
 
 ```json
 {
@@ -26,30 +26,23 @@ Definir um contrato de input headless orientado a intenção, com integração o
 ## Regras v1
 
 - `inputIntentVersion` deve ser exatamente `1`.
-- `tick` é inteiro e começa em `1`.
+- `tick` Ã© inteiro e comeÃ§a em `1`.
 - `entityId` identifica a entidade alvo do intent.
 - `actions` preserva a ordem declarada no documento.
 - v1 suporta apenas `actions[].type = "move"`.
-- `axis.x` e `axis.y` são inteiros no intervalo `[-1, 1]`.
-- não há campos extras nos níveis controlados do contrato.
+- `axis.x` e `axis.y` sÃ£o inteiros no intervalo `[-1, 1]`.
+- nÃ£o hÃ¡ campos extras nos nÃ­veis controlados do contrato.
 
 ## Escopo
 
 - contrato de input headless isolado;
-- validação local no runtime;
-- fixtures mínimas válidas/inválidas.
-- integração opt-in com `runMinimalSystemLoop`, `run-loop` e `run_loop`.
-
-## Integração opt-in com o loop headless
-
-- runtime: `runMinimalSystemLoop(..., { inputIntent })` e `runMinimalSystemLoopWithTrace(..., { inputIntent })`.
-- CLI: `run-loop --input-intent <path>`.
-- MCP: `run_loop` com `inputIntentPath`.
-- sem input intent, `input.keyboard` mantém a semântica atual de `+3` por tick.
-- com input intent e `tick` correspondente ao tick executado, `input.keyboard` usa a soma de `actions[].axis.x + actions[].axis.y`, com normalização unsigned no estado final.
+- validaÃ§Ã£o local no runtime;
+- validaÃ§Ã£o por CLI e MCP reutilizando o mesmo validador de runtime;
+- fixtures mÃ­nimas vÃ¡lidas/invÃ¡lidas.
 
 ## Fora deste slice
 
-- integração com `Scene Document v1`;
-- integração com `simulate-state`;
-- binding de teclado para input em tempo real.
+- integraÃ§Ã£o com `Scene Document v1`;
+- integraÃ§Ã£o com `run-loop`;
+- integraÃ§Ã£o com `simulate-state`;
+- binding de teclado.

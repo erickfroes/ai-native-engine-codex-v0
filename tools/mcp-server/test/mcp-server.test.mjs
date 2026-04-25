@@ -79,6 +79,10 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     const toolsResponse = await client.request('tools/list');
     assert.ok(Array.isArray(toolsResponse.result.tools));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_scene'));
+    const validateInputIntentTool = toolsResponse.result.tools.find((tool) => tool.name === 'validate_input_intent');
+    assert.ok(validateInputIntentTool);
+    assert.equal(validateInputIntentTool.title, 'Validate Input Intent');
+    assert.deepEqual(validateInputIntentTool.inputSchema.required, ['path']);
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_save'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'emit_world_snapshot'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
@@ -107,6 +111,72 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
         ['input.keyboard', true, 3],
         ['networking.replication', true, 2]
       ]
+    );
+
+    const validInputIntentResponse = await client.request('tools/call', {
+      name: 'validate_input_intent',
+      arguments: {
+        path: './fixtures/input/valid.move.intent.json'
+      }
+    });
+
+    const expectedInputIntentKeys = [
+      'absolutePath',
+      'errors',
+      'inputIntent',
+      'ok'
+    ];
+
+    assert.equal(validInputIntentResponse.result.isError, false);
+    assert.deepEqual(
+      Object.keys(validInputIntentResponse.result.structuredContent).sort(),
+      expectedInputIntentKeys
+    );
+    assert.equal(
+      validInputIntentResponse.result.structuredContent.absolutePath,
+      path.join(repoRoot, 'fixtures', 'input', 'valid.move.intent.json')
+    );
+    assert.equal(validInputIntentResponse.result.structuredContent.ok, true);
+    assert.deepEqual(validInputIntentResponse.result.structuredContent.errors, []);
+    assert.deepEqual(validInputIntentResponse.result.structuredContent.inputIntent, {
+      inputIntentVersion: 1,
+      tick: 1,
+      entityId: 'player',
+      actions: [
+        {
+          type: 'move',
+          axis: {
+            x: 1,
+            y: 0
+          }
+        },
+        {
+          type: 'move',
+          axis: {
+            x: 0,
+            y: -1
+          }
+        }
+      ]
+    });
+
+    const invalidInputIntentResponse = await client.request('tools/call', {
+      name: 'validate_input_intent',
+      arguments: {
+        path: './fixtures/input/invalid.missing-entity.intent.json'
+      }
+    });
+
+    assert.equal(invalidInputIntentResponse.result.isError, true);
+    assert.deepEqual(
+      Object.keys(invalidInputIntentResponse.result.structuredContent).sort(),
+      expectedInputIntentKeys
+    );
+    assert.equal(invalidInputIntentResponse.result.structuredContent.ok, false);
+    assert.ok(
+      invalidInputIntentResponse.result.structuredContent.errors.some(
+        (error) => error.path === '$.entityId' && error.message === 'is required'
+      )
     );
 
     const validSaveResponse = await client.request('tools/call', {

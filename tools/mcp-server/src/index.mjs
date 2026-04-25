@@ -6,7 +6,7 @@ import {
   validateLoopScene,
   formatSceneValidationReportV1,
   validateSaveFile,
-  loadValidatedInputIntentV1,
+  validateInputIntentV1File,
   loadSceneFile,
   createLoopExecutionPlan,
   createInitialStateFromScene,
@@ -87,6 +87,7 @@ async function handleToolCall(params) {
 
   if (
     params.name !== 'validate_scene' &&
+    params.name !== 'validate_input_intent' &&
     params.name !== 'validate_save' &&
     params.name !== 'emit_world_snapshot' &&
     params.name !== 'plan_loop' &&
@@ -324,6 +325,15 @@ async function handleToolCall(params) {
       };
     }
 
+    if (params.name === 'validate_input_intent') {
+      const report = await validateInputIntentV1File(targetPath);
+      return {
+        content: toTextContent(report.ok ? 'Input intent validation passed.' : 'Input intent validation failed.'),
+        structuredContent: report,
+        isError: !report.ok
+      };
+    }
+
     const report = await validateLoopScene(targetPath);
     return {
       content: toTextContent(formatSceneValidationReportV1(report)),
@@ -367,7 +377,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_save, emit_world_snapshot, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_input_intent, validate_save, emit_world_snapshot, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }
