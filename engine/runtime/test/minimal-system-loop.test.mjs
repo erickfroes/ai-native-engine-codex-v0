@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { loadSceneFile, runMinimalSystemLoop } from '../src/index.mjs';
+import { createInputIntentFromKeyboardV1, loadSceneFile, runMinimalSystemLoop } from '../src/index.mjs';
 import { runDeterministicReplay } from '../src/replay/run-deterministic-replay.mjs';
 import { resolveSystemHandler } from '../src/loop/system-handlers.mjs';
 
@@ -152,6 +152,27 @@ test('input.keyboard applies explicit minimal state increment semantics', () => 
   assert.equal(ticks1.finalState, (seed + 3) >>> 0);
   assert.equal(ticksN.finalState, (seed + 3 * ticksNValue) >>> 0);
   assert.deepEqual(ticksN, ticksNAgain);
+});
+
+test('input.keyboard falls back to default semantics on ticks omitted by inputIntentResolver', () => {
+  const inputKeyboardOnlyScene = {
+    entities: [],
+    systems: ['input.keyboard']
+  };
+
+  const result = runMinimalSystemLoop(inputKeyboardOnlyScene, {
+    ticks: 2,
+    seed: 21,
+    inputIntentResolver: (tick) => (tick === 1
+      ? createInputIntentFromKeyboardV1({
+        tick: 1,
+        entityId: 'player',
+        keys: ['ArrowRight']
+      })
+      : undefined)
+  });
+
+  assert.equal(result.finalState, 25);
 });
 
 test('headless composition of known systems applies +6 per tick and preserves declared order', () => {

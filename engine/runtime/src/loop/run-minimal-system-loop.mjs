@@ -21,11 +21,12 @@ export function runMinimalSystemLoopWithTrace(scene, options = {}) {
   const tracedSystemsPerTick = [];
 
   for (const tickPlan of systemsPerTick) {
+    const inputIntent = options.inputIntentResolver?.(tickPlan.tick);
     const tickSystems = [];
 
     for (const system of tickPlan.systems) {
       const stateBefore = state;
-      const stateAfter = runResolvedSystem(system.name, { state, tick: tickPlan.tick, seed });
+      const stateAfter = runResolvedSystem(system.name, { state, tick: tickPlan.tick, seed, inputIntent });
 
       tickSystems.push({
         name: system.name,

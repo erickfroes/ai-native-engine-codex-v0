@@ -7,7 +7,9 @@ export {
   validateKeyboardInputScriptV1,
   validateKeyboardInputScriptV1File
 } from './input/validate-keyboard-input-script-v1.mjs';
+export { loadValidatedKeyboardInputScriptV1 } from './input/load-validated-keyboard-input-script-v1.mjs';
 export { createInputIntentFromKeyboardV1 } from './input/create-input-intent-from-keyboard-v1.mjs';
+export { createKeyboardInputIntentResolverFromScriptV1 } from './input/create-keyboard-input-intent-resolver-v1.mjs';
 export { loadSceneFile } from './scene/load-scene.mjs';
 export { summarizeScene } from './scene/summary.mjs';
 export { validateSceneInvariants } from './scene/invariants.mjs';
@@ -17,6 +19,7 @@ export { buildReplayArtifact } from './replay/replay-artifact.mjs';
 export { generateReplaySignature } from './replay/replay-signature.mjs';
 export { runMinimalSystemLoop } from './loop/run-minimal-system-loop.mjs';
 export { runMinimalSystemLoopWithTrace } from './loop/run-minimal-system-loop.mjs';
+export { runLoopWithKeyboardInputScriptV1 } from './loop/run-loop-with-keyboard-input-script-v1.mjs';
 export { createLoopExecutionPlan } from './loop/create-loop-execution-plan.mjs';
 export { createLoopSchedule } from './loop/loop-scheduler.mjs';
 export { createPhasedLoopSchedulePreview } from './loop/phased-scheduler-preview.mjs';
