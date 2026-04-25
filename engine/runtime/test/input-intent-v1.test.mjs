@@ -4,7 +4,7 @@ import path from 'node:path';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
-import { validateInputIntentV1File } from '../src/index.mjs';
+import { createInputIntentFromKeyboardV1, validateInputIntentV1File } from '../src/index.mjs';
 import { assertInputIntentV1, assertInputIntentV1Rejects } from './helpers/assertInputIntentV1.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
@@ -72,6 +72,68 @@ test('input intent v1: runtime closes axis upper bound to keep full [-1, 1] cont
   } finally {
     await rm(tempDir, { recursive: true, force: true });
   }
+});
+
+test('input intent v1: keyboard translator maps movement keys to one deterministic move action', () => {
+  const inputIntent = createInputIntentFromKeyboardV1({
+    tick: 1,
+    entityId: 'player',
+    keys: ['ArrowRight', 'ArrowUp']
+  });
+
+  assertInputIntentV1(inputIntent);
+  assert.deepEqual(inputIntent, {
+    inputIntentVersion: 1,
+    tick: 1,
+    entityId: 'player',
+    actions: [
+      {
+        type: 'move',
+        axis: {
+          x: 1,
+          y: -1
+        }
+      }
+    ]
+  });
+});
+
+test('input intent v1: keyboard translator cancels opposite directions and ignores unmapped keys', () => {
+  const inputIntent = createInputIntentFromKeyboardV1({
+    tick: 3,
+    entityId: 'player',
+    keys: ['ArrowRight', 'ArrowLeft', 'KeyW', 'KeyS', 'Space']
+  });
+
+  assertInputIntentV1(inputIntent);
+  assert.deepEqual(inputIntent.actions, [
+    {
+      type: 'move',
+      axis: {
+        x: 0,
+        y: 0
+      }
+    }
+  ]);
+});
+
+test('input intent v1: keyboard translator rejects invalid tick, entityId and keys', () => {
+  assert.throws(
+    () => createInputIntentFromKeyboardV1({ tick: 0, entityId: 'player', keys: ['ArrowRight'] }),
+    /`tick` must be an integer >= 1/
+  );
+  assert.throws(
+    () => createInputIntentFromKeyboardV1({ tick: 1, entityId: '   ', keys: ['ArrowRight'] }),
+    /`entityId` must be a non-empty string/
+  );
+  assert.throws(
+    () => createInputIntentFromKeyboardV1({ tick: 1, entityId: 'player', keys: [] }),
+    /`keys` must be a non-empty array of strings/
+  );
+  assert.throws(
+    () => createInputIntentFromKeyboardV1({ tick: 1, entityId: 'player', keys: ['ArrowRight', ''] }),
+    /`keys` must contain only non-empty strings/
+  );
 });
 
 test('input intent v1: rejects extra fields at controlled levels', async () => {

@@ -10,6 +10,7 @@ import {
   loadStateSnapshotSaveV1,
   saveStateSnapshotV1,
   validateInputIntentV1File,
+  createInputIntentFromKeyboardV1,
   loadSceneFile,
   buildWorldSnapshotMessage,
   runDeterministicReplay,
@@ -28,6 +29,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs validate-scene <path> [--json]
   node engine/runtime/src/cli.mjs validate-save <path> [--json]
   node engine/runtime/src/cli.mjs validate-input-intent <path> [--json]
+  node engine/runtime/src/cli.mjs keyboard-to-input-intent --tick <n> --entity <id> --keys <comma-list> [--json]
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs save-state <path> --ticks <n> [--seed <n>] --out <dir> [--json]
@@ -106,6 +108,10 @@ function formatInputIntentAction(action) {
   }
 
   return `move(${action.axis.x},${action.axis.y})`;
+}
+
+function formatInputIntentErrors(errors) {
+  return errors.map((error) => `${error.path}: ${error.message}`).join('; ');
 }
 
 async function run() {
@@ -192,6 +198,35 @@ async function run() {
       }
     }
     process.exitCode = report.ok ? 0 : 1;
+    return;
+  }
+
+  if (command === 'keyboard-to-input-intent') {
+    if (!hasFlag('--tick')) {
+      throw new Error('keyboard-to-input-intent: --tick is required');
+    }
+
+    if (!hasFlag('--entity')) {
+      throw new Error('keyboard-to-input-intent: --entity is required');
+    }
+
+    if (!hasFlag('--keys')) {
+      throw new Error('keyboard-to-input-intent: --keys is required');
+    }
+
+    const tick = readNumberFlag('keyboard-to-input-intent', '--tick', 1);
+    const entityId = readStringFlag('keyboard-to-input-intent', '--entity', undefined);
+    const keys = readCommaListFlag('keyboard-to-input-intent', '--keys');
+    const inputIntent = createInputIntentFromKeyboardV1({ tick, entityId, keys });
+    const validationReport = await validateInputIntentV1(inputIntent);
+
+    if (!validationReport.ok) {
+      throw new Error(
+        `keyboard-to-input-intent produced invalid input intent: ${formatInputIntentErrors(validationReport.errors)}`
+      );
+    }
+
+    console.log(JSON.stringify(inputIntent, null, 2));
     return;
   }
 

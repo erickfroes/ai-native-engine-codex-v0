@@ -6,6 +6,7 @@ Servidor MCP local via stdio.
 
 - `validate_scene`
 - `validate_input_intent`
+- `keyboard_to_input_intent`
 - `validate_save`
 - `emit_world_snapshot`
 - `plan_loop`

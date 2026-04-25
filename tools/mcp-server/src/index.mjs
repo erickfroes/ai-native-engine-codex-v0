@@ -5,10 +5,12 @@ import { fileURLToPath } from 'node:url';
 import {
   validateLoopScene,
   formatSceneValidationReportV1,
+  validateInputIntentV1,
   validateSaveFile,
   loadStateSnapshotSaveV1,
   saveStateSnapshotV1,
   validateInputIntentV1File,
+  createInputIntentFromKeyboardV1,
   loadSceneFile,
   createLoopExecutionPlan,
   createInitialStateFromScene,
@@ -90,6 +92,7 @@ async function handleToolCall(params) {
   if (
     params.name !== 'validate_scene' &&
     params.name !== 'validate_input_intent' &&
+    params.name !== 'keyboard_to_input_intent' &&
     params.name !== 'validate_save' &&
     params.name !== 'save_state_snapshot' &&
     params.name !== 'load_save' &&
@@ -105,7 +108,10 @@ async function handleToolCall(params) {
   }
 
   const args = params.arguments ?? {};
-  if (typeof args.path !== 'string' || args.path.trim().length === 0) {
+  if (
+    params.name !== 'keyboard_to_input_intent' &&
+    (typeof args.path !== 'string' || args.path.trim().length === 0)
+  ) {
     return {
       content: toTextContent('The `path` argument is required and must be a non-empty string.'),
       isError: true
@@ -113,6 +119,56 @@ async function handleToolCall(params) {
   }
 
   try {
+    if (params.name === 'keyboard_to_input_intent') {
+      if (!Number.isInteger(args.tick) || args.tick < 1) {
+        return {
+          content: toTextContent('keyboard_to_input_intent: `tick` is required and must be an integer >= 1.'),
+          isError: true
+        };
+      }
+
+      if (typeof args.entityId !== 'string' || args.entityId.trim().length === 0) {
+        return {
+          content: toTextContent('keyboard_to_input_intent: `entityId` is required and must be a non-empty string.'),
+          isError: true
+        };
+      }
+
+      if (
+        !Array.isArray(args.keys) ||
+        args.keys.length === 0 ||
+        args.keys.some((key) => typeof key !== 'string' || key.trim().length === 0)
+      ) {
+        return {
+          content: toTextContent(
+            'keyboard_to_input_intent: `keys` is required and must be a non-empty array of strings.'
+          ),
+          isError: true
+        };
+      }
+
+      const inputIntent = createInputIntentFromKeyboardV1({
+        tick: args.tick,
+        entityId: args.entityId,
+        keys: args.keys
+      });
+      const report = await validateInputIntentV1(inputIntent);
+
+      if (!report.ok) {
+        return {
+          content: toTextContent('keyboard_to_input_intent: generated input intent failed validation.'),
+          structuredContent: report,
+          isError: true
+        };
+      }
+
+      return {
+        content: toTextContent(`Input intent generated for ${inputIntent.entityId} at tick ${inputIntent.tick}.`),
+        structuredContent: inputIntent,
+        isError: false
+      };
+    }
+
     const targetPath = resolveRepoPath(args.path);
 
     if (params.name === 'load_save') {

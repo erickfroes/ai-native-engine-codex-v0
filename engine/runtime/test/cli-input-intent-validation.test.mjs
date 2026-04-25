@@ -66,3 +66,76 @@ test('validate-input-intent prints readable status in default mode', () => {
   assert.match(result.stdout, /Entity: \(missing\)/);
   assert.match(result.stdout, /\$\.entityId: is required/);
 });
+
+test('keyboard-to-input-intent prints valid input intent JSON for a movement chord', () => {
+  const result = runCli([
+    'keyboard-to-input-intent',
+    '--tick',
+    '1',
+    '--entity',
+    'player',
+    '--keys',
+    'ArrowRight,ArrowUp'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(JSON.parse(result.stdout), {
+    inputIntentVersion: 1,
+    tick: 1,
+    entityId: 'player',
+    actions: [
+      {
+        type: 'move',
+        axis: {
+          x: 1,
+          y: -1
+        }
+      }
+    ]
+  });
+});
+
+test('keyboard-to-input-intent fails predictably when --tick is invalid', () => {
+  const result = runCli([
+    'keyboard-to-input-intent',
+    '--tick',
+    'abc',
+    '--entity',
+    'player',
+    '--keys',
+    'ArrowRight'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /keyboard-to-input-intent: --tick must be an integer/);
+});
+
+test('keyboard-to-input-intent fails predictably when --entity is blank', () => {
+  const result = runCli([
+    'keyboard-to-input-intent',
+    '--tick',
+    '1',
+    '--entity',
+    '   ',
+    '--keys',
+    'ArrowRight'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /keyboard-to-input-intent: --entity must be a non-empty string/);
+});
+
+test('keyboard-to-input-intent fails predictably when --keys is empty', () => {
+  const result = runCli([
+    'keyboard-to-input-intent',
+    '--tick',
+    '1',
+    '--entity',
+    'player',
+    '--keys',
+    ','
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /keyboard-to-input-intent: --keys must contain at least one key/);
+});
