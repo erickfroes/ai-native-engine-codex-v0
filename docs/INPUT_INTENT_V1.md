@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Definir um contrato isolado para input headless orientado a intenção, sem alterar `input.keyboard`, `run-loop`, `simulate-state`, `Scene Document v1` ou contratos de saída já publicados.
+Definir um contrato de input headless orientado a intenção, com integração opt-in no loop headless sem alterar `Scene Document v1`, `simulate-state` ou o shape dos contratos de saída já publicados.
 
 ## Shape mínimo
 
@@ -38,11 +38,18 @@ Definir um contrato isolado para input headless orientado a intenção, sem alte
 - contrato de input headless isolado;
 - validação local no runtime;
 - fixtures mínimas válidas/inválidas.
+- integração opt-in com `runMinimalSystemLoop`, `run-loop` e `run_loop`.
+
+## Integração opt-in com o loop headless
+
+- runtime: `runMinimalSystemLoop(..., { inputIntent })` e `runMinimalSystemLoopWithTrace(..., { inputIntent })`.
+- CLI: `run-loop --input-intent <path>`.
+- MCP: `run_loop` com `inputIntentPath`.
+- sem input intent, `input.keyboard` mantém a semântica atual de `+3` por tick.
+- com input intent e `tick` correspondente ao tick executado, `input.keyboard` usa a soma de `actions[].axis.x + actions[].axis.y`, com normalização unsigned no estado final.
 
 ## Fora deste slice
 
 - integração com `Scene Document v1`;
-- integração com `run-loop`;
 - integração com `simulate-state`;
-- binding de teclado;
-- CLI e MCP.
+- binding de teclado para input em tempo real.
