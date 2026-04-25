@@ -432,6 +432,39 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       /render_browser_demo: `width` must be an integer >= 1 when provided\./
     );
 
+    const renderBrowserDemoInvalidHeightResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        height: 0
+      }
+    });
+
+    assert.equal(renderBrowserDemoInvalidHeightResponse.result.isError, true);
+    assert.match(
+      renderBrowserDemoInvalidHeightResponse.result.content[0].text,
+      /render_browser_demo: `height` must be an integer >= 1 when provided\./
+    );
+
+    const renderBrowserDemoMissingPathResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/does-not-exist.scene.json'
+      }
+    });
+
+    assert.equal(renderBrowserDemoMissingPathResponse.result.isError, true);
+    assert.equal(renderBrowserDemoMissingPathResponse.result.structuredContent.ok, false);
+    assert.equal(renderBrowserDemoMissingPathResponse.result.structuredContent.errorName, 'Error');
+    assert.match(
+      renderBrowserDemoMissingPathResponse.result.content[0].text,
+      /ENOENT: no such file or directory/
+    );
+    assert.match(
+      renderBrowserDemoMissingPathResponse.result.structuredContent.errorMessage,
+      /does-not-exist\.scene\.json/
+    );
+
     const replayResponseA = await client.request('tools/call', {
       name: 'run_replay',
       arguments: {
