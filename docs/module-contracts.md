@@ -287,3 +287,13 @@ Regra de compatibilidade:
 - A falha é reportada em `$.saveVersion`.
 - A mensagem atual é estável e usada pelos testes: `unsupported saveVersion: <valor>; supported: 1`.
 - Ainda não existe migração automática de save.
+
+## Minimal Save/Load v1
+
+- Save/load real continua opt-in e mínimo: só acontece via runtime `saveStateSnapshotV1` / `loadStateSnapshotSaveV1`, CLI `save-state` / `load-save`, ou MCP `save_state_snapshot` / `load_save`.
+- O payload salvo é um `State Snapshot v1` serializado em JSON canônico e determinístico.
+- O envelope `savegame v1` preenche `saveVersion`, `contentVersion`, `seed`, `checksum` e `payloadRef`.
+- `checksum` usa `sha256` sobre o payload canônico.
+- `payloadRef` é resolvido relativo ao diretório do save e não pode escapar desse diretório.
+- Sem usar save/load explicitamente, `run-loop`, `simulate-state`, `validate-save` e os demais comandos continuam com o mesmo comportamento padrão.
+- Fora de escopo neste slice: persistência automática, autosave, editor e slots avançados.
