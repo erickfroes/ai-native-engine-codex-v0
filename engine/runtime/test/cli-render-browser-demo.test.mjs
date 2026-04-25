@@ -99,3 +99,46 @@ test('render-browser-demo --json stays deterministic for the same scene options'
   assert.equal(second.status, 0, second.stderr);
   assert.equal(first.stdout, second.stdout);
 });
+
+test('render-browser-demo fails predictably for invalid width and height flags', () => {
+  const invalidWidth = runCli([
+    'render-browser-demo',
+    tutorialScenePath,
+    '--width',
+    '0'
+  ]);
+  const invalidHeight = runCli([
+    'render-browser-demo',
+    tutorialScenePath,
+    '--height',
+    '0'
+  ]);
+
+  assert.notEqual(invalidWidth.status, 0);
+  assert.match(invalidWidth.stderr, /buildRenderSnapshotV1: `width` must be an integer >= 1/);
+  assert.notEqual(invalidHeight.status, 0);
+  assert.match(invalidHeight.stderr, /buildRenderSnapshotV1: `height` must be an integer >= 1/);
+});
+
+test('render-browser-demo fails predictably when --out is present with an empty path value', () => {
+  const result = runCli([
+    'render-browser-demo',
+    tutorialScenePath,
+    '--out',
+    ''
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /render-browser-demo: --out must be a non-empty string/);
+});
+
+test('render-browser-demo fails predictably when the scene path does not exist', () => {
+  const result = runCli([
+    'render-browser-demo',
+    path.join(repoRoot, 'scenes', 'does-not-exist.scene.json')
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /ENOENT: no such file or directory/);
+  assert.match(result.stderr, /does-not-exist\.scene\.json/);
+});
