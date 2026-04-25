@@ -33,6 +33,20 @@ Definir um contrato headless e deterministico para declarar teclas por tick, sem
 - validacao local no runtime;
 - geracao posterior de `InputIntent v1` por tick a partir desse contrato.
 
+## Integracao minima
+
+- runtime: `runLoopWithKeyboardInputScriptV1(scenePath, scriptPath, { ticks, seed })`
+- CLI: `run-loop <scene> --ticks <n> --keyboard-script <path> [--seed <n>] [--json] [--trace]`
+- MCP: `run_loop` com `keyboardScriptPath`
+
+## Comportamento
+
+- sem script, `run-loop` e `run_loop` mantem exatamente o comportamento padrao atual;
+- com script, cada tick declarado gera um `InputIntent v1` via `createInputIntentFromKeyboardV1`;
+- ticks omitidos no script mantem a semantica padrao de `input.keyboard`;
+- o fluxo continua headless e deterministico;
+- nao ha captura real de teclado do sistema.
+
 ## Fora deste slice
 
 - captura real de teclado;

@@ -122,6 +122,20 @@ Contrato isolado para intenção de input headless, sem acoplamento com `Scene D
 - ver `docs/INPUT_INTENT_V1.md`.
 - schema formal: `docs/schemas/input-intent-v1.schema.json`.
 
+## Keyboard Input Script v1 (script headless por tick)
+
+Contrato isolado para declarar teclas por tick e gerar `InputIntent v1` de forma determinística:
+
+- ver `docs/KEYBOARD_INPUT_SCRIPT_V1.md`.
+- schema formal: `docs/schemas/keyboard-input-script-v1.schema.json`.
+
+Compatibilidade:
+
+- sem `keyboardScriptPath`, `run-loop` e `run_loop` mantêm o comportamento padrão atual;
+- com `keyboardScriptPath`, apenas ticks declarados no script sobrescrevem `input.keyboard`;
+- `LoopReport v1` e `LoopTrace v1` mantêm o mesmo shape;
+- não há captura real de teclado do sistema nesta versão.
+
 ## State Model v1 (interno)
 
 Representação estruturada de estado inicial derivada do Scene Document v1:

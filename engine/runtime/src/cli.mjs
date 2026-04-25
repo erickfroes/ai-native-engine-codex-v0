@@ -509,6 +509,7 @@ async function run() {
         seed,
         trace: withTrace
       });
+      const scene = await loadSceneFile(maybePath);
 
       if (withTrace) {
         if (asJson) {
@@ -528,7 +529,7 @@ async function run() {
 
       const loopReport = {
         loopReportVersion: 1,
-        scene: path.basename(maybePath, '.scene.json'),
+        scene: scene.metadata.name,
         ticks,
         seed: seed ?? 1337,
         ticksExecuted: result.ticksExecuted,
