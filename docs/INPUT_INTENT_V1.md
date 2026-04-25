@@ -37,6 +37,7 @@ Definir um contrato isolado para input headless orientado a intenção, sem alte
 
 - contrato de input headless isolado;
 - validação local no runtime;
+- CLI mínima de validação local;
 - fixtures mínimas válidas/inválidas.
 
 ## Fora deste slice
@@ -45,4 +46,4 @@ Definir um contrato isolado para input headless orientado a intenção, sem alte
 - integração com `run-loop`;
 - integração com `simulate-state`;
 - binding de teclado;
-- CLI e MCP.
+- MCP.
