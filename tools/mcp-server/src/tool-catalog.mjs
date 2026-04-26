@@ -419,6 +419,26 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_movement_blocking',
+    title: 'Inspect Movement Blocking',
+    description: 'Build MovementBlockingReport v1 from collision.bounds and an Input Intent v1 without mutating the run loop.',
+    inputSchema: {
+      type: 'object',
+      required: ['path', 'inputIntentPath'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        inputIntentPath: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root for an Input Intent v1 JSON file.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'simulate_state',
     title: 'Simulate State',
     description: 'Run opt-in State Simulation v1 processors over a scene-derived state model.',

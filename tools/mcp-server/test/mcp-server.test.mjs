@@ -175,6 +175,11 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     );
     assert.ok(inspectCollisionOverlapsTool);
     assert.deepEqual(inspectCollisionOverlapsTool.inputSchema.required, ['path']);
+    const inspectMovementBlockingTool = toolsResponse.result.tools.find(
+      (tool) => tool.name === 'inspect_movement_blocking'
+    );
+    assert.ok(inspectMovementBlockingTool);
+    assert.deepEqual(inspectMovementBlockingTool.inputSchema.required, ['path', 'inputIntentPath']);
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'simulate_state'));
 
     const callResponse = await client.request('tools/call', {
@@ -1509,6 +1514,70 @@ test('mcp inspect_collision_overlaps returns deterministic overlaps and empty re
       collisionOverlapReportVersion: 1,
       scene: 'collision-no-overlap-fixture',
       overlaps: []
+    });
+  } finally {
+    await client.close();
+  }
+});
+
+test('mcp inspect_movement_blocking returns blocked and unblocked reports', async () => {
+  const client = createClient();
+
+  try {
+    const initResponse = await client.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: {
+        name: 'node-test',
+        version: '1.0.0'
+      }
+    });
+
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    client.notify('notifications/initialized');
+
+    const blockedResponse = await client.request('tools/call', {
+      name: 'inspect_movement_blocking',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-blocked.scene.json',
+        inputIntentPath: './fixtures/input/move-player-right.intent.json'
+      }
+    });
+
+    assert.equal(blockedResponse.result.isError, false);
+    assert.deepEqual(blockedResponse.result.structuredContent, {
+      movementBlockingReportVersion: 1,
+      scene: 'movement-blocking-blocked-fixture',
+      entityId: 'player.hero',
+      inputIntentTick: 1,
+      attemptedMove: { x: 1, y: 0 },
+      from: { x: 0, y: 0 },
+      candidate: { x: 1, y: 0 },
+      final: { x: 0, y: 0 },
+      blocked: true,
+      blockingEntities: ['wall.block']
+    });
+
+    const unblockedResponse = await client.request('tools/call', {
+      name: 'inspect_movement_blocking',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-open.scene.json',
+        inputIntentPath: './fixtures/input/move-player-right.intent.json'
+      }
+    });
+
+    assert.equal(unblockedResponse.result.isError, false);
+    assert.deepEqual(unblockedResponse.result.structuredContent, {
+      movementBlockingReportVersion: 1,
+      scene: 'movement-blocking-open-fixture',
+      entityId: 'player.hero',
+      inputIntentTick: 1,
+      attemptedMove: { x: 1, y: 0 },
+      from: { x: 0, y: 0 },
+      candidate: { x: 1, y: 0 },
+      final: { x: 1, y: 0 },
+      blocked: false,
+      blockingEntities: []
     });
   } finally {
     await client.close();

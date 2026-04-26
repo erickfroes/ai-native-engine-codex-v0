@@ -37,7 +37,8 @@ import {
   simulateStateV1,
   simulateStateV1WithMutationTrace,
   buildCollisionBoundsReportV1,
-  buildCollisionOverlapReportV1
+  buildCollisionOverlapReportV1,
+  buildMovementBlockingReportV1
 } from './index.mjs';
 
 function printUsage() {
@@ -60,6 +61,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-state <path> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs inspect-collision-bounds <path> [--json]
   node engine/runtime/src/cli.mjs inspect-collision-overlaps <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-movement-blocking <path> --input-intent <path> [--json]
   node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--input-intent <path>] [--keyboard-script <path>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
@@ -762,6 +764,39 @@ async function run() {
           `- ${overlap.entityAId} <-> ${overlap.entityBId} solid=${overlap.solid}`
         );
       }
+    }
+
+    return;
+  }
+
+  if (command === 'inspect-movement-blocking') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    if (!hasFlag('--input-intent')) {
+      throw new Error('inspect-movement-blocking: --input-intent is required');
+    }
+
+    const inputIntentPath = readStringFlag('inspect-movement-blocking', '--input-intent', undefined);
+    const inputIntent = await loadValidatedInputIntentV1(inputIntentPath);
+    const report = await buildMovementBlockingReportV1(maybePath, { inputIntent });
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`Movement blocking report version: ${report.movementBlockingReportVersion}`);
+      console.log(`Entity: ${report.entityId}`);
+      console.log(`Input intent tick: ${report.inputIntentTick}`);
+      console.log(`Attempted move: ${report.attemptedMove.x},${report.attemptedMove.y}`);
+      console.log(`From: ${report.from.x},${report.from.y}`);
+      console.log(`Candidate: ${report.candidate.x},${report.candidate.y}`);
+      console.log(`Final: ${report.final.x},${report.final.y}`);
+      console.log(`Blocked: ${report.blocked}`);
+      console.log(`Blocking entities: ${report.blockingEntities.length === 0 ? '(none)' : report.blockingEntities.join(', ')}`);
     }
 
     return;
