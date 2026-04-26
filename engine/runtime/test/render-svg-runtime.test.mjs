@@ -8,6 +8,7 @@ import { buildRenderSnapshotV1, renderSnapshotToSvgV1 } from '../src/index.mjs';
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
 
 test('renderSnapshotToSvgV1 returns deterministic SVG for RenderSnapshot v1 rect draw calls', async () => {
   const snapshot = await buildRenderSnapshotV1(tutorialScenePath, { tick: 4, width: 320, height: 180 });
@@ -58,6 +59,25 @@ test('renderSnapshotToSvgV1 renders sprite drawCalls as deterministic rect fallb
 </svg>
 `
   );
+});
+
+test('renderSnapshotToSvgV1 renders tile.layer rect drawCalls without renderer changes', async () => {
+  const snapshot = await buildRenderSnapshotV1(tileLayerScenePath);
+  const svg = renderSnapshotToSvgV1(snapshot);
+
+  assert.match(
+    svg,
+    /<rect id="map\.ground\.tile\.0\.0" data-layer="-10" x="0" y="0" width="16" height="16" \/>/
+  );
+  assert.match(
+    svg,
+    /<rect id="map\.ground\.tile\.1\.3" data-layer="-10" x="48" y="16" width="16" height="16" \/>/
+  );
+  assert.match(
+    svg,
+    /<rect id="map\.ground\.tile\.2\.3" data-layer="-10" x="48" y="32" width="16" height="16" \/>/
+  );
+  assert.doesNotMatch(svg, /assetSrc|data-asset-id|data-kind="sprite"/);
 });
 
 test('renderSnapshotToSvgV1 preserves drawCall order already present in the snapshot', () => {
