@@ -1143,6 +1143,227 @@ test('buildRenderSnapshotV1 lets explicit viewport options override camera.viewp
   ]);
 });
 
+test('buildRenderSnapshotV1 offsets tile, sprite and rect fallback correctly for negative camera coordinates', async () => {
+  const assetManifest = await loadValidAssetManifest();
+  const snapshot = await buildRenderSnapshotV1(
+    {
+      metadata: { name: 'negative-camera-scene' },
+      entities: [
+        {
+          id: 'camera.main',
+          components: [
+            {
+              kind: 'camera.viewport',
+              fields: { x: -12, y: -8, width: 80, height: 60 }
+            }
+          ]
+        },
+        {
+          id: 'map.ground',
+          components: [
+            {
+              kind: 'tile.layer',
+              fields: {
+                tileWidth: 16,
+                tileHeight: 16,
+                columns: 1,
+                rows: 1,
+                layer: -2,
+                tiles: [[1]],
+                palette: {
+                  1: { kind: 'rect' }
+                }
+              }
+            }
+          ]
+        },
+        {
+          id: 'marker.rect',
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 4, y: 5 }
+            },
+            {
+              kind: 'sprite',
+              fields: { width: 8, height: 10, layer: 0 }
+            }
+          ]
+        },
+        {
+          id: 'player.hero',
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 0, y: 0 }
+            },
+            {
+              kind: 'visual.sprite',
+              fields: { assetId: 'player.sprite', layer: 3 }
+            }
+          ]
+        }
+      ]
+    },
+    { assetManifest }
+  );
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.viewport, {
+    width: 80,
+    height: 60
+  });
+  assert.deepEqual(snapshot.drawCalls, [
+    {
+      kind: 'rect',
+      id: 'map.ground.tile.0.0',
+      x: 12,
+      y: 8,
+      width: 16,
+      height: 16,
+      layer: -2
+    },
+    {
+      kind: 'rect',
+      id: 'marker.rect',
+      x: 16,
+      y: 13,
+      width: 8,
+      height: 10,
+      layer: 0
+    },
+    {
+      kind: 'sprite',
+      id: 'player.hero',
+      assetId: 'player.sprite',
+      assetSrc: 'images/player.png',
+      x: 12,
+      y: 8,
+      width: 16,
+      height: 16,
+      layer: 3
+    }
+  ]);
+});
+
+test('buildRenderSnapshotV1 keeps drawCalls outside the viewport with large camera displacement and preserves ordering', async () => {
+  const assetManifest = await loadValidAssetManifest();
+  const snapshot = await buildRenderSnapshotV1(
+    {
+      metadata: { name: 'far-camera-scene' },
+      entities: [
+        {
+          id: 'camera.main',
+          components: [
+            {
+              kind: 'camera.viewport',
+              fields: { x: 1000, y: 1000, width: 32, height: 24 }
+            }
+          ]
+        },
+        {
+          id: 'player.hero',
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 8, y: 8 }
+            },
+            {
+              kind: 'visual.sprite',
+              fields: { assetId: 'player.sprite', layer: 2 }
+            }
+          ]
+        },
+        {
+          id: 'far.rect',
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 40, y: 20 }
+            },
+            {
+              kind: 'sprite',
+              fields: { width: 6, height: 6, layer: 2 }
+            }
+          ]
+        },
+        {
+          id: 'map.ground',
+          components: [
+            {
+              kind: 'tile.layer',
+              fields: {
+                tileWidth: 16,
+                tileHeight: 16,
+                columns: 2,
+                rows: 1,
+                layer: -5,
+                tiles: [[1, 1]],
+                palette: {
+                  1: { kind: 'rect' }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    { assetManifest }
+  );
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.viewport, {
+    width: 32,
+    height: 24
+  });
+  assert.deepEqual(snapshot.drawCalls.map((drawCall) => `${drawCall.layer}:${drawCall.id}`), [
+    '-5:map.ground.tile.0.0',
+    '-5:map.ground.tile.0.1',
+    '2:far.rect',
+    '2:player.hero'
+  ]);
+  assert.deepEqual(snapshot.drawCalls, [
+    {
+      kind: 'rect',
+      id: 'map.ground.tile.0.0',
+      x: -1000,
+      y: -1000,
+      width: 16,
+      height: 16,
+      layer: -5
+    },
+    {
+      kind: 'rect',
+      id: 'map.ground.tile.0.1',
+      x: -984,
+      y: -1000,
+      width: 16,
+      height: 16,
+      layer: -5
+    },
+    {
+      kind: 'rect',
+      id: 'far.rect',
+      x: -960,
+      y: -980,
+      width: 6,
+      height: 6,
+      layer: 2
+    },
+    {
+      kind: 'sprite',
+      id: 'player.hero',
+      assetId: 'player.sprite',
+      assetSrc: 'images/player.png',
+      x: -992,
+      y: -992,
+      width: 16,
+      height: 16,
+      layer: 2
+    }
+  ]);
+});
+
 test('buildRenderSnapshotV1 fails predictably when a referenced assetId is missing from the manifest', async () => {
   const assetManifest = await loadValidAssetManifest();
 
