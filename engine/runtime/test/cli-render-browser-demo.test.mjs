@@ -10,6 +10,10 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
+const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
+const invalidAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'missing.asset-manifest.json');
+const invalidRelativeAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'invalid.non-positive-size.asset-manifest.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -36,6 +40,17 @@ function assertBrowserDemoHtmlSurface(html) {
   assert.match(
     html,
     /Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by 4 px per keydown\./
+  );
+}
+
+function assertBrowserDemoHtmlWithImageLoadingSurface(html) {
+  assert.match(html, /new Image\(\)/);
+  assert.match(html, /drawImage\(/);
+  assert.match(html, /assetSrc/);
+  assert.match(html, /requestAnimationFrame\(renderFrame\)/);
+  assert.doesNotMatch(
+    html,
+    /<script[^>]+src=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|Date\.now|new Date|performance\.now|localStorage/
   );
 }
 
@@ -103,6 +118,85 @@ test('render-browser-demo writes HTML to --out and returns a small JSON envelope
 
   const writtenHtml = await readFile(payload.outputPath, 'utf8');
   assert.equal(writtenHtml, payload.html);
+});
+
+test('render-browser-demo with --asset-manifest preserves envelope shape and includes image loading script', () => {
+  const result = runCli([
+    'render-browser-demo',
+    spriteScenePath,
+    '--tick',
+    '4',
+    '--width',
+    '64',
+    '--height',
+    '48',
+    '--asset-manifest',
+    validAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.browserDemoVersion, 1);
+  assert.equal(payload.scene, 'sprite-fixture');
+  assert.equal(payload.tick, 4);
+  assertBrowserDemoHtmlWithImageLoadingSurface(payload.html);
+  assert.match(payload.html, /"kind":"sprite"/);
+  assert.match(payload.html, /"assetId":"player\.sprite"/);
+  assert.match(payload.html, /"assetSrc":"(?:file:\/\/\/.*)?images\/player\.png"/);
+  assert.match(payload.html, /"assetSrc":"(?:file:\/\/\/.*)?images\/camera-icon\.png"/);
+});
+
+test('render-browser-demo with --asset-manifest is deterministic for repeated runs', () => {
+  const args = [
+    'render-browser-demo',
+    spriteScenePath,
+    '--tick',
+    '4',
+    '--width',
+    '64',
+    '--height',
+    '48',
+    '--asset-manifest',
+    validAssetManifestPath,
+    '--json'
+  ];
+
+  const first = runCli(args);
+  const second = runCli(args);
+
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(second.status, 0, second.stderr);
+  assert.equal(first.stdout, second.stdout);
+});
+
+test('render-browser-demo fails predictably when --asset-manifest path does not exist', () => {
+  const result = runCli([
+    'render-browser-demo',
+    spriteScenePath,
+    '--asset-manifest',
+    invalidAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /ENOENT: no such file or directory/);
+  assert.match(result.stderr, /missing\.asset-manifest\.json/);
+});
+
+test('render-browser-demo fails predictably when --asset-manifest is invalid', () => {
+  const result = runCli([
+    'render-browser-demo',
+    spriteScenePath,
+    '--asset-manifest',
+    invalidRelativeAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /asset manifest is invalid:/);
 });
 
 test('render-browser-demo --json keeps the same envelope shape when --out is omitted', () => {
