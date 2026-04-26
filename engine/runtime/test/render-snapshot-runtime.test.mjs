@@ -152,6 +152,14 @@ test('buildRenderSnapshotV1 keeps rect fallback when no asset manifest is provid
   ]);
 });
 
+test('buildRenderSnapshotV1 keeps old scenes without visual.sprite on rect fallback', async () => {
+  const snapshot = await buildRenderSnapshotV1(tutorialScenePath);
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.drawCalls.map((drawCall) => drawCall.kind), ['rect', 'rect']);
+  assert.deepEqual(snapshot.drawCalls.map((drawCall) => drawCall.id), ['camera.main', 'player.hero']);
+});
+
 test('buildRenderSnapshotV1 emits sprite drawCalls when asset manifest is provided explicitly', async () => {
   const assetManifest = await loadValidAssetManifest();
   const snapshot = await buildRenderSnapshotV1(
@@ -305,6 +313,64 @@ test('buildRenderSnapshotV1 sorts mixed rect and sprite drawCalls deterministica
   ]);
 });
 
+test('buildRenderSnapshotV1 sorts mixed visual.sprite and rect drawCalls by layer then id', async () => {
+  const assetManifest = await loadValidAssetManifest();
+  const snapshot = await buildRenderSnapshotV1(
+    {
+      metadata: { name: 'mixed-visual-scene' },
+      entities: [
+        {
+          id: 'z.visual',
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 9, y: 9 }
+            },
+            {
+              kind: 'visual.sprite',
+              fields: { assetId: 'player.sprite', layer: 2 }
+            }
+          ]
+        },
+        {
+          id: 'a.rect',
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 1, y: 2 }
+            },
+            {
+              kind: 'sprite',
+              fields: { layer: 2, width: 8, height: 8 }
+            }
+          ]
+        },
+        {
+          id: 'front.visual',
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 3, y: 4 }
+            },
+            {
+              kind: 'visual.sprite',
+              fields: { assetId: 'camera.icon', layer: -1 }
+            }
+          ]
+        }
+      ]
+    },
+    { assetManifest }
+  );
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.drawCalls.map((drawCall) => `${drawCall.layer}:${drawCall.id}:${drawCall.kind}`), [
+    '-1:front.visual:sprite',
+    '2:a.rect:rect',
+    '2:z.visual:sprite'
+  ]);
+});
+
 test('buildRenderSnapshotV1 accepts assetManifestPath and falls back to manifest dimensions', async () => {
   const snapshot = await buildRenderSnapshotV1(
     {
@@ -364,6 +430,18 @@ test('buildRenderSnapshotV1 emits sprite drawCalls from visual.sprite with asset
       layer: 2
     }
   ]);
+});
+
+test('buildRenderSnapshotV1 lets visual.sprite dimensions override manifest dimensions', async () => {
+  const snapshot = await buildRenderSnapshotV1(
+    visualSpriteScenePath,
+    { assetManifestPath: visualSpriteAssetManifestPath }
+  );
+
+  assertRenderSnapshotV1(snapshot);
+  assert.equal(snapshot.drawCalls[0].assetId, 'player.sprite');
+  assert.equal(snapshot.drawCalls[0].width, 20);
+  assert.equal(snapshot.drawCalls[0].height, 24);
 });
 
 test('buildRenderSnapshotV1 uses asset dimensions when visual.sprite omits size', async () => {
