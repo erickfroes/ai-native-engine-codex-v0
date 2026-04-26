@@ -11,6 +11,7 @@ const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
+const cameraViewportScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'camera-viewport.scene.json');
 const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const invalidVisualSpriteScenePath = path.join(
@@ -28,6 +29,14 @@ const invalidTileLayerScenePath = path.join(
   'test',
   'fixtures',
   'invalid_tile_layer_unknown_palette.scene.json'
+);
+const invalidCameraViewportScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'invalid_camera_viewport_x.scene.json'
 );
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
@@ -249,6 +258,84 @@ test('render-snapshot supports tile.layer without changing JSON shape', () => {
     height: 16,
     layer: -10
   });
+});
+
+test('render-snapshot applies camera.viewport offsets and viewport dimensions deterministically', () => {
+  const first = runCli([
+    'render-snapshot',
+    cameraViewportScenePath,
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--json'
+  ]);
+  const second = runCli([
+    'render-snapshot',
+    cameraViewportScenePath,
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(second.status, 0, second.stderr);
+
+  const firstSnapshot = JSON.parse(first.stdout);
+  const secondSnapshot = JSON.parse(second.stdout);
+  assertRenderSnapshotV1(firstSnapshot);
+  assert.deepEqual(firstSnapshot, secondSnapshot);
+  assert.deepEqual(firstSnapshot.viewport, { width: 160, height: 90 });
+  assert.deepEqual(firstSnapshot.drawCalls, [
+    {
+      kind: 'rect',
+      id: 'map.ground.tile.0.0',
+      x: -8,
+      y: -4,
+      width: 16,
+      height: 16,
+      layer: -10
+    },
+    {
+      kind: 'rect',
+      id: 'map.ground.tile.0.1',
+      x: 8,
+      y: -4,
+      width: 16,
+      height: 16,
+      layer: -10
+    },
+    {
+      kind: 'rect',
+      id: 'map.ground.tile.1.0',
+      x: -8,
+      y: 12,
+      width: 16,
+      height: 16,
+      layer: -10
+    },
+    {
+      kind: 'sprite',
+      id: 'player.hero',
+      assetId: 'player.sprite',
+      assetSrc: 'images/player.png',
+      x: 22,
+      y: 36,
+      width: 20,
+      height: 24,
+      layer: 2
+    }
+  ]);
+});
+
+test('render-snapshot fails predictably when camera.viewport is invalid', () => {
+  const result = runCli([
+    'render-snapshot',
+    invalidCameraViewportScenePath,
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /SceneValidationError: Scene validation failed for/);
+  assert.match(result.stderr, /invalid_camera_viewport_x\.scene\.json/);
 });
 
 test('render-snapshot fails predictably for invalid numeric options', () => {

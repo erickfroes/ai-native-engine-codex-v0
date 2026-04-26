@@ -1282,3 +1282,91 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     await client.close();
   }
 });
+
+test('mcp render_snapshot preserves camera viewport offsets and fails predictably for invalid camera scenes', async () => {
+  const client = createClient();
+
+  try {
+    const initResponse = await client.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: {
+        name: 'node-test',
+        version: '1.0.0'
+      }
+    });
+
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    client.notify('notifications/initialized');
+
+    const cameraSnapshotResponse = await client.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './engine/runtime/test/fixtures/camera-viewport.scene.json',
+        assetManifestPath: './fixtures/assets/visual-sprite.asset-manifest.json'
+      }
+    });
+
+    assert.equal(cameraSnapshotResponse.result.isError, false);
+    assertRenderSnapshotV1(cameraSnapshotResponse.result.structuredContent);
+    assert.deepEqual(cameraSnapshotResponse.result.structuredContent.viewport, {
+      width: 160,
+      height: 90
+    });
+    assert.deepEqual(cameraSnapshotResponse.result.structuredContent.drawCalls, [
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.0.0',
+        x: -8,
+        y: -4,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.0.1',
+        x: 8,
+        y: -4,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.1.0',
+        x: -8,
+        y: 12,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'sprite',
+        id: 'player.hero',
+        assetId: 'player.sprite',
+        assetSrc: 'images/player.png',
+        x: 22,
+        y: 36,
+        width: 20,
+        height: 24,
+        layer: 2
+      }
+    ]);
+
+    const invalidCameraResponse = await client.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './engine/runtime/test/fixtures/invalid_camera_viewport_x.scene.json'
+      }
+    });
+
+    assert.equal(invalidCameraResponse.result.isError, true);
+    assert.equal(invalidCameraResponse.result.structuredContent.ok, false);
+    assert.equal(invalidCameraResponse.result.structuredContent.errorName, 'SceneValidationError');
+    assert.match(invalidCameraResponse.result.content[0].text, /Scene validation failed for/);
+    assert.match(invalidCameraResponse.result.structuredContent.errorMessage, /invalid_camera_viewport_x\.scene\.json/);
+  } finally {
+    await client.close();
+  }
+});
