@@ -10,6 +10,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `collision.bounds` e CollisionBoundsReport v1: concluidos.
 - CollisionOverlapReport v1: concluido.
 - MovementBlockingReport v1: concluido e endurecido.
+- Tile Collision v1: concluido como relatorio diagnostico de tiles solidos.
 
 ## O que o Codex recebe
 
@@ -21,6 +22,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - CollisionBoundsReport v1;
 - CollisionOverlapReport v1;
 - MovementBlockingReport v1;
+- TileCollisionReport v1;
 - suites cross-interface;
 - roadmap progressivo ate 3D AAA;
 - estrategia de subagentes e skills.
@@ -35,7 +37,8 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 6. `docs/COLLISION_BOUNDS_V1.md`
 7. `docs/COLLISION_OVERLAP_V1.md`
 8. `docs/MOVEMENT_BLOCKING_V1.md`
-9. `AGENTS.md`
+9. `docs/TILE_COLLISION_V1.md`
+10. `AGENTS.md`
 
 ## Baseline obrigatorio
 
@@ -50,12 +53,11 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Tile Collision v1.
-2. Movement Blocking opt-in no `run-loop` usando colisao com entidade/tile.
-3. Browser Demo usando blocking real.
-4. Fechamento V1 Small 2D.
-5. UI/audio/animation basicos para V2.
-6. 3D indie apenas depois de V1/V2 demonstradas.
+1. Movement Blocking opt-in no `run-loop` usando colisao com entidade/tile.
+2. Browser Demo usando blocking real.
+3. Fechamento V1 Small 2D.
+4. UI/audio/animation basicos para V2.
+5. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Uso de subagentes
 

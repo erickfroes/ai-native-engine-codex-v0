@@ -46,7 +46,7 @@ Capacidades alvo:
 - CollisionBoundsReport v1 concluido;
 - CollisionOverlapReport v1 concluido;
 - MovementBlockingReport v1 concluido e endurecido;
-- Tile Collision v1;
+- Tile Collision v1 concluido;
 - movimento bloqueado opt-in no `run-loop`;
 - Browser Demo com blocking real;
 - UI/HUD simples;
@@ -203,8 +203,7 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Tile Collision v1.
-2. Movement Blocking opt-in no `run-loop`.
-3. Browser Demo com blocking real.
-4. Fechamento Meta 3 / V1 small 2D.
-5. UI/audio/animation basicos para V2.
+1. Movement Blocking opt-in no `run-loop`.
+2. Browser Demo com blocking real.
+3. Fechamento Meta 3 / V1 small 2D.
+4. UI/audio/animation basicos para V2.

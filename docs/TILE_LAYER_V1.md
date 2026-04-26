@@ -26,7 +26,7 @@ Declarar uma camada simples de mapa/tile grid na cena e transforma-la em draw ca
     ],
     "palette": {
       "0": { "kind": "empty" },
-      "1": { "kind": "rect", "width": 16, "height": 16 }
+      "1": { "kind": "rect", "width": 16, "height": 16, "solid": true }
     }
   }
 }
@@ -45,8 +45,10 @@ Declarar uma camada simples de mapa/tile grid na cena e transforma-la em draw ca
 - entradas de palette `kind: "empty"` ocupam a celula na grade, mas nao geram drawCall.
 - entradas de palette `kind: "rect"` geram drawCall `rect`.
 - `palette.*.width` e `palette.*.height` sao opcionais; quando presentes, sobrescrevem o tamanho visual daquele tile. Quando ausentes, usam `tileWidth` e `tileHeight`.
+- `palette.*.solid` e opcional em entradas `kind: "rect"`; quando presente, deve ser booleano e alimenta apenas Tile Collision v1.
+- `solid` ausente equivale a `false`.
 - `fields.layer` e opcional; quando ausente, usa `0`.
-- campos extras nao sao permitidos nos niveis controlados; `tile.layer` v1 cobre apenas render declarativo.
+- campos extras nao sao permitidos nos niveis controlados; `tile.layer` v1 cobre render declarativo e a marcacao minima de tile solido para diagnostico.
 
 ## Render
 
@@ -70,12 +72,14 @@ Depois da expansao, as draw calls continuam ordenadas por `layer` e depois por `
 - Render SVG v1, Browser Playable Demo v1 e Canvas 2D local consomem os `rect` drawCalls gerados sem backend novo.
 - o HTML da Browser Demo continua autocontido, sem `fetch`, rede, scripts externos, servidor ou WebGL.
 - `tile.layer` v1 e intencionalmente pequeno; nao define budget validado para mapas densos grandes nem modelo de chunks.
+- Tile Collision v1 pode inspecionar entries `rect` com `solid: true`, mas isso nao altera drawCalls nem renderers.
 
 ## Fora de escopo
 
 - editor de mapa;
 - autotile;
-- colisao;
+- bloqueio de movimento por tile;
+- resolucao de colisao;
 - pathfinding;
 - chunks ou chunk streaming;
 - atlas/UV/materials;

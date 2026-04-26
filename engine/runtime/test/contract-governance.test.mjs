@@ -10,7 +10,8 @@ import {
   validateLoopScene,
   createLoopExecutionPlan,
   getSystemRegistryV1,
-  getSystemPhaseRegistryV1
+  getSystemPhaseRegistryV1,
+  buildTileCollisionReportV1
 } from '../src/index.mjs';
 import { assertLoopReportV1 } from './helpers/assertLoopReportV1.mjs';
 import { assertLoopTraceV1 } from './helpers/assertLoopTraceV1.mjs';
@@ -19,6 +20,7 @@ import { assertExecutionPlanV1 } from './helpers/assertExecutionPlanV1.mjs';
 import { assertStateMutationTraceV1 } from './helpers/assertStateMutationTraceV1.mjs';
 import { assertSystemRegistryV1 } from './helpers/assertSystemRegistryV1.mjs';
 import { assertSystemPhaseRegistryV1 } from './helpers/assertSystemPhaseRegistryV1.mjs';
+import { assertTileCollisionReportV1 } from './helpers/assertTileCollisionReportV1.mjs';
 import { simulateStateV1WithMutationTrace } from '../src/index.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
@@ -55,6 +57,11 @@ test('contract governance: v1 contract shapes remain strict and aligned', async 
     { ticks: 3, seed: 10 }
   );
   assertStateMutationTraceV1(mutationTraceEnvelope.mutationTrace);
+
+  const tileCollisionReport = await buildTileCollisionReportV1(
+    path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'tile-collision-solid.scene.json')
+  );
+  assertTileCollisionReportV1(tileCollisionReport);
 
   assert.equal(plan.estimated.finalState, report.finalState);
   assert.equal(
