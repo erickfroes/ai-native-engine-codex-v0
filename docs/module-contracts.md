@@ -181,21 +181,10 @@ Compatibilidade:
 
 - deriva de `Render SVG v1` sem alterar `RenderSnapshot v1`;
 - nao altera `run-loop`;
-- nao adiciona backend grafico real;
-- nao possui tool MCP dedicada nesta versao.
-
-## Canvas2D Demo v1 (visualizacao estatica no navegador)
-
-Contrato minimo para embutir `RenderSnapshot v1` em HTML deterministico com Canvas 2D nativo:
-
-- ver `docs/CANVAS2D_DEMO_V1.md`.
-
-Compatibilidade:
-
-- deriva de `RenderSnapshot v1` sem alterar `Render SVG v1` ou `SVG Demo HTML v1`;
-- nao altera `run-loop`;
-- nao usa Pixi, Three ou WebGL;
-- nao adiciona input real ou editor nesta versao.
+- nao altera `InputIntent v1`;
+- nao altera Save/Load v1.
+- o loop visual do browser e local ao HTML e nao avanca simulacao sozinho.
+- foco do canvas e controles locais de pause/reset pertencem ao HTML autocontido, nao ao loop headless.
 
 ## State Model v1 (interno)
 

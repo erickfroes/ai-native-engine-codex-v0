@@ -24,14 +24,36 @@ function extractInlineScript(html) {
 function createCanvasHarness(html) {
   const script = extractInlineScript(html);
   const operations = [];
-  const listeners = new Map();
+  const canvasListeners = new Map();
+  const pauseButtonListeners = new Map();
+  const resetButtonListeners = new Map();
+  const animationFrames = [];
+  const cancelledAnimationFrames = new Set();
+  let nextAnimationFrameHandle = 1;
   const statusElement = { textContent: '' };
   const positionElement = { textContent: '' };
   const dataElement = { textContent: extractInlineJson(html) };
-  const resetButton = {
-    disabled: false,
+  const pauseButton = {
+    textContent: '',
     addEventListener(eventName, handler) {
-      listeners.set(`reset:${eventName}`, handler);
+      pauseButtonListeners.set(eventName, handler);
+    },
+    click() {
+      const handler = pauseButtonListeners.get('click');
+      if (handler) {
+        handler({ preventDefault() {} });
+      }
+    }
+  };
+  const resetButton = {
+    addEventListener(eventName, handler) {
+      resetButtonListeners.set(eventName, handler);
+    },
+    click() {
+      const handler = resetButtonListeners.get('click');
+      if (handler) {
+        handler({ preventDefault() {} });
+      }
     }
   };
   const context2d = {
@@ -57,7 +79,7 @@ function createCanvasHarness(html) {
       return context2d;
     },
     addEventListener(eventName, handler) {
-      listeners.set(eventName, handler);
+      canvasListeners.set(eventName, handler);
     },
     focus() {
       this.focusedCount += 1;
@@ -66,6 +88,19 @@ function createCanvasHarness(html) {
 
   vm.runInNewContext(script, {
     JSON,
+    requestAnimationFrame(callback) {
+      const handle = nextAnimationFrameHandle;
+      nextAnimationFrameHandle += 1;
+      animationFrames.push({ handle, callback });
+      return handle;
+    },
+    cancelAnimationFrame(handle) {
+      cancelledAnimationFrames.add(handle);
+      const frameIndex = animationFrames.findIndex((frame) => frame.handle === handle);
+      if (frameIndex !== -1) {
+        animationFrames.splice(frameIndex, 1);
+      }
+    },
     document: {
       getElementById(id) {
         if (id === 'browser-playable-demo-data') {
@@ -74,8 +109,8 @@ function createCanvasHarness(html) {
         if (id === 'browser-playable-demo-canvas') {
           return canvas;
         }
-        if (id === 'browser-playable-demo-position') {
-          return positionElement;
+        if (id === 'browser-playable-demo-pause') {
+          return pauseButton;
         }
         if (id === 'browser-playable-demo-reset') {
           return resetButton;
@@ -89,13 +124,29 @@ function createCanvasHarness(html) {
   });
 
   return {
+    animationFrames,
     canvas,
-    listeners,
+    canvasListeners,
+    flushAnimationFrames(count) {
+      for (let index = 0; index < count; index += 1) {
+        const frame = animationFrames.shift();
+        assert.ok(frame, 'expected a scheduled animation frame');
+        if (!cancelledAnimationFrames.has(frame.handle)) {
+          frame.callback();
+        }
+      }
+    },
     operations,
-    positionElement,
+    pauseButton,
     resetButton,
     statusElement
   };
+}
+
+function extractControlledPosition(statusText) {
+  const match = statusText.match(/at \((-?\d+), (-?\d+)\)/);
+  assert.ok(match, `expected controlled position in status: ${statusText}`);
+  return [Number(match[1]), Number(match[2])];
 }
 
 function createTutorialSnapshot() {
@@ -156,6 +207,10 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.match(htmlA, /resetButton\.addEventListener\("click"/);
   assert.doesNotMatch(htmlA, /localStorage|requestAnimationFrame/);
   assert.match(htmlA, /addEventListener\("keydown"/);
+  assert.match(htmlA, /id="browser-playable-demo-pause"/);
+  assert.match(htmlA, /requestAnimationFrame\(renderFrame\)/);
+  assert.match(htmlA, /scheduleRedrawLoop\(\)/);
+  assert.match(htmlA, /id="browser-playable-demo-reset"/);
   assert.match(htmlA, /ArrowRight/);
   assert.match(htmlA, /KeyD/);
   assert.match(htmlA, /ArrowLeft/);
@@ -165,9 +220,39 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.match(htmlA, /ArrowDown/);
   assert.match(htmlA, /KeyS/);
   assert.match(htmlA, /4 px per keydown/);
+  assert.match(htmlA, /Pause rendering/);
+  assert.match(htmlA, />Reset<\/button>/);
   assert.doesNotMatch(htmlA, /<script[^>]+src=/);
-  assert.doesNotMatch(htmlA, /https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|Date\.now|new Date|performance\.now|toISOString/);
+  assert.doesNotMatch(htmlA, /https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|Date\.now|new Date|performance\.now|toISOString|localStorage/);
   assert.equal(BROWSER_PLAYABLE_DEMO_VERSION, 1);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 keeps canvas focus affordances and stable local instructions', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'tutorial Browser Playable Demo',
+    renderSnapshot: createTutorialSnapshot(),
+    metadata: {
+      controllableEntityId: 'player.hero',
+      stepPx: DEFAULT_BROWSER_PLAYABLE_STEP_PX
+    }
+  });
+  const harness = createCanvasHarness(html);
+  const click = harness.canvasListeners.get('click');
+  const focusCountBeforeClick = harness.canvas.focusedCount;
+
+  assert.match(html, /tabindex="0"/);
+  assert.match(html, /aria-label="Browser playable demo canvas"/);
+  assert.match(
+    html,
+    /Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by 4 px per keydown\./
+  );
+  assert.match(html, />Pause rendering<\/button>/);
+  assert.match(html, />Reset<\/button>/);
+  assert.equal(typeof click, 'function');
+
+  click();
+
+  assert.equal(harness.canvas.focusedCount, focusCountBeforeClick + 1);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 renders deterministic empty HTML when drawCalls is empty', () => {
@@ -247,7 +332,7 @@ test('renderBrowserPlayableDemoHtmlV1 escapes HTML and JSON payload safely', () 
   );
   assert.doesNotMatch(html, /<\/script><script>/);
   assert.doesNotMatch(html, /<script[^>]+src=|<link[^>]+href=|https?:\/\//);
-  assert.doesNotMatch(html, /Date\.now|new Date|performance\.now|fetch\(|XMLHttpRequest|WebSocket|toISOString/);
+  assert.doesNotMatch(html, /Date\.now|new Date|performance\.now|fetch\(|XMLHttpRequest|WebSocket|toISOString|localStorage/);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 preserves snapshot order for multiple rect draw calls', () => {
@@ -325,7 +410,7 @@ test('renderBrowserPlayableDemoHtmlV1 falls back to the first rect when player.h
     }
   });
   const harness = createCanvasHarness(html);
-  const keydown = harness.listeners.get('keydown');
+  const keydown = harness.canvasListeners.get('keydown');
 
   assert.equal(typeof keydown, 'function');
   assert.match(html, /data-controllable-entity="camera\.main"/);
@@ -347,7 +432,7 @@ test('renderBrowserPlayableDemoHtmlV1 moves the nominated controllable rect by t
     }
   });
   const harness = createCanvasHarness(html);
-  const keydown = harness.listeners.get('keydown');
+  const keydown = harness.canvasListeners.get('keydown');
 
   assert.equal(typeof keydown, 'function');
   assert.equal(harness.canvas.focusedCount > 0, true);
@@ -370,7 +455,7 @@ test('renderBrowserPlayableDemoHtmlV1 moves the nominated controllable rect by t
   assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 0\)/);
 });
 
-test('renderBrowserPlayableDemoHtmlV1 resets the controllable rect to its initial position', () => {
+test('renderBrowserPlayableDemoHtmlV1 ignores invalid keydown events without moving the controlled rect', () => {
   const html = renderBrowserPlayableDemoHtmlV1({
     title: 'tutorial Browser Playable Demo',
     renderSnapshot: createTutorialSnapshot(),
@@ -379,25 +464,109 @@ test('renderBrowserPlayableDemoHtmlV1 resets the controllable rect to its initia
     }
   });
   const harness = createCanvasHarness(html);
-  const keydown = harness.listeners.get('keydown');
-  const reset = harness.listeners.get('reset:click');
+  const keydown = harness.canvasListeners.get('keydown');
+  const initialPosition = extractControlledPosition(harness.statusElement.textContent);
+  let prevented = false;
 
-  assert.equal(typeof keydown, 'function');
-  assert.equal(typeof reset, 'function');
-  assert.equal(harness.resetButton.disabled, false);
+  keydown({
+    code: 'KeyQ',
+    preventDefault() {
+      prevented = true;
+    }
+  });
+
+  assert.equal(prevented, false);
+  assert.deepEqual(extractControlledPosition(harness.statusElement.textContent), initialPosition);
+  assert.match(harness.statusElement.textContent, /Inputs 0/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 keeps redrawing through requestAnimationFrame without moving state on its own', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'tutorial Browser Playable Demo',
+    renderSnapshot: createTutorialSnapshot(),
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const harness = createCanvasHarness(html);
+  const initialOperationCount = harness.operations.length;
+
+  assert.equal(harness.animationFrames.length, 1);
+
+  harness.flushAnimationFrames(3);
+
+  assert.equal(harness.animationFrames.length, 1);
+  assert.ok(harness.operations.length > initialOperationCount);
+  assert.match(harness.statusElement.textContent, /Inputs 0/);
+  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(0, 0\)/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 toggles pause and resume for the local redraw loop without moving state', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'tutorial Browser Playable Demo',
+    renderSnapshot: createTutorialSnapshot(),
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
 
   keydown({
     code: 'ArrowRight',
     preventDefault() {}
   });
-  reset();
 
+  const movedPosition = extractControlledPosition(harness.statusElement.textContent);
+
+  assert.equal(harness.pauseButton.textContent, 'Pause rendering');
+  assert.equal(harness.animationFrames.length, 1);
+
+  harness.pauseButton.click();
+
+  assert.equal(harness.pauseButton.textContent, 'Resume rendering');
+  assert.equal(harness.animationFrames.length, 0);
+  assert.deepEqual(extractControlledPosition(harness.statusElement.textContent), movedPosition);
+
+  harness.pauseButton.click();
+
+  assert.equal(harness.pauseButton.textContent, 'Pause rendering');
+  assert.equal(harness.animationFrames.length, 1);
+  harness.flushAnimationFrames(1);
+  assert.deepEqual(extractControlledPosition(harness.statusElement.textContent), movedPosition);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 reset button restores the initial rect position and HUD', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'tutorial Browser Playable Demo',
+    renderSnapshot: createTutorialSnapshot(),
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+  keydown({
+    code: 'ArrowDown',
+    preventDefault() {}
+  });
+
+  assert.match(harness.statusElement.textContent, /Inputs 2/);
+  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 4\)/);
+
+  harness.resetButton.click();
+
+  assert.match(harness.statusElement.textContent, /Inputs 0/);
+  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(0, 0\)/);
   const highlightedRects = harness.operations.filter(
     (entry) => entry.method === 'fillRect' && entry.fillStyle === '#b74f2a'
   );
   assert.deepEqual(highlightedRects.at(-1).args, [0, 0, 16, 16]);
-  assert.equal(harness.positionElement.textContent, 'Position: x 0, y 0');
-  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(0, 0\)/);
 });
 
 test('createBrowserPlayableDemoMetadataV1 picks the first scene rect before falling back to snapshot order', () => {

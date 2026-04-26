@@ -62,6 +62,33 @@ function createClient() {
   return { request, notify, close };
 }
 
+function assertBrowserDemoStructuredContent(payload) {
+  assert.deepEqual(Object.keys(payload), ['browserDemoVersion', 'scene', 'tick', 'html']);
+  assert.equal(payload.browserDemoVersion, 1);
+  assert.equal(payload.scene, 'tutorial');
+  assert.equal(payload.tick, 4);
+  assert.equal('outputPath' in payload, false);
+  assert.match(payload.html, /^<!DOCTYPE html>/);
+  assert.match(
+    payload.html,
+    /<canvas id="browser-playable-demo-canvas" data-browser-demo-version="1" data-scene="tutorial" data-tick="4" data-controllable-entity="player\.hero" width="320" height="180" tabindex="0"/
+  );
+  assert.match(payload.html, /aria-label="Browser playable demo canvas"/);
+  assert.match(payload.html, /requestAnimationFrame\(renderFrame\)/);
+  assert.match(payload.html, />Pause rendering<\/button>/);
+  assert.match(payload.html, /Resume rendering/);
+  assert.match(payload.html, />Reset<\/button>/);
+  assert.match(
+    payload.html,
+    /Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by 4 px per keydown\./
+  );
+  assert.match(payload.html, /addEventListener\("keydown"/);
+  assert.doesNotMatch(
+    payload.html,
+    /<script[^>]+src=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|Date\.now|new Date|performance\.now|localStorage/
+  );
+}
+
 test('mcp server lists tools, validates scenes, emits snapshots and runs deterministic replay', async () => {
   const client = createClient();
 
@@ -440,20 +467,9 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       }
     });
 
-    assert.equal(renderCanvasDemoResponseA.result.isError, false);
-    assert.deepEqual(
-      Object.keys(renderCanvasDemoResponseA.result.structuredContent).sort(),
-      ['canvasDemoVersion', 'html', 'scene', 'tick']
-    );
-    assert.equal(renderCanvasDemoResponseA.result.structuredContent.canvasDemoVersion, 1);
-    assert.equal(renderCanvasDemoResponseA.result.structuredContent.scene, 'tutorial');
-    assert.equal(renderCanvasDemoResponseA.result.structuredContent.tick, 4);
-    assert.match(renderCanvasDemoResponseA.result.structuredContent.html, /<!DOCTYPE html>/);
-    assert.match(renderCanvasDemoResponseA.result.structuredContent.html, /<canvas id="render-canvas-demo"/);
-    assert.match(
-      renderCanvasDemoResponseA.result.structuredContent.html,
-      /context\.strokeRect\(drawCall\.x, drawCall\.y, drawCall\.width, drawCall\.height\);/
-    );
+    assert.equal(renderBrowserDemoResponseA.result.isError, false);
+    assertBrowserDemoStructuredContent(renderBrowserDemoResponseA.result.structuredContent);
+    assertBrowserDemoStructuredContent(renderBrowserDemoResponseB.result.structuredContent);
     assert.deepEqual(
       renderCanvasDemoResponseA.result.structuredContent,
       renderCanvasDemoResponseB.result.structuredContent
