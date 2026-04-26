@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "movement-blocking-non-solid-fixture"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "player.hero",
+      "name": "Player",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "kind": "collision.bounds",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "width": 8,
+            "height": 8,
+            "solid": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ghost.zone",
+      "name": "Ghost Zone",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 1,
+            "y": 0
+          }
+        },
+        {
+          "kind": "collision.bounds",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "width": 8,
+            "height": 8,
+            "solid": false
+          }
+        }
+      ]
+    }
+  ],
+  "assetRefs": []
+}
