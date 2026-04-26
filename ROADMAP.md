@@ -89,10 +89,11 @@ Objetivo: transformar a engine visual/interativa minima em uma engine capaz de p
 
 Entregas alvo:
 
-- `collision.bounds` e `CollisionBoundsReport v1`;
-- `CollisionOverlapReport v1`;
-- bloqueio de movimento opt-in por colisao;
-- colisao com `tile.layer` solido;
+- `collision.bounds` e `CollisionBoundsReport v1` concluidos;
+- `CollisionOverlapReport v1` concluido;
+- `MovementBlockingReport v1` concluido e endurecido;
+- `tile.layer` solido / Tile Collision v1 como proximo bloco;
+- bloqueio de movimento opt-in no `run-loop` apos Tile Collision v1;
 - camera/viewport endurecida;
 - Browser Demo usando regras de gameplay reais;
 - UI/HUD declarativo minimo;
@@ -100,6 +101,8 @@ Entregas alvo:
 - export de demo jogavel HTML;
 - matriz de regressao visual/headless;
 - pacote Codex com prompts/skills/subagentes para criar um jogo 2D pequeno.
+
+Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1` e `MovementBlockingReport v1` ja estao implementados e endurecidos. O proximo bloco recomendado e Tile Collision v1, sem fisica completa e sem pathfinding.
 
 Criterio de conclusao:
 
@@ -113,6 +116,14 @@ Subagentes recomendados:
 - `render_architect` para impacto visual;
 - `perf_auditor` para regressao/determinismo;
 - `qa_contract_auditor` para shape de reports, CLI/MCP e schemas.
+
+Linha de trabalho atual recomendada:
+
+1. Tile Collision v1.
+2. Movement Blocking opt-in no `run-loop`.
+3. Browser Demo com blocking real.
+4. Fechamento Meta 3 / V1 small 2D.
+5. UI/audio/animation basicos para V2.
 
 ---
 

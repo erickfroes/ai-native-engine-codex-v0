@@ -1,12 +1,15 @@
 # Handoff para Codex - Estado atual e continuidade
 
-Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e Meta 2 fechadas.
+Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e Meta 2 fechadas, e Meta 3 em andamento.
 
 ## Estado atual
 
 - Meta 1 Headless: concluida.
 - Meta 2 Visual/Interativa minima: concluida.
-- Meta 3 Gameplay Foundation: iniciada com `collision.bounds` e CollisionBoundsReport v1.
+- Meta 3 Gameplay Foundation: em andamento.
+- `collision.bounds` e CollisionBoundsReport v1: concluidos.
+- CollisionOverlapReport v1: concluido.
+- MovementBlockingReport v1: concluido e endurecido.
 
 ## O que o Codex recebe
 
@@ -14,7 +17,10 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - runtime, CLI e MCP alinhados;
 - Browser Playable Demo autocontida;
 - Asset Manifest, visual.sprite, tile.layer e camera.viewport;
-- collision.bounds inicial;
+- collision.bounds declarativo;
+- CollisionBoundsReport v1;
+- CollisionOverlapReport v1;
+- MovementBlockingReport v1;
 - suites cross-interface;
 - roadmap progressivo ate 3D AAA;
 - estrategia de subagentes e skills.
@@ -26,7 +32,10 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 3. `docs/ENGINE_VERSION_ROADMAP.md`
 4. `docs/CODEX_SUBAGENT_STRATEGY.md`
 5. `docs/module-contracts.md`
-6. `AGENTS.md`
+6. `docs/COLLISION_BOUNDS_V1.md`
+7. `docs/COLLISION_OVERLAP_V1.md`
+8. `docs/MOVEMENT_BLOCKING_V1.md`
+9. `AGENTS.md`
 
 ## Baseline obrigatorio
 
@@ -41,22 +50,23 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Collision Overlap Report v1.
-2. Movement Blocking v1.
-3. Tile Collision v1.
-4. Browser Demo usando blocking real.
-5. Fechamento V1 Small 2D.
-6. UI/audio/animation basicos para V2.
-7. 3D indie apenas depois de V1/V2 demonstradas.
+1. Tile Collision v1.
+2. Movement Blocking opt-in no `run-loop` usando colisao com entidade/tile.
+3. Browser Demo usando blocking real.
+4. Fechamento V1 Small 2D.
+5. UI/audio/animation basicos para V2.
+6. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Uso de subagentes
 
 Pacotes medios devem usar:
 
-- explorer para mapear arquivos;
-- agente de dominio para design;
-- gameplay_worker ou worker equivalente para implementar;
-- perf_auditor ou qa_contract_auditor para revisar determinismo e regressao.
+- `explorer` para mapear arquivos;
+- `engine_architect` ou agente de dominio para design;
+- `gameplay_worker` ou worker equivalente para implementar;
+- `qa_contract_auditor` para shape de reports, fixtures, CLI/MCP e schemas;
+- `perf_auditor` para revisar determinismo e regressao;
+- `docs_handoff_auditor` para fechamento documental.
 
 Subagentes adicionais recomendados estao em `.codex/agents/` e descritos em `docs/CODEX_SUBAGENT_STRATEGY.md`.
 
@@ -67,7 +77,8 @@ Subagentes adicionais recomendados estao em `.codex/agents/` e descritos em `doc
 - servidor;
 - pipeline pesado de assets;
 - multiplayer real;
-- pathfinding/chunk streaming antes de colisao base;
+- pathfinding/chunk streaming antes de colisao tile;
+- fisica completa antes de movement blocking opt-in;
 - 3D antes de consolidar V1/V2.
 
 ## Regra pratica de continuidade

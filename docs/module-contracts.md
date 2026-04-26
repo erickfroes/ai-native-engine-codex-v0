@@ -200,6 +200,9 @@ Compatibilidade:
 - deriva de `CollisionBoundsReport v1` sem alterar `collision.bounds`, `CollisionBoundsReport v1` ou `CollisionOverlapReport v1`;
 - usa `from`, `candidate` e `final` para separar posicao atual, tentativa e resultado efetivo do report;
 - se a tentativa causaria overlap solido, `blocked: true` e `final` permanece igual a `from`;
+- se a tentativa nao e bloqueada, `blocked: false` e `final` fica igual a `candidate`;
+- multiplos bloqueadores solidos sao listados em `blockingEntities` com ordenacao deterministica;
+- casos previsiveis cobertos: alvo ausente, alvo sem `transform`, alvo sem `collision.bounds`, input sem movimento ou com eixo `0,0`, input intent invalido/ausente e cena invalida/ausente;
 - nao altera `run-loop`, Browser Playable Demo, `InputIntent v1`, `KeyboardInputScript v1`, RenderSnapshot v1, Save/Load v1 ou renderers;
 - nao adiciona fisica completa, resolucao complexa, tile collision, pathfinding, editor ou servidor.
 

@@ -42,14 +42,16 @@ Objetivo: permitir criar jogos pequenos 2D completos.
 
 Capacidades alvo:
 
-- collision.bounds;
-- overlap reports;
-- movimento bloqueado por colisao;
-- tile collision;
+- `collision.bounds` concluido;
+- CollisionBoundsReport v1 concluido;
+- CollisionOverlapReport v1 concluido;
+- MovementBlockingReport v1 concluido e endurecido;
+- Tile Collision v1;
+- movimento bloqueado opt-in no `run-loop`;
+- Browser Demo com blocking real;
 - UI/HUD simples;
 - audio-lite;
 - save/load jogavel;
-- browser demo jogavel com regras reais;
 - export HTML simples;
 - templates de jogo top-down/platformer.
 
@@ -201,9 +203,8 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Collision Overlap Report v1.
-2. Movement Blocking v1.
-3. Tile Collision v1.
-4. Browser Demo com blocking real.
-5. Fechamento Meta 3 / V1 small 2D.
-6. UI/audio/animation basicos para V2.
+1. Tile Collision v1.
+2. Movement Blocking opt-in no `run-loop`.
+3. Browser Demo com blocking real.
+4. Fechamento Meta 3 / V1 small 2D.
+5. UI/audio/animation basicos para V2.

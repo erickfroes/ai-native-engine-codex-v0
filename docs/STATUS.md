@@ -2,9 +2,18 @@
 
 ## Estado atual
 
-A Meta 1 Headless e a Meta 2 Visual/Interativa estao concluidas como bases de engine pequenas, deterministicas e automatizaveis por Codex.
+A Meta 1 Headless e a Meta 2 Visual/Interativa estao concluidas como bases pequenas, deterministicas e automatizaveis por Codex.
 
-O projeto agora entra na Meta 3, cujo foco e **Gameplay Foundation**: colisao, overlap, bloqueio de movimento, colisao com tile layer e uma demo browser com regras reais de gameplay.
+O projeto esta na Meta 3, cujo foco e **Gameplay Foundation**: colisao, overlap, bloqueio de movimento, colisao com tile layer e uma demo browser com regras reais de gameplay.
+
+Neste ponto, a fundacao de colisao por entidade ja existe:
+
+- `collision.bounds`;
+- CollisionBoundsReport v1;
+- CollisionOverlapReport v1;
+- MovementBlockingReport v1;
+- CLI/MCP e runtime para inspecao de bounds, overlaps e blocking;
+- hardening de bordas do Movement Blocking v1.
 
 ## Capacidades consolidadas
 
@@ -26,16 +35,17 @@ O projeto agora entra na Meta 3, cujo foco e **Gameplay Foundation**: colisao, o
 - `camera.viewport`;
 - image loading local com fallback;
 - `collision.bounds` e CollisionBoundsReport v1;
+- CollisionOverlapReport v1;
+- MovementBlockingReport v1;
 - CLI/MCP para fluxos principais;
 - testes cross-interface.
 
 ## Foco atual recomendado
 
-1. Collision Overlap Report v1.
-2. Movement Blocking v1.
-3. Tile Collision v1.
-4. Browser Demo com blocking real.
-5. Fechamento da V1 Small 2D Games.
+1. Tile Collision v1.
+2. Movement Blocking opt-in no `run-loop`.
+3. Browser Demo com blocking real.
+4. Fechamento da V1 Small 2D Games.
 
 ## Versoes de produto
 
@@ -49,8 +59,8 @@ Detalhes: `docs/ENGINE_VERSION_ROADMAP.md`.
 
 ## Riscos atuais
 
-- expandir gameplay sem contratos de colisao/movimento;
-- acoplar browser demo ao runtime canonico;
+- aplicar blocking real antes de Tile Collision v1 definir o contrato de tiles solidos;
+- acoplar Browser Demo ao runtime canonico sem contrato opt-in;
 - criar editor antes de solidificar V1 gameplay;
 - criar pipeline de assets pesado antes de uma demo jogavel real;
 - usar subagentes sem delimitar escopo, gerando patches conflitantes.
