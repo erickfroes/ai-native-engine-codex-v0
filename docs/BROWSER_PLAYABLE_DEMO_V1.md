@@ -16,7 +16,8 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 ## Comportamento
 
 - desenha `drawCalls` em um unico `canvas`;
-- draw calls `sprite` usam fallback visual minimo para o mesmo retangulo preenchido, sem image loading real;
+- draw calls `sprite` tentam `new Image()` com `assetSrc` quando presente e renderizam com `drawImage`.
+- se `assetSrc` falhar ou ainda estiver carregando no primeiro frame, a demo cai no fallback visual deterministico do `rect`;
 - mantem um loop visual local de redraw no browser;
 - o loop visual nao altera simulacao, tick, systems ou posicao por conta propria;
 - captura teclado real via `keydown` no proprio `canvas`;
@@ -39,8 +40,8 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 
 ## CLI e MCP
 
-- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]`
-- MCP: `render_browser_demo(path, tick?, width?, height?)`
+- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]`
+- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?)`
 
 Envelope minimo de CLI `--json` e MCP `structuredContent`:
 
@@ -55,6 +56,13 @@ Envelope minimo de CLI `--json` e MCP `structuredContent`:
 
 No CLI, `outputPath` so aparece quando `--out` e usado.
 
+### Asset Manifest Local
+
+- `render-browser-demo --asset-manifest <path>` e `render_browser_demo(assetManifestPath)` ativam `assetSrc` deterministico no HTML.
+- o HTML de runtime faz carregamento local (`Image.src = assetSrc`) e `drawImage` quando a imagem estiver disponível.
+- se a imagem nao carregar, o fallback segue no `rect` e o demo continua funcional sem quebrar.
+- caminhos de `assetSrc` seguem contrato seguro do Asset Manifest v1 e sao relativos por design.
+
 ## Fora de escopo
 
 - nao e runtime jogavel completo do engine ainda;
@@ -64,5 +72,5 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 - nao altera o loop headless;
 - nao salva estado automaticamente;
 - nao usa rede;
-- nao usa assets reais;
+- nao cria/transforma pipeline de assets reais no runtime;
 - nao cria servidor web.

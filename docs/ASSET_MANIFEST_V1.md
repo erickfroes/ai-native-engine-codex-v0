@@ -38,18 +38,18 @@ Definir um contrato local, declarativo e deterministico para registrar assets de
 - `validateAssetManifestV1File(path)` valida o manifesto em disco e preserva `absolutePath`.
 - `loadValidatedAssetManifestV1(path)` retorna o manifesto validado ou falha de forma previsivel.
 - `buildRenderSnapshotV1(sceneOrPath, { assetManifest, assetManifestPath })` pode usar o manifesto de forma opt-in para emitir `drawCalls.kind = "sprite"`.
-- o manifesto continua declarativo: ele nao carrega bytes de imagem, nao faz fetch e nao abre image loading real neste slice.
+- o manifesto continua declarativo: valida os metadados, sem importar bytes ou executar transformações no slice de build.
 
 ## Compatibilidade
 
 - sem manifesto, o comportamento padrao de `RenderSnapshot v1` permanece inalterado;
 - o manifesto nao altera `run-loop`, `InputIntent v1`, Save/Load v1 ou `StateSnapshot v1`;
-- o manifesto nao exige existencia de assets reais neste slice;
-- o manifesto nao carrega bytes de imagem, nao usa rede/fetch e nao cria cache de runtime.
+- o manifesto nao exige existencia de assets reais no contrato;
+- o runtime de browser pode carregar localmente imagens via `assetSrc` de forma opcional e deterministica no HTML, sem fetch/rede.
 
 ## Fora deste slice
 
-- image loading real ou async;
+- image loading em runtime ainda nao usa fetch/streaming; é apenas caminho local no HTML, sem assets inline.
 - atlas, animacao, UV, materiais ou frame graph;
 - editor de assets;
 - servidor;
