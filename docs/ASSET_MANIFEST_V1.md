@@ -29,6 +29,7 @@ Definir um contrato local, declarativo e deterministico para registrar assets de
 - `assets[].type` aceita apenas `image`.
 - `assets[].src` deve ser path relativo ao diretorio do proprio manifesto.
 - `assets[].src` nao pode escapar do diretorio do manifesto via traversal.
+- `assets[].src` absoluto continua proibido.
 - `assets[].width` e `assets[].height` devem ser inteiros `>= 1`.
 - campos extras nao sao permitidos nos niveis controlados.
 
@@ -45,7 +46,9 @@ Definir um contrato local, declarativo e deterministico para registrar assets de
 - sem manifesto, o comportamento padrao de `RenderSnapshot v1` permanece inalterado;
 - o manifesto nao altera `run-loop`, `InputIntent v1`, Save/Load v1 ou `StateSnapshot v1`;
 - o manifesto nao exige existencia de assets reais no contrato;
-- o runtime de browser pode carregar localmente imagens via `assetSrc` de forma opcional e deterministica no HTML, sem fetch/rede.
+- o runtime de browser pode carregar localmente imagens via `assetSrc` relativo de forma opcional no HTML, sem fetch/rede.
+- quando a browser demo recebe `assetManifestPath`, o `assetSrc` relativo do manifesto e resolvido para `file:///...` local no HTML gerado.
+- se a imagem local falhar, `Image.onerror` mantem o fallback visual para `rect`.
 
 ## Fora deste slice
 

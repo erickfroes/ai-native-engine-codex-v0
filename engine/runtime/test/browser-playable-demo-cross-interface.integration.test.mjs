@@ -46,6 +46,8 @@ function assertBrowserDemoEnvelope(payload, {
     assert.match(payload.html, /new Image\(\)/);
     assert.match(payload.html, /drawImage\(/);
     assert.match(payload.html, /assetSrc/);
+    assert.match(payload.html, /"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/);
+    assert.match(payload.html, /"assetSrc":"file:\/\/\/[^"]+images\/camera-icon\.png"/);
   }
   assert.match(payload.html, /requestAnimationFrame\(renderFrame\)/);
   assert.match(payload.html, />Pause rendering<\/button>/);

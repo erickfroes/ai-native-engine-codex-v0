@@ -188,7 +188,7 @@ Compatibilidade:
 - nao altera `InputIntent v1`;
 - nao altera Save/Load v1.
 - draw calls `sprite` usam fallback visual minimo no Canvas 2D local.
-- se o `RenderSnapshot` inclui `assetSrc`, o HTML tenta `new Image()` e `drawImage` com fallback para `rect` em erro.
+- se o `RenderSnapshot` inclui `assetSrc` e a browser demo recebeu `assetManifestPath`, o HTML resolve `assetSrc` para `file:///...` local e tenta `new Image()` / `drawImage`, com fallback para `rect` em erro.
 - o loop visual do browser e local ao HTML e nao avanca simulacao sozinho.
 - foco do canvas e controles locais de pause/reset pertencem ao HTML autocontido, nao ao loop headless.
 
