@@ -23,7 +23,11 @@ const openScenePath = path.join(
   'fixtures',
   'movement-blocking-open.scene.json'
 );
+const invalidScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'invalid_collision_bounds.scene.json');
 const inputIntentPath = path.join(repoRoot, 'fixtures', 'input', 'move-player-right.intent.json');
+const invalidInputIntentPath = path.join(repoRoot, 'fixtures', 'input', 'invalid.missing-entity.intent.json');
+const missingInputIntentPath = path.join(repoRoot, 'fixtures', 'input', 'missing-movement.intent.json');
+const missingScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'missing-movement.scene.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -90,4 +94,36 @@ test('inspect-movement-blocking fails predictably without --input-intent', () =>
 
   assert.equal(result.status, 1);
   assert.match(result.stderr, /inspect-movement-blocking: --input-intent is required/);
+});
+
+test('inspect-movement-blocking fails predictably for an invalid input intent', () => {
+  const result = runCli(['inspect-movement-blocking', blockedScenePath, '--input-intent', invalidInputIntentPath, '--json']);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /input intent is invalid/);
+  assert.match(result.stderr, /\$\.entityId: is required/);
+});
+
+test('inspect-movement-blocking fails predictably for a missing input intent path', () => {
+  const result = runCli(['inspect-movement-blocking', blockedScenePath, '--input-intent', missingInputIntentPath, '--json']);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /ENOENT: no such file or directory/);
+  assert.match(result.stderr, /missing-movement\.intent\.json/);
+});
+
+test('inspect-movement-blocking fails predictably for an invalid scene', () => {
+  const result = runCli(['inspect-movement-blocking', invalidScenePath, '--input-intent', inputIntentPath, '--json']);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Scene validation failed for/);
+  assert.match(result.stderr, /invalid_collision_bounds\.scene\.json/);
+});
+
+test('inspect-movement-blocking fails predictably for a missing scene path', () => {
+  const result = runCli(['inspect-movement-blocking', missingScenePath, '--input-intent', inputIntentPath, '--json']);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /ENOENT: no such file or directory/);
+  assert.match(result.stderr, /missing-movement\.scene\.json/);
 });

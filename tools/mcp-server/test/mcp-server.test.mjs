@@ -1583,3 +1583,65 @@ test('mcp inspect_movement_blocking returns blocked and unblocked reports', asyn
     await client.close();
   }
 });
+
+test('mcp inspect_movement_blocking returns predictable errors for invalid inputs', async () => {
+  const client = createClient();
+
+  try {
+    const initResponse = await client.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: {
+        name: 'node-test',
+        version: '1.0.0'
+      }
+    });
+
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    client.notify('notifications/initialized');
+
+    const invalidInputIntentResponse = await client.request('tools/call', {
+      name: 'inspect_movement_blocking',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-blocked.scene.json',
+        inputIntentPath: './fixtures/input/invalid.missing-entity.intent.json'
+      }
+    });
+
+    assert.equal(invalidInputIntentResponse.result.isError, true);
+    assert.equal(invalidInputIntentResponse.result.structuredContent.ok, false);
+    assert.equal(invalidInputIntentResponse.result.structuredContent.errorName, 'InputIntentValidationError');
+    assert.match(invalidInputIntentResponse.result.content[0].text, /input intent is invalid/);
+    assert.match(invalidInputIntentResponse.result.content[0].text, /\$\.entityId: is required/);
+
+    const missingInputIntentResponse = await client.request('tools/call', {
+      name: 'inspect_movement_blocking',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-blocked.scene.json',
+        inputIntentPath: './fixtures/input/missing-movement.intent.json'
+      }
+    });
+
+    assert.equal(missingInputIntentResponse.result.isError, true);
+    assert.equal(missingInputIntentResponse.result.structuredContent.ok, false);
+    assert.equal(missingInputIntentResponse.result.structuredContent.errorName, 'Error');
+    assert.match(missingInputIntentResponse.result.content[0].text, /ENOENT: no such file or directory/);
+    assert.match(missingInputIntentResponse.result.content[0].text, /missing-movement\.intent\.json/);
+
+    const missingSceneResponse = await client.request('tools/call', {
+      name: 'inspect_movement_blocking',
+      arguments: {
+        path: './engine/runtime/test/fixtures/missing-movement.scene.json',
+        inputIntentPath: './fixtures/input/move-player-right.intent.json'
+      }
+    });
+
+    assert.equal(missingSceneResponse.result.isError, true);
+    assert.equal(missingSceneResponse.result.structuredContent.ok, false);
+    assert.equal(missingSceneResponse.result.structuredContent.errorName, 'Error');
+    assert.match(missingSceneResponse.result.content[0].text, /ENOENT: no such file or directory/);
+    assert.match(missingSceneResponse.result.content[0].text, /missing-movement\.scene\.json/);
+  } finally {
+    await client.close();
+  }
+});
