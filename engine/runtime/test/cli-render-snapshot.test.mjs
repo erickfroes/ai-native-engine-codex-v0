@@ -10,6 +10,8 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
+const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -73,10 +75,58 @@ test('render-snapshot uses deterministic default options', () => {
   assert.deepEqual(snapshot.viewport, { width: 320, height: 180 });
 });
 
+test('render-snapshot accepts --asset-manifest and emits deterministic sprite drawCalls', () => {
+  const first = runCli([
+    'render-snapshot',
+    spriteScenePath,
+    '--asset-manifest',
+    validAssetManifestPath,
+    '--json'
+  ]);
+  const second = runCli([
+    'render-snapshot',
+    spriteScenePath,
+    '--asset-manifest',
+    validAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(second.status, 0, second.stderr);
+
+  const firstSnapshot = JSON.parse(first.stdout);
+  const secondSnapshot = JSON.parse(second.stdout);
+  assertRenderSnapshotV1(firstSnapshot);
+  assert.deepEqual(firstSnapshot, secondSnapshot);
+  assert.deepEqual(firstSnapshot.drawCalls, [
+    {
+      kind: 'sprite',
+      id: 'camera.icon',
+      assetId: 'camera.icon',
+      x: 6,
+      y: 2,
+      width: 16,
+      height: 16,
+      layer: 0
+    },
+    {
+      kind: 'sprite',
+      id: 'player.hero',
+      assetId: 'player.sprite',
+      x: 10,
+      y: 12,
+      width: 16,
+      height: 16,
+      layer: 1
+    }
+  ]);
+});
+
 test('render-snapshot fails predictably for invalid numeric options', () => {
   const invalidTick = runCli(['render-snapshot', tutorialScenePath, '--tick', '-1', '--json']);
   const invalidWidth = runCli(['render-snapshot', tutorialScenePath, '--width', '0', '--json']);
   const invalidHeight = runCli(['render-snapshot', tutorialScenePath, '--height', '0', '--json']);
+  const invalidAssetManifest = runCli(['render-snapshot', tutorialScenePath, '--asset-manifest', '', '--json']);
 
   assert.notEqual(invalidTick.status, 0);
   assert.match(invalidTick.stderr, /buildRenderSnapshotV1: `tick` must be an integer >= 0/);
@@ -84,4 +134,6 @@ test('render-snapshot fails predictably for invalid numeric options', () => {
   assert.match(invalidWidth.stderr, /buildRenderSnapshotV1: `width` must be an integer >= 1/);
   assert.notEqual(invalidHeight.status, 0);
   assert.match(invalidHeight.stderr, /buildRenderSnapshotV1: `height` must be an integer >= 1/);
+  assert.notEqual(invalidAssetManifest.status, 0);
+  assert.match(invalidAssetManifest.stderr, /render-snapshot: --asset-manifest must be a non-empty string/);
 });

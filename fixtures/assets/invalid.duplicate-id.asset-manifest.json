@@ -1,0 +1,19 @@
+{
+  "assetManifestVersion": 1,
+  "assets": [
+    {
+      "id": "player.sprite",
+      "type": "image",
+      "src": "images/player-a.png",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "id": "player.sprite",
+      "type": "image",
+      "src": "images/player-b.png",
+      "width": 32,
+      "height": 32
+    }
+  ]
+}

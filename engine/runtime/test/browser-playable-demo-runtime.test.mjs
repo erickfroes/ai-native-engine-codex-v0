@@ -165,6 +165,22 @@ function createTutorialSnapshot() {
   };
 }
 
+function createSpriteSnapshot() {
+  return {
+    renderSnapshotVersion: 1,
+    scene: 'sprite-scene',
+    tick: 2,
+    viewport: {
+      width: 64,
+      height: 48
+    },
+    drawCalls: [
+      { kind: 'sprite', id: 'player.hero', assetId: 'player.sprite', x: 0, y: 0, width: 16, height: 16, layer: 0 },
+      { kind: 'rect', id: 'camera.frame', x: 20, y: 4, width: 12, height: 12, layer: 1 }
+    ]
+  };
+}
+
 test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and keyboard capture', () => {
   const htmlA = renderBrowserPlayableDemoHtmlV1({
     title: 'tutorial Browser Playable Demo',
@@ -387,6 +403,33 @@ test('renderBrowserPlayableDemoHtmlV1 preserves snapshot order for multiple rect
     html,
     /<canvas id="browser-playable-demo-canvas" data-browser-demo-version="1" data-scene="multi-rect" data-tick="2" data-controllable-entity="mid" width="64" height="48" tabindex="0"/
   );
+});
+
+test('renderBrowserPlayableDemoHtmlV1 accepts sprite drawCalls and keeps deterministic rect fallback behavior', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'sprite-scene Browser Playable Demo',
+    renderSnapshot: createSpriteSnapshot(),
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+
+  assert.ok(html.includes('"kind":"sprite"'));
+  assert.ok(html.includes('"assetId":"player.sprite"'));
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+
+  const highlightedRects = harness.operations.filter(
+    (entry) => entry.method === 'fillRect' && entry.fillStyle === '#b74f2a'
+  );
+  assert.deepEqual(highlightedRects[0].args, [0, 0, 16, 16]);
+  assert.deepEqual(highlightedRects[1].args, [4, 0, 16, 16]);
+  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 0\)/);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 falls back to the first rect when player.hero is absent', () => {

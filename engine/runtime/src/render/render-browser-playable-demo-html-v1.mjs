@@ -40,11 +40,8 @@ function escapeInlineJson(value) {
     .replaceAll('\u2029', '\\u2029');
 }
 
-function normalizeRectDrawCall(drawCall, index) {
+function normalizeDrawCall(drawCall, index) {
   assertObject(drawCall, `renderSnapshot.drawCalls[${index}]`);
-  if (drawCall.kind !== 'rect') {
-    throw new Error(`renderBrowserPlayableDemoHtmlV1: drawCalls[${index}].kind must be \`rect\``);
-  }
 
   assertNonEmptyString(`renderSnapshot.drawCalls[${index}].id`, drawCall.id);
   assertInteger(`renderSnapshot.drawCalls[${index}].x`, drawCall.x);
@@ -53,9 +50,18 @@ function normalizeRectDrawCall(drawCall, index) {
   assertInteger(`renderSnapshot.drawCalls[${index}].height`, drawCall.height, 1);
   assertInteger(`renderSnapshot.drawCalls[${index}].layer`, drawCall.layer);
 
+  if (drawCall.kind !== 'rect' && drawCall.kind !== 'sprite') {
+    throw new Error(`renderBrowserPlayableDemoHtmlV1: drawCalls[${index}].kind must be \`rect\` or \`sprite\``);
+  }
+
+  if (drawCall.kind === 'sprite') {
+    assertNonEmptyString(`renderSnapshot.drawCalls[${index}].assetId`, drawCall.assetId);
+  }
+
   return {
-    kind: 'rect',
+    kind: drawCall.kind,
     id: drawCall.id,
+    ...(drawCall.kind === 'sprite' ? { assetId: drawCall.assetId } : {}),
     x: drawCall.x,
     y: drawCall.y,
     width: drawCall.width,
@@ -81,7 +87,7 @@ function validateRenderSnapshot(renderSnapshot) {
     throw new Error('renderBrowserPlayableDemoHtmlV1: `renderSnapshot.drawCalls` must be an array');
   }
 
-  renderSnapshot.drawCalls.forEach(normalizeRectDrawCall);
+  renderSnapshot.drawCalls.forEach(normalizeDrawCall);
 }
 
 function validateMetadata(metadata) {

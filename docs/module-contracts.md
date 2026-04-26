@@ -128,19 +128,20 @@ Compatibilidade:
 - `LoopReport v1` e `LoopTrace v1` mantêm o mesmo shape;
 - `simulate-state` continua isolado deste contrato neste slice.
 
-## Keyboard Input Script v1 (input declarativo por tick)
+## Asset Manifest v1 (assets declarativos locais)
 
-Contrato opt-in para declarar teclas por tick sem captura real de teclado:
+Contrato declarativo local para assets de sprite usados de forma opt-in por `RenderSnapshot v1`:
 
-- ver `docs/KEYBOARD_INPUT_SCRIPT_V1.md`.
-- schema formal: `docs/schemas/keyboard-input-script-v1.schema.json`.
+- ver `docs/ASSET_MANIFEST_V1.md`.
+- schema formal: `docs/schemas/asset-manifest-v1.schema.json`.
 
 Compatibilidade:
 
-- nao altera o comportamento padrao de `run-loop`/`run_loop` quando ausente;
-- alimenta o caminho opt-in de `run-loop --keyboard-script` e `run_loop.keyboardScriptPath`;
-- nao adiciona captura real de teclado;
-- nao altera `LoopReport v1` ou `LoopTrace v1` fora do fluxo opt-in.
+- sem manifesto, o comportamento padrao de `RenderSnapshot v1` permanece inalterado;
+- nao altera `run-loop`;
+- nao altera `InputIntent v1`;
+- nao altera Save/Load v1;
+- nao adiciona rede, editor ou pipeline pesado de assets.
 
 ## Render Snapshot v1 (render headless declarativo)
 
@@ -155,7 +156,8 @@ Compatibilidade:
 - nao altera `StateSnapshot v1`;
 - nao altera Save/Load v1;
 - nao altera `InputIntent v1`;
-- nao adiciona backend grafico ou assets reais.
+- `Asset Manifest v1` e opt-in e local; sem manifesto, o fallback atual para `rect` permanece;
+- nao adiciona backend grafico ou assets reais obrigatorios.
 
 ## Render SVG v1 (serializacao textual deterministica)
 
@@ -168,6 +170,7 @@ Compatibilidade:
 - nao altera `RenderSnapshot v1`;
 - nao altera `run-loop`;
 - nao altera Save/Load v1;
+- `sprite` usa fallback textual minimo para `rect` com `data-asset-id`;
 - nao introduz backend grafico;
 - nao representa runtime visual real nesta versao.
 
@@ -183,6 +186,7 @@ Compatibilidade:
 - nao altera `run-loop`;
 - nao altera `InputIntent v1`;
 - nao altera Save/Load v1.
+- draw calls `sprite` usam fallback visual minimo no Canvas 2D local.
 - o loop visual do browser e local ao HTML e nao avanca simulacao sozinho.
 - foco do canvas e controles locais de pause/reset pertencem ao HTML autocontido, nao ao loop headless.
 

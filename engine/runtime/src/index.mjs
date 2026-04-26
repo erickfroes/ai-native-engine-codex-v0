@@ -7,6 +7,8 @@ export { saveStateSnapshotV1, loadStateSnapshotSaveV1 } from './save/state-snaps
 export { validateInputIntentV1, validateInputIntentV1File } from './input/validate-input-intent-v1.mjs';
 export { loadValidatedInputIntentV1 } from './input/load-validated-input-intent-v1.mjs';
 export { createInputIntentFromKeyboardV1 } from './input/create-input-intent-from-keyboard-v1.mjs';
+export { validateAssetManifestV1, validateAssetManifestV1File } from './assets/validate-asset-manifest-v1.mjs';
+export { loadValidatedAssetManifestV1 } from './assets/load-validated-asset-manifest-v1.mjs';
 export {
   validateKeyboardInputScriptV1,
   validateKeyboardInputScriptV1File

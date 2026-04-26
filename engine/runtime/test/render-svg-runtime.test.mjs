@@ -27,6 +27,39 @@ test('renderSnapshotToSvgV1 returns deterministic SVG for RenderSnapshot v1 rect
   );
 });
 
+test('renderSnapshotToSvgV1 renders sprite drawCalls as deterministic rect fallbacks with data-asset-id', () => {
+  const svg = renderSnapshotToSvgV1({
+    renderSnapshotVersion: 1,
+    scene: 'sprite-scene',
+    tick: 2,
+    viewport: {
+      width: 64,
+      height: 48
+    },
+    drawCalls: [
+      {
+        kind: 'sprite',
+        id: 'camera.icon',
+        assetId: 'camera.icon',
+        x: 4,
+        y: 6,
+        width: 16,
+        height: 16,
+        layer: 0
+      }
+    ]
+  });
+
+  assert.equal(
+    svg,
+    `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" data-svg-version="1" data-scene="sprite-scene" data-tick="2" width="64" height="48" viewBox="0 0 64 48">
+  <rect id="camera.icon" data-asset-id="camera.icon" data-kind="sprite" data-layer="0" x="4" y="6" width="16" height="16" />
+</svg>
+`
+  );
+});
+
 test('renderSnapshotToSvgV1 preserves drawCall order already present in the snapshot', () => {
   const svg = renderSnapshotToSvgV1({
     renderSnapshotVersion: 1,
@@ -38,8 +71,9 @@ test('renderSnapshotToSvgV1 preserves drawCall order already present in the snap
     },
     drawCalls: [
       {
-        kind: 'rect',
+        kind: 'sprite',
         id: 'z.entity',
+        assetId: 'z.sprite',
         x: 8,
         y: 8,
         width: 4,

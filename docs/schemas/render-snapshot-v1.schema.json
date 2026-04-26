@@ -56,9 +56,12 @@
         "properties": {
           "kind": {
             "type": "string",
-            "enum": ["rect"]
+            "enum": ["rect", "sprite"]
           },
           "id": {
+            "type": "string"
+          },
+          "assetId": {
             "type": "string"
           },
           "x": {

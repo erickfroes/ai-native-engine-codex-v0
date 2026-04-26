@@ -15,7 +15,8 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 
 ## Comportamento
 
-- desenha `drawCalls` com `kind: "rect"` em um unico `canvas`;
+- desenha `drawCalls` em um unico `canvas`;
+- draw calls `sprite` usam fallback visual minimo para o mesmo retangulo preenchido, sem image loading real;
 - mantem um loop visual local de redraw no browser;
 - o loop visual nao altera simulacao, tick, systems ou posicao por conta propria;
 - captura teclado real via `keydown` no proprio `canvas`;

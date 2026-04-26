@@ -24,6 +24,16 @@ Definir um contrato JSON headless e deterministico para descrever uma vista rend
       "width": 16,
       "height": 16,
       "layer": 0
+    },
+    {
+      "kind": "sprite",
+      "id": "camera.icon",
+      "assetId": "camera.icon",
+      "x": 20,
+      "y": 0,
+      "width": 16,
+      "height": 16,
+      "layer": 1
     }
   ]
 }
@@ -35,8 +45,9 @@ Definir um contrato JSON headless e deterministico para descrever uma vista rend
 - `scene` identifica `metadata.name` da cena.
 - `tick` representa o tick observado e deve ser inteiro `>= 0`.
 - `viewport.width` e `viewport.height` devem ser inteiros `>= 1`.
-- `drawCalls` contem chamadas declarativas; nesta versao apenas `kind: "rect"`.
-- cada draw call declara `id`, `x`, `y`, `width`, `height` e `layer`.
+- `drawCalls` contem chamadas declarativas com `kind: "rect"` ou `kind: "sprite"`.
+- toda draw call declara `id`, `x`, `y`, `width`, `height` e `layer`.
+- draw calls `sprite` tambem declaram `assetId`.
 - campos extras nao sao permitidos nos niveis controlados do contrato.
 
 ## Builder runtime
@@ -44,11 +55,15 @@ Definir um contrato JSON headless e deterministico para descrever uma vista rend
 - `buildRenderSnapshotV1(scenePathOuScene, options)` retorna este contrato sem canvas real.
 - `renderSnapshotToSvgV1(renderSnapshot)` pode serializar esse contrato para SVG textual deterministico.
 - `tick` padrao e `0`; viewport padrao e `320x180`.
-- nesta versao, entidades com componente `transform` viram `rect`.
+- nesta versao, entidades com componente `transform` ainda viram `rect` por padrao.
+- `options.assetManifest` ou `options.assetManifestPath` ativam a leitura opt-in de `Asset Manifest v1`.
+- quando um manifesto opt-in existe e a entidade declara `sprite.fields.assetId`, o builder pode emitir `drawCalls.kind = "sprite"`.
+- sem manifesto, o builder preserva o fallback atual para `rect`.
 - `x` e `y` vem de `transform.fields.position` ou de `transform.fields`.
-- `width` e `height` podem vir de `sprite.fields`; se ausentes, usam fallback deterministico `16x16`.
+- `width` e `height` podem vir de `sprite.fields`; se ausentes, usam fallback deterministico `16x16` ou o tamanho declarado no manifesto quando houver `assetId`.
 - `layer` pode vir de `sprite.fields.layer`; se ausente, usa `0`.
 - `drawCalls` sao ordenados por `layer` e depois `id`.
+- suporte a `sprite` existe no contrato, mas o uso por `assetManifest` continua opt-in e minimalista.
 
 Ver tambem: `docs/RENDER_SVG_V1.md`.
 
@@ -56,12 +71,13 @@ Ver tambem: `docs/RENDER_SVG_V1.md`.
 
 - contrato serializavel e estavel para validacao visual headless;
 - base para comparacao deterministica entre runtime, CLI e MCP;
+- base para future-proofing de sprites declarativos sem image loading real ainda;
 - nenhuma rasterizacao real nesta versao.
 
 ## Fora deste slice
 
 - canvas real;
 - Pixi, Three ou WebGL;
-- assets reais;
+- assets reais obrigatorios;
 - editor visual;
 - frame graph ou backend grafico.

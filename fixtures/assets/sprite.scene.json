@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "sprite-fixture"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "assetRefs": [
+    "images/camera-icon.png",
+    "images/player.png"
+  ],
+  "entities": [
+    {
+      "id": "camera.icon",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 6,
+            "y": 2
+          }
+        },
+        {
+          "kind": "sprite",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "assetId": "camera.icon",
+            "layer": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "player.hero",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "position": {
+              "x": 10,
+              "y": 12
+            }
+          }
+        },
+        {
+          "kind": "sprite",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "assetId": "player.sprite",
+            "layer": 1
+          }
+        }
+      ]
+    }
+  ]
+}
