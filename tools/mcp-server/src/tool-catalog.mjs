@@ -199,9 +199,9 @@ export const toolCatalog = [
     }
   },
   {
-    name: 'render_browser_demo',
-    title: 'Render Browser Demo',
-    description: 'Build deterministic self-contained Browser Playable Demo v1 HTML from a scene via RenderSnapshot v1.',
+    name: 'render_canvas_demo',
+    title: 'Render Canvas Demo',
+    description: 'Build deterministic Canvas 2D demo HTML from a scene via RenderSnapshot v1.',
     inputSchema: {
       type: 'object',
       required: ['path'],

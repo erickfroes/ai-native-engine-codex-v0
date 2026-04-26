@@ -602,8 +602,8 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       }
     });
 
-    const renderBrowserDemoResponseB = await client.request('tools/call', {
-      name: 'render_browser_demo',
+    const renderCanvasDemoResponseB = await client.request('tools/call', {
+      name: 'render_canvas_demo',
       arguments: {
         path: './scenes/tutorial.scene.json',
         tick: 4,
@@ -616,8 +616,8 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assertBrowserDemoStructuredContent(renderBrowserDemoResponseA.result.structuredContent);
     assertBrowserDemoStructuredContent(renderBrowserDemoResponseB.result.structuredContent);
     assert.deepEqual(
-      renderBrowserDemoResponseA.result.structuredContent,
-      renderBrowserDemoResponseB.result.structuredContent
+      renderCanvasDemoResponseA.result.structuredContent,
+      renderCanvasDemoResponseB.result.structuredContent
     );
 
     const renderBrowserDemoWithManifestResponseA = await client.request('tools/call', {
@@ -723,10 +723,10 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       }
     });
 
-    assert.equal(renderBrowserDemoInvalidWidthResponse.result.isError, true);
+    assert.equal(renderCanvasDemoInvalidWidthResponse.result.isError, true);
     assert.match(
-      renderBrowserDemoInvalidWidthResponse.result.content[0].text,
-      /render_browser_demo: `width` must be an integer >= 1 when provided\./
+      renderCanvasDemoInvalidWidthResponse.result.content[0].text,
+      /render_canvas_demo: `width` must be an integer >= 1 when provided/
     );
 
     const renderBrowserDemoInvalidHeightResponse = await client.request('tools/call', {
