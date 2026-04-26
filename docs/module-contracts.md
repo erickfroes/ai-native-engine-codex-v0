@@ -115,6 +115,20 @@ Relações:
 - `LoopReport v1`: resultado real de execução;
 - `LoopTrace v1`: diagnóstico real opt-in.
 
+## Visual Components v1 (declarativo)
+
+Contrato minimo para componentes visuais declarados na propria cena:
+
+- ver `docs/VISUAL_COMPONENTS_V1.md`.
+- componente atual: `visual.sprite` v1.
+
+Compatibilidade:
+
+- declarativo e opt-in;
+- sem `Asset Manifest v1`, o render continua com fallback `rect`;
+- com `Asset Manifest v1`, `visual.sprite.fields.assetId` pode gerar drawCall `sprite` com `assetSrc`;
+- nao cria editor, servidor, WebGL, Pixi, Three ou pipeline pesado de assets.
+
 ## Input Intent v1 (input headless opt-in no loop)
 
 Contrato de intenção de input headless, com integração opt-in no `run-loop`/`run_loop` e sem acoplamento com `Scene Document v1` ou `simulate-state`:
@@ -230,6 +244,7 @@ Componentes iniciais:
 
 - `transform` v1;
 - `velocity` v1.
+- `visual.sprite` v1.
 
 ## State Processor Registry v1 (interno, opt-in)
 

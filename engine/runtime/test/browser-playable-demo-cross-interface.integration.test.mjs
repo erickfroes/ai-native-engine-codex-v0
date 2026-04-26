@@ -20,6 +20,8 @@ const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.m
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
+const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
+const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -31,7 +33,11 @@ function runCli(args) {
 function assertBrowserDemoEnvelope(payload, {
   expectedScene = 'tutorial',
   expectedTick = 4,
-  withAssetLoading = false
+  withAssetLoading = false,
+  expectedAssetSrcPatterns = [
+    /"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/,
+    /"assetSrc":"file:\/\/\/[^"]+images\/camera-icon\.png"/
+  ]
 } = {}) {
   assert.deepEqual(Object.keys(payload), ['browserDemoVersion', 'scene', 'tick', 'html']);
   assert.equal(payload.browserDemoVersion, 1);
@@ -46,8 +52,9 @@ function assertBrowserDemoEnvelope(payload, {
     assert.match(payload.html, /new Image\(\)/);
     assert.match(payload.html, /drawImage\(/);
     assert.match(payload.html, /assetSrc/);
-    assert.match(payload.html, /"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/);
-    assert.match(payload.html, /"assetSrc":"file:\/\/\/[^"]+images\/camera-icon\.png"/);
+    for (const expectedAssetSrcPattern of expectedAssetSrcPatterns) {
+      assert.match(payload.html, expectedAssetSrcPattern);
+    }
   }
   assert.match(payload.html, /requestAnimationFrame\(renderFrame\)/);
   assert.match(payload.html, />Pause rendering<\/button>/);
@@ -259,6 +266,100 @@ test('browser playable demo with asset manifest stays aligned across runtime, CL
       expectedScene: 'sprite-fixture',
       expectedTick: 4,
       withAssetLoading: true
+    });
+    assert.deepEqual(runtimeEnvelope, cliEnvelope);
+    assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+    assert.equal(runtimeEnvelope.html, cliEnvelope.html);
+    assert.equal(runtimeEnvelope.html, mcpEnvelope.html);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('browser playable demo with visual.sprite and asset manifest stays aligned across runtime, CLI and MCP', async () => {
+  const tick = 4;
+  const width = 64;
+  const height = 48;
+  const scene = await loadSceneFile(visualSpriteScenePath);
+  const snapshot = materializeBrowserDemoAssetSrcV1(await buildRenderSnapshotV1(scene, {
+    tick,
+    width,
+    height,
+    assetManifestPath: visualSpriteAssetManifestPath
+  }), visualSpriteAssetManifestPath);
+
+  const runtimeEnvelope = {
+    browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderBrowserPlayableDemoHtmlV1({
+      title: `${snapshot.scene} Browser Playable Demo`,
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot)
+    })
+  };
+
+  const cliResult = runCli([
+    'render-browser-demo',
+    visualSpriteScenePath,
+    '--tick',
+    String(tick),
+    '--width',
+    String(width),
+    '--height',
+    String(height),
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './fixtures/assets/visual-sprite.scene.json',
+        tick,
+        width,
+        height,
+        assetManifestPath: './fixtures/assets/visual-sprite.asset-manifest.json'
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+    const visualSpriteAssetSrcPatterns = [
+      /"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/
+    ];
+
+    assertBrowserDemoEnvelope(runtimeEnvelope, {
+      expectedScene: 'visual-sprite-fixture',
+      expectedTick: 4,
+      withAssetLoading: true,
+      expectedAssetSrcPatterns: visualSpriteAssetSrcPatterns
+    });
+    assertBrowserDemoEnvelope(cliEnvelope, {
+      expectedScene: 'visual-sprite-fixture',
+      expectedTick: 4,
+      withAssetLoading: true,
+      expectedAssetSrcPatterns: visualSpriteAssetSrcPatterns
+    });
+    assertBrowserDemoEnvelope(mcpEnvelope, {
+      expectedScene: 'visual-sprite-fixture',
+      expectedTick: 4,
+      withAssetLoading: true,
+      expectedAssetSrcPatterns: visualSpriteAssetSrcPatterns
     });
     assert.deepEqual(runtimeEnvelope, cliEnvelope);
     assert.deepEqual(runtimeEnvelope, mcpEnvelope);
