@@ -82,7 +82,7 @@ function assertBrowserDemoStructuredContent(payload, options = {}) {
   assert.match(payload.html, /requestAnimationFrame\(renderFrame\)/);
   assert.match(payload.html, />Pause rendering<\/button>/);
   assert.match(payload.html, /Resume rendering/);
-  assert.match(payload.html, />Reset<\/button>/);
+  assert.match(payload.html, />Reset position<\/button>/);
   assert.match(
     payload.html,
     /Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by 4 px per keydown\./
@@ -673,8 +673,8 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       }
     });
 
-    const renderCanvasDemoResponseB = await client.request('tools/call', {
-      name: 'render_canvas_demo',
+    const renderBrowserDemoResponseB = await client.request('tools/call', {
+      name: 'render_browser_demo',
       arguments: {
         path: './scenes/tutorial.scene.json',
         tick: 4,
@@ -687,8 +687,8 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assertBrowserDemoStructuredContent(renderBrowserDemoResponseA.result.structuredContent);
     assertBrowserDemoStructuredContent(renderBrowserDemoResponseB.result.structuredContent);
     assert.deepEqual(
-      renderCanvasDemoResponseA.result.structuredContent,
-      renderCanvasDemoResponseB.result.structuredContent
+      renderBrowserDemoResponseA.result.structuredContent,
+      renderBrowserDemoResponseB.result.structuredContent
     );
 
     const renderBrowserDemoWithManifestResponseA = await client.request('tools/call', {
@@ -794,10 +794,10 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       }
     });
 
-    assert.equal(renderCanvasDemoInvalidWidthResponse.result.isError, true);
+    assert.equal(renderBrowserDemoInvalidWidthResponse.result.isError, true);
     assert.match(
-      renderCanvasDemoInvalidWidthResponse.result.content[0].text,
-      /render_canvas_demo: `width` must be an integer >= 1 when provided/
+      renderBrowserDemoInvalidWidthResponse.result.content[0].text,
+      /render_browser_demo: `width` must be an integer >= 1 when provided/
     );
 
     const renderBrowserDemoInvalidHeightResponse = await client.request('tools/call', {

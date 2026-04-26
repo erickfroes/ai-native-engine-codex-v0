@@ -109,7 +109,7 @@ async function handleToolCall(params) {
     params.name !== 'emit_world_snapshot' &&
     params.name !== 'render_snapshot' &&
     params.name !== 'render_svg' &&
-    params.name !== 'render_canvas_demo' &&
+    params.name !== 'render_browser_demo' &&
     params.name !== 'plan_loop' &&
     params.name !== 'run_loop' &&
     params.name !== 'run_replay' &&
@@ -558,24 +558,24 @@ async function handleToolCall(params) {
       };
     }
 
-    if (params.name === 'render_canvas_demo') {
+    if (params.name === 'render_browser_demo') {
       if (args.tick !== undefined && (!Number.isInteger(args.tick) || args.tick < 0)) {
         return {
-          content: toTextContent('render_canvas_demo: `tick` must be an integer >= 0 when provided.'),
+          content: toTextContent('render_browser_demo: `tick` must be an integer >= 0 when provided.'),
           isError: true
         };
       }
 
       if (args.width !== undefined && (!Number.isInteger(args.width) || args.width < 1)) {
         return {
-          content: toTextContent('render_canvas_demo: `width` must be an integer >= 1 when provided.'),
+          content: toTextContent('render_browser_demo: `width` must be an integer >= 1 when provided.'),
           isError: true
         };
       }
 
       if (args.height !== undefined && (!Number.isInteger(args.height) || args.height < 1)) {
         return {
-          content: toTextContent('render_canvas_demo: `height` must be an integer >= 1 when provided.'),
+          content: toTextContent('render_browser_demo: `height` must be an integer >= 1 when provided.'),
           isError: true
         };
       }
@@ -608,17 +608,13 @@ async function handleToolCall(params) {
       const html = renderBrowserPlayableDemoHtmlV1({
         title,
         renderSnapshot: snapshot,
-        metadata: {
-          scene: snapshot.scene,
-          tick: snapshot.tick,
-          viewport: `${snapshot.viewport.width}x${snapshot.viewport.height}`
-        }
+        metadata
       });
 
       return {
-        content: toTextContent(`Canvas 2D demo built for ${snapshot.scene} at tick ${snapshot.tick}.`),
+        content: toTextContent(`Browser playable demo built for ${snapshot.scene} at tick ${snapshot.tick}.`),
         structuredContent: {
-          canvasDemoVersion: CANVAS_2D_DEMO_VERSION,
+          browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
           scene: snapshot.scene,
           tick: snapshot.tick,
           html

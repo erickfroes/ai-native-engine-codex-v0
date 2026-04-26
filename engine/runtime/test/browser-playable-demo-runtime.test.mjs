@@ -162,6 +162,9 @@ function createCanvasHarness(html) {
         if (id === 'browser-playable-demo-status') {
           return statusElement;
         }
+        if (id === 'browser-playable-demo-position') {
+          return positionElement;
+        }
         throw new Error(`unexpected element lookup: ${id}`);
       }
     }
@@ -183,6 +186,7 @@ function createCanvasHarness(html) {
     operations,
     imageInstances,
     pauseButton,
+    positionElement,
     resetButton,
     statusElement
   };
@@ -356,7 +360,7 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.match(htmlA, /<button id="browser-playable-demo-reset" type="button" aria-controls="browser-playable-demo-canvas">Reset position<\/button>/);
   assert.match(htmlA, /function resetControlledPosition\(\)/);
   assert.match(htmlA, /resetButton\.addEventListener\("click"/);
-  assert.doesNotMatch(htmlA, /localStorage|requestAnimationFrame/);
+  assert.doesNotMatch(htmlA, /localStorage/);
   assert.match(htmlA, /addEventListener\("keydown"/);
   assert.match(htmlA, /id="browser-playable-demo-pause"/);
   assert.match(htmlA, /requestAnimationFrame\(renderFrame\)/);
@@ -372,7 +376,7 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.match(htmlA, /KeyS/);
   assert.match(htmlA, /4 px per keydown/);
   assert.match(htmlA, /Pause rendering/);
-  assert.match(htmlA, />Reset<\/button>/);
+  assert.match(htmlA, />Reset position<\/button>/);
   assert.doesNotMatch(htmlA, /<script[^>]+src=/);
   assertNoForbiddenBrowserDemoHtmlSurface(htmlA);
   assert.equal(BROWSER_PLAYABLE_DEMO_VERSION, 1);
@@ -398,7 +402,7 @@ test('renderBrowserPlayableDemoHtmlV1 keeps canvas focus affordances and stable 
     /Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by 4 px per keydown\./
   );
   assert.match(html, />Pause rendering<\/button>/);
-  assert.match(html, />Reset<\/button>/);
+  assert.match(html, />Reset position<\/button>/);
   assert.equal(typeof click, 'function');
 
   click();

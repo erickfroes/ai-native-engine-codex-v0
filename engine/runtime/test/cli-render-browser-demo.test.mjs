@@ -47,7 +47,7 @@ function assertBrowserDemoHtmlSurface(html) {
   assert.match(html, /aria-label="Browser playable demo canvas"/);
   assert.match(html, /requestAnimationFrame\(renderFrame\)/);
   assert.match(html, />Pause rendering<\/button>/);
-  assert.match(html, />Reset<\/button>/);
+  assert.match(html, />Reset position<\/button>/);
   assert.match(
     html,
     /Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by 4 px per keydown\./

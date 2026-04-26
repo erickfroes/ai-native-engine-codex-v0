@@ -385,7 +385,7 @@ async function run() {
     return;
   }
 
-  if (command === 'render-svg-demo') {
+  if (command === 'render-browser-demo') {
     if (!maybePath) {
       printUsage();
       process.exitCode = 2;
@@ -410,11 +410,7 @@ async function run() {
     const html = renderBrowserPlayableDemoHtmlV1({
       title,
       renderSnapshot: snapshot,
-      metadata: {
-        scene: snapshot.scene,
-        tick: snapshot.tick,
-        viewport: `${snapshot.viewport.width}x${snapshot.viewport.height}`
-      }
+      metadata
     });
     const outputPath = requestedOutPath ? path.resolve(requestedOutPath) : undefined;
 
@@ -424,7 +420,7 @@ async function run() {
     }
 
     const envelope = {
-      canvasDemoVersion: CANVAS_2D_DEMO_VERSION,
+      browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
       scene: snapshot.scene,
       tick: snapshot.tick,
       ...(outputPath ? { outputPath } : {}),
