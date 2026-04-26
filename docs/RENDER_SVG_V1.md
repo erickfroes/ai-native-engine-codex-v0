@@ -9,9 +9,10 @@ Nao existe canvas real, Pixi, Three, WebGL ou runtime visual neste slice.
 ## Runtime
 
 - `renderSnapshotToSvgV1(renderSnapshot)` recebe um `RenderSnapshot v1` valido.
-- a saida e uma string SVG estavel com `<?xml ...?>`, `<svg ...>` e draw calls `rect`.
+- a saida e uma string SVG estavel com `<?xml ...?>`, `<svg ...>` e draw calls serializados de forma deterministica.
 - a ordem dos elementos segue exatamente `renderSnapshot.drawCalls`.
 - `viewport.width` e `viewport.height` viram `width`, `height` e `viewBox` do documento SVG.
+- draw calls `sprite` ainda usam fallback visual minimo para `<rect>` com `data-asset-id`, sem carregar imagem real.
 
 ## CLI e MCP
 
@@ -41,5 +42,5 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 
 - rasterizacao real;
 - backend grafico;
-- assets reais;
+- assets reais obrigatorios;
 - editor visual.
