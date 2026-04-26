@@ -188,6 +188,21 @@ Compatibilidade:
 - nao altera `RenderSnapshot v1`, Render SVG, Canvas2D Demo ou Browser Playable Demo;
 - nao adiciona fisica, resolucao de colisao, bloqueio de movimento, input blocking, colisao com `tile.layer`, pathfinding, editor ou servidor.
 
+## Movement Blocking v1 (inspecao deterministica de movimento)
+
+Contrato deterministico para avaliar uma tentativa de movimento de `InputIntent v1` contra `collision.bounds` solidos:
+
+- ver `docs/MOVEMENT_BLOCKING_V1.md`.
+
+Compatibilidade:
+
+- gera `MovementBlockingReport v1` via runtime, CLI e MCP;
+- deriva de `CollisionBoundsReport v1` sem alterar `collision.bounds`, `CollisionBoundsReport v1` ou `CollisionOverlapReport v1`;
+- usa `from`, `candidate` e `final` para separar posicao atual, tentativa e resultado efetivo do report;
+- se a tentativa causaria overlap solido, `blocked: true` e `final` permanece igual a `from`;
+- nao altera `run-loop`, Browser Playable Demo, `InputIntent v1`, `KeyboardInputScript v1`, RenderSnapshot v1, Save/Load v1 ou renderers;
+- nao adiciona fisica completa, resolucao complexa, tile collision, pathfinding, editor ou servidor.
+
 ## Input Intent v1 (input headless opt-in no loop)
 
 Contrato de intenção de input headless, com integração opt-in no `run-loop`/`run_loop` e sem acoplamento com `Scene Document v1` ou `simulate-state`:
