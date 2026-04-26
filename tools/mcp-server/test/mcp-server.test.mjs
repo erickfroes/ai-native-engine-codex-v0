@@ -163,6 +163,12 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
         'keyboardScriptPath'
       )
     );
+    assert.ok(
+      Object.prototype.hasOwnProperty.call(
+        toolsResponse.result.tools.find((tool) => tool.name === 'run_loop').inputSchema.properties,
+        'movementBlocking'
+      )
+    );
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'plan_loop'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay_artifact'));
@@ -1066,6 +1072,92 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.deepEqual(
       runLoopWithIntentA.result.structuredContent,
       runLoopWithIntentB.result.structuredContent
+    );
+
+    const runLoopWithMovementBlockingBlockedA = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-loop-blocked.scene.json',
+        ticks: 1,
+        seed: 40,
+        movementBlocking: true,
+        inputIntentPath: './fixtures/input/move-player-right.intent.json'
+      }
+    });
+
+    const runLoopWithMovementBlockingBlockedNoFlag = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-loop-blocked.scene.json',
+        ticks: 1,
+        seed: 40,
+        inputIntentPath: './fixtures/input/move-player-right.intent.json'
+      }
+    });
+
+    const runLoopWithMovementBlockingOpen = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-loop-open.scene.json',
+        ticks: 1,
+        seed: 40,
+        movementBlocking: true,
+        inputIntentPath: './fixtures/input/move-player-right.intent.json'
+      }
+    });
+    const runLoopWithMovementBlockingOpenNoFlag = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-loop-open.scene.json',
+        ticks: 1,
+        seed: 40,
+        inputIntentPath: './fixtures/input/move-player-right.intent.json'
+      }
+    });
+
+    const runLoopWithMovementBlockingNonSolid = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-loop-non-solid.scene.json',
+        ticks: 1,
+        seed: 40,
+        movementBlocking: true,
+        inputIntentPath: './fixtures/input/move-player-right.intent.json'
+      }
+    });
+
+    assert.equal(runLoopWithMovementBlockingBlockedA.result.isError, false);
+    assert.equal(runLoopWithMovementBlockingBlockedNoFlag.result.isError, false);
+    assert.equal(runLoopWithMovementBlockingOpen.result.isError, false);
+    assert.equal(runLoopWithMovementBlockingOpenNoFlag.result.isError, false);
+    assert.equal(runLoopWithMovementBlockingNonSolid.result.isError, false);
+    assert.equal(
+      runLoopWithMovementBlockingBlockedNoFlag.result.structuredContent.finalState - 1,
+      runLoopWithMovementBlockingBlockedA.result.structuredContent.finalState
+    );
+    assert.equal(
+      runLoopWithMovementBlockingOpen.result.structuredContent.finalState,
+      runLoopWithMovementBlockingOpenNoFlag.result.structuredContent.finalState
+    );
+    assert.equal(
+      runLoopWithMovementBlockingNonSolid.result.structuredContent.finalState,
+      runLoopWithMovementBlockingOpenNoFlag.result.structuredContent.finalState
+    );
+
+    const runLoopWithMovementBlockingInvalid = await client.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        ticks: 1,
+        movementBlocking: 'yes',
+        inputIntentPath: './fixtures/input/valid.move.intent.json'
+      }
+    });
+
+    assert.equal(runLoopWithMovementBlockingInvalid.result.isError, true);
+    assert.match(
+      runLoopWithMovementBlockingInvalid.result.content[0].text,
+      /movementBlocking/
     );
 
     const simulateStateNoTraceResponse = await client.request('tools/call', {
