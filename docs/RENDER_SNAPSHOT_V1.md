@@ -59,11 +59,13 @@ Definir um contrato JSON headless e deterministico para descrever uma vista rend
 - `options.assetManifest` ou `options.assetManifestPath` ativam a leitura opt-in de `Asset Manifest v1`.
 - quando um manifesto opt-in existe e a entidade declara `sprite.fields.assetId`, o builder pode emitir `drawCalls.kind = "sprite"`.
 - sem manifesto, o builder preserva o fallback atual para `rect`.
+- `assetManifestPath` deve apontar para um manifesto local valido; paths absolutos no `src` do manifesto e traversal sao rejeitados.
 - `x` e `y` vem de `transform.fields.position` ou de `transform.fields`.
 - `width` e `height` podem vir de `sprite.fields`; se ausentes, usam fallback deterministico `16x16` ou o tamanho declarado no manifesto quando houver `assetId`.
 - `layer` pode vir de `sprite.fields.layer`; se ausente, usa `0`.
 - `drawCalls` sao ordenados por `layer` e depois `id`.
 - suporte a `sprite` existe no contrato, mas o uso por `assetManifest` continua opt-in e minimalista.
+- renderers desta versao continuam livres para usar fallback visual minimo para `sprite`, sem image loading real, sem fetch e sem rede.
 
 Ver tambem: `docs/RENDER_SVG_V1.md`.
 
