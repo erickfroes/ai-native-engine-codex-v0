@@ -14,6 +14,7 @@ const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 const invalidAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'missing.asset-manifest.json');
 const invalidRelativeAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'invalid.non-positive-size.asset-manifest.json');
+const invalidTraversalAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'invalid.traversal-src.asset-manifest.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -50,7 +51,7 @@ function assertBrowserDemoHtmlWithImageLoadingSurface(html) {
   assert.match(html, /requestAnimationFrame\(renderFrame\)/);
   assert.doesNotMatch(
     html,
-    /<script[^>]+src=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|Date\.now|new Date|performance\.now|localStorage/
+    /<script[^>]+src=|<link[^>]+href=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|import\(|Date\.now|new Date|performance\.now|localStorage/
   );
 }
 
@@ -145,8 +146,8 @@ test('render-browser-demo with --asset-manifest preserves envelope shape and inc
   assertBrowserDemoHtmlWithImageLoadingSurface(payload.html);
   assert.match(payload.html, /"kind":"sprite"/);
   assert.match(payload.html, /"assetId":"player\.sprite"/);
-  assert.match(payload.html, /"assetSrc":"(?:file:\/\/\/.*)?images\/player\.png"/);
-  assert.match(payload.html, /"assetSrc":"(?:file:\/\/\/.*)?images\/camera-icon\.png"/);
+  assert.match(payload.html, /"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/);
+  assert.match(payload.html, /"assetSrc":"file:\/\/\/[^"]+images\/camera-icon\.png"/);
 });
 
 test('render-browser-demo with --asset-manifest is deterministic for repeated runs', () => {
@@ -197,6 +198,20 @@ test('render-browser-demo fails predictably when --asset-manifest is invalid', (
 
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /asset manifest is invalid:/);
+});
+
+test('render-browser-demo fails predictably when --asset-manifest src escapes manifest directory', () => {
+  const result = runCli([
+    'render-browser-demo',
+    spriteScenePath,
+    '--asset-manifest',
+    invalidTraversalAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /asset manifest is invalid:/);
+  assert.match(result.stderr, /\$\.assets\[0\]\.src: must stay inside the manifest directory/);
 });
 
 test('render-browser-demo --json keeps the same envelope shape when --out is omitted', () => {
