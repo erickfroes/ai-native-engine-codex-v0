@@ -31,8 +31,8 @@ Shape v1:
 - `kind` deve ser exatamente `camera.viewport`.
 - `version` deve ser exatamente `1`.
 - `replicated` deve ser exatamente `false`.
-- `fields.x` e `fields.y` devem ser inteiros.
-- `fields.width` e `fields.height` devem ser inteiros `>= 1`.
+- `fields.x` e `fields.y` devem ser inteiros e podem ser negativos.
+- `fields.width` e `fields.height` devem ser inteiros `> 0`.
 - campos extras nao sao permitidos.
 - apenas um `camera.viewport` e permitido por cena.
 
@@ -43,7 +43,7 @@ Shape v1:
   - `drawCall.x = worldX - camera.viewport.fields.x`
   - `drawCall.y = worldY - camera.viewport.fields.y`
 - `viewport.width` e `viewport.height` passam a usar a camera, salvo override explicito por opcoes do runtime/CLI/MCP.
-- nao existe culling: drawCalls fora da viewport continuam presentes.
+- nao existe culling: drawCalls fora da viewport continuam presentes no snapshot, apenas deslocados.
 
 ## Integracao
 
