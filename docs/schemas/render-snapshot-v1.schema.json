@@ -64,6 +64,9 @@
           "assetId": {
             "type": "string"
           },
+          "assetSrc": {
+            "type": "string"
+          },
           "x": {
             "type": "integer"
           },

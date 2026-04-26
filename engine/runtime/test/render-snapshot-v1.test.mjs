@@ -38,6 +38,7 @@ test('render snapshot v1: valid rect and sprite draw calls match helper and sche
         kind: 'sprite',
         id: 'camera.icon',
         assetId: 'camera.icon',
+        assetSrc: 'images/camera-icon.png',
         x: 24,
         y: 20,
         width: 16,

@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 const ROOT_KEYS = Object.freeze(['drawCalls', 'renderSnapshotVersion', 'scene', 'tick', 'viewport']);
 const VIEWPORT_KEYS = Object.freeze(['height', 'width']);
 const RECT_DRAW_CALL_KEYS = Object.freeze(['height', 'id', 'kind', 'layer', 'width', 'x', 'y']);
-const SPRITE_DRAW_CALL_KEYS = Object.freeze(['assetId', 'height', 'id', 'kind', 'layer', 'width', 'x', 'y']);
+const SPRITE_DRAW_CALL_KEYS = Object.freeze(['assetId', 'assetSrc', 'height', 'id', 'kind', 'layer', 'width', 'x', 'y']);
+const SPRITE_DRAW_CALL_KEYS_WITHOUT_ASSET_SRC = Object.freeze(['assetId', 'height', 'id', 'kind', 'layer', 'width', 'x', 'y']);
 
 export function assertRenderSnapshotV1(snapshot) {
   assert.equal(typeof snapshot, 'object');
@@ -30,9 +31,16 @@ export function assertRenderSnapshotV1(snapshot) {
     if (drawCall.kind === 'rect') {
       assert.deepEqual(Object.keys(drawCall).sort(), RECT_DRAW_CALL_KEYS);
     } else if (drawCall.kind === 'sprite') {
-      assert.deepEqual(Object.keys(drawCall).sort(), SPRITE_DRAW_CALL_KEYS);
+      const expectedSpriteKeys = Object.hasOwn(drawCall, 'assetSrc')
+        ? SPRITE_DRAW_CALL_KEYS
+        : SPRITE_DRAW_CALL_KEYS_WITHOUT_ASSET_SRC;
+      assert.deepEqual(Object.keys(drawCall).sort(), expectedSpriteKeys);
       assert.equal(typeof drawCall.assetId, 'string');
       assert.equal(drawCall.assetId.trim().length > 0, true);
+      if (Object.hasOwn(drawCall, 'assetSrc')) {
+        assert.equal(typeof drawCall.assetSrc, 'string');
+        assert.equal(drawCall.assetSrc.trim().length > 0, true);
+      }
     } else {
       assert.fail(`unexpected drawCall.kind: ${drawCall.kind}`);
     }

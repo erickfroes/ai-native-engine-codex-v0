@@ -120,7 +120,10 @@ function toDrawCall(entity, assetsById = undefined) {
     throw new Error(`buildRenderSnapshotV1: entity \`${entity.id}\` references unknown assetId \`${assetId}\``);
   }
 
-  return toSpriteDrawCall(entity, position, resolveDrawSizeWithAssetFallback(entity, asset), assetId);
+  return {
+    ...toSpriteDrawCall(entity, position, resolveDrawSizeWithAssetFallback(entity, asset), assetId),
+    assetSrc: asset.src
+  };
 }
 
 function sortDrawCalls(left, right) {
