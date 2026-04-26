@@ -290,3 +290,71 @@ test('tile.layer rejects non-object fields predictably', () => {
   assert.ok(report.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
   assert.equal(report.errors.some((error) => error.path.endsWith('.fields.tiles')), false);
 });
+
+test('tile.layer validates grid dimensions and palette references predictably', () => {
+  const report = validateTileLayerFields({
+    tileWidth: 16,
+    tileHeight: 16,
+    columns: 3,
+    rows: 2,
+    tiles: [
+      [1, 1],
+      [1, 2, 1],
+      [1, 1, 1]
+    ],
+    palette: {
+      0: { kind: 'empty' },
+      1: { kind: 'rect', width: 16, height: 16 }
+    }
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.tiles' &&
+        error.message === 'tile.layer tiles row count must equal rows'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.tiles[0]' &&
+        error.message === 'tile.layer tiles column count must equal columns'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.tiles[1][1]' &&
+        error.message === 'tile.layer tile id `2` must exist in palette'
+    )
+  );
+});
+
+test('tile.layer rejects invalid tile sizes predictably', () => {
+  const report = validateTileLayerFields({
+    tileWidth: 0,
+    tileHeight: 1.5,
+    columns: 1,
+    rows: 1,
+    tiles: [[1]],
+    palette: {
+      1: { kind: 'rect' }
+    }
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.tileWidth' &&
+        error.message === 'tile.layer tileWidth must be an integer >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.tileHeight' &&
+        error.message === 'tile.layer tileHeight must be an integer >= 1'
+    )
+  );
+});
