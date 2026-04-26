@@ -15,7 +15,7 @@ async function loadSchema() {
   return JSON.parse(await readFile(schemaPath, 'utf8'));
 }
 
-test('render snapshot v1: valid minimal snapshot matches helper and schema', async () => {
+test('render snapshot v1: valid rect and sprite draw calls match helper and schema', async () => {
   const snapshot = {
     renderSnapshotVersion: 1,
     scene: 'tutorial',
@@ -33,6 +33,16 @@ test('render snapshot v1: valid minimal snapshot matches helper and schema', asy
         width: 16,
         height: 16,
         layer: 0
+      },
+      {
+        kind: 'sprite',
+        id: 'camera.icon',
+        assetId: 'camera.icon',
+        x: 24,
+        y: 20,
+        width: 16,
+        height: 16,
+        layer: 1
       }
     ]
   };
@@ -56,8 +66,9 @@ test('render snapshot v1: rejects extra fields at controlled levels', async () =
     },
     drawCalls: [
       {
-        kind: 'rect',
+        kind: 'sprite',
         id: 'player.hero',
+        assetId: 'player.sprite',
         x: 10,
         y: 20,
         width: 16,
@@ -76,4 +87,27 @@ test('render snapshot v1: rejects extra fields at controlled levels', async () =
   assert.ok(errors.some((error) => error.path === '$.viewport.scale' && error.message === 'is not allowed by schema'));
   assert.ok(errors.some((error) => error.path === '$.drawCalls[0].color' && error.message === 'is not allowed by schema'));
   assert.ok(errors.some((error) => error.path === '$.debug' && error.message === 'is not allowed by schema'));
+});
+
+test('render snapshot v1: helper rejects sprite draw calls without assetId', () => {
+  assertRenderSnapshotV1Rejects({
+    renderSnapshotVersion: 1,
+    scene: 'tutorial',
+    tick: 4,
+    viewport: {
+      width: 320,
+      height: 180
+    },
+    drawCalls: [
+      {
+        kind: 'sprite',
+        id: 'player.hero',
+        x: 10,
+        y: 20,
+        width: 16,
+        height: 16,
+        layer: 0
+      }
+    ]
+  });
 });
