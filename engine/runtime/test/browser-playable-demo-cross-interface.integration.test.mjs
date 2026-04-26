@@ -60,7 +60,7 @@ function assertBrowserDemoEnvelope(payload, {
   assert.match(payload.html, /requestAnimationFrame\(renderFrame\)/);
   assert.match(payload.html, />Pause rendering<\/button>/);
   assert.match(payload.html, /Resume rendering/);
-  assert.match(payload.html, />Reset<\/button>/);
+  assert.match(payload.html, />Reset position<\/button>/);
   assert.match(
     payload.html,
     /Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by 4 px per keydown\./
