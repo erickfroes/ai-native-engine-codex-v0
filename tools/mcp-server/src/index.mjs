@@ -35,7 +35,8 @@ import {
   runMinimalSystemLoop,
   runMinimalSystemLoopWithTrace,
   buildCollisionBoundsReportV1,
-  buildCollisionOverlapReportV1
+  buildCollisionOverlapReportV1,
+  buildMovementBlockingReportV1
 } from '../../../engine/runtime/src/index.mjs';
 import { toolCatalog } from './tool-catalog.mjs';
 
@@ -122,6 +123,7 @@ async function handleToolCall(params) {
     params.name !== 'inspect_state' &&
     params.name !== 'inspect_collision_bounds' &&
     params.name !== 'inspect_collision_overlaps' &&
+    params.name !== 'inspect_movement_blocking' &&
     params.name !== 'simulate_state'
   ) {
     throw Object.assign(new Error(`Unknown tool: ${params.name}`), { code: -32602 });
@@ -428,6 +430,28 @@ async function handleToolCall(params) {
       return {
         content: toTextContent(
           `Collision overlap report built for ${report.scene} with ${report.overlaps.length} overlap(s).`
+        ),
+        structuredContent: report,
+        isError: false
+      };
+    }
+
+    if (params.name === 'inspect_movement_blocking') {
+      if (
+        typeof args.inputIntentPath !== 'string' ||
+        args.inputIntentPath.trim().length === 0
+      ) {
+        return {
+          content: toTextContent('inspect_movement_blocking: `inputIntentPath` is required and must be a non-empty string.'),
+          isError: true
+        };
+      }
+
+      const inputIntent = await loadValidatedInputIntentV1(resolveRepoPath(args.inputIntentPath));
+      const report = await buildMovementBlockingReportV1(targetPath, { inputIntent });
+      return {
+        content: toTextContent(
+          `Movement blocking inspected for ${report.entityId}: blocked=${report.blocked}.`
         ),
         structuredContent: report,
         isError: false
@@ -760,7 +784,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, inspect_collision_bounds, inspect_collision_overlaps, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, inspect_collision_bounds, inspect_collision_overlaps, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }
