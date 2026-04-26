@@ -20,6 +20,7 @@ const malformedPath = path.join(repoRoot, 'scenes', 'invalid', 'malformed.scene.
 const missingSystemsPath = path.join(repoRoot, 'scenes', 'invalid', 'missing-systems.scene.json');
 const emptySystemsPath = path.join(repoRoot, 'scenes', 'invalid', 'empty-systems.scene.json');
 const unknownSystemPath = path.join(repoRoot, 'scenes', 'invalid', 'unknown-system.scene.json');
+const visualSpriteFixturePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -83,6 +84,18 @@ test('scene document v1: tutorial and loopable fixtures conform to expected shap
 
   await loadSceneFile(tutorialPath);
   await loadSceneFile(loopablePath);
+});
+
+test('scene document v1: visual sprite fixture stays valid and opt-in', async () => {
+  const visualSprite = JSON.parse(await readFile(visualSpriteFixturePath, 'utf8'));
+  assertSceneDocumentV1(visualSprite);
+
+  const scene = await loadSceneFile(visualSpriteFixturePath);
+  assert.equal(scene.metadata.name, 'visual-sprite-fixture');
+
+  const report = await validateLoopScene(visualSpriteFixturePath);
+  assertSceneValidationReportV1(report);
+  assert.equal(report.valid, true);
 });
 
 test('scene document v1 helper rejects malformed/missing/empty systems shape when applicable', async () => {
