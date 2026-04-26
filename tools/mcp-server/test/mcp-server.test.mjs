@@ -428,6 +428,37 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       }
     ]);
 
+    const renderSnapshotVisualSpriteResponse = await client.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './fixtures/assets/visual-sprite.scene.json',
+        assetManifestPath: './fixtures/assets/visual-sprite.asset-manifest.json'
+      }
+    });
+
+    assert.equal(renderSnapshotVisualSpriteResponse.result.isError, false);
+    assertRenderSnapshotV1(renderSnapshotVisualSpriteResponse.result.structuredContent);
+    assert.deepEqual(Object.keys(renderSnapshotVisualSpriteResponse.result.structuredContent).sort(), [
+      'drawCalls',
+      'renderSnapshotVersion',
+      'scene',
+      'tick',
+      'viewport'
+    ]);
+    assert.deepEqual(renderSnapshotVisualSpriteResponse.result.structuredContent.drawCalls, [
+      {
+        kind: 'sprite',
+        id: 'player.hero',
+        assetId: 'player.sprite',
+        assetSrc: 'images/player.png',
+        x: 10,
+        y: 12,
+        width: 20,
+        height: 24,
+        layer: 2
+      }
+    ]);
+
     const renderSnapshotMissingManifestResponse = await client.request('tools/call', {
       name: 'render_snapshot',
       arguments: {
