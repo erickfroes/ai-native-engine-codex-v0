@@ -46,20 +46,46 @@ function validateRenderSnapshot(renderSnapshot) {
   }
 }
 
-function serializeRect(drawCall, index) {
+function validateCommonDrawCall(drawCall, index) {
   assertObject(drawCall, `renderSnapshot.drawCalls[${index}]`);
-  if (drawCall.kind !== 'rect') {
-    throw new Error(`renderSnapshotToSvgV1: drawCalls[${index}].kind must be \`rect\``);
-  }
-
   assertNonEmptyString(`renderSnapshot.drawCalls[${index}].id`, drawCall.id);
   assertInteger(`renderSnapshot.drawCalls[${index}].x`, drawCall.x);
   assertInteger(`renderSnapshot.drawCalls[${index}].y`, drawCall.y);
   assertInteger(`renderSnapshot.drawCalls[${index}].width`, drawCall.width, 1);
   assertInteger(`renderSnapshot.drawCalls[${index}].height`, drawCall.height, 1);
   assertInteger(`renderSnapshot.drawCalls[${index}].layer`, drawCall.layer);
+}
+
+function serializeRect(drawCall, index) {
+  validateCommonDrawCall(drawCall, index);
+  if (drawCall.kind !== 'rect') {
+    throw new Error(`renderSnapshotToSvgV1: drawCalls[${index}].kind must be \`rect\` or \`sprite\``);
+  }
 
   return `  <rect id="${escapeXmlAttribute(drawCall.id)}" data-layer="${drawCall.layer}" x="${drawCall.x}" y="${drawCall.y}" width="${drawCall.width}" height="${drawCall.height}" />`;
+}
+
+function serializeSprite(drawCall, index) {
+  validateCommonDrawCall(drawCall, index);
+  if (drawCall.kind !== 'sprite') {
+    throw new Error(`renderSnapshotToSvgV1: drawCalls[${index}].kind must be \`rect\` or \`sprite\``);
+  }
+
+  assertNonEmptyString(`renderSnapshot.drawCalls[${index}].assetId`, drawCall.assetId);
+
+  return `  <rect id="${escapeXmlAttribute(drawCall.id)}" data-asset-id="${escapeXmlAttribute(drawCall.assetId)}" data-kind="sprite" data-layer="${drawCall.layer}" x="${drawCall.x}" y="${drawCall.y}" width="${drawCall.width}" height="${drawCall.height}" />`;
+}
+
+function serializeDrawCall(drawCall, index) {
+  if (drawCall.kind === 'rect') {
+    return serializeRect(drawCall, index);
+  }
+
+  if (drawCall.kind === 'sprite') {
+    return serializeSprite(drawCall, index);
+  }
+
+  throw new Error(`renderSnapshotToSvgV1: drawCalls[${index}].kind must be \`rect\` or \`sprite\``);
 }
 
 export function renderSnapshotToSvgV1(renderSnapshot) {
@@ -68,7 +94,7 @@ export function renderSnapshotToSvgV1(renderSnapshot) {
   const lines = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     `<svg xmlns="http://www.w3.org/2000/svg" data-svg-version="${RENDER_SVG_VERSION}" data-scene="${escapeXmlAttribute(renderSnapshot.scene)}" data-tick="${renderSnapshot.tick}" width="${renderSnapshot.viewport.width}" height="${renderSnapshot.viewport.height}" viewBox="0 0 ${renderSnapshot.viewport.width} ${renderSnapshot.viewport.height}">`,
-    ...renderSnapshot.drawCalls.map(serializeRect),
+    ...renderSnapshot.drawCalls.map(serializeDrawCall),
     '</svg>'
   ];
 
