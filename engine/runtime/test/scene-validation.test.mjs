@@ -584,8 +584,95 @@ test('camera.viewport component invariants are validated predictably', () => {
   );
 });
 
+test('camera.viewport rejects invalid width predictably', () => {
+  const report = validateCameraViewportFields({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 180
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.width' &&
+        error.message === 'camera.viewport width must be an integer >= 1'
+    )
+  );
+});
+
+test('camera.viewport rejects invalid height predictably', () => {
+  const report = validateCameraViewportFields({
+    x: 0,
+    y: 0,
+    width: 320,
+    height: 0
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.height' &&
+        error.message === 'camera.viewport height must be an integer >= 1'
+    )
+  );
+});
+
+test('camera.viewport rejects missing x and y predictably', () => {
+  const report = validateCameraViewportFields({
+    width: 320,
+    height: 180
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.x' &&
+        error.message === 'camera.viewport x must be an integer'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.y' &&
+        error.message === 'camera.viewport y must be an integer'
+    )
+  );
+});
+
+test('camera.viewport rejects non-integer x and y predictably', () => {
+  const report = validateCameraViewportFields({
+    x: 1.5,
+    y: 'north',
+    width: 320,
+    height: 180
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.x' &&
+        error.message === 'camera.viewport x must be an integer'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.y' &&
+        error.message === 'camera.viewport y must be an integer'
+    )
+  );
+});
+
+test('camera.viewport rejects missing fields predictably', () => {
+  const report = validateCameraViewportFields(undefined);
+
+  assert.ok(report.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
+  assert.equal(report.errors.some((error) => error.path.endsWith('.fields.width')), false);
+});
+
 test('camera.viewport rejects non-object fields predictably', () => {
-  const report = validateCameraViewportFields(null);
+  const report = validateCameraViewportFields('invalid');
 
   assert.ok(report.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
   assert.equal(report.errors.some((error) => error.path.endsWith('.fields.width')), false);
