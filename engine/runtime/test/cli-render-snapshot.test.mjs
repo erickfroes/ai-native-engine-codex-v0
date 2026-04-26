@@ -12,6 +12,14 @@ const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
+const invalidVisualSpriteScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'invalid_visual_sprite_asset_id.scene.json'
+);
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const cameraOnlyAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.camera-only.asset-manifest.json');
@@ -230,4 +238,18 @@ test('render-snapshot fails predictably when manifest does not contain a referen
 
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /buildRenderSnapshotV1: entity `player\.hero` references unknown assetId `player\.sprite`/);
+});
+
+test('render-snapshot fails predictably when visual.sprite component is invalid', () => {
+  const result = runCli([
+    'render-snapshot',
+    invalidVisualSpriteScenePath,
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /SceneValidationError: Scene validation failed for/);
+  assert.match(result.stderr, /invalid_visual_sprite_asset_id\.scene\.json/);
 });

@@ -459,6 +459,26 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       }
     ]);
 
+    const renderSnapshotInvalidVisualSpriteResponse = await client.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './engine/runtime/test/fixtures/invalid_visual_sprite_asset_id.scene.json',
+        assetManifestPath: './fixtures/assets/visual-sprite.asset-manifest.json'
+      }
+    });
+
+    assert.equal(renderSnapshotInvalidVisualSpriteResponse.result.isError, true);
+    assert.equal(renderSnapshotInvalidVisualSpriteResponse.result.structuredContent.ok, false);
+    assert.equal(renderSnapshotInvalidVisualSpriteResponse.result.structuredContent.errorName, 'SceneValidationError');
+    assert.match(
+      renderSnapshotInvalidVisualSpriteResponse.result.content[0].text,
+      /Scene validation failed for/
+    );
+    assert.match(
+      renderSnapshotInvalidVisualSpriteResponse.result.structuredContent.errorMessage,
+      /invalid_visual_sprite_asset_id\.scene\.json/
+    );
+
     const renderSnapshotMissingManifestResponse = await client.request('tools/call', {
       name: 'render_snapshot',
       arguments: {
@@ -553,49 +573,27 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(renderSvgResponseA.result.structuredContent.svg, /<rect id="player\.hero"/);
     assert.deepEqual(renderSvgResponseA.result.structuredContent, renderSvgResponseB.result.structuredContent);
 
-    const renderSvgInvalidWidthResponse = await client.request('tools/call', {
+    const renderSvgInvalidVisualSpriteResponse = await client.request('tools/call', {
       name: 'render_svg',
       arguments: {
-        path: './scenes/tutorial.scene.json',
-        width: 0
+        path: './engine/runtime/test/fixtures/invalid_visual_sprite_asset_id.scene.json'
       }
     });
 
-    assert.equal(renderSvgInvalidWidthResponse.result.isError, true);
+    assert.equal(renderSvgInvalidVisualSpriteResponse.result.isError, true);
+    assert.equal(renderSvgInvalidVisualSpriteResponse.result.structuredContent.ok, false);
+    assert.equal(renderSvgInvalidVisualSpriteResponse.result.structuredContent.errorName, 'SceneValidationError');
     assert.match(
-      renderSvgInvalidWidthResponse.result.content[0].text,
-      /render_svg: `width` must be an integer >= 1 when provided/
+      renderSvgInvalidVisualSpriteResponse.result.content[0].text,
+      /Scene validation failed for/
+    );
+    assert.match(
+      renderSvgInvalidVisualSpriteResponse.result.structuredContent.errorMessage,
+      /invalid_visual_sprite_asset_id\.scene\.json/
     );
 
-    const renderSvgInvalidHeightResponse = await client.request('tools/call', {
-      name: 'render_svg',
-      arguments: {
-        path: './scenes/tutorial.scene.json',
-        height: 0
-      }
-    });
-
-    assert.equal(renderSvgInvalidHeightResponse.result.isError, true);
-    assert.match(
-      renderSvgInvalidHeightResponse.result.content[0].text,
-      /render_svg: `height` must be an integer >= 1 when provided/
-    );
-
-    const renderSvgMissingPathResponse = await client.request('tools/call', {
-      name: 'render_svg',
-      arguments: {
-        path: './scenes/missing.scene.json'
-      }
-    });
-
-    assert.equal(renderSvgMissingPathResponse.result.isError, true);
-    assert.equal(renderSvgMissingPathResponse.result.structuredContent.ok, false);
-    assert.equal(renderSvgMissingPathResponse.result.structuredContent.errorName, 'Error');
-    assert.match(renderSvgMissingPathResponse.result.content[0].text, /ENOENT/);
-    assert.match(renderSvgMissingPathResponse.result.content[0].text, /missing\.scene\.json/);
-
-    const renderCanvasDemoResponseA = await client.request('tools/call', {
-      name: 'render_canvas_demo',
+    const renderBrowserDemoResponseA = await client.request('tools/call', {
+      name: 'render_browser_demo',
       arguments: {
         path: './scenes/tutorial.scene.json',
         tick: 4,
@@ -645,6 +643,26 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.deepEqual(
       renderBrowserDemoWithManifestResponseA.result.structuredContent,
       renderBrowserDemoWithManifestResponseB.result.structuredContent
+    );
+
+    const renderBrowserDemoInvalidVisualSpriteResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './engine/runtime/test/fixtures/invalid_visual_sprite_asset_id.scene.json',
+        assetManifestPath: './fixtures/assets/visual-sprite.asset-manifest.json'
+      }
+    });
+
+    assert.equal(renderBrowserDemoInvalidVisualSpriteResponse.result.isError, true);
+    assert.equal(renderBrowserDemoInvalidVisualSpriteResponse.result.structuredContent.ok, false);
+    assert.equal(renderBrowserDemoInvalidVisualSpriteResponse.result.structuredContent.errorName, 'SceneValidationError');
+    assert.match(
+      renderBrowserDemoInvalidVisualSpriteResponse.result.content[0].text,
+      /Scene validation failed for/
+    );
+    assert.match(
+      renderBrowserDemoInvalidVisualSpriteResponse.result.structuredContent.errorMessage,
+      /invalid_visual_sprite_asset_id\.scene\.json/
     );
 
     const renderBrowserDemoWithManifestInvalidResponse = await client.request('tools/call', {

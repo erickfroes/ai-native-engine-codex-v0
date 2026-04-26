@@ -37,9 +37,11 @@ Regras:
 - `visual.sprite` e declarativo; ele nao carrega imagem sozinho.
 - com `Asset Manifest v1`, `buildRenderSnapshotV1` resolve `assetId` e pode emitir drawCall `sprite` com `assetSrc`.
 - sem `Asset Manifest v1`, o comportamento continua usando fallback `rect`.
+- quando `sprite` legado e `visual.sprite` coexistem na mesma entidade, `visual.sprite` e a fonte preferida para `assetId`, `width`, `height` e `layer`.
 - se `width` ou `height` nao forem declarados no componente, o builder usa as dimensoes do asset manifest quando disponiveis.
 - a Browser Playable Demo pode tentar `new Image()` local via `assetSrc`, sem `fetch`, rede ou scripts externos.
 - se a imagem local nao carregar, o HTML continua desenhando o fallback `rect`.
+- `visual.sprite` invalido falha a validacao da cena antes de `render-snapshot`, `render-svg` e `render-browser-demo`.
 
 ## Fora de escopo
 
