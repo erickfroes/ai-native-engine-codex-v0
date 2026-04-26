@@ -167,6 +167,9 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_replay_artifact'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'inspect_state'));
+    const inspectCollisionBoundsTool = toolsResponse.result.tools.find((tool) => tool.name === 'inspect_collision_bounds');
+    assert.ok(inspectCollisionBoundsTool);
+    assert.deepEqual(inspectCollisionBoundsTool.inputSchema.required, ['path']);
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'simulate_state'));
 
     const callResponse = await client.request('tools/call', {
@@ -1366,6 +1369,83 @@ test('mcp render_snapshot preserves camera viewport offsets and fails predictabl
     assert.equal(invalidCameraResponse.result.structuredContent.errorName, 'SceneValidationError');
     assert.match(invalidCameraResponse.result.content[0].text, /Scene validation failed for/);
     assert.match(invalidCameraResponse.result.structuredContent.errorMessage, /invalid_camera_viewport_x\.scene\.json/);
+  } finally {
+    await client.close();
+  }
+});
+
+test('mcp inspect_collision_bounds returns deterministic bounds and empty reports', async () => {
+  const client = createClient();
+
+  try {
+    const initResponse = await client.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: {
+        name: 'node-test',
+        version: '1.0.0'
+      }
+    });
+
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    client.notify('notifications/initialized');
+
+    const boundsResponse = await client.request('tools/call', {
+      name: 'inspect_collision_bounds',
+      arguments: {
+        path: './engine/runtime/test/fixtures/collision-bounds.scene.json'
+      }
+    });
+
+    assert.equal(boundsResponse.result.isError, false);
+    assert.deepEqual(boundsResponse.result.structuredContent, {
+      collisionBoundsReportVersion: 1,
+      scene: 'collision-bounds-fixture',
+      bounds: [
+        {
+          entityId: 'player.hero',
+          x: 12,
+          y: 15,
+          width: 12,
+          height: 14,
+          solid: true
+        },
+        {
+          entityId: 'wall.block',
+          x: 40,
+          y: 8,
+          width: 16,
+          height: 32,
+          solid: true
+        }
+      ]
+    });
+
+    const emptyResponse = await client.request('tools/call', {
+      name: 'inspect_collision_bounds',
+      arguments: {
+        path: './scenes/tutorial.scene.json'
+      }
+    });
+
+    assert.equal(emptyResponse.result.isError, false);
+    assert.deepEqual(emptyResponse.result.structuredContent, {
+      collisionBoundsReportVersion: 1,
+      scene: 'tutorial',
+      bounds: []
+    });
+
+    const invalidResponse = await client.request('tools/call', {
+      name: 'inspect_collision_bounds',
+      arguments: {
+        path: './engine/runtime/test/fixtures/invalid_collision_bounds.scene.json'
+      }
+    });
+
+    assert.equal(invalidResponse.result.isError, true);
+    assert.equal(invalidResponse.result.structuredContent.ok, false);
+    assert.equal(invalidResponse.result.structuredContent.errorName, 'SceneValidationError');
+    assert.match(invalidResponse.result.structuredContent.errorMessage, /invalid_collision_bounds\.scene\.json/);
   } finally {
     await client.close();
   }

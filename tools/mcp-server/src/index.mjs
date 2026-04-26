@@ -33,7 +33,8 @@ import {
   buildReplayArtifact,
   snapshotStateV1,
   runMinimalSystemLoop,
-  runMinimalSystemLoopWithTrace
+  runMinimalSystemLoopWithTrace,
+  buildCollisionBoundsReportV1
 } from '../../../engine/runtime/src/index.mjs';
 import { toolCatalog } from './tool-catalog.mjs';
 
@@ -118,6 +119,7 @@ async function handleToolCall(params) {
     params.name !== 'run_replay' &&
     params.name !== 'run_replay_artifact' &&
     params.name !== 'inspect_state' &&
+    params.name !== 'inspect_collision_bounds' &&
     params.name !== 'simulate_state'
   ) {
     throw Object.assign(new Error(`Unknown tool: ${params.name}`), { code: -32602 });
@@ -406,6 +408,15 @@ async function handleToolCall(params) {
       return {
         content: toTextContent(`State snapshot built for ${snapshot.scene} with ${snapshot.entities.length} entities.`),
         structuredContent: snapshot,
+        isError: false
+      };
+    }
+
+    if (params.name === 'inspect_collision_bounds') {
+      const report = await buildCollisionBoundsReportV1(targetPath);
+      return {
+        content: toTextContent(`Collision bounds report built for ${report.scene} with ${report.bounds.length} bound(s).`),
+        structuredContent: report,
         isError: false
       };
     }
@@ -736,7 +747,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, inspect_collision_bounds, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }
