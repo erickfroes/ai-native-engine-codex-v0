@@ -245,3 +245,48 @@ test('renderCanvas2DDemoHtmlV1 escapes title and scene for HTML and serializes s
   assert.doesNotMatch(html, /<script[^>]+src=|<link[^>]+href=|https?:\/\//);
   assert.doesNotMatch(html, /Date\.now|new Date|performance\.now|toISOString/);
 });
+
+test('renderCanvas2DDemoHtmlV1 preserves camera-shifted drawCalls in the inline snapshot', () => {
+  const html = renderCanvas2DDemoHtmlV1({
+    title: 'camera-viewport-fixture Canvas 2D Demo',
+    renderSnapshot: {
+      renderSnapshotVersion: 1,
+      scene: 'camera-viewport-fixture',
+      tick: 0,
+      viewport: {
+        width: 160,
+        height: 90
+      },
+      drawCalls: [
+        {
+          kind: 'rect',
+          id: 'map.ground.tile.0.0',
+          x: -8,
+          y: -4,
+          width: 16,
+          height: 16,
+          layer: -10
+        },
+        {
+          kind: 'rect',
+          id: 'player.hero',
+          x: 22,
+          y: 36,
+          width: 20,
+          height: 24,
+          layer: 2
+        }
+      ]
+    },
+    metadata: {
+      scene: 'camera-viewport-fixture',
+      tick: 0,
+      viewport: '160x90'
+    }
+  });
+
+  assert.match(html, /"viewport":\{"width":160,"height":90\}/);
+  assert.match(html, /"id":"map\.ground\.tile\.0\.0","x":-8,"y":-4/);
+  assert.match(html, /"id":"player\.hero","x":22,"y":36,"width":20,"height":24/);
+  assert.match(html, /context\.fillRect\(drawCall\.x, drawCall\.y, drawCall\.width, drawCall\.height\);/);
+});

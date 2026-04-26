@@ -11,10 +11,19 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
+const cameraViewportScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'camera-viewport.scene.json');
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const invalidTraversalAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'invalid.traversal-src.asset-manifest.json');
+const validCameraViewportScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'valid_camera_viewport.scene.json'
+);
 
 async function loadValidAssetManifest() {
   return JSON.parse(await readFile(validAssetManifestPath, 'utf8'));
@@ -179,6 +188,102 @@ test('buildRenderSnapshotV1 keeps old scenes without visual.sprite on rect fallb
   assertRenderSnapshotV1(snapshot);
   assert.deepEqual(snapshot.drawCalls.map((drawCall) => drawCall.kind), ['rect', 'rect']);
   assert.deepEqual(snapshot.drawCalls.map((drawCall) => drawCall.id), ['camera.main', 'player.hero']);
+});
+
+test('buildRenderSnapshotV1 applies camera viewport offsets to tile.layer and visual.sprite drawCalls', async () => {
+  const snapshot = await buildRenderSnapshotV1(cameraViewportScenePath, {
+    assetManifestPath: visualSpriteAssetManifestPath
+  });
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.viewport, {
+    width: 160,
+    height: 90
+  });
+  assert.deepEqual(snapshot.drawCalls, [
+    {
+      kind: 'rect',
+      id: 'map.ground.tile.0.0',
+      x: -8,
+      y: -4,
+      width: 16,
+      height: 16,
+      layer: -10
+    },
+    {
+      kind: 'rect',
+      id: 'map.ground.tile.0.1',
+      x: 8,
+      y: -4,
+      width: 16,
+      height: 16,
+      layer: -10
+    },
+    {
+      kind: 'rect',
+      id: 'map.ground.tile.1.0',
+      x: -8,
+      y: 12,
+      width: 16,
+      height: 16,
+      layer: -10
+    },
+    {
+      kind: 'sprite',
+      id: 'player.hero',
+      assetId: 'player.sprite',
+      assetSrc: 'images/player.png',
+      x: 22,
+      y: 36,
+      width: 20,
+      height: 24,
+      layer: 2
+    }
+  ]);
+});
+
+test('buildRenderSnapshotV1 lets explicit viewport options override camera viewport size', async () => {
+  const snapshot = await buildRenderSnapshotV1(cameraViewportScenePath, {
+    width: 96,
+    height: 54
+  });
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.viewport, {
+    width: 96,
+    height: 54
+  });
+  assert.deepEqual(snapshot.drawCalls.map((drawCall) => [drawCall.id, drawCall.x, drawCall.y]), [
+    ['map.ground.tile.0.0', -8, -4],
+    ['map.ground.tile.0.1', 8, -4],
+    ['map.ground.tile.1.0', -8, 12],
+    ['player.hero', 22, 36]
+  ]);
+});
+
+test('buildRenderSnapshotV1 fails predictably for invalid raw scene camera viewport objects', async () => {
+  await assert.rejects(
+    () => buildRenderSnapshotV1({
+      metadata: { name: 'invalid-camera-scene-object' },
+      entities: [
+        {
+          id: 'camera.main',
+          components: [
+            {
+              kind: 'camera.viewport',
+              fields: {
+                x: 'left',
+                y: 0,
+                width: 320,
+                height: 180
+              }
+            }
+          ]
+        }
+      ]
+    }),
+    /buildRenderSnapshotV1: entity `camera\.main` camera\.viewport\.x must be an integer/
+  );
 });
 
 test('buildRenderSnapshotV1 expands tile.layer into deterministic rect drawCalls', async () => {
@@ -862,6 +967,178 @@ test('buildRenderSnapshotV1 keeps rect fallback for visual.sprite without asset 
       width: 20,
       height: 24,
       layer: 2
+    }
+  ]);
+});
+
+test('buildRenderSnapshotV1 uses camera.viewport from a scene path and does not emit a fallback rect for the camera entity', async () => {
+  const snapshot = await buildRenderSnapshotV1(validCameraViewportScenePath);
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot, {
+    renderSnapshotVersion: 1,
+    scene: 'valid-camera-viewport',
+    tick: 0,
+    viewport: {
+      width: 320,
+      height: 180
+    },
+    drawCalls: []
+  });
+});
+
+test('buildRenderSnapshotV1 offsets rect, sprite, and tile drawCalls by camera position deterministically', async () => {
+  const assetManifest = await loadValidAssetManifest();
+  const scene = {
+    metadata: { name: 'camera-offset-scene' },
+    entities: [
+      {
+        id: 'camera.main',
+        components: [
+          {
+            kind: 'camera.viewport',
+            fields: { x: 100, y: 50, width: 200, height: 120 }
+          }
+        ]
+      },
+      {
+        id: 'player.hero',
+        components: [
+          {
+            kind: 'transform',
+            fields: { x: 110, y: 70 }
+          },
+          {
+            kind: 'visual.sprite',
+            fields: { assetId: 'player.sprite', layer: 2 }
+          }
+        ]
+      },
+      {
+        id: 'marker.rect',
+        components: [
+          {
+            kind: 'transform',
+            fields: { x: 95, y: 55 }
+          },
+          {
+            kind: 'sprite',
+            fields: { width: 8, height: 10, layer: 0 }
+          }
+        ]
+      },
+      {
+        id: 'map.ground',
+        components: [
+          {
+            kind: 'tile.layer',
+            fields: {
+              tileWidth: 16,
+              tileHeight: 16,
+              columns: 2,
+              rows: 1,
+              layer: -1,
+              tiles: [[1, 0]],
+              palette: {
+                0: { kind: 'empty' },
+                1: { kind: 'rect' }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
+
+  const first = await buildRenderSnapshotV1(scene, { assetManifest });
+  const second = await buildRenderSnapshotV1(scene, { assetManifest });
+
+  assertRenderSnapshotV1(first);
+  assert.deepEqual(first, second);
+  assert.deepEqual(first, {
+    renderSnapshotVersion: 1,
+    scene: 'camera-offset-scene',
+    tick: 0,
+    viewport: {
+      width: 200,
+      height: 120
+    },
+    drawCalls: [
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.0.0',
+        x: -100,
+        y: -50,
+        width: 16,
+        height: 16,
+        layer: -1
+      },
+      {
+        kind: 'rect',
+        id: 'marker.rect',
+        x: -5,
+        y: 5,
+        width: 8,
+        height: 10,
+        layer: 0
+      },
+      {
+        kind: 'sprite',
+        id: 'player.hero',
+        assetId: 'player.sprite',
+        assetSrc: 'images/player.png',
+        x: 10,
+        y: 20,
+        width: 16,
+        height: 16,
+        layer: 2
+      }
+    ]
+  });
+});
+
+test('buildRenderSnapshotV1 lets explicit viewport options override camera.viewport dimensions', async () => {
+  const snapshot = await buildRenderSnapshotV1(
+    {
+      metadata: { name: 'camera-viewport-override' },
+      entities: [
+        {
+          id: 'camera.main',
+          components: [
+            {
+              kind: 'camera.viewport',
+              fields: { x: 32, y: 24, width: 200, height: 120 }
+            }
+          ]
+        },
+        {
+          id: 'player.hero',
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 40, y: 30 }
+            }
+          ]
+        }
+      ]
+    },
+    { width: 640 }
+  );
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.viewport, {
+    width: 640,
+    height: 120
+  });
+  assert.deepEqual(snapshot.drawCalls, [
+    {
+      kind: 'rect',
+      id: 'player.hero',
+      x: 8,
+      y: 6,
+      width: 16,
+      height: 16,
+      layer: 0
     }
   ]);
 });

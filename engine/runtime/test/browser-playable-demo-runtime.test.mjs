@@ -277,6 +277,23 @@ function createTileLayerSnapshot() {
   };
 }
 
+function createCameraViewportSnapshot() {
+  return {
+    renderSnapshotVersion: 1,
+    scene: 'camera-viewport-fixture',
+    tick: 0,
+    viewport: {
+      width: 160,
+      height: 90
+    },
+    drawCalls: [
+      { kind: 'rect', id: 'map.ground.tile.0.0', x: -8, y: -4, width: 16, height: 16, layer: -10 },
+      { kind: 'rect', id: 'map.ground.tile.0.1', x: 8, y: -4, width: 16, height: 16, layer: -10 },
+      { kind: 'sprite', id: 'player.hero', assetId: 'player.sprite', x: 22, y: 36, width: 20, height: 24, layer: 2 }
+    ]
+  };
+}
+
 function createMultiSpriteSnapshotWithEscapedAssetSources() {
   return {
     renderSnapshotVersion: 1,
@@ -564,6 +581,28 @@ test('renderBrowserPlayableDemoHtmlV1 renders tile layer rect drawCalls with Can
   assert.ok(fillRects.some((entry) => entry.args.join(',') === '16,0,16,16'));
   assert.ok(fillRects.some((entry) => entry.args.join(',') === '0,16,16,16'));
   assert.equal(strokeRects.length >= 3, true);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 renders camera-shifted drawCalls without extra camera logic', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'camera-viewport-fixture Browser Playable Demo',
+    renderSnapshot: createCameraViewportSnapshot(),
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const harness = createCanvasHarness(html);
+
+  assert.match(html, /"viewport":\{"height":90,"width":160\}/);
+  assert.match(html, /"id":"map\.ground\.tile\.0\.0"/);
+  assert.match(html, /"x":-8,"y":-4/);
+  assert.match(html, /"id":"player\.hero"/);
+  assert.match(html, /"assetId":"player\.sprite"/);
+
+  const fillRects = harness.operations.filter((entry) => entry.method === 'fillRect');
+  assert.ok(fillRects.some((entry) => entry.args.join(',') === '-8,-4,16,16'));
+  assert.ok(fillRects.some((entry) => entry.args.join(',') === '8,-4,16,16'));
+  assert.ok(fillRects.some((entry) => entry.args.join(',') === '22,36,20,24'));
 });
 
 test('renderBrowserPlayableDemoHtmlV1 accepts sprite drawCalls and keeps deterministic rect fallback behavior', () => {

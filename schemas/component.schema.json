@@ -183,6 +183,54 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "camera.viewport"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "kind": {
+            "const": "camera.viewport"
+          },
+          "version": {
+            "const": 1
+          },
+          "replicated": {
+            "const": false
+          },
+          "fields": {
+            "type": "object",
+            "required": [
+              "x",
+              "y",
+              "width",
+              "height"
+            ],
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
     }
   ],
   "additionalProperties": false
