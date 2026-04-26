@@ -203,7 +203,11 @@ Compatibilidade:
 - se a tentativa nao e bloqueada, `blocked: false` e `final` fica igual a `candidate`;
 - multiplos bloqueadores solidos sao listados em `blockingEntities` com ordenacao deterministica;
 - casos previsiveis cobertos: alvo ausente, alvo sem `transform`, alvo sem `collision.bounds`, input sem movimento ou com eixo `0,0`, input intent invalido/ausente e cena invalida/ausente;
-- nao altera `run-loop`, Browser Playable Demo, `InputIntent v1`, `KeyboardInputScript v1`, RenderSnapshot v1, Save/Load v1 ou renderers;
+- `run-loop`/`run_loop` continuam iguais por padrão;
+- com `movementBlocking` no `run-loop`, o fluxo aplica bloqueio de deslocamento derivado de `InputIntent v1`;
+- sem `movementBlocking`, não há alteração no resultado atual de `run-loop`;
+- `run-loop` aplica apenas bloqueio de movimento (sem física completa);
+- Browser Playable Demo, `InputIntent v1`, `KeyboardInputScript v1`, RenderSnapshot v1, Save/Load v1 e renderers permanecem inalterados;
 - nao adiciona fisica completa, resolucao complexa, tile collision, pathfinding, editor ou servidor.
 
 ## Input Intent v1 (input headless opt-in no loop)

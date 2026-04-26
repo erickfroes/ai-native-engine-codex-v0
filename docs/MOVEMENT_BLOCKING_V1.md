@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Inspecionar uma tentativa de movimento declarada por `InputIntent v1` e reportar se ela seria bloqueada por overlaps solidos entre `collision.bounds`, sem alterar o `run-loop`, sem mover entidades e sem adicionar fisica completa.
+Inspecionar uma tentativa de movimento declarada por `InputIntent v1` e reportar se ela seria bloqueada por overlaps sólidos entre `collision.bounds`, com aplicação opcional no `run-loop` apenas quando explicitamente habilitada.
 
 ## Fonte de dados
 
@@ -72,20 +72,23 @@ MCP:
 
 ## Compatibilidade
 
-- nao altera `run-loop`;
+- `run-loop` / `run_loop` continuam iguais por padrão (flag/opção ausente);
+- com `movementBlocking` (`run-loop` CLI/MCP), só o movimento derivado de `InputIntent v1` é bloqueado;
+- sem `movementBlocking`, o comportamento permanece exatamente igual;
 - nao altera Browser Playable Demo;
 - nao altera `InputIntent v1` ou `KeyboardInputScript v1`;
 - nao altera `CollisionBoundsReport v1`;
 - nao altera `CollisionOverlapReport v1`;
 - nao altera `RenderSnapshot v1`, Render SVG, Canvas2D Demo ou Browser Playable Demo;
 - nao altera `visual.sprite`, `tile.layer`, `camera.viewport` ou Save/Load v1.
+- tile.collision ainda não está em escopo neste pacote.
 
 ## Fora de escopo
 
 - aplicar movimento no estado canonico;
 - resolver fisica;
 - empurrar ou separar entidades;
-- bloquear input em runtime;
+- bloquear input em runtime sem flag/opção;
 - colisao com `tile.layer`;
 - pathfinding;
 - editor;
