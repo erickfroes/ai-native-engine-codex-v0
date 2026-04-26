@@ -1,46 +1,63 @@
-# STATUS - Meta 1 / V0 Headless
+# STATUS - Meta 2 Visual/Interativa
 
 ## Estado atual
 
-A Meta 1 esta concluida como V0 headless, deterministica e orientada a contrato.
+A Meta 2 esta concluida como camada visual/interativa minima sobre a base headless deterministica da Meta 1.
 
 O repositorio hoje entrega:
 
-- runtime estavel para cenas pequenas;
+- validacao de cena, save e input;
 - loop headless interpretavel;
-- InputIntent v1 opt-in;
-- KeyboardInputScript v1 opt-in;
+- replay e replay artifact deterministico;
 - save/load v1 minimo;
 - State Mutation Trace v1 opt-in;
 - RenderSnapshot v1;
 - Render SVG v1;
-- demo HTML estatica derivada de SVG;
-- CLI e MCP cobrindo os fluxos headless principais;
+- SVG Demo HTML v1;
+- Canvas2D Demo v1;
+- Browser Playable Demo v1;
+- Browser Runtime Loop v1 local ao HTML;
+- Asset Manifest v1;
+- drawCall `sprite`;
+- `visual.sprite`;
+- `tile.layer`;
+- `camera.viewport`;
+- image loading local opcional com fallback;
+- CLI e MCP para os principais fluxos visuais;
 - suites cross-interface para contratos criticos.
 
-## O que esta dentro da V0 Headless
+## O que esta dentro da Meta 2
 
-- validacao de cena, save e input;
-- planejamento e execucao deterministica de loop;
-- replay deterministico e replay artifact;
-- inspecao e simulacao opt-in de estado;
-- persistencia minima de State Snapshot v1;
-- render declarativo textual sem backend grafico real.
+- render declarativo por `RenderSnapshot v1`;
+- serializacao textual por `Render SVG v1`;
+- demos HTML autocontidas por SVG, Canvas2D e Browser Playable Demo;
+- componentes visuais declarativos pequenos;
+- camera declarativa minima via offset de drawCalls;
+- carregamento local de imagem apenas na Browser Playable Demo, com fallback deterministico;
+- validacao automatica por runtime, CLI, MCP e testes cross-interface.
 
-## O que fica fora de escopo da Meta 1
+## O que fica fora de escopo da Meta 2
 
-- canvas, Pixi, Three e WebGL;
+- Pixi;
+- Three;
+- WebGL;
+- renderer real do engine;
 - editor visual;
-- assets reais como pipeline de producao;
-- captura real de teclado;
+- servidor;
+- pipeline pesado de assets;
+- colisao;
+- pathfinding;
+- chunk streaming;
+- animacao avancada;
 - multiplayer real;
-- ECS completo.
+- gameplay em tempo real no browser.
 
 ## Superficies canonicas
 
-- CLI: automacao local e exemplos humanos
-- MCP: automacao para agentes
-- runtime: funcoes e contratos internos versionados
+- runtime: funcoes e contratos internos versionados;
+- CLI: automacao local e exemplos humanos;
+- MCP: automacao para agentes;
+- docs: contratos curtos e limites de escopo.
 
 ## Validacao obrigatoria
 
@@ -50,11 +67,12 @@ npm run validate:scenes
 npm run smoke
 ```
 
-## Sinal para Meta 2
+## Sinal para Meta 3
 
-A Meta 2 pode partir desta base para explorar:
+A Meta 3 pode partir desta base para explorar:
 
-- runtime visual real;
-- authority/rede alem de contratos headless;
-- ampliacao de ECS e gameplay;
-- tooling/editor acima da base headless.
+- renderer real do engine sem quebrar contratos v1;
+- editor/tooling visual sobre os contratos existentes;
+- assets pipeline mais completo;
+- gameplay e interacao alem da Browser Playable Demo local;
+- auditoria visual/performance mais rica.
