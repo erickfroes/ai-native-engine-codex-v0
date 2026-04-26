@@ -90,6 +90,34 @@ function validateCameraViewportFields(fields, componentOverrides = {}, entityOve
   });
 }
 
+function validateCollisionBoundsFields(fields, componentOverrides = {}) {
+  return validateSceneInvariants({
+    version: 1,
+    metadata: { name: 'collision-bounds-negative' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'player.hero',
+        components: [
+          {
+            kind: 'transform',
+            version: 1,
+            replicated: false,
+            fields: { x: 0, y: 0 }
+          },
+          {
+            kind: 'collision.bounds',
+            version: 1,
+            replicated: false,
+            fields,
+            ...componentOverrides
+          }
+        ]
+      }
+    ]
+  });
+}
+
 test('validates tutorial scene successfully', async () => {
   const report = await validateSceneFile(scenePath('tutorial.scene.json'));
 
@@ -116,6 +144,15 @@ test('validates camera viewport fixture successfully', async () => {
   assert.equal(report.ok, true);
   assert.equal(report.errors.length, 0);
   assert.equal(report.summary.entityCount, 1);
+  assert.equal(report.summary.replicatedComponentCount, 0);
+});
+
+test('validates collision bounds fixture successfully', async () => {
+  const report = await validateSceneFile(fixturePath('collision-bounds.scene.json'));
+
+  assert.equal(report.ok, true);
+  assert.equal(report.errors.length, 0);
+  assert.equal(report.summary.entityCount, 2);
   assert.equal(report.summary.replicatedComponentCount, 0);
 });
 
@@ -753,5 +790,119 @@ test('camera.viewport must be unique per scene', () => {
         'camera.viewport must be unique per scene; found multiple on entities: camera.main, camera.alt'
     ).length,
     2
+  );
+});
+
+test('collision.bounds component invariants are validated predictably', () => {
+  const report = validateCollisionBoundsFields(
+    {
+      x: 1.5,
+      y: 'north',
+      width: 0,
+      height: -1,
+      solid: 'yes',
+      layer: 2
+    },
+    {
+      version: 2,
+      replicated: true
+    }
+  );
+
+  assert.ok(report.errors.some((error) => error.path.endsWith('.version') && error.message.includes('version')));
+  assert.ok(report.errors.some((error) => error.path.endsWith('.replicated') && error.message.includes('must not be replicated')));
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path.endsWith('.fields.x') &&
+        error.message === 'collision.bounds x must be an integer when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path.endsWith('.fields.y') &&
+        error.message === 'collision.bounds y must be an integer when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path.endsWith('.fields.width') &&
+        error.message === 'collision.bounds width must be an integer >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path.endsWith('.fields.height') &&
+        error.message === 'collision.bounds height must be an integer >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path.endsWith('.fields.solid') &&
+        error.message === 'collision.bounds solid must be a boolean when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path.endsWith('.fields.layer') &&
+        error.message === 'is not allowed for collision.bounds'
+    )
+  );
+});
+
+test('collision.bounds rejects invalid width and height predictably', () => {
+  const report = validateCollisionBoundsFields({
+    width: 0,
+    height: 1.5
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.width' &&
+        error.message === 'collision.bounds width must be an integer >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.height' &&
+        error.message === 'collision.bounds height must be an integer >= 1'
+    )
+  );
+});
+
+test('collision.bounds rejects missing fields predictably', () => {
+  const report = validateCollisionBoundsFields(undefined);
+
+  assert.ok(report.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
+  assert.equal(report.errors.some((error) => error.path.endsWith('.fields.width')), false);
+});
+
+test('collision.bounds rejects non-object fields predictably', () => {
+  const report = validateCollisionBoundsFields('invalid');
+
+  assert.ok(report.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
+  assert.equal(report.errors.some((error) => error.path.endsWith('.fields.width')), false);
+});
+
+test('collision.bounds rejects invalid solid predictably', () => {
+  const report = validateCollisionBoundsFields({
+    width: 16,
+    height: 16,
+    solid: 'true'
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.solid' &&
+        error.message === 'collision.bounds solid must be a boolean when provided'
+    )
   );
 });

@@ -387,6 +387,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_collision_bounds',
+    title: 'Inspect Collision Bounds',
+    description: 'Build CollisionBoundsReport v1 from declarative collision.bounds components without physics.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'simulate_state',
     title: 'Simulate State',
     description: 'Run opt-in State Simulation v1 processors over a scene-derived state model.',

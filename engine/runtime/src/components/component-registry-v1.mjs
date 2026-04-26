@@ -30,6 +30,12 @@ const COMPONENT_REGISTRY_V1 = Object.freeze({
       version: 1,
       deterministic: true,
       description: 'Declarative camera viewport component'
+    }),
+    Object.freeze({
+      name: 'collision.bounds',
+      version: 1,
+      deterministic: true,
+      description: 'Declarative collision bounds component'
     })
   ])
 });
