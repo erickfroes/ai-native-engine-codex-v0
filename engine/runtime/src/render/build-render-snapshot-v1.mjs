@@ -202,6 +202,58 @@ function sortDrawCalls(left, right) {
   return left.id.localeCompare(right.id);
 }
 
+function pushSceneStructureError(errors, errorPath, message) {
+  errors.push(`${errorPath}: ${message}`);
+}
+
+function validateRawSceneObjectForRender(scene) {
+  const errors = [];
+
+  if (!scene.metadata || typeof scene.metadata !== 'object' || Array.isArray(scene.metadata)) {
+    pushSceneStructureError(errors, '$.metadata', 'must be an object');
+  } else if (typeof scene.metadata.name !== 'string' || scene.metadata.name.trim().length === 0) {
+    pushSceneStructureError(errors, '$.metadata.name', 'must be a non-empty string');
+  }
+
+  if (!Array.isArray(scene.entities)) {
+    pushSceneStructureError(errors, '$.entities', 'must be an array');
+    return errors;
+  }
+
+  for (const [entityIndex, entity] of scene.entities.entries()) {
+    const entityPath = `$.entities[${entityIndex}]`;
+
+    if (!entity || typeof entity !== 'object' || Array.isArray(entity)) {
+      pushSceneStructureError(errors, entityPath, 'must be an object');
+      continue;
+    }
+
+    if (typeof entity.id !== 'string' || entity.id.trim().length === 0) {
+      pushSceneStructureError(errors, `${entityPath}.id`, 'must be a non-empty string');
+    }
+
+    if (!Array.isArray(entity.components)) {
+      pushSceneStructureError(errors, `${entityPath}.components`, 'must be an array');
+      continue;
+    }
+
+    for (const [componentIndex, component] of entity.components.entries()) {
+      const componentPath = `${entityPath}.components[${componentIndex}]`;
+
+      if (!component || typeof component !== 'object' || Array.isArray(component)) {
+        pushSceneStructureError(errors, componentPath, 'must be an object');
+        continue;
+      }
+
+      if (typeof component.kind !== 'string' || component.kind.trim().length === 0) {
+        pushSceneStructureError(errors, `${componentPath}.kind`, 'must be a non-empty string');
+      }
+    }
+  }
+
+  return errors;
+}
+
 async function resolveScene(sceneOrPath) {
   if (typeof sceneOrPath === 'string') {
     return loadSceneFile(sceneOrPath);
@@ -209,6 +261,11 @@ async function resolveScene(sceneOrPath) {
 
   if (!sceneOrPath || typeof sceneOrPath !== 'object') {
     throw new Error('buildRenderSnapshotV1: `sceneOrPath` must be a scene object or path string');
+  }
+
+  const errors = validateRawSceneObjectForRender(sceneOrPath);
+  if (errors.length > 0) {
+    throw new Error(`buildRenderSnapshotV1: scene object is invalid: ${errors.join('; ')}`);
   }
 
   return sceneOrPath;
