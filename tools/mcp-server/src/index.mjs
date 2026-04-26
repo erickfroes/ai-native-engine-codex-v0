@@ -23,6 +23,8 @@ import {
   buildRenderSnapshotV1,
   renderSnapshotToSvgV1,
   RENDER_SVG_VERSION,
+  renderCanvas2DDemoHtmlV1,
+  CANVAS_2D_DEMO_VERSION,
   renderBrowserPlayableDemoHtmlV1,
   createBrowserPlayableDemoMetadataV1,
   BROWSER_PLAYABLE_DEMO_VERSION,
@@ -109,6 +111,7 @@ async function handleToolCall(params) {
     params.name !== 'emit_world_snapshot' &&
     params.name !== 'render_snapshot' &&
     params.name !== 'render_svg' &&
+    params.name !== 'render_canvas_demo' &&
     params.name !== 'render_browser_demo' &&
     params.name !== 'plan_loop' &&
     params.name !== 'run_loop' &&
@@ -558,6 +561,55 @@ async function handleToolCall(params) {
       };
     }
 
+    if (params.name === 'render_canvas_demo') {
+      if (args.tick !== undefined && (!Number.isInteger(args.tick) || args.tick < 0)) {
+        return {
+          content: toTextContent('render_canvas_demo: `tick` must be an integer >= 0 when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.width !== undefined && (!Number.isInteger(args.width) || args.width < 1)) {
+        return {
+          content: toTextContent('render_canvas_demo: `width` must be an integer >= 1 when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.height !== undefined && (!Number.isInteger(args.height) || args.height < 1)) {
+        return {
+          content: toTextContent('render_canvas_demo: `height` must be an integer >= 1 when provided.'),
+          isError: true
+        };
+      }
+
+      const snapshot = await buildRenderSnapshotV1(targetPath, {
+        tick: args.tick,
+        width: args.width,
+        height: args.height
+      });
+      const html = renderCanvas2DDemoHtmlV1({
+        title: `${snapshot.scene} Canvas 2D Demo`,
+        renderSnapshot: snapshot,
+        metadata: {
+          scene: snapshot.scene,
+          tick: snapshot.tick,
+          viewport: `${snapshot.viewport.width}x${snapshot.viewport.height}`
+        }
+      });
+
+      return {
+        content: toTextContent(`Canvas 2D demo built for ${snapshot.scene} at tick ${snapshot.tick}.`),
+        structuredContent: {
+          canvasDemoVersion: CANVAS_2D_DEMO_VERSION,
+          scene: snapshot.scene,
+          tick: snapshot.tick,
+          html
+        },
+        isError: false
+      };
+    }
+
     if (params.name === 'render_browser_demo') {
       if (args.tick !== undefined && (!Number.isInteger(args.tick) || args.tick < 0)) {
         return {
@@ -684,7 +736,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_browser_demo, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }

@@ -18,6 +18,10 @@ import {
   buildRenderSnapshotV1,
   renderSnapshotToSvgV1,
   RENDER_SVG_VERSION,
+  renderSvgDemoHtmlV1,
+  SVG_DEMO_HTML_VERSION,
+  renderCanvas2DDemoHtmlV1,
+  CANVAS_2D_DEMO_VERSION,
   renderBrowserPlayableDemoHtmlV1,
   createBrowserPlayableDemoMetadataV1,
   BROWSER_PLAYABLE_DEMO_VERSION,
@@ -44,6 +48,8 @@ function printUsage() {
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs render-snapshot <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--json]
   node engine/runtime/src/cli.mjs render-svg <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
+  node engine/runtime/src/cli.mjs render-svg-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
+  node engine/runtime/src/cli.mjs render-canvas-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs save-state <path> --ticks <n> [--seed <n>] --out <dir> [--json]
   node engine/runtime/src/cli.mjs load-save <path> [--json]
@@ -380,6 +386,102 @@ async function run() {
       console.log(outputPath);
     } else {
       process.stdout.write(svg);
+    }
+
+    return;
+  }
+
+  if (command === 'render-svg-demo') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const tick = readNumberFlag('render-svg-demo', '--tick', undefined);
+    const width = readNumberFlag('render-svg-demo', '--width', undefined);
+    const height = readNumberFlag('render-svg-demo', '--height', undefined);
+    const requestedOutPath = readStringFlag('render-svg-demo', '--out', undefined);
+    const snapshot = await buildRenderSnapshotV1(maybePath, { tick, width, height });
+    const svg = renderSnapshotToSvgV1(snapshot);
+    const html = renderSvgDemoHtmlV1({
+      title: `${snapshot.scene} SVG Demo`,
+      svg,
+      metadata: {
+        scene: snapshot.scene,
+        svgVersion: RENDER_SVG_VERSION,
+        tick: snapshot.tick,
+        viewport: `${snapshot.viewport.width}x${snapshot.viewport.height}`
+      }
+    });
+    const outputPath = requestedOutPath ? path.resolve(requestedOutPath) : undefined;
+
+    if (outputPath) {
+      await mkdir(path.dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, html, 'utf8');
+    }
+
+    const envelope = {
+      demoHtmlVersion: SVG_DEMO_HTML_VERSION,
+      scene: snapshot.scene,
+      tick: snapshot.tick,
+      ...(outputPath ? { outputPath } : {}),
+      html
+    };
+
+    if (asJson) {
+      console.log(JSON.stringify(envelope, null, 2));
+    } else if (outputPath) {
+      console.log(outputPath);
+    } else {
+      process.stdout.write(html);
+    }
+
+    return;
+  }
+
+  if (command === 'render-canvas-demo') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const tick = readNumberFlag('render-canvas-demo', '--tick', undefined);
+    const width = readNumberFlag('render-canvas-demo', '--width', undefined);
+    const height = readNumberFlag('render-canvas-demo', '--height', undefined);
+    const requestedOutPath = readStringFlag('render-canvas-demo', '--out', undefined);
+    const snapshot = await buildRenderSnapshotV1(maybePath, { tick, width, height });
+    const html = renderCanvas2DDemoHtmlV1({
+      title: `${snapshot.scene} Canvas 2D Demo`,
+      renderSnapshot: snapshot,
+      metadata: {
+        scene: snapshot.scene,
+        tick: snapshot.tick,
+        viewport: `${snapshot.viewport.width}x${snapshot.viewport.height}`
+      }
+    });
+    const outputPath = requestedOutPath ? path.resolve(requestedOutPath) : undefined;
+
+    if (outputPath) {
+      await mkdir(path.dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, html, 'utf8');
+    }
+
+    const envelope = {
+      canvasDemoVersion: CANVAS_2D_DEMO_VERSION,
+      scene: snapshot.scene,
+      tick: snapshot.tick,
+      ...(outputPath ? { outputPath } : {}),
+      html
+    };
+
+    if (asJson) {
+      console.log(JSON.stringify(envelope, null, 2));
+    } else if (outputPath) {
+      console.log(outputPath);
+    } else {
+      process.stdout.write(html);
     }
 
     return;

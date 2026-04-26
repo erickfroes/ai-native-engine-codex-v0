@@ -199,6 +199,34 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'render_canvas_demo',
+    title: 'Render Canvas Demo',
+    description: 'Build deterministic self-contained Canvas2D Demo v1 HTML from a scene via RenderSnapshot v1.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        tick: {
+          type: 'integer',
+          description: 'Optional render tick. Defaults to 0.'
+        },
+        width: {
+          type: 'integer',
+          description: 'Optional viewport width. Defaults to 320.'
+        },
+        height: {
+          type: 'integer',
+          description: 'Optional viewport height. Defaults to 180.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'render_browser_demo',
     title: 'Render Browser Demo',
     description: 'Build deterministic self-contained Browser Playable Demo v1 HTML from a scene via RenderSnapshot v1.',
