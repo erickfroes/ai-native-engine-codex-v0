@@ -1,65 +1,53 @@
-# Handoff para Codex
+# Handoff para Codex - V0 Headless
 
-Este repositório já está **pronto para ser entregue ao Codex**.
+Este repositorio esta pronto para handoff como V0 headless completa da Meta 1.
 
-## Objetivo do handoff
+## O que o Codex recebe
 
-Dar ao Codex um ponto de partida que já tenha:
+- contratos v1 documentados;
+- runtime, CLI e MCP alinhados nos fluxos headless principais;
+- suites cross-interface para os contratos mais sensiveis;
+- fixtures pequenas e reproduziveis;
+- baseline de validacao claro antes de qualquer mudanca.
 
-- contrato formal de cena;
-- validador local executável;
-- tool MCP funcional;
-- fixtures válidas e inválidas;
-- documentação curta e ordenada.
-
-## O que conferir antes de abrir no Codex
-
-Rode no terminal do projeto:
+## O que conferir antes de editar
 
 ```bash
+git status -sb
+npm test
+npm run validate:scenes
 npm run smoke
-node ./engine/runtime/src/cli.mjs emit-world-snapshot ./scenes/tutorial.scene.json --json
 ```
 
-Se esse comando passar, o repositório está pronto para o Codex assumir a próxima iteração.
+## Sequencia recomendada dentro do Codex
 
-## Sequência recomendada dentro do Codex
+1. Ler `README.md`, `AGENTS.md`, `docs/module-contracts.md` e este arquivo.
+2. Confirmar baseline verde com `npm test`, `npm run validate:scenes` e `npm run smoke`.
+3. Validar a cena tutorial por CLI e MCP.
+4. Rodar `run-loop` e `run_loop` com `ticks` e `seed` fixos.
+5. Exercitar o caminho opt-in com `--keyboard-script` ou `inputIntentPath`.
+6. Exercitar `save-state` / `load-save`.
+7. Exercitar `render-snapshot`, `render-svg` e `render-svg-demo`.
+8. Propor mudancas pequenas a partir da Meta 2, sem mutar contratos v1 em place.
 
-1. Abra a pasta do repositório.
-2. Marque o projeto como confiável para que o Codex carregue `.codex/config.toml`.
-3. Confira se o MCP `ai_engine_tools` apareceu.
-4. Peça para o Codex ler `README.md`, `AGENTS.md` e este arquivo.
-5. Mande o prompt inicial de `docs/CODEX_FIRST_PROMPT.md`.
+## Escopo entregue na Meta 1
 
-## O que o Codex deve fazer primeiro
+- validacao de cena, save e input;
+- loop headless interpretavel;
+- replay e replay artifact;
+- inspecao/simulacao de estado;
+- persistencia minima;
+- render textual deterministico.
 
-Ordem recomendada:
+## Fora de escopo que deve permanecer explicito
 
-1. rodar `npm run smoke`;
-2. validar `./scenes/tutorial.scene.json`;
-3. usar a tool MCP `validate_scene` na mesma cena;
-4. usar a tool MCP `emit_world_snapshot` para a mesma cena;
-5. usar a tool MCP `run_replay` com `ticks` e `seed` fixos;
-6. comparar runtime/CLI/MCP para replay + `world.snapshot`;
-7. propor os próximos 3 commits pequenos;
-8. executar só o primeiro commit.
+- canvas, Pixi, Three, WebGL e runtime visual real;
+- editor;
+- assets reais;
+- captura real de teclado;
+- multiplayer real;
+- ECS completo.
 
-## Status curto do slice concluído
+## Regra pratica de continuidade
 
-Slice de paridade mínima de `world.snapshot` concluído:
-
-- runtime gera `world.snapshot` determinístico;
-- CLI expõe `emit-world-snapshot`;
-- MCP expõe `emit_world_snapshot` e `run_replay`.
-
-## Próxima entrega sugerida para o Codex
-
-A melhor continuação da V0 é:
-
-- entregar replicação real-time mínima no runtime;
-- expandir replay para multi-sistema;
-- publicar métricas de tick para CI.
-
-## Observação importante
-
-A configuração MCP deste projeto é local e repo-scoped. Se o projeto não estiver marcado como confiável, o Codex vai ignorar `.codex/config.toml` e o servidor MCP não será carregado.
+Se houver duvida sobre comportamento, preservar a V0 atual e adicionar teste/fixture antes de ampliar escopo.
