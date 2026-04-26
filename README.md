@@ -1,37 +1,43 @@
-# AI-Native Engine for Codex - V0 Headless
+# AI-Native Engine for Codex - Meta 2 Visual/Interactive
 
-Este repositorio fecha a Meta 1 com uma V0 headless, deterministica e orientada a contrato.
+Este repositorio fecha a Meta 2 como uma base visual/interativa minima, deterministica e orientada a contrato.
 
-O foco atual nao e um runtime visual real. O foco e permitir que Codex e automacoes operem com seguranca sobre:
+A simulacao canonica continua headless. A camada visual atual transforma cenas validadas em snapshots e demos HTML autocontidas para inspecao, smoke e automacao com Codex.
 
-- cenas validadas por schema + invariantes;
-- loop headless interpretavel e deterministico;
-- InputIntent v1 opt-in;
-- KeyboardInputScript v1 opt-in;
-- save/load v1 minimo;
-- State Mutation Trace v1 opt-in;
-- RenderSnapshot v1;
-- Render SVG v1;
-- demo HTML estatica derivada de SVG;
-- paridade principal entre runtime, CLI e MCP.
+## O que o engine ja consegue fazer visualmente
 
-## O que esta dentro da V0
+- gerar `RenderSnapshot v1` deterministico a partir de uma cena;
+- gerar `Render SVG v1` textual e deterministico;
+- gerar `SVG Demo HTML v1` com SVG inline;
+- gerar `Canvas2D Demo v1` com Canvas 2D nativo;
+- gerar `Browser Playable Demo v1` autocontida com canvas focavel e input local;
+- carregar imagens locais opcionais via `Asset Manifest v1` na browser demo, com fallback visual deterministico;
+- usar `visual.sprite` para sprite declarativo com fallback `rect`;
+- usar `tile.layer` para mapas declarativos pequenos expandidos em drawCalls;
+- usar `camera.viewport` para aplicar offset `world - camera` nos drawCalls.
 
-- `engine/runtime/`: runtime, contratos internos e CLI headless
-- `tools/mcp-server/`: servidor MCP local via stdio
-- `scenes/`: cenas pequenas e reproduziveis
-- `fixtures/`: fixtures de input, save e contratos de teste
-- `schemas/` e `docs/schemas/`: contratos formais versionados
-- `docs/`: handoff, status, contratos e checklists da Meta 1
+## O que esta dentro da Meta 2
 
-## O que nao esta dentro da V0
+- `engine/runtime/`: runtime, contratos internos e CLI;
+- `tools/mcp-server/`: servidor MCP local via stdio;
+- `scenes/`: cenas pequenas e reproduziveis;
+- `fixtures/`: fixtures de input, save, assets e render;
+- `schemas/` e `docs/schemas/`: contratos formais versionados;
+- `docs/`: handoff, status, contratos e matrizes da Meta 2;
+- paridade principal entre runtime, CLI e MCP para fluxos visuais automatizaveis.
 
-- canvas, Pixi, Three, WebGL ou backend grafico real;
+## O que nao esta dentro da Meta 2
+
+- Pixi, Three, WebGL ou renderer real do engine;
 - editor visual;
-- assets reais como pipeline de producao;
-- captura real de teclado;
+- servidor;
+- pipeline pesado de assets;
+- colisao;
+- pathfinding;
+- chunk streaming;
+- animacao avancada;
 - multiplayer real;
-- ECS completo.
+- captura/input runtime completo fora da Browser Playable Demo local.
 
 ## Comandos CLI principais
 
@@ -46,6 +52,8 @@ O foco atual nao e um runtime visual real. O foco e permitir que Codex e automac
 - `render-snapshot`: gera RenderSnapshot v1
 - `render-svg`: gera SVG textual deterministico
 - `render-svg-demo`: gera HTML estatico com SVG inline
+- `render-canvas-demo`: gera HTML estatico com Canvas 2D
+- `render-browser-demo`: gera HTML interativo minimo com Canvas 2D, teclado local e fallback de sprites
 
 ## Tools MCP principais
 
@@ -58,6 +66,8 @@ O foco atual nao e um runtime visual real. O foco e permitir que Codex e automac
 - `emit_world_snapshot`
 - `render_snapshot`
 - `render_svg`
+- `render_canvas_demo`
+- `render_browser_demo`
 - `plan_loop`
 - `run_loop`
 - `run_replay`
@@ -65,15 +75,15 @@ O foco atual nao e um runtime visual real. O foco e permitir que Codex e automac
 - `inspect_state`
 - `simulate_state`
 
-Observacao: `render-svg-demo` e um fluxo de CLI/runtime nesta V0. Ainda nao existe tool MCP dedicada para a demo HTML.
+Observacao: `render-svg-demo` e um fluxo de CLI/runtime. A Meta 2 nao define uma tool MCP dedicada para a demo HTML de SVG.
 
-## Fluxo headless principal
+## Fluxo visual minimo
 
 1. Validar a cena com `validate-scene` ou `validate_scene`.
-2. Planejar ou executar o loop com `plan-loop` / `run-loop`.
-3. Injetar input opt-in via `--input-intent` ou `--keyboard-script` quando necessario.
-4. Persistir ou inspecionar estado com `save-state`, `load-save`, `inspect-state` e `simulate-state`.
-5. Gerar saidas de render headless com `render-snapshot`, `render-svg` e `render-svg-demo`.
+2. Gerar o contrato visual com `render-snapshot` ou `render_snapshot`.
+3. Serializar uma saida textual com `render-svg` ou `render_svg`.
+4. Gerar demos HTML com `render-svg-demo`, `render-canvas-demo` ou `render-browser-demo`.
+5. Usar `--asset-manifest` ou `assetManifestPath` apenas quando a cena declarar sprites locais.
 
 ## Exemplos minimos
 
@@ -84,13 +94,6 @@ node ./engine/runtime/src/cli.mjs validate-scene ./scenes/tutorial.scene.json --
 # executar loop headless
 node ./engine/runtime/src/cli.mjs run-loop ./scenes/tutorial.scene.json --ticks 3 --seed 42 --json
 
-# executar loop com KeyboardInputScript v1
-node ./engine/runtime/src/cli.mjs run-loop ./scenes/tutorial.scene.json --ticks 2 --seed 10 --keyboard-script ./fixtures/input-script/valid.keyboard-input-script.json --json
-
-# salvar e recarregar snapshot de estado
-node ./engine/runtime/src/cli.mjs save-state ./scenes/tutorial.scene.json --ticks 2 --seed 42 --out ./tmp/save-demo --json
-node ./engine/runtime/src/cli.mjs load-save ./tmp/save-demo/state-snapshot-v1.savegame.json --json
-
 # gerar RenderSnapshot v1
 node ./engine/runtime/src/cli.mjs render-snapshot ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --json
 
@@ -98,7 +101,13 @@ node ./engine/runtime/src/cli.mjs render-snapshot ./scenes/tutorial.scene.json -
 node ./engine/runtime/src/cli.mjs render-svg ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --json
 
 # gerar demo HTML estatica com SVG inline
-node ./engine/runtime/src/cli.mjs render-svg-demo ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --out ./tmp/tutorial-demo.html --json
+node ./engine/runtime/src/cli.mjs render-svg-demo ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --out ./tmp/tutorial-svg-demo.html --json
+
+# gerar demo HTML estatica com Canvas 2D
+node ./engine/runtime/src/cli.mjs render-canvas-demo ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --out ./tmp/tutorial-canvas-demo.html --json
+
+# gerar Browser Playable Demo com input local
+node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --out ./tmp/tutorial-browser-demo.html --json
 ```
 
 ## Validacao obrigatoria
@@ -111,11 +120,11 @@ npm run smoke
 
 ## Estrutura rapida
 
-- `README.md`: panorama atual da V0 headless
+- `README.md`: panorama atual da Meta 2 visual/interativa
 - `docs/CODEX_HANDOFF.md`: orientacao curta para abrir e continuar no Codex
-- `docs/STATUS.md`: status consolidado da Meta 1
-- `docs/V0_HEADLESS_TEST_MATRIX.md`: matriz CLI/MCP/cross-interface
-- `docs/V0_HEADLESS_CHECKLIST.md`: checklist final da Meta 1
+- `docs/STATUS.md`: status consolidado da Meta 2
+- `docs/META2_VISUAL_TEST_MATRIX.md`: matriz runtime/CLI/MCP/testes visuais
+- `docs/META2_VISUAL_INTERACTIVE_CHECKLIST.md`: checklist final da Meta 2
 
 ## Primeira leitura recomendada
 
