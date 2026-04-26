@@ -11,7 +11,9 @@ const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
+const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
+const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const cameraOnlyAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.camera-only.asset-manifest.json');
 const invalidAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'invalid.non-positive-size.asset-manifest.json');
 const missingAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'missing.asset-manifest.json');
@@ -123,6 +125,51 @@ test('render-snapshot accepts --asset-manifest and emits deterministic sprite dr
       width: 16,
       height: 16,
       layer: 1
+    }
+  ]);
+});
+
+test('render-snapshot supports visual.sprite with --asset-manifest without changing JSON shape', () => {
+  const first = runCli([
+    'render-snapshot',
+    visualSpriteScenePath,
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--json'
+  ]);
+  const second = runCli([
+    'render-snapshot',
+    visualSpriteScenePath,
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(second.status, 0, second.stderr);
+
+  const firstSnapshot = JSON.parse(first.stdout);
+  const secondSnapshot = JSON.parse(second.stdout);
+  assertRenderSnapshotV1(firstSnapshot);
+  assert.deepEqual(Object.keys(firstSnapshot).sort(), [
+    'drawCalls',
+    'renderSnapshotVersion',
+    'scene',
+    'tick',
+    'viewport'
+  ]);
+  assert.deepEqual(firstSnapshot, secondSnapshot);
+  assert.deepEqual(firstSnapshot.drawCalls, [
+    {
+      kind: 'sprite',
+      id: 'player.hero',
+      assetId: 'player.sprite',
+      assetSrc: 'images/player.png',
+      x: 10,
+      y: 12,
+      width: 20,
+      height: 24,
+      layer: 2
     }
   ]);
 });

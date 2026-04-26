@@ -48,6 +48,7 @@ Definir um contrato JSON headless e deterministico para descrever uma vista rend
 - `drawCalls` contem chamadas declarativas com `kind: "rect"` ou `kind: "sprite"`.
 - toda draw call declara `id`, `x`, `y`, `width`, `height` e `layer`.
 - draw calls `sprite` tambem declaram `assetId`.
+- draw calls `sprite` podem declarar `assetSrc` opcional quando derivadas de um `Asset Manifest v1` validado.
 - campos extras nao sao permitidos nos niveis controlados do contrato.
 
 ## Builder runtime
@@ -57,15 +58,16 @@ Definir um contrato JSON headless e deterministico para descrever uma vista rend
 - `tick` padrao e `0`; viewport padrao e `320x180`.
 - nesta versao, entidades com componente `transform` ainda viram `rect` por padrao.
 - `options.assetManifest` ou `options.assetManifestPath` ativam a leitura opt-in de `Asset Manifest v1`.
-- quando um manifesto opt-in existe e a entidade declara `sprite.fields.assetId`, o builder pode emitir `drawCalls.kind = "sprite"`.
+- quando um manifesto opt-in existe e a entidade declara `visual.sprite.fields.assetId`, o builder pode emitir `drawCalls.kind = "sprite"`.
+- o componente legado `sprite` continua aceito pelo builder para compatibilidade; quando `visual.sprite` existe, ele e a fonte preferida para `assetId`, `width`, `height` e `layer`.
 - sem manifesto, o builder preserva o fallback atual para `rect`.
 - `assetManifestPath` deve apontar para um manifesto local valido; paths absolutos no `src` do manifesto e traversal sao rejeitados.
 - `x` e `y` vem de `transform.fields.position` ou de `transform.fields`.
-- `width` e `height` podem vir de `sprite.fields`; se ausentes, usam fallback deterministico `16x16` ou o tamanho declarado no manifesto quando houver `assetId`.
-- `layer` pode vir de `sprite.fields.layer`; se ausente, usa `0`.
+- `width` e `height` podem vir de `visual.sprite.fields`; se ausentes, usam fallback deterministico `16x16` ou o tamanho declarado no manifesto quando houver `assetId`.
+- `layer` pode vir de `visual.sprite.fields.layer`; se ausente, usa `0`.
 - `drawCalls` sao ordenados por `layer` e depois `id`.
 - suporte a `sprite` existe no contrato, mas o uso por `assetManifest` continua opt-in e minimalista.
-- renderers desta versao continuam livres para usar fallback visual minimo para `sprite`, sem image loading real, sem fetch e sem rede.
+- renderers desta versao continuam livres para usar fallback visual minimo para `sprite`; a browser demo pode tentar `Image()` local via `assetSrc`, sem fetch e sem rede.
 
 Ver tambem: `docs/RENDER_SVG_V1.md`.
 
@@ -73,7 +75,7 @@ Ver tambem: `docs/RENDER_SVG_V1.md`.
 
 - contrato serializavel e estavel para validacao visual headless;
 - base para comparacao deterministica entre runtime, CLI e MCP;
-- base para future-proofing de sprites declarativos sem image loading real ainda;
+- base para sprites declarativos locais com fallback visual deterministico;
 - nenhuma rasterizacao real nesta versao.
 
 ## Fora deste slice

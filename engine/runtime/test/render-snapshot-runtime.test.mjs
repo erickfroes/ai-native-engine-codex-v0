@@ -11,6 +11,8 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
+const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
+const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const invalidTraversalAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'invalid.traversal-src.asset-manifest.json');
 
 async function loadValidAssetManifest() {
@@ -342,6 +344,58 @@ test('buildRenderSnapshotV1 accepts assetManifestPath and falls back to manifest
   ]);
 });
 
+test('buildRenderSnapshotV1 emits sprite drawCalls from visual.sprite with asset manifest', async () => {
+  const snapshot = await buildRenderSnapshotV1(
+    visualSpriteScenePath,
+    { assetManifestPath: visualSpriteAssetManifestPath }
+  );
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.drawCalls, [
+    {
+      kind: 'sprite',
+      id: 'player.hero',
+      assetId: 'player.sprite',
+      assetSrc: 'images/player.png',
+      x: 10,
+      y: 12,
+      width: 20,
+      height: 24,
+      layer: 2
+    }
+  ]);
+});
+
+test('buildRenderSnapshotV1 uses asset dimensions when visual.sprite omits size', async () => {
+  const scene = await loadSceneFile(visualSpriteScenePath);
+  const visualSprite = scene.entities[0].components.find((component) => component.kind === 'visual.sprite');
+  delete visualSprite.fields.width;
+  delete visualSprite.fields.height;
+
+  const snapshot = await buildRenderSnapshotV1(scene, { assetManifestPath: visualSpriteAssetManifestPath });
+
+  assertRenderSnapshotV1(snapshot);
+  assert.equal(snapshot.drawCalls[0].width, 16);
+  assert.equal(snapshot.drawCalls[0].height, 16);
+});
+
+test('buildRenderSnapshotV1 keeps rect fallback for visual.sprite without asset manifest', async () => {
+  const snapshot = await buildRenderSnapshotV1(visualSpriteScenePath);
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.drawCalls, [
+    {
+      kind: 'rect',
+      id: 'player.hero',
+      x: 10,
+      y: 12,
+      width: 20,
+      height: 24,
+      layer: 2
+    }
+  ]);
+});
+
 test('buildRenderSnapshotV1 fails predictably when a referenced assetId is missing from the manifest', async () => {
   const assetManifest = await loadValidAssetManifest();
 
@@ -359,6 +413,35 @@ test('buildRenderSnapshotV1 fails predictably when a referenced assetId is missi
               },
               {
                 kind: 'sprite',
+                fields: { assetId: 'missing.sprite' }
+              }
+            ]
+          }
+        ]
+      },
+      { assetManifest }
+    ),
+    /buildRenderSnapshotV1: entity `player\.hero` references unknown assetId `missing\.sprite`/
+  );
+});
+
+test('buildRenderSnapshotV1 fails predictably when visual.sprite assetId is missing from the manifest', async () => {
+  const assetManifest = await loadValidAssetManifest();
+
+  await assert.rejects(
+    () => buildRenderSnapshotV1(
+      {
+        metadata: { name: 'missing-visual-asset-scene' },
+        entities: [
+          {
+            id: 'player.hero',
+            components: [
+              {
+                kind: 'transform',
+                fields: { x: 0, y: 0 }
+              },
+              {
+                kind: 'visual.sprite',
                 fields: { assetId: 'missing.sprite' }
               }
             ]

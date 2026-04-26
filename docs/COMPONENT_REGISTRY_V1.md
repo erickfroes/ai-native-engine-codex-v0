@@ -17,6 +17,7 @@ Componentes conhecidos iniciais:
 
 - `transform` v1
 - `velocity` v1
+- `visual.sprite` v1
 
 ## Separação de responsabilidade
 

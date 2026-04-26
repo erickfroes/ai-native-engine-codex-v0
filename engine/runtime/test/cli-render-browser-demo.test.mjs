@@ -11,7 +11,9 @@ const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
+const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
+const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const invalidAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'missing.asset-manifest.json');
 const invalidRelativeAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'invalid.non-positive-size.asset-manifest.json');
 const invalidTraversalAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'invalid.traversal-src.asset-manifest.json');
@@ -148,6 +150,35 @@ test('render-browser-demo with --asset-manifest preserves envelope shape and inc
   assert.match(payload.html, /"assetId":"player\.sprite"/);
   assert.match(payload.html, /"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/);
   assert.match(payload.html, /"assetSrc":"file:\/\/\/[^"]+images\/camera-icon\.png"/);
+});
+
+test('render-browser-demo with visual.sprite and --asset-manifest includes local image loading', () => {
+  const result = runCli([
+    'render-browser-demo',
+    visualSpriteScenePath,
+    '--tick',
+    '4',
+    '--width',
+    '64',
+    '--height',
+    '48',
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.browserDemoVersion, 1);
+  assert.equal(payload.scene, 'visual-sprite-fixture');
+  assert.equal(payload.tick, 4);
+  assertBrowserDemoHtmlWithImageLoadingSurface(payload.html);
+  assert.match(payload.html, /"kind":"sprite"/);
+  assert.match(payload.html, /"assetId":"player\.sprite"/);
+  assert.match(payload.html, /"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/);
+  assert.match(payload.html, /fillRect\(/);
 });
 
 test('render-browser-demo with --asset-manifest is deterministic for repeated runs', () => {

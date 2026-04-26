@@ -67,6 +67,7 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 ### Asset Manifest Local
 
 - `render-browser-demo --asset-manifest <path>` e `render_browser_demo(assetManifestPath)` materializam `assetSrc` para `file:///...` local a partir do diretorio do manifesto.
+- cenas com `visual.sprite.fields.assetId` usam o mesmo caminho local quando o manifesto e fornecido.
 - o HTML de runtime faz carregamento local (`Image.src = assetSrc`) e `drawImage` quando a imagem estiver disponivel.
 - se a imagem nao carregar, o fallback segue no `rect` e o demo continua funcional sem quebrar.
 - no manifesto, `assets[].src` continua relativo por design; paths absolutos e traversal continuam proibidos.
