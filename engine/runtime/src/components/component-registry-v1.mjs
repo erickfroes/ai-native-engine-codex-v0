@@ -12,6 +12,12 @@ const COMPONENT_REGISTRY_V1 = Object.freeze({
       version: 1,
       deterministic: true,
       description: 'Linear velocity component'
+    }),
+    Object.freeze({
+      name: 'visual.sprite',
+      version: 1,
+      deterministic: true,
+      description: 'Declarative sprite visual component'
     })
   ])
 });
