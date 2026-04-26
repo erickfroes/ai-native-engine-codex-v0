@@ -67,6 +67,35 @@ function validateTileLayerFields(fields, componentOverrides = {}) {
   });
 }
 
+function validateCameraViewportFields(fields, componentOverrides = {}, entityOverrides = {}) {
+  return validateSceneInvariants({
+    version: 1,
+    metadata: { name: 'camera-viewport-negative' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'camera.main',
+        components: [
+          {
+            kind: 'transform',
+            version: 1,
+            replicated: false,
+            fields: { x: 0, y: 0 }
+          },
+          {
+            kind: 'camera.viewport',
+            version: 1,
+            replicated: false,
+            fields,
+            ...componentOverrides
+          }
+        ],
+        ...entityOverrides
+      }
+    ]
+  });
+}
+
 test('validates tutorial scene successfully', async () => {
   const report = await validateSceneFile(scenePath('tutorial.scene.json'));
 
@@ -85,6 +114,15 @@ test('reports duplicate ids and replicated-system mismatch', async () => {
     report.errors.some((error) => error.message.includes('missing system "networking.replication"'))
   );
   assert.ok(report.errors.some((error) => error.message.includes('duplicate component kind')));
+});
+
+test('validates camera viewport fixture successfully', async () => {
+  const report = await validateSceneFile(fixturePath('valid_camera_viewport.scene.json'));
+
+  assert.equal(report.ok, true);
+  assert.equal(report.errors.length, 0);
+  assert.equal(report.summary.entityCount, 1);
+  assert.equal(report.summary.replicatedComponentCount, 0);
 });
 
 test('loadSceneFile throws when the scene is invalid', async () => {
@@ -503,5 +541,166 @@ test('tile.layer rejects invalid tile sizes predictably', () => {
         error.path === '$.entities[0].components[0].fields.tileHeight' &&
         error.message === 'tile.layer tileHeight must be an integer >= 1'
     )
+  );
+});
+
+test('camera.viewport component invariants are validated predictably', () => {
+  const report = validateCameraViewportFields(
+    {
+      width: 0,
+      height: 1.5,
+      x: 12
+    },
+    {
+      version: 2,
+      replicated: true
+    }
+  );
+
+  assert.ok(report.errors.some((error) => error.path.endsWith('.version') && error.message.includes('version')));
+  assert.ok(report.errors.some((error) => error.path.endsWith('.replicated') && error.message.includes('must not be replicated')));
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path.endsWith('.fields.width') &&
+        error.message === 'camera.viewport width must be an integer >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path.endsWith('.fields.height') &&
+        error.message === 'camera.viewport height must be an integer >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path.endsWith('.fields.x') &&
+        error.message === 'is not allowed for camera.viewport'
+    )
+  );
+});
+
+test('camera.viewport rejects non-object fields predictably', () => {
+  const report = validateCameraViewportFields(null);
+
+  assert.ok(report.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
+  assert.equal(report.errors.some((error) => error.path.endsWith('.fields.width')), false);
+});
+
+test('camera.viewport rejects missing width and height predictably', () => {
+  const report = validateCameraViewportFields({});
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.width' &&
+        error.message === 'camera.viewport width must be an integer >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.height' &&
+        error.message === 'camera.viewport height must be an integer >= 1'
+    )
+  );
+});
+
+test('camera.viewport rejects extra fields predictably', () => {
+  const report = validateCameraViewportFields({
+    width: 320,
+    height: 180,
+    y: 20
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.y' &&
+        error.message === 'is not allowed for camera.viewport'
+    )
+  );
+});
+
+test('camera.viewport requires transform on the same entity', () => {
+  const report = validateCameraViewportFields(
+    {
+      width: 320,
+      height: 180
+    },
+    {},
+    {
+      components: [
+        {
+          kind: 'camera.viewport',
+          version: 1,
+          replicated: false,
+          fields: { width: 320, height: 180 }
+        }
+      ]
+    }
+  );
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components' &&
+        error.message === 'camera.viewport requires a transform component on the same entity'
+    )
+  );
+});
+
+test('camera.viewport must be unique per scene', () => {
+  const report = validateSceneInvariants({
+    version: 1,
+    metadata: { name: 'camera-viewport-duplicate' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'camera.main',
+        components: [
+          {
+            kind: 'transform',
+            version: 1,
+            replicated: false,
+            fields: { x: 0, y: 0 }
+          },
+          {
+            kind: 'camera.viewport',
+            version: 1,
+            replicated: false,
+            fields: { width: 320, height: 180 }
+          }
+        ]
+      },
+      {
+        id: 'camera.alt',
+        components: [
+          {
+            kind: 'transform',
+            version: 1,
+            replicated: false,
+            fields: { x: 16, y: 8 }
+          },
+          {
+            kind: 'camera.viewport',
+            version: 1,
+            replicated: false,
+            fields: { width: 160, height: 90 }
+          }
+        ]
+      }
+    ]
+  });
+
+  assert.equal(
+    report.errors.filter(
+      (error) =>
+        error.message ===
+        'camera.viewport must be unique per scene; found multiple on entities: camera.main, camera.alt'
+    ).length,
+    2
   );
 });

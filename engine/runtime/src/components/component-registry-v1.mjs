@@ -24,6 +24,12 @@ const COMPONENT_REGISTRY_V1 = Object.freeze({
       version: 1,
       deterministic: true,
       description: 'Declarative tile grid visual component'
+    }),
+    Object.freeze({
+      name: 'camera.viewport',
+      version: 1,
+      deterministic: true,
+      description: 'Declarative camera viewport component'
     })
   ])
 });

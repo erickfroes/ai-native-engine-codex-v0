@@ -195,6 +195,40 @@ function validateTileLayerComponent(component, componentPath, errors) {
   }
 }
 
+function validateCameraViewportComponent(component, componentPath, errors) {
+  const fields = component.fields;
+  const allowedFieldNames = new Set(['width', 'height']);
+
+  if (component.version !== 1) {
+    pushMessage(errors, `${componentPath}.version`, 'camera.viewport version must be exactly 1');
+  }
+
+  if (component.replicated !== false) {
+    pushMessage(errors, `${componentPath}.replicated`, 'camera.viewport must not be replicated');
+  }
+
+  if (!isPlainObject(fields)) {
+    pushMessage(errors, `${componentPath}.fields`, 'camera.viewport fields must be an object');
+    return;
+  }
+
+  for (const fieldName of Object.keys(fields)) {
+    if (!allowedFieldNames.has(fieldName)) {
+      pushMessage(errors, `${componentPath}.fields.${fieldName}`, 'is not allowed for camera.viewport');
+    }
+  }
+
+  for (const dimensionName of ['width', 'height']) {
+    if (!Number.isInteger(fields[dimensionName]) || fields[dimensionName] < 1) {
+      pushMessage(
+        errors,
+        `${componentPath}.fields.${dimensionName}`,
+        `camera.viewport ${dimensionName} must be an integer >= 1`
+      );
+    }
+  }
+}
+
 export function validateSceneInvariants(scene) {
   const errors = [];
   const warnings = [];
@@ -202,6 +236,7 @@ export function validateSceneInvariants(scene) {
   const entityIds = new Set();
   const entityNames = new Set();
   let hasReplicatedComponent = false;
+  const cameraViewportOwners = [];
 
   for (const [entityIndex, entity] of scene.entities.entries()) {
     const entityPath = `$.entities[${entityIndex}]`;
@@ -249,6 +284,34 @@ export function validateSceneInvariants(scene) {
       if (component.kind === 'tile.layer') {
         validateTileLayerComponent(component, componentPath, errors);
       }
+
+      if (component.kind === 'camera.viewport') {
+        cameraViewportOwners.push({
+          entityId: entity.id,
+          componentPath
+        });
+        validateCameraViewportComponent(component, componentPath, errors);
+      }
+    }
+
+    if (componentKinds.has('camera.viewport') && !componentKinds.has('transform')) {
+      pushMessage(
+        errors,
+        `${entityPath}.components`,
+        'camera.viewport requires a transform component on the same entity'
+      );
+    }
+  }
+
+  if (cameraViewportOwners.length > 1) {
+    for (const owner of cameraViewportOwners) {
+      pushMessage(
+        errors,
+        owner.componentPath,
+        `camera.viewport must be unique per scene; found multiple on entities: ${cameraViewportOwners
+          .map((entry) => entry.entityId)
+          .join(', ')}`
+      );
     }
   }
 
