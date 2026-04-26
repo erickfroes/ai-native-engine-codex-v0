@@ -18,6 +18,12 @@ const COMPONENT_REGISTRY_V1 = Object.freeze({
       version: 1,
       deterministic: true,
       description: 'Declarative sprite visual component'
+    }),
+    Object.freeze({
+      name: 'tile.layer',
+      version: 1,
+      deterministic: true,
+      description: 'Declarative tile grid visual component'
     })
   ])
 });

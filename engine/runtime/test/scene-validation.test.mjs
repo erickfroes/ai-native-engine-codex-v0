@@ -45,6 +45,28 @@ function validateVisualSpriteFields(fields, componentOverrides = {}) {
   });
 }
 
+function validateTileLayerFields(fields, componentOverrides = {}) {
+  return validateSceneInvariants({
+    version: 1,
+    metadata: { name: 'tile-layer-negative' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'map.ground',
+        components: [
+          {
+            kind: 'tile.layer',
+            version: 1,
+            replicated: false,
+            fields,
+            ...componentOverrides
+          }
+        ]
+      }
+    ]
+  });
+}
+
 test('validates tutorial scene successfully', async () => {
   const report = await validateSceneFile(scenePath('tutorial.scene.json'));
 
@@ -202,6 +224,137 @@ test('visual.sprite rejects invalid layer predictably', () => {
       (error) =>
         error.path === '$.entities[0].components[1].fields.layer' &&
         error.message === 'visual.sprite layer must be an integer'
+    )
+  );
+});
+
+test('tile.layer component invariants are validated predictably', () => {
+  const report = validateTileLayerFields(
+    {
+      tileWidth: 0,
+      tileHeight: -1,
+      columns: 1.5,
+      rows: 0,
+      layer: 0.5,
+      tiles: [[1]],
+      palette: {
+        1: {
+          kind: 'rect',
+          width: 0,
+          height: 1.5,
+          tint: '#fff'
+        }
+      },
+      collision: true
+    },
+    {
+      version: 2,
+      replicated: true
+    }
+  );
+
+  assert.ok(report.errors.some((error) => error.path.endsWith('.version') && error.message.includes('version')));
+  assert.ok(report.errors.some((error) => error.path.endsWith('.replicated') && error.message.includes('must not be replicated')));
+  assert.ok(report.errors.some((error) => error.path.endsWith('.fields.tileWidth') && error.message.includes('integer >= 1')));
+  assert.ok(report.errors.some((error) => error.path.endsWith('.fields.tileHeight') && error.message.includes('integer >= 1')));
+  assert.ok(report.errors.some((error) => error.path.endsWith('.fields.columns') && error.message.includes('integer >= 1')));
+  assert.ok(report.errors.some((error) => error.path.endsWith('.fields.rows') && error.message.includes('integer >= 1')));
+  assert.ok(report.errors.some((error) => error.path.endsWith('.fields.layer') && error.message.includes('layer')));
+  assert.ok(report.errors.some((error) => error.path.endsWith('.fields.collision') && error.message.includes('not allowed')));
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path.endsWith('.fields.palette."1".width') &&
+        error.message === 'tile.layer palette rect width must be an integer >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path.endsWith('.fields.palette."1".height') &&
+        error.message === 'tile.layer palette rect height must be an integer >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path.endsWith('.fields.palette."1".tint') &&
+        error.message === 'is not allowed for tile.layer rect palette entry'
+    )
+  );
+});
+
+test('tile.layer rejects non-object fields predictably', () => {
+  const report = validateTileLayerFields(null);
+
+  assert.ok(report.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
+  assert.equal(report.errors.some((error) => error.path.endsWith('.fields.tiles')), false);
+});
+
+test('tile.layer validates grid dimensions and palette references predictably', () => {
+  const report = validateTileLayerFields({
+    tileWidth: 16,
+    tileHeight: 16,
+    columns: 3,
+    rows: 2,
+    tiles: [
+      [1, 1],
+      [1, 2, 1],
+      [1, 1, 1]
+    ],
+    palette: {
+      0: { kind: 'empty' },
+      1: { kind: 'rect', width: 16, height: 16 }
+    }
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.tiles' &&
+        error.message === 'tile.layer tiles row count must equal rows'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.tiles[0]' &&
+        error.message === 'tile.layer tiles column count must equal columns'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.tiles[1][1]' &&
+        error.message === 'tile.layer tile id `2` must exist in palette'
+    )
+  );
+});
+
+test('tile.layer rejects invalid tile sizes predictably', () => {
+  const report = validateTileLayerFields({
+    tileWidth: 0,
+    tileHeight: 1.5,
+    columns: 1,
+    rows: 1,
+    tiles: [[1]],
+    palette: {
+      1: { kind: 'rect' }
+    }
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.tileWidth' &&
+        error.message === 'tile.layer tileWidth must be an integer >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.tileHeight' &&
+        error.message === 'tile.layer tileHeight must be an integer >= 1'
     )
   );
 });

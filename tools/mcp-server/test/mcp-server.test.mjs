@@ -459,6 +459,58 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       }
     ]);
 
+    const renderSnapshotTileLayerResponse = await client.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './fixtures/tile-layer.scene.json'
+      }
+    });
+
+    assert.equal(renderSnapshotTileLayerResponse.result.isError, false);
+    assertRenderSnapshotV1(renderSnapshotTileLayerResponse.result.structuredContent);
+    assert.deepEqual(Object.keys(renderSnapshotTileLayerResponse.result.structuredContent).sort(), [
+      'drawCalls',
+      'renderSnapshotVersion',
+      'scene',
+      'tick',
+      'viewport'
+    ]);
+    assert.equal(renderSnapshotTileLayerResponse.result.structuredContent.scene, 'tile-layer-fixture');
+    assert.equal(renderSnapshotTileLayerResponse.result.structuredContent.drawCalls.length, 10);
+    assert.deepEqual(
+      renderSnapshotTileLayerResponse.result.structuredContent.drawCalls.map((drawCall) => drawCall.id),
+      [
+        'map.ground.tile.0.0',
+        'map.ground.tile.0.1',
+        'map.ground.tile.0.2',
+        'map.ground.tile.0.3',
+        'map.ground.tile.1.0',
+        'map.ground.tile.1.3',
+        'map.ground.tile.2.0',
+        'map.ground.tile.2.1',
+        'map.ground.tile.2.2',
+        'map.ground.tile.2.3'
+      ]
+    );
+    assert.deepEqual(renderSnapshotTileLayerResponse.result.structuredContent.drawCalls[0], {
+      kind: 'rect',
+      id: 'map.ground.tile.0.0',
+      x: 0,
+      y: 0,
+      width: 16,
+      height: 16,
+      layer: -10
+    });
+    assert.deepEqual(renderSnapshotTileLayerResponse.result.structuredContent.drawCalls[9], {
+      kind: 'rect',
+      id: 'map.ground.tile.2.3',
+      x: 48,
+      y: 32,
+      width: 16,
+      height: 16,
+      layer: -10
+    });
+
     const renderSnapshotInvalidVisualSpriteResponse = await client.request('tools/call', {
       name: 'render_snapshot',
       arguments: {

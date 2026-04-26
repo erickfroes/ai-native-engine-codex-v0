@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "tile-layer-fixture"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "map.ground",
+      "components": [
+        {
+          "kind": "tile.layer",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "tileWidth": 16,
+            "tileHeight": 16,
+            "columns": 4,
+            "rows": 3,
+            "layer": -10,
+            "tiles": [
+              [1, 1, 1, 1],
+              [1, 0, 0, 1],
+              [1, 1, 1, 1]
+            ],
+            "palette": {
+              "0": {
+                "kind": "empty"
+              },
+              "1": {
+                "kind": "rect",
+                "width": 16,
+                "height": 16
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -21,6 +21,7 @@ const missingSystemsPath = path.join(repoRoot, 'scenes', 'invalid', 'missing-sys
 const emptySystemsPath = path.join(repoRoot, 'scenes', 'invalid', 'empty-systems.scene.json');
 const unknownSystemPath = path.join(repoRoot, 'scenes', 'invalid', 'unknown-system.scene.json');
 const visualSpriteFixturePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
+const tileLayerFixturePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -94,6 +95,18 @@ test('scene document v1: visual sprite fixture stays valid and opt-in', async ()
   assert.equal(scene.metadata.name, 'visual-sprite-fixture');
 
   const report = await validateLoopScene(visualSpriteFixturePath);
+  assertSceneValidationReportV1(report);
+  assert.equal(report.valid, true);
+});
+
+test('scene document v1: tile layer fixture stays valid and opt-in', async () => {
+  const tileLayer = JSON.parse(await readFile(tileLayerFixturePath, 'utf8'));
+  assertSceneDocumentV1(tileLayer);
+
+  const scene = await loadSceneFile(tileLayerFixturePath);
+  assert.equal(scene.metadata.name, 'tile-layer-fixture');
+
+  const report = await validateLoopScene(tileLayerFixturePath);
   assertSceneValidationReportV1(report);
   assert.equal(report.valid, true);
 });

@@ -256,6 +256,23 @@ function createSpriteSnapshotWithFailingAssetSources() {
   };
 }
 
+function createTileLayerSnapshot() {
+  return {
+    renderSnapshotVersion: 1,
+    scene: 'tile-layer-fixture',
+    tick: 0,
+    viewport: {
+      width: 64,
+      height: 48
+    },
+    drawCalls: [
+      { kind: 'rect', id: 'map.ground.tile.0.0', x: 0, y: 0, width: 16, height: 16, layer: -10 },
+      { kind: 'rect', id: 'map.ground.tile.0.1', x: 16, y: 0, width: 16, height: 16, layer: -10 },
+      { kind: 'rect', id: 'map.ground.tile.1.0', x: 0, y: 16, width: 16, height: 16, layer: -10 }
+    ]
+  };
+}
+
 function createMultiSpriteSnapshotWithEscapedAssetSources() {
   return {
     renderSnapshotVersion: 1,
@@ -521,6 +538,28 @@ test('renderBrowserPlayableDemoHtmlV1 preserves snapshot order for multiple rect
     html,
     /<canvas id="browser-playable-demo-canvas" data-browser-demo-version="1" data-scene="multi-rect" data-tick="2" data-controllable-entity="mid" width="64" height="48" tabindex="0"/
   );
+});
+
+test('renderBrowserPlayableDemoHtmlV1 renders tile layer rect drawCalls with Canvas 2D primitives', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'tile-layer-fixture Browser Playable Demo',
+    renderSnapshot: createTileLayerSnapshot()
+  });
+  const harness = createCanvasHarness(html);
+
+  assert.match(html, /fillRect\(/);
+  assert.match(html, /strokeRect\(/);
+  assertNoForbiddenBrowserDemoHtmlSurface(html);
+  assert.ok(html.indexOf('"id":"map.ground.tile.0.0"') < html.indexOf('"id":"map.ground.tile.1.0"'));
+  assert.equal(harness.imageInstances.length, 0);
+  assert.equal(harness.operations.some((entry) => entry.method === 'drawImage'), false);
+
+  const fillRects = harness.operations.filter((entry) => entry.method === 'fillRect');
+  const strokeRects = harness.operations.filter((entry) => entry.method === 'strokeRect');
+  assert.ok(fillRects.some((entry) => entry.args.join(',') === '0,0,16,16'));
+  assert.ok(fillRects.some((entry) => entry.args.join(',') === '16,0,16,16'));
+  assert.ok(fillRects.some((entry) => entry.args.join(',') === '0,16,16,16'));
+  assert.equal(strokeRects.length >= 3, true);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 accepts sprite drawCalls and keeps deterministic rect fallback behavior', () => {

@@ -10,6 +10,7 @@ import { assertRenderSnapshotV1 } from './helpers/assertRenderSnapshotV1.mjs';
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
@@ -158,6 +159,113 @@ test('buildRenderSnapshotV1 keeps old scenes without visual.sprite on rect fallb
   assertRenderSnapshotV1(snapshot);
   assert.deepEqual(snapshot.drawCalls.map((drawCall) => drawCall.kind), ['rect', 'rect']);
   assert.deepEqual(snapshot.drawCalls.map((drawCall) => drawCall.id), ['camera.main', 'player.hero']);
+});
+
+test('buildRenderSnapshotV1 expands tile.layer into deterministic rect drawCalls', async () => {
+  const snapshot = await buildRenderSnapshotV1(tileLayerScenePath);
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot, {
+    renderSnapshotVersion: 1,
+    scene: 'tile-layer-fixture',
+    tick: 0,
+    viewport: {
+      width: 320,
+      height: 180
+    },
+    drawCalls: [
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.0.0',
+        x: 0,
+        y: 0,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.0.1',
+        x: 16,
+        y: 0,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.0.2',
+        x: 32,
+        y: 0,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.0.3',
+        x: 48,
+        y: 0,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.1.0',
+        x: 0,
+        y: 16,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.1.3',
+        x: 48,
+        y: 16,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.2.0',
+        x: 0,
+        y: 32,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.2.1',
+        x: 16,
+        y: 32,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.2.2',
+        x: 32,
+        y: 32,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.2.3',
+        x: 48,
+        y: 32,
+        width: 16,
+        height: 16,
+        layer: -10
+      }
+    ]
+  });
 });
 
 test('buildRenderSnapshotV1 emits sprite drawCalls when asset manifest is provided explicitly', async () => {

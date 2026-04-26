@@ -4,6 +4,8 @@
 
 Declarar intencao visual minima na propria cena sem criar editor, servidor, backend grafico ou pipeline pesado de assets.
 
+Tile grids usam o contrato separado `tile.layer`; ver `docs/TILE_LAYER_V1.md`.
+
 ## visual.sprite
 
 Componente atual:

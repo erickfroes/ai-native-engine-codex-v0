@@ -10,6 +10,7 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
 const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const invalidVisualSpriteScenePath = path.join(
@@ -180,6 +181,66 @@ test('render-snapshot supports visual.sprite with --asset-manifest without chang
       layer: 2
     }
   ]);
+});
+
+test('render-snapshot supports tile.layer without changing JSON shape', () => {
+  const first = runCli([
+    'render-snapshot',
+    tileLayerScenePath,
+    '--json'
+  ]);
+  const second = runCli([
+    'render-snapshot',
+    tileLayerScenePath,
+    '--json'
+  ]);
+
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(second.status, 0, second.stderr);
+
+  const firstSnapshot = JSON.parse(first.stdout);
+  const secondSnapshot = JSON.parse(second.stdout);
+  assertRenderSnapshotV1(firstSnapshot);
+  assert.deepEqual(Object.keys(firstSnapshot).sort(), [
+    'drawCalls',
+    'renderSnapshotVersion',
+    'scene',
+    'tick',
+    'viewport'
+  ]);
+  assert.deepEqual(firstSnapshot, secondSnapshot);
+  assert.equal(firstSnapshot.scene, 'tile-layer-fixture');
+  assert.equal(firstSnapshot.drawCalls.length, 10);
+  assert.deepEqual(firstSnapshot.drawCalls.map((drawCall) => drawCall.id), [
+    'map.ground.tile.0.0',
+    'map.ground.tile.0.1',
+    'map.ground.tile.0.2',
+    'map.ground.tile.0.3',
+    'map.ground.tile.1.0',
+    'map.ground.tile.1.3',
+    'map.ground.tile.2.0',
+    'map.ground.tile.2.1',
+    'map.ground.tile.2.2',
+    'map.ground.tile.2.3'
+  ]);
+  assert.deepEqual(firstSnapshot.drawCalls[0], {
+    kind: 'rect',
+    id: 'map.ground.tile.0.0',
+    x: 0,
+    y: 0,
+    width: 16,
+    height: 16,
+    layer: -10
+  });
+  assert.deepEqual(firstSnapshot.drawCalls[9], {
+    kind: 'rect',
+    id: 'map.ground.tile.2.3',
+    x: 48,
+    y: 32,
+    width: 16,
+    height: 16,
+    layer: -10
+  });
 });
 
 test('render-snapshot fails predictably for invalid numeric options', () => {
