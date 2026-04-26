@@ -170,6 +170,11 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     const inspectCollisionBoundsTool = toolsResponse.result.tools.find((tool) => tool.name === 'inspect_collision_bounds');
     assert.ok(inspectCollisionBoundsTool);
     assert.deepEqual(inspectCollisionBoundsTool.inputSchema.required, ['path']);
+    const inspectCollisionOverlapsTool = toolsResponse.result.tools.find(
+      (tool) => tool.name === 'inspect_collision_overlaps'
+    );
+    assert.ok(inspectCollisionOverlapsTool);
+    assert.deepEqual(inspectCollisionOverlapsTool.inputSchema.required, ['path']);
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'simulate_state'));
 
     const callResponse = await client.request('tools/call', {
@@ -1446,6 +1451,65 @@ test('mcp inspect_collision_bounds returns deterministic bounds and empty report
     assert.equal(invalidResponse.result.structuredContent.ok, false);
     assert.equal(invalidResponse.result.structuredContent.errorName, 'SceneValidationError');
     assert.match(invalidResponse.result.structuredContent.errorMessage, /invalid_collision_bounds\.scene\.json/);
+  } finally {
+    await client.close();
+  }
+});
+
+test('mcp inspect_collision_overlaps returns deterministic overlaps and empty reports', async () => {
+  const client = createClient();
+
+  try {
+    const initResponse = await client.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: {
+        name: 'node-test',
+        version: '1.0.0'
+      }
+    });
+
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    client.notify('notifications/initialized');
+
+    const overlapsResponse = await client.request('tools/call', {
+      name: 'inspect_collision_overlaps',
+      arguments: {
+        path: './engine/runtime/test/fixtures/collision-overlap.scene.json'
+      }
+    });
+
+    assert.equal(overlapsResponse.result.isError, false);
+    assert.deepEqual(overlapsResponse.result.structuredContent, {
+      collisionOverlapReportVersion: 1,
+      scene: 'collision-overlap-fixture',
+      overlaps: [
+        {
+          entityAId: 'ghost.zone',
+          entityBId: 'player.hero',
+          solid: false
+        },
+        {
+          entityAId: 'player.hero',
+          entityBId: 'wall.block',
+          solid: true
+        }
+      ]
+    });
+
+    const emptyResponse = await client.request('tools/call', {
+      name: 'inspect_collision_overlaps',
+      arguments: {
+        path: './engine/runtime/test/fixtures/collision-no-overlap.scene.json'
+      }
+    });
+
+    assert.equal(emptyResponse.result.isError, false);
+    assert.deepEqual(emptyResponse.result.structuredContent, {
+      collisionOverlapReportVersion: 1,
+      scene: 'collision-no-overlap-fixture',
+      overlaps: []
+    });
   } finally {
     await client.close();
   }

@@ -403,6 +403,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_collision_overlaps',
+    title: 'Inspect Collision Overlaps',
+    description: 'Build CollisionOverlapReport v1 from collision.bounds AABBs without physics or movement resolution.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'simulate_state',
     title: 'Simulate State',
     description: 'Run opt-in State Simulation v1 processors over a scene-derived state model.',
