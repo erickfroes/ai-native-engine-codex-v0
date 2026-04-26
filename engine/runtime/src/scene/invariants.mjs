@@ -197,7 +197,7 @@ function validateTileLayerComponent(component, componentPath, errors) {
 
 function validateCameraViewportComponent(component, componentPath, errors) {
   const fields = component.fields;
-  const allowedFieldNames = new Set(['width', 'height']);
+  const allowedFieldNames = new Set(['x', 'y', 'width', 'height']);
 
   if (component.version !== 1) {
     pushMessage(errors, `${componentPath}.version`, 'camera.viewport version must be exactly 1');
@@ -215,6 +215,16 @@ function validateCameraViewportComponent(component, componentPath, errors) {
   for (const fieldName of Object.keys(fields)) {
     if (!allowedFieldNames.has(fieldName)) {
       pushMessage(errors, `${componentPath}.fields.${fieldName}`, 'is not allowed for camera.viewport');
+    }
+  }
+
+  for (const coordinateName of ['x', 'y']) {
+    if (!Number.isInteger(fields[coordinateName])) {
+      pushMessage(
+        errors,
+        `${componentPath}.fields.${coordinateName}`,
+        `camera.viewport ${coordinateName} must be an integer`
+      );
     }
   }
 
@@ -294,13 +304,6 @@ export function validateSceneInvariants(scene) {
       }
     }
 
-    if (componentKinds.has('camera.viewport') && !componentKinds.has('transform')) {
-      pushMessage(
-        errors,
-        `${entityPath}.components`,
-        'camera.viewport requires a transform component on the same entity'
-      );
-    }
   }
 
   if (cameraViewportOwners.length > 1) {

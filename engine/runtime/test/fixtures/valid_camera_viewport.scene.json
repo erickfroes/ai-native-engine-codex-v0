@@ -12,19 +12,12 @@
       "name": "Main Camera",
       "components": [
         {
-          "kind": "transform",
-          "version": 1,
-          "replicated": false,
-          "fields": {
-            "x": 0,
-            "y": 0
-          }
-        },
-        {
           "kind": "camera.viewport",
           "version": 1,
           "replicated": false,
           "fields": {
+            "x": 0,
+            "y": 0,
             "width": 320,
             "height": 180
           }

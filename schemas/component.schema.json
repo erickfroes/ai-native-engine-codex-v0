@@ -206,10 +206,18 @@
           "fields": {
             "type": "object",
             "required": [
+              "x",
+              "y",
               "width",
               "height"
             ],
             "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
               "width": {
                 "type": "integer",
                 "minimum": 1

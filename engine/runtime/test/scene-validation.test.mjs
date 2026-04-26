@@ -77,12 +77,6 @@ function validateCameraViewportFields(fields, componentOverrides = {}, entityOve
         id: 'camera.main',
         components: [
           {
-            kind: 'transform',
-            version: 1,
-            replicated: false,
-            fields: { x: 0, y: 0 }
-          },
-          {
             kind: 'camera.viewport',
             version: 1,
             replicated: false,
@@ -547,9 +541,10 @@ test('tile.layer rejects invalid tile sizes predictably', () => {
 test('camera.viewport component invariants are validated predictably', () => {
   const report = validateCameraViewportFields(
     {
+      x: 12.5,
+      y: 'north',
       width: 0,
-      height: 1.5,
-      x: 12
+      height: 1.5
     },
     {
       version: 2,
@@ -577,7 +572,14 @@ test('camera.viewport component invariants are validated predictably', () => {
     report.errors.some(
       (error) =>
         error.path.endsWith('.fields.x') &&
-        error.message === 'is not allowed for camera.viewport'
+        error.message === 'camera.viewport x must be an integer'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path.endsWith('.fields.y') &&
+        error.message === 'camera.viewport y must be an integer'
     )
   );
 });
@@ -590,19 +592,19 @@ test('camera.viewport rejects non-object fields predictably', () => {
 });
 
 test('camera.viewport rejects missing width and height predictably', () => {
-  const report = validateCameraViewportFields({});
+  const report = validateCameraViewportFields({ x: 0, y: 0 });
 
   assert.ok(
     report.errors.some(
       (error) =>
-        error.path === '$.entities[0].components[1].fields.width' &&
+        error.path === '$.entities[0].components[0].fields.width' &&
         error.message === 'camera.viewport width must be an integer >= 1'
     )
   );
   assert.ok(
     report.errors.some(
       (error) =>
-        error.path === '$.entities[0].components[1].fields.height' &&
+        error.path === '$.entities[0].components[0].fields.height' &&
         error.message === 'camera.viewport height must be an integer >= 1'
     )
   );
@@ -610,44 +612,18 @@ test('camera.viewport rejects missing width and height predictably', () => {
 
 test('camera.viewport rejects extra fields predictably', () => {
   const report = validateCameraViewportFields({
+    x: 0,
+    y: 0,
     width: 320,
     height: 180,
-    y: 20
+    zoom: 2
   });
 
   assert.ok(
     report.errors.some(
       (error) =>
-        error.path === '$.entities[0].components[1].fields.y' &&
+        error.path === '$.entities[0].components[0].fields.zoom' &&
         error.message === 'is not allowed for camera.viewport'
-    )
-  );
-});
-
-test('camera.viewport requires transform on the same entity', () => {
-  const report = validateCameraViewportFields(
-    {
-      width: 320,
-      height: 180
-    },
-    {},
-    {
-      components: [
-        {
-          kind: 'camera.viewport',
-          version: 1,
-          replicated: false,
-          fields: { width: 320, height: 180 }
-        }
-      ]
-    }
-  );
-
-  assert.ok(
-    report.errors.some(
-      (error) =>
-        error.path === '$.entities[0].components' &&
-        error.message === 'camera.viewport requires a transform component on the same entity'
     )
   );
 });
@@ -662,16 +638,10 @@ test('camera.viewport must be unique per scene', () => {
         id: 'camera.main',
         components: [
           {
-            kind: 'transform',
-            version: 1,
-            replicated: false,
-            fields: { x: 0, y: 0 }
-          },
-          {
             kind: 'camera.viewport',
             version: 1,
             replicated: false,
-            fields: { width: 320, height: 180 }
+            fields: { x: 0, y: 0, width: 320, height: 180 }
           }
         ]
       },
@@ -679,16 +649,10 @@ test('camera.viewport must be unique per scene', () => {
         id: 'camera.alt',
         components: [
           {
-            kind: 'transform',
-            version: 1,
-            replicated: false,
-            fields: { x: 16, y: 8 }
-          },
-          {
             kind: 'camera.viewport',
             version: 1,
             replicated: false,
-            fields: { width: 160, height: 90 }
+            fields: { x: 16, y: 8, width: 160, height: 90 }
           }
         ]
       }
