@@ -291,6 +291,153 @@ test('tile.layer rejects non-object fields predictably', () => {
   assert.equal(report.errors.some((error) => error.path.endsWith('.fields.tiles')), false);
 });
 
+test('tile.layer rejects missing palette predictably', () => {
+  const report = validateTileLayerFields({
+    tileWidth: 16,
+    tileHeight: 16,
+    columns: 1,
+    rows: 1,
+    tiles: [[1]]
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.palette' &&
+        error.message === 'tile.layer palette must be an object'
+    )
+  );
+});
+
+test('tile.layer rejects row count mismatches predictably', () => {
+  const rowsTooFew = validateTileLayerFields({
+    tileWidth: 16,
+    tileHeight: 16,
+    columns: 1,
+    rows: 2,
+    tiles: [[1]],
+    palette: {
+      1: { kind: 'rect' }
+    }
+  });
+  const rowsTooMany = validateTileLayerFields({
+    tileWidth: 16,
+    tileHeight: 16,
+    columns: 1,
+    rows: 1,
+    tiles: [[1], [1]],
+    palette: {
+      1: { kind: 'rect' }
+    }
+  });
+
+  for (const report of [rowsTooFew, rowsTooMany]) {
+    assert.ok(
+      report.errors.some(
+        (error) =>
+          error.path === '$.entities[0].components[0].fields.tiles' &&
+          error.message === 'tile.layer tiles row count must equal rows'
+      )
+    );
+  }
+});
+
+test('tile.layer rejects column count mismatches predictably', () => {
+  const columnsTooFew = validateTileLayerFields({
+    tileWidth: 16,
+    tileHeight: 16,
+    columns: 2,
+    rows: 1,
+    tiles: [[1]],
+    palette: {
+      1: { kind: 'rect' }
+    }
+  });
+  const columnsTooMany = validateTileLayerFields({
+    tileWidth: 16,
+    tileHeight: 16,
+    columns: 1,
+    rows: 1,
+    tiles: [[1, 1]],
+    palette: {
+      1: { kind: 'rect' }
+    }
+  });
+
+  for (const report of [columnsTooFew, columnsTooMany]) {
+    assert.ok(
+      report.errors.some(
+        (error) =>
+          error.path === '$.entities[0].components[0].fields.tiles[0]' &&
+          error.message === 'tile.layer tiles column count must equal columns'
+      )
+    );
+  }
+});
+
+test('tile.layer rejects tile ids without palette entries predictably', () => {
+  const report = validateTileLayerFields({
+    tileWidth: 16,
+    tileHeight: 16,
+    columns: 2,
+    rows: 1,
+    tiles: [[1, 2]],
+    palette: {
+      1: { kind: 'rect' }
+    }
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.tiles[0][1]' &&
+        error.message === 'tile.layer tile id `2` must exist in palette'
+    )
+  );
+});
+
+test('tile.layer rejects invalid required grid integers predictably', () => {
+  const report = validateTileLayerFields({
+    tileWidth: 0,
+    tileHeight: -1,
+    columns: 1.5,
+    rows: 0,
+    tiles: [[1]],
+    palette: {
+      1: { kind: 'rect' }
+    }
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.tileWidth' &&
+        error.message === 'tile.layer tileWidth must be an integer >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.tileHeight' &&
+        error.message === 'tile.layer tileHeight must be an integer >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.columns' &&
+        error.message === 'tile.layer columns must be an integer >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.rows' &&
+        error.message === 'tile.layer rows must be an integer >= 1'
+    )
+  );
+});
+
 test('tile.layer validates grid dimensions and palette references predictably', () => {
   const report = validateTileLayerFields({
     tileWidth: 16,
