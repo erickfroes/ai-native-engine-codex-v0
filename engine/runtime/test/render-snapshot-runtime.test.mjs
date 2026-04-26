@@ -119,6 +119,26 @@ test('buildRenderSnapshotV1 accepts a scene object and sorts drawCalls by layer 
   });
 });
 
+test('buildRenderSnapshotV1 fails predictably for an invalid raw scene object', async () => {
+  await assert.rejects(
+    () => buildRenderSnapshotV1({
+      metadata: { name: 'invalid-scene-object' },
+      systems: [],
+      entities: [
+        {
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 1, y: 2 }
+            }
+          ]
+        }
+      ]
+    }),
+    /buildRenderSnapshotV1: scene object is invalid: \$\.entities\[0\]\.id: must be a non-empty string/
+  );
+});
+
 test('buildRenderSnapshotV1 keeps rect fallback when no asset manifest is provided', async () => {
   const snapshot = await buildRenderSnapshotV1({
     metadata: { name: 'rect-fallback' },
