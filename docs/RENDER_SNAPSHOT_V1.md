@@ -60,6 +60,7 @@ Definir um contrato JSON headless e deterministico para descrever uma vista rend
 - `options.assetManifest` ou `options.assetManifestPath` ativam a leitura opt-in de `Asset Manifest v1`.
 - quando um manifesto opt-in existe e a entidade declara `visual.sprite.fields.assetId`, o builder pode emitir `drawCalls.kind = "sprite"`.
 - o componente legado `sprite` continua aceito pelo builder para compatibilidade; quando `visual.sprite` existe, ele e a fonte preferida para `assetId`, `width`, `height` e `layer`.
+- se `visual.sprite` for invalido, a cena falha validacao antes de o builder emitir snapshot.
 - sem manifesto, o builder preserva o fallback atual para `rect`.
 - `assetManifestPath` deve apontar para um manifesto local valido; paths absolutos no `src` do manifesto e traversal sao rejeitados.
 - `x` e `y` vem de `transform.fields.position` ou de `transform.fields`.
