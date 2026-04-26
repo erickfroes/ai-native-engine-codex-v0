@@ -1,0 +1,19 @@
+{
+  "assetManifestVersion": 1,
+  "assets": [
+    {
+      "id": "camera.icon",
+      "type": "image",
+      "src": "images/camera-icon.png",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "id": "player.sprite",
+      "type": "image",
+      "src": "images/player.png",
+      "width": 16,
+      "height": 16
+    }
+  ]
+}

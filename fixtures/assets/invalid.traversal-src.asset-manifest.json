@@ -1,0 +1,12 @@
+{
+  "assetManifestVersion": 1,
+  "assets": [
+    {
+      "id": "player.sprite",
+      "type": "image",
+      "src": "../outside/player.png",
+      "width": 16,
+      "height": 16
+    }
+  ]
+}
