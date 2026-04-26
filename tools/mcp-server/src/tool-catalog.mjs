@@ -189,6 +189,10 @@ export const toolCatalog = [
         height: {
           type: 'integer',
           description: 'Optional viewport height. Defaults to 180.'
+        },
+        assetManifestPath: {
+          type: 'string',
+          description: 'Optional repository-relative or absolute path to an Asset Manifest v1 JSON file.'
         }
       },
       additionalProperties: false
@@ -217,6 +221,10 @@ export const toolCatalog = [
         height: {
           type: 'integer',
           description: 'Optional viewport height. Defaults to 180.'
+        },
+        assetManifestPath: {
+          type: 'string',
+          description: 'Optional repository-relative or absolute path to an Asset Manifest v1 JSON file.'
         }
       },
       additionalProperties: false
