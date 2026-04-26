@@ -17,6 +17,34 @@ function fixturePath(relativePath) {
   return path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', relativePath);
 }
 
+function validateVisualSpriteFields(fields, componentOverrides = {}) {
+  return validateSceneInvariants({
+    version: 1,
+    metadata: { name: 'visual-sprite-negative' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'player.hero',
+        components: [
+          {
+            kind: 'transform',
+            version: 1,
+            replicated: false,
+            fields: { x: 0, y: 0 }
+          },
+          {
+            kind: 'visual.sprite',
+            version: 1,
+            replicated: false,
+            fields,
+            ...componentOverrides
+          }
+        ]
+      }
+    ]
+  });
+}
+
 test('validates tutorial scene successfully', async () => {
   const report = await validateSceneFile(scenePath('tutorial.scene.json'));
 
@@ -82,4 +110,68 @@ test('visual.sprite component invariants are validated predictably', () => {
   assert.ok(report.errors.some((error) => error.path.endsWith('.fields.height') && error.message.includes('dimensions')));
   assert.ok(report.errors.some((error) => error.path.endsWith('.fields.layer') && error.message.includes('layer')));
   assert.ok(report.errors.some((error) => error.path.endsWith('.fields.tint') && error.message.includes('not allowed')));
+});
+
+test('visual.sprite rejects missing assetId predictably', () => {
+  const report = validateVisualSpriteFields({ width: 16, height: 16 });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.assetId' &&
+        error.message === 'visual.sprite assetId must be a non-empty string'
+    )
+  );
+});
+
+test('visual.sprite rejects empty assetId predictably', () => {
+  for (const assetId of ['', '   ']) {
+    const report = validateVisualSpriteFields({ assetId, width: 16, height: 16 });
+
+    assert.ok(
+      report.errors.some(
+        (error) =>
+          error.path === '$.entities[0].components[1].fields.assetId' &&
+          error.message === 'visual.sprite assetId must be a non-empty string'
+      )
+    );
+  }
+});
+
+test('visual.sprite rejects invalid width and height predictably', () => {
+  const report = validateVisualSpriteFields({
+    assetId: 'player.sprite',
+    width: 0,
+    height: 1.5
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.width' &&
+        error.message === 'visual.sprite dimensions must be integers >= 1'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.height' &&
+        error.message === 'visual.sprite dimensions must be integers >= 1'
+    )
+  );
+});
+
+test('visual.sprite rejects invalid layer predictably', () => {
+  const report = validateVisualSpriteFields({
+    assetId: 'player.sprite',
+    layer: 1.5
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.layer' &&
+        error.message === 'visual.sprite layer must be an integer'
+    )
+  );
 });
