@@ -62,16 +62,21 @@ function createClient() {
   return { request, notify, close };
 }
 
-function assertBrowserDemoStructuredContent(payload) {
+function assertBrowserDemoStructuredContent(payload, options = {}) {
+  const expectedScene = options.scene ?? 'tutorial';
+  const expectedTick = options.tick ?? 4;
+  const expectedControllableEntityId = options.controllableEntityId ?? 'player.hero';
   assert.deepEqual(Object.keys(payload), ['browserDemoVersion', 'scene', 'tick', 'html']);
   assert.equal(payload.browserDemoVersion, 1);
-  assert.equal(payload.scene, 'tutorial');
-  assert.equal(payload.tick, 4);
+  assert.equal(payload.scene, expectedScene);
+  assert.equal(payload.tick, expectedTick);
   assert.equal('outputPath' in payload, false);
   assert.match(payload.html, /^<!DOCTYPE html>/);
   assert.match(
     payload.html,
-    /<canvas id="browser-playable-demo-canvas" data-browser-demo-version="1" data-scene="tutorial" data-tick="4" data-controllable-entity="player\.hero" width="320" height="180" tabindex="0"/
+    new RegExp(
+      `<canvas id="browser-playable-demo-canvas" data-browser-demo-version="1" data-scene="${expectedScene}" data-tick="${expectedTick}" data-controllable-entity="${expectedControllableEntityId}" width="320" height="180" tabindex="0"`
+    )
   );
   assert.match(payload.html, /aria-label="Browser playable demo canvas"/);
   assert.match(payload.html, /requestAnimationFrame\(renderFrame\)/);
@@ -87,6 +92,17 @@ function assertBrowserDemoStructuredContent(payload) {
     payload.html,
     /<script[^>]+src=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|Date\.now|new Date|performance\.now|localStorage/
   );
+}
+
+function assertBrowserDemoStructuredContentWithAssetLoading(payload) {
+  assertBrowserDemoStructuredContent(payload, {
+    scene: 'sprite-fixture',
+    tick: 4,
+    controllableEntityId: 'camera.icon'
+  });
+  assert.match(payload.html, /new Image\(\)/);
+  assert.match(payload.html, /drawImage\(/);
+  assert.match(payload.html, /assetSrc/);
 }
 
 test('mcp server lists tools, validates scenes, emits snapshots and runs deterministic replay', async () => {
@@ -131,12 +147,13 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'tick'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'width'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'height'));
-    const renderCanvasDemoTool = toolsResponse.result.tools.find((tool) => tool.name === 'render_canvas_demo');
-    assert.ok(renderCanvasDemoTool);
-    assert.deepEqual(renderCanvasDemoTool.inputSchema.required, ['path']);
-    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'tick'));
-    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'width'));
-    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'height'));
+    const renderBrowserDemoTool = toolsResponse.result.tools.find((tool) => tool.name === 'render_browser_demo');
+    assert.ok(renderBrowserDemoTool);
+    assert.deepEqual(renderBrowserDemoTool.inputSchema.required, ['path']);
+    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'tick'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'width'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'height'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'assetManifestPath'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
     assert.ok(
       Object.prototype.hasOwnProperty.call(
@@ -389,6 +406,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
         kind: 'sprite',
         id: 'camera.icon',
         assetId: 'camera.icon',
+        assetSrc: 'images/camera-icon.png',
         x: 6,
         y: 2,
         width: 16,
@@ -399,6 +417,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
         kind: 'sprite',
         id: 'player.hero',
         assetId: 'player.sprite',
+        assetSrc: 'images/player.png',
         x: 10,
         y: 12,
         width: 16,
@@ -570,8 +589,61 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       renderCanvasDemoResponseB.result.structuredContent
     );
 
-    const renderCanvasDemoInvalidWidthResponse = await client.request('tools/call', {
-      name: 'render_canvas_demo',
+    const renderBrowserDemoWithManifestResponseA = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        tick: 4,
+        assetManifestPath: './fixtures/assets/valid.asset-manifest.json'
+      }
+    });
+
+    const renderBrowserDemoWithManifestResponseB = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        tick: 4,
+        assetManifestPath: './fixtures/assets/valid.asset-manifest.json'
+      }
+    });
+
+    assertBrowserDemoStructuredContentWithAssetLoading(renderBrowserDemoWithManifestResponseA.result.structuredContent);
+    assertBrowserDemoStructuredContentWithAssetLoading(renderBrowserDemoWithManifestResponseB.result.structuredContent);
+    assert.deepEqual(
+      renderBrowserDemoWithManifestResponseA.result.structuredContent,
+      renderBrowserDemoWithManifestResponseB.result.structuredContent
+    );
+
+    const renderBrowserDemoWithManifestInvalidResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        assetManifestPath: './fixtures/assets/missing.asset-manifest.json'
+      }
+    });
+
+    assert.equal(renderBrowserDemoWithManifestInvalidResponse.result.isError, true);
+    assert.match(
+      renderBrowserDemoWithManifestInvalidResponse.result.content[0].text,
+      /ENOENT: no such file or directory/
+    );
+
+    const renderBrowserDemoWithManifestInvalidFormatResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        assetManifestPath: './fixtures/assets/invalid.non-positive-size.asset-manifest.json'
+      }
+    });
+
+    assert.equal(renderBrowserDemoWithManifestInvalidFormatResponse.result.isError, true);
+    assert.match(
+      renderBrowserDemoWithManifestInvalidFormatResponse.result.content[0].text,
+      /asset manifest is invalid:/
+    );
+
+    const renderBrowserDemoInvalidWidthResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
       arguments: {
         path: './scenes/tutorial.scene.json',
         width: 0

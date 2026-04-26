@@ -11,6 +11,7 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
+const invalidTraversalAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'invalid.traversal-src.asset-manifest.json');
 
 async function loadValidAssetManifest() {
   return JSON.parse(await readFile(validAssetManifestPath, 'utf8'));
@@ -209,6 +210,7 @@ test('buildRenderSnapshotV1 emits sprite drawCalls when asset manifest is provid
     kind: 'sprite',
     id: 'z.entity',
     assetId: 'player.sprite',
+    assetSrc: 'images/player.png',
     x: 7,
     y: 8,
     width: 20,
@@ -291,6 +293,7 @@ test('buildRenderSnapshotV1 sorts mixed rect and sprite drawCalls deterministica
       kind: 'sprite',
       id: 'z.sprite',
       assetId: 'player.sprite',
+      assetSrc: 'images/player.png',
       x: 9,
       y: 9,
       width: 16,
@@ -329,6 +332,7 @@ test('buildRenderSnapshotV1 accepts assetManifestPath and falls back to manifest
       kind: 'sprite',
       id: 'player.hero',
       assetId: 'player.sprite',
+      assetSrc: 'images/player.png',
       x: 4,
       y: 5,
       width: 16,
@@ -386,5 +390,17 @@ test('buildRenderSnapshotV1 validates tick and viewport options', async () => {
       assetManifestPath: validAssetManifestPath
     }),
     /buildRenderSnapshotV1: provide only one of `assetManifest` or `assetManifestPath`/
+  );
+});
+
+test('buildRenderSnapshotV1 rejects unsafe asset manifest src paths', async () => {
+  const scene = await readFile(path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json'), 'utf8')
+    .then((rawScene) => JSON.parse(rawScene));
+  await assert.rejects(
+    () => buildRenderSnapshotV1(
+      scene,
+      { assetManifestPath: invalidTraversalAssetManifestPath }
+    ),
+    /asset manifest is invalid/
   );
 });

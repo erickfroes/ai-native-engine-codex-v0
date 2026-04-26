@@ -9,6 +9,7 @@ import {
   buildRenderSnapshotV1,
   renderBrowserPlayableDemoHtmlV1,
   createBrowserPlayableDemoMetadataV1,
+  materializeBrowserDemoAssetSrcV1,
   BROWSER_PLAYABLE_DEMO_VERSION
 } from '../src/index.mjs';
 
@@ -17,6 +18,8 @@ const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
+const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -25,16 +28,25 @@ function runCli(args) {
   });
 }
 
-function assertBrowserDemoEnvelope(payload) {
+function assertBrowserDemoEnvelope(payload, {
+  expectedScene = 'tutorial',
+  expectedTick = 4,
+  withAssetLoading = false
+} = {}) {
   assert.deepEqual(Object.keys(payload), ['browserDemoVersion', 'scene', 'tick', 'html']);
   assert.equal(payload.browserDemoVersion, 1);
-  assert.equal(payload.scene, 'tutorial');
-  assert.equal(payload.tick, 4);
+  assert.equal(payload.scene, expectedScene);
+  assert.equal(payload.tick, expectedTick);
   assert.equal('outputPath' in payload, false);
   assert.match(payload.html, /^<!DOCTYPE html>/);
   assert.match(payload.html, /<canvas id="browser-playable-demo-canvas"/);
   assert.match(payload.html, /tabindex="0"/);
   assert.match(payload.html, /aria-label="Browser playable demo canvas"/);
+  if (withAssetLoading) {
+    assert.match(payload.html, /new Image\(\)/);
+    assert.match(payload.html, /drawImage\(/);
+    assert.match(payload.html, /assetSrc/);
+  }
   assert.match(payload.html, /requestAnimationFrame\(renderFrame\)/);
   assert.match(payload.html, />Pause rendering<\/button>/);
   assert.match(payload.html, /Resume rendering/);
@@ -158,6 +170,94 @@ test('browser playable demo stays aligned across runtime, CLI and MCP for the sa
     assertBrowserDemoEnvelope(runtimeEnvelope);
     assertBrowserDemoEnvelope(cliEnvelope);
     assertBrowserDemoEnvelope(mcpEnvelope);
+    assert.deepEqual(runtimeEnvelope, cliEnvelope);
+    assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+    assert.equal(runtimeEnvelope.html, cliEnvelope.html);
+    assert.equal(runtimeEnvelope.html, mcpEnvelope.html);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('browser playable demo with asset manifest stays aligned across runtime, CLI and MCP', async () => {
+  const tick = 4;
+  const width = 64;
+  const height = 48;
+  const scene = await loadSceneFile(spriteScenePath);
+  const snapshot = materializeBrowserDemoAssetSrcV1(await buildRenderSnapshotV1(scene, {
+    tick,
+    width,
+    height,
+    assetManifestPath: validAssetManifestPath
+  }), validAssetManifestPath);
+
+  const runtimeEnvelope = {
+    browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderBrowserPlayableDemoHtmlV1({
+      title: `${snapshot.scene} Browser Playable Demo`,
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot)
+    })
+  };
+
+  const cliResult = runCli([
+    'render-browser-demo',
+    spriteScenePath,
+    '--tick',
+    String(tick),
+    '--width',
+    String(width),
+    '--height',
+    String(height),
+    '--asset-manifest',
+    validAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        tick,
+        width,
+        height,
+        assetManifestPath: './fixtures/assets/valid.asset-manifest.json'
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+
+    assertBrowserDemoEnvelope(runtimeEnvelope, {
+      expectedScene: 'sprite-fixture',
+      expectedTick: 4,
+      withAssetLoading: true
+    });
+    assertBrowserDemoEnvelope(cliEnvelope, {
+      expectedScene: 'sprite-fixture',
+      expectedTick: 4,
+      withAssetLoading: true
+    });
+    assertBrowserDemoEnvelope(mcpEnvelope, {
+      expectedScene: 'sprite-fixture',
+      expectedTick: 4,
+      withAssetLoading: true
+    });
     assert.deepEqual(runtimeEnvelope, cliEnvelope);
     assert.deepEqual(runtimeEnvelope, mcpEnvelope);
     assert.equal(runtimeEnvelope.html, cliEnvelope.html);

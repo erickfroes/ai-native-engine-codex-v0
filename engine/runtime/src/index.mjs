@@ -38,6 +38,7 @@ export {
   BROWSER_PLAYABLE_DEMO_VERSION,
   DEFAULT_BROWSER_PLAYABLE_STEP_PX
 } from './render/render-browser-playable-demo-html-v1.mjs';
+export { materializeBrowserDemoAssetSrcV1 } from './render/materialize-browser-demo-asset-src-v1.mjs';
 export {
   createStateModelV1FromScene,
   createInitialStateFromScene,

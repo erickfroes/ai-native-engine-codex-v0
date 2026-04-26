@@ -24,6 +24,7 @@ function extractInlineScript(html) {
 function createCanvasHarness(html) {
   const script = extractInlineScript(html);
   const operations = [];
+  const imageInstances = [];
   const canvasListeners = new Map();
   const pauseButtonListeners = new Map();
   const resetButtonListeners = new Map();
@@ -68,6 +69,9 @@ function createCanvasHarness(html) {
     },
     strokeRect(...args) {
       operations.push({ method: 'strokeRect', strokeStyle: this.strokeStyle, args });
+    },
+    drawImage(...args) {
+      operations.push({ method: 'drawImage', args });
     }
   };
   const canvas = {
@@ -86,6 +90,45 @@ function createCanvasHarness(html) {
     }
   };
 
+  class MockImage {
+    constructor() {
+      const state = {
+        src: '',
+        loaded: false,
+        failed: false,
+        onload: undefined,
+        onerror: undefined
+      };
+      imageInstances.push(state);
+      this._state = state;
+      state.image = this;
+    }
+
+    set onload(handler) {
+      this._state.onload = handler;
+    }
+
+    get onload() {
+      return this._state.onload;
+    }
+
+    set onerror(handler) {
+      this._state.onerror = handler;
+    }
+
+    get onerror() {
+      return this._state.onerror;
+    }
+
+    set src(value) {
+      this._state.src = value;
+    }
+
+    get src() {
+      return this._state.src;
+    }
+  }
+
   vm.runInNewContext(script, {
     JSON,
     requestAnimationFrame(callback) {
@@ -101,6 +144,7 @@ function createCanvasHarness(html) {
         animationFrames.splice(frameIndex, 1);
       }
     },
+    Image: MockImage,
     document: {
       getElementById(id) {
         if (id === 'browser-playable-demo-data') {
@@ -137,6 +181,7 @@ function createCanvasHarness(html) {
       }
     },
     operations,
+    imageInstances,
     pauseButton,
     resetButton,
     statusElement
@@ -177,6 +222,36 @@ function createSpriteSnapshot() {
     drawCalls: [
       { kind: 'sprite', id: 'player.hero', assetId: 'player.sprite', x: 0, y: 0, width: 16, height: 16, layer: 0 },
       { kind: 'rect', id: 'camera.frame', x: 20, y: 4, width: 12, height: 12, layer: 1 }
+    ]
+  };
+}
+
+function createSpriteSnapshotWithAssetSources() {
+  return {
+    renderSnapshotVersion: 1,
+    scene: 'sprite-scene',
+    tick: 2,
+    viewport: {
+      width: 64,
+      height: 48
+    },
+    drawCalls: [
+      { kind: 'sprite', id: 'player.hero', assetId: 'player.sprite', assetSrc: 'images/player.png', x: 0, y: 0, width: 16, height: 16, layer: 0 }
+    ]
+  };
+}
+
+function createSpriteSnapshotWithFailingAssetSources() {
+  return {
+    renderSnapshotVersion: 1,
+    scene: 'sprite-scene',
+    tick: 2,
+    viewport: {
+      width: 64,
+      height: 48
+    },
+    drawCalls: [
+      { kind: 'sprite', id: 'player.hero', assetId: 'player.sprite', assetSrc: 'images/missing.png', x: 0, y: 0, width: 16, height: 16, layer: 0 }
     ]
   };
 }
@@ -430,6 +505,61 @@ test('renderBrowserPlayableDemoHtmlV1 accepts sprite drawCalls and keeps determi
   assert.deepEqual(highlightedRects[0].args, [0, 0, 16, 16]);
   assert.deepEqual(highlightedRects[1].args, [4, 0, 16, 16]);
   assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 0\)/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 creates sprite images and uses drawImage after they load', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'sprite-scene Browser Playable Demo',
+    renderSnapshot: createSpriteSnapshotWithAssetSources(),
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+
+  assert.equal(harness.imageInstances.length, 1);
+  assert.equal(harness.imageInstances[0].src, 'images/player.png');
+
+  const fallbackDrawsBeforeLoad = harness.operations.filter((entry) => entry.method === 'drawImage').length;
+  assert.equal(fallbackDrawsBeforeLoad, 0);
+  assert.ok(harness.operations.some((entry) => entry.method === 'fillRect'), 'expected image fallback before load');
+
+  harness.operations.length = 0;
+  assert.equal(typeof harness.imageInstances[0].onload, 'function');
+  harness.imageInstances[0].onload();
+
+  const drawImageCalls = harness.operations.filter((entry) => entry.method === 'drawImage');
+  assert.equal(drawImageCalls.length, 1);
+  assert.equal(typeof keydown, 'function');
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+
+  const drawImageCallsAfterInput = harness.operations.filter((entry) => entry.method === 'drawImage');
+  assert.ok(drawImageCallsAfterInput.length > drawImageCalls.length);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 falls back visually when sprite image fails to load', () => {
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'sprite-fallback Browser Playable Demo',
+    renderSnapshot: createSpriteSnapshotWithFailingAssetSources(),
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const harness = createCanvasHarness(html);
+
+  assert.equal(harness.imageInstances.length, 1);
+  assert.equal(harness.imageInstances[0].src, 'images/missing.png');
+  harness.operations.length = 0;
+  assert.equal(typeof harness.imageInstances[0].onerror, 'function');
+  harness.imageInstances[0].onerror();
+
+  const fallbackRects = harness.operations.filter((entry) => entry.method === 'fillRect');
+  assert.ok(fallbackRects.some((entry) => entry.fillStyle === '#b74f2a'), 'expected fallback rect stroke on load error');
 });
 
 test('renderBrowserPlayableDemoHtmlV1 falls back to the first rect when player.hero is absent', () => {

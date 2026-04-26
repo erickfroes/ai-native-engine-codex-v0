@@ -23,8 +23,10 @@ import {
   buildRenderSnapshotV1,
   renderSnapshotToSvgV1,
   RENDER_SVG_VERSION,
-  renderCanvas2DDemoHtmlV1,
-  CANVAS_2D_DEMO_VERSION,
+  renderBrowserPlayableDemoHtmlV1,
+  createBrowserPlayableDemoMetadataV1,
+  BROWSER_PLAYABLE_DEMO_VERSION,
+  materializeBrowserDemoAssetSrcV1,
   runDeterministicReplay,
   buildReplayArtifact,
   snapshotStateV1,
@@ -578,13 +580,33 @@ async function handleToolCall(params) {
         };
       }
 
-      const snapshot = await buildRenderSnapshotV1(targetPath, {
+      if (
+        args.assetManifestPath !== undefined &&
+        (typeof args.assetManifestPath !== 'string' || args.assetManifestPath.trim().length === 0)
+      ) {
+        return {
+          content: toTextContent(
+            'render_browser_demo: `assetManifestPath` must be a non-empty string when provided.'
+          ),
+          isError: true
+        };
+      }
+
+      const scene = await loadSceneFile(targetPath);
+      const resolvedAssetManifestPath = args.assetManifestPath === undefined
+        ? undefined
+        : resolveRepoPath(args.assetManifestPath);
+      const rawSnapshot = await buildRenderSnapshotV1(scene, {
         tick: args.tick,
         width: args.width,
-        height: args.height
+        height: args.height,
+        assetManifestPath: resolvedAssetManifestPath
       });
-      const html = renderCanvas2DDemoHtmlV1({
-        title: `${snapshot.scene} Canvas 2D Demo`,
+      const snapshot = materializeBrowserDemoAssetSrcV1(rawSnapshot, resolvedAssetManifestPath);
+      const title = `${snapshot.scene} Browser Playable Demo`;
+      const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot);
+      const html = renderBrowserPlayableDemoHtmlV1({
+        title,
         renderSnapshot: snapshot,
         metadata: {
           scene: snapshot.scene,
