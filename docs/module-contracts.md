@@ -173,6 +173,21 @@ Compatibilidade:
 - nao altera `RenderSnapshot v1`, Render SVG, Canvas2D Demo ou Browser Playable Demo;
 - nao adiciona fisica, resolucao de colisao, bloqueio de movimento, colisao com `tile.layer`, pathfinding, editor ou servidor.
 
+## Collision Overlap v1 (diagnostico AABB minimo)
+
+Contrato deterministico para detectar pares AABB sobrepostos a partir de `CollisionBoundsReport v1`:
+
+- ver `docs/COLLISION_OVERLAP_V1.md`.
+
+Compatibilidade:
+
+- gera `CollisionOverlapReport v1` via runtime, CLI e MCP;
+- deriva de `collision.bounds` sem alterar `CollisionBoundsReport v1`;
+- usa pares unicos ordenados deterministicamente por `entityId`;
+- cenas sem overlap retornam `overlaps: []`;
+- nao altera `RenderSnapshot v1`, Render SVG, Canvas2D Demo ou Browser Playable Demo;
+- nao adiciona fisica, resolucao de colisao, bloqueio de movimento, input blocking, colisao com `tile.layer`, pathfinding, editor ou servidor.
+
 ## Input Intent v1 (input headless opt-in no loop)
 
 Contrato de intenção de input headless, com integração opt-in no `run-loop`/`run_loop` e sem acoplamento com `Scene Document v1` ou `simulate-state`:

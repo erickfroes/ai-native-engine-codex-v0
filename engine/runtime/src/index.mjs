@@ -60,6 +60,7 @@ export {
   isKnownComponent
 } from './components/component-registry-v1.mjs';
 export { buildCollisionBoundsReportV1 } from './collision/build-collision-bounds-report-v1.mjs';
+export { buildCollisionOverlapReportV1 } from './collision/build-collision-overlap-report-v1.mjs';
 export { getSystemRegistryV1, getKnownSystemDefinition } from './systems/system-registry.mjs';
 export {
   getSystemPhaseRegistryV1,
