@@ -217,6 +217,89 @@ test('buildRenderSnapshotV1 emits sprite drawCalls when asset manifest is provid
   });
 });
 
+test('buildRenderSnapshotV1 sorts mixed rect and sprite drawCalls deterministically by layer then id', async () => {
+  const assetManifest = await loadValidAssetManifest();
+  const snapshot = await buildRenderSnapshotV1(
+    {
+      metadata: { name: 'mixed-scene' },
+      entities: [
+        {
+          id: 'z.sprite',
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 9, y: 9 }
+            },
+            {
+              kind: 'sprite',
+              fields: { assetId: 'player.sprite', layer: 2 }
+            }
+          ]
+        },
+        {
+          id: 'a.rect',
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 1, y: 2 }
+            },
+            {
+              kind: 'sprite',
+              fields: { layer: 2, width: 8, height: 8 }
+            }
+          ]
+        },
+        {
+          id: 'front.rect',
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 3, y: 4 }
+            },
+            {
+              kind: 'sprite',
+              fields: { layer: 1, width: 6, height: 6 }
+            }
+          ]
+        }
+      ]
+    },
+    { assetManifest }
+  );
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.drawCalls, [
+    {
+      kind: 'rect',
+      id: 'front.rect',
+      x: 3,
+      y: 4,
+      width: 6,
+      height: 6,
+      layer: 1
+    },
+    {
+      kind: 'rect',
+      id: 'a.rect',
+      x: 1,
+      y: 2,
+      width: 8,
+      height: 8,
+      layer: 2
+    },
+    {
+      kind: 'sprite',
+      id: 'z.sprite',
+      assetId: 'player.sprite',
+      x: 9,
+      y: 9,
+      width: 16,
+      height: 16,
+      layer: 2
+    }
+  ]);
+});
+
 test('buildRenderSnapshotV1 accepts assetManifestPath and falls back to manifest dimensions', async () => {
   const snapshot = await buildRenderSnapshotV1(
     {
