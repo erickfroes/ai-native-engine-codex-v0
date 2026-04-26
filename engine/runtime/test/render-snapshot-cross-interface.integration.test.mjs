@@ -16,6 +16,7 @@ const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
+const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -229,6 +230,140 @@ test('RenderSnapshot v1 with visual.sprite and asset manifest stays aligned acro
         width: 20,
         height: 24,
         layer: 2
+      }
+    ]);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('RenderSnapshot v1 with tile.layer stays aligned across runtime, CLI and MCP', async () => {
+  const runtimeSnapshot = await buildRenderSnapshotV1(tileLayerScenePath);
+  assertRenderSnapshotV1(runtimeSnapshot);
+
+  const cliResult = runCli([
+    'render-snapshot',
+    tileLayerScenePath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliSnapshot = JSON.parse(cliResult.stdout);
+  assertRenderSnapshotV1(cliSnapshot);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './fixtures/tile-layer.scene.json'
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpSnapshot = mcpResponse.result.structuredContent;
+    assertRenderSnapshotV1(mcpSnapshot);
+
+    assert.deepEqual(runtimeSnapshot, cliSnapshot);
+    assert.deepEqual(runtimeSnapshot, mcpSnapshot);
+    assert.deepEqual(runtimeSnapshot.drawCalls, [
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.0.0',
+        x: 0,
+        y: 0,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.0.1',
+        x: 16,
+        y: 0,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.0.2',
+        x: 32,
+        y: 0,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.0.3',
+        x: 48,
+        y: 0,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.1.0',
+        x: 0,
+        y: 16,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.1.3',
+        x: 48,
+        y: 16,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.2.0',
+        x: 0,
+        y: 32,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.2.1',
+        x: 16,
+        y: 32,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.2.2',
+        x: 32,
+        y: 32,
+        width: 16,
+        height: 16,
+        layer: -10
+      },
+      {
+        kind: 'rect',
+        id: 'map.ground.tile.2.3',
+        x: 48,
+        y: 32,
+        width: 16,
+        height: 16,
+        layer: -10
       }
     ]);
   } finally {

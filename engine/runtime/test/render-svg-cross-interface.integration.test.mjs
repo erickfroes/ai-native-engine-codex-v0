@@ -11,6 +11,7 @@ const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -122,6 +123,54 @@ test('Render SVG v1 stays semantically aligned across runtime, CLI and MCP', asy
     assert.deepEqual(Object.keys(runtimeEnvelope).sort(), ['scene', 'svg', 'svgVersion', 'tick']);
     assert.deepEqual(runtimeEnvelope, cliEnvelope);
     assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('Render SVG v1 with tile.layer stays aligned across runtime, CLI and MCP', async () => {
+  const snapshot = await buildRenderSnapshotV1(tileLayerScenePath);
+  const runtimeEnvelope = {
+    svgVersion: RENDER_SVG_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    svg: renderSnapshotToSvgV1(snapshot)
+  };
+
+  const cliResult = runCli([
+    'render-svg',
+    tileLayerScenePath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_svg',
+      arguments: {
+        path: './fixtures/tile-layer.scene.json'
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+
+    assert.deepEqual(runtimeEnvelope, cliEnvelope);
+    assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+    assert.match(runtimeEnvelope.svg, /id="map\.ground\.tile\.0\.0"/);
+    assert.match(runtimeEnvelope.svg, /id="map\.ground\.tile\.1\.3"/);
+    assert.match(runtimeEnvelope.svg, /id="map\.ground\.tile\.2\.3"/);
   } finally {
     await mcp.close();
   }

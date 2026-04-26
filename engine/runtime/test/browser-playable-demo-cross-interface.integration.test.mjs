@@ -22,6 +22,7 @@ const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
+const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -365,6 +366,74 @@ test('browser playable demo with visual.sprite and asset manifest stays aligned 
     assert.deepEqual(runtimeEnvelope, mcpEnvelope);
     assert.equal(runtimeEnvelope.html, cliEnvelope.html);
     assert.equal(runtimeEnvelope.html, mcpEnvelope.html);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('browser playable demo with tile.layer stays aligned across runtime, CLI and MCP', async () => {
+  const scene = await loadSceneFile(tileLayerScenePath);
+  const snapshot = await buildRenderSnapshotV1(scene);
+  const runtimeEnvelope = {
+    browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderBrowserPlayableDemoHtmlV1({
+      title: `${snapshot.scene} Browser Playable Demo`,
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot)
+    })
+  };
+
+  const cliResult = runCli([
+    'render-browser-demo',
+    tileLayerScenePath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './fixtures/tile-layer.scene.json'
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+
+    assertBrowserDemoEnvelope(runtimeEnvelope, {
+      expectedScene: 'tile-layer-fixture',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(cliEnvelope, {
+      expectedScene: 'tile-layer-fixture',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(mcpEnvelope, {
+      expectedScene: 'tile-layer-fixture',
+      expectedTick: 0
+    });
+    assert.deepEqual(runtimeEnvelope, cliEnvelope);
+    assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+    assert.match(runtimeEnvelope.html, /data-controllable-entity="map\.ground\.tile\.0\.0"/);
+    assert.match(runtimeEnvelope.html, /"id":"map\.ground\.tile\.0\.0"/);
+    assert.match(runtimeEnvelope.html, /"id":"map\.ground\.tile\.2\.3"/);
+    assert.match(runtimeEnvelope.html, /fillRect\(/);
+    assert.match(runtimeEnvelope.html, /strokeRect\(/);
+    assert.doesNotMatch(runtimeEnvelope.html, /fetch\(|XMLHttpRequest|WebSocket|<script[^>]+src=|<link[^>]+href=/);
   } finally {
     await mcp.close();
   }

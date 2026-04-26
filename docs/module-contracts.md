@@ -120,14 +120,30 @@ Relações:
 Contrato minimo para componentes visuais declarados na propria cena:
 
 - ver `docs/VISUAL_COMPONENTS_V1.md`.
-- componente atual: `visual.sprite` v1.
+- componentes atuais: `visual.sprite` v1 e `tile.layer` v1.
 
 Compatibilidade:
 
 - declarativo e opt-in;
 - sem `Asset Manifest v1`, o render continua com fallback `rect`;
 - com `Asset Manifest v1`, `visual.sprite.fields.assetId` pode gerar drawCall `sprite` com `assetSrc`;
+- `tile.layer` compila uma grade declarativa para drawCalls `rect` deterministicas;
 - nao cria editor, servidor, WebGL, Pixi, Three ou pipeline pesado de assets.
+
+## Tile Layer v1 (mapa declarativo minimo)
+
+Contrato declarativo minimo para camada de tile grid renderizavel:
+
+- ver `docs/TILE_LAYER_V1.md`.
+
+Compatibilidade:
+
+- nao altera `RenderSnapshot v1` de forma incompativel;
+- nao cria novo `drawCall.kind`;
+- tiles `rect` viram drawCalls `rect` ordenadas por `layer` e `id`;
+- tiles `empty` nao geram drawCall;
+- sem `tile.layer`, cenas antigas continuam com o mesmo fallback `rect`;
+- fora de escopo: editor, autotile, colisao, pathfinding e chunk streaming.
 
 ## Input Intent v1 (input headless opt-in no loop)
 
@@ -245,6 +261,7 @@ Componentes iniciais:
 - `transform` v1;
 - `velocity` v1.
 - `visual.sprite` v1.
+- `tile.layer` v1.
 
 ## State Processor Registry v1 (interno, opt-in)
 

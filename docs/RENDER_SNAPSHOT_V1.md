@@ -60,7 +60,11 @@ Definir um contrato JSON headless e deterministico para descrever uma vista rend
 - `options.assetManifest` ou `options.assetManifestPath` ativam a leitura opt-in de `Asset Manifest v1`.
 - quando um manifesto opt-in existe e a entidade declara `visual.sprite.fields.assetId`, o builder pode emitir `drawCalls.kind = "sprite"`.
 - o componente legado `sprite` continua aceito pelo builder para compatibilidade; quando `visual.sprite` existe, ele e a fonte preferida para `assetId`, `width`, `height` e `layer`.
+- entidades com `tile.layer` sao expandidas para multiplos drawCalls `rect`, um por tile `rect` da palette.
+- `tile.layer` usa ids deterministicas no formato `<entityId>.tile.<row>.<col>` e posicao `x = col * tileWidth`, `y = row * tileHeight`.
+- tiles `empty` nao geram drawCall; `tile.layer` nao cria um novo `drawCall.kind`.
 - se `visual.sprite` for invalido, a cena falha validacao antes de o builder emitir snapshot.
+- se `tile.layer` for invalido, a cena falha validacao antes de o builder emitir snapshot.
 - sem manifesto, o builder preserva o fallback atual para `rect`.
 - `assetManifestPath` deve apontar para um manifesto local valido; paths absolutos no `src` do manifesto e traversal sao rejeitados.
 - `x` e `y` vem de `transform.fields.position` ou de `transform.fields`.
@@ -71,12 +75,14 @@ Definir um contrato JSON headless e deterministico para descrever uma vista rend
 - renderers desta versao continuam livres para usar fallback visual minimo para `sprite`; a browser demo pode tentar `Image()` local via `assetSrc`, sem fetch e sem rede.
 
 Ver tambem: `docs/RENDER_SVG_V1.md`.
+Ver tambem: `docs/TILE_LAYER_V1.md`.
 
 ## Escopo
 
 - contrato serializavel e estavel para validacao visual headless;
 - base para comparacao deterministica entre runtime, CLI e MCP;
 - base para sprites declarativos locais com fallback visual deterministico;
+- base para tile layers declarativos que compilam para `rect`;
 - nenhuma rasterizacao real nesta versao.
 
 ## Fora deste slice
@@ -85,4 +91,5 @@ Ver tambem: `docs/RENDER_SVG_V1.md`.
 - Pixi, Three ou WebGL;
 - assets reais obrigatorios;
 - editor visual;
+- editor de mapa, autotile, colisao, pathfinding ou chunk streaming;
 - frame graph ou backend grafico.
