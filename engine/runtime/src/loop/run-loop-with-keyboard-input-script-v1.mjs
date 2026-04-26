@@ -12,13 +12,15 @@ export async function runLoopWithKeyboardInputScriptV1(scenePath, scriptPath, op
     return runMinimalSystemLoopWithTrace(scene, {
       ticks: options.ticks,
       seed: options.seed,
-      inputIntentResolver
+      inputIntentResolver,
+      movementBlocking: options.movementBlocking
     });
   }
 
   return runMinimalSystemLoop(scene, {
     ticks: options.ticks,
     seed: options.seed,
-    inputIntentResolver
+    inputIntentResolver,
+    movementBlocking: options.movementBlocking
   });
 }

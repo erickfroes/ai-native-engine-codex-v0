@@ -6,6 +6,7 @@ function executeLoopSchedule(schedule, options = {}) {
   let state = seed >>> 0;
   const executedSystems = [];
   const tracedSystemsPerTick = [];
+  const movementBlocking = options.movementBlocking === true;
 
   for (const tickPlan of systemsPerTick) {
     const inputIntent = options.inputIntentResolver?.(tickPlan.tick) ?? options.inputIntent;
@@ -17,7 +18,9 @@ function executeLoopSchedule(schedule, options = {}) {
         state,
         tick: tickPlan.tick,
         seed,
-        inputIntent
+        inputIntent,
+        scene: options.scene,
+        movementBlocking
       });
 
       if (options.trace === true) {
@@ -52,7 +55,9 @@ export function runMinimalSystemLoop(scene, options = {}) {
   const schedule = createLoopSchedule(scene, options);
   const executed = executeLoopSchedule(schedule, {
     inputIntent: options.inputIntent,
-    inputIntentResolver: options.inputIntentResolver
+    inputIntentResolver: options.inputIntentResolver,
+    movementBlocking: options.movementBlocking === true,
+    scene
   });
 
   return {
@@ -68,6 +73,8 @@ export function runMinimalSystemLoopWithTrace(scene, options = {}) {
   const executed = executeLoopSchedule(schedule, {
     inputIntent: options.inputIntent,
     inputIntentResolver: options.inputIntentResolver,
+    movementBlocking: options.movementBlocking === true,
+    scene,
     trace: true
   });
 
