@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "collision-bounds-fixture"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "player.hero",
+      "name": "Player",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 10,
+            "y": 12
+          }
+        },
+        {
+          "kind": "collision.bounds",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 2,
+            "y": 3,
+            "width": 12,
+            "height": 14,
+            "solid": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "wall.block",
+      "name": "Wall",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 40,
+            "y": 8
+          }
+        },
+        {
+          "kind": "collision.bounds",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "width": 16,
+            "height": 32
+          }
+        }
+      ]
+    }
+  ],
+  "assetRefs": []
+}
