@@ -48,7 +48,12 @@ test('asset manifest v1: rejects duplicate ids predictably', async () => {
 
   const report = await validateAssetManifestV1File(invalidFixturePath);
   assert.equal(report.ok, false);
-  assert.ok(report.errors.some((error) => error.path === '$.assets[1].id' && error.message === 'duplicate asset id: player.sprite'));
+  assert.deepEqual(report.errors, [
+    {
+      path: '$.assets[1].id',
+      message: 'duplicate asset id: player.sprite'
+    }
+  ]);
 });
 
 test('asset manifest v1: rejects absolute src predictably', async () => {
@@ -79,6 +84,26 @@ test('asset manifest v1: rejects traversal src predictably', async () => {
     {
       path: '$.assets[0].src',
       message: 'must stay inside the manifest directory'
+    }
+  ]);
+});
+
+test('asset manifest v1: rejects non-positive width and height predictably', async () => {
+  const invalidFixturePath = assetFixturePath('invalid.non-positive-size.asset-manifest.json');
+  const fixture = JSON.parse(await readFile(invalidFixturePath, 'utf8'));
+
+  assertAssetManifestV1Rejects(fixture);
+
+  const report = await validateAssetManifestV1File(invalidFixturePath);
+  assert.equal(report.ok, false);
+  assert.deepEqual(report.errors, [
+    {
+      path: '$.assets[0].width',
+      message: 'must be >= 1'
+    },
+    {
+      path: '$.assets[0].height',
+      message: 'must be >= 1'
     }
   ]);
 });

@@ -27,8 +27,8 @@ Definir um contrato local, declarativo e deterministico para registrar assets de
 - `assets` deve ser array.
 - `assets[].id` e obrigatorio, nao pode ser vazio e deve ser unico.
 - `assets[].type` aceita apenas `image`.
-- `assets[].src` deve ser path relativo.
-- `assets[].src` nao pode escapar do diretorio do manifesto.
+- `assets[].src` deve ser path relativo ao diretorio do proprio manifesto.
+- `assets[].src` nao pode escapar do diretorio do manifesto via traversal.
 - `assets[].width` e `assets[].height` devem ser inteiros `>= 1`.
 - campos extras nao sao permitidos nos niveis controlados.
 
@@ -38,13 +38,14 @@ Definir um contrato local, declarativo e deterministico para registrar assets de
 - `validateAssetManifestV1File(path)` valida o manifesto em disco e preserva `absolutePath`.
 - `loadValidatedAssetManifestV1(path)` retorna o manifesto validado ou falha de forma previsivel.
 - `buildRenderSnapshotV1(sceneOrPath, { assetManifest, assetManifestPath })` pode usar o manifesto de forma opt-in para emitir `drawCalls.kind = "sprite"`.
+- o manifesto continua declarativo: ele nao carrega bytes de imagem, nao faz fetch e nao abre image loading real neste slice.
 
 ## Compatibilidade
 
 - sem manifesto, o comportamento padrao de `RenderSnapshot v1` permanece inalterado;
 - o manifesto nao altera `run-loop`, `InputIntent v1`, Save/Load v1 ou `StateSnapshot v1`;
 - o manifesto nao exige existencia de assets reais neste slice;
-- o manifesto nao carrega bytes de imagem nem cria cache de runtime.
+- o manifesto nao carrega bytes de imagem, nao usa rede/fetch e nao cria cache de runtime.
 
 ## Fora deste slice
 
