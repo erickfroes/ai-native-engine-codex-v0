@@ -39,14 +39,14 @@ Declarar uma camada simples de mapa/tile grid na cena e transforma-la em draw ca
 - `replicated` deve ser `false`.
 - `fields.tileWidth` e `fields.tileHeight` sao obrigatorios, inteiros `>= 1`.
 - `fields.columns` e `fields.rows` sao obrigatorios, inteiros `>= 1`.
-- `fields.tiles` deve ter exatamente `rows` linhas e cada linha deve ter exatamente `columns` colunas.
+- `fields.tiles` deve bater exatamente com a grade declarada: `rows` linhas e `columns` colunas por linha.
+- `fields.palette` e obrigatorio, deve ter pelo menos um tile e funciona como lookup obrigatorio para todos os ids usados em `fields.tiles`.
 - cada tile id em `fields.tiles` deve ser inteiro ou string nao vazia e existir em `fields.palette`.
-- `fields.palette` e obrigatorio e deve ter pelo menos um tile.
-- entradas de palette `kind: "empty"` nao geram drawCall.
+- entradas de palette `kind: "empty"` ocupam a celula na grade, mas nao geram drawCall.
 - entradas de palette `kind: "rect"` geram drawCall `rect`.
-- `palette.*.width` e `palette.*.height` sao opcionais; quando ausentes, usam `tileWidth` e `tileHeight`.
+- `palette.*.width` e `palette.*.height` sao opcionais; quando presentes, sobrescrevem o tamanho visual daquele tile. Quando ausentes, usam `tileWidth` e `tileHeight`.
 - `fields.layer` e opcional; quando ausente, usa `0`.
-- campos extras nao sao permitidos nos niveis controlados.
+- campos extras nao sao permitidos nos niveis controlados; `tile.layer` v1 cobre apenas render declarativo.
 
 ## Render
 
@@ -56,10 +56,12 @@ Declarar uma camada simples de mapa/tile grid na cena e transforma-la em draw ca
 - `id: "<entityId>.tile.<row>.<col>"`;
 - `x = col * tileWidth`;
 - `y = row * tileHeight`;
-- `width` e `height` vem da palette ou do tamanho do tile;
+- `width` e `height` vem do override na palette ou do tamanho base do tile;
 - `layer` vem de `tile.layer.fields.layer`.
 
-Depois da expansao, as draw calls continuam ordenadas por `layer` e depois por `id`, como todo `RenderSnapshot v1`.
+`tile.layer` usa a origem da propria grade. Ele nao aplica `transform` da entidade ao calcular `x`/`y` dos tiles em v1.
+
+Depois da expansao, as draw calls continuam ordenadas por `layer` e depois por `id`, como todo `RenderSnapshot v1`. A ordenacao por `id` e lexicografica, portanto ids com indices de dois digitos seguem a regra textual do id, nao uma ordenacao numerica row-major separada.
 
 ## Compatibilidade
 
@@ -67,6 +69,7 @@ Depois da expansao, as draw calls continuam ordenadas por `layer` e depois por `
 - `visual.sprite` e `sprite` legado continuam funcionando como antes.
 - Render SVG v1, Browser Playable Demo v1 e Canvas 2D local consomem os `rect` drawCalls gerados sem backend novo.
 - o HTML da Browser Demo continua autocontido, sem `fetch`, rede, scripts externos, servidor ou WebGL.
+- `tile.layer` v1 e intencionalmente pequeno; nao define budget validado para mapas densos grandes nem modelo de chunks.
 
 ## Fora de escopo
 
@@ -74,7 +77,7 @@ Depois da expansao, as draw calls continuam ordenadas por `layer` e depois por `
 - autotile;
 - colisao;
 - pathfinding;
-- chunk streaming;
+- chunks ou chunk streaming;
 - atlas/UV/materials;
 - importacao de assets reais;
 - backend grafico externo.

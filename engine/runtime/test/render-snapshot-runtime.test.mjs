@@ -268,6 +268,226 @@ test('buildRenderSnapshotV1 expands tile.layer into deterministic rect drawCalls
   });
 });
 
+test('buildRenderSnapshotV1 emits zero drawCalls for an empty-only tile.layer', async () => {
+  const snapshot = await buildRenderSnapshotV1({
+    metadata: { name: 'empty-only-tile-layer' },
+    entities: [
+      {
+        id: 'map.empty',
+        components: [
+          {
+            kind: 'tile.layer',
+            fields: {
+              tileWidth: 16,
+              tileHeight: 16,
+              columns: 2,
+              rows: 2,
+              layer: -5,
+              tiles: [
+                [0, 0],
+                [0, 0]
+              ],
+              palette: {
+                0: { kind: 'empty' }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  });
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.drawCalls, []);
+});
+
+test('buildRenderSnapshotV1 lets tile.layer palette rect size override tile size', async () => {
+  const snapshot = await buildRenderSnapshotV1({
+    metadata: { name: 'tile-layer-size-override' },
+    entities: [
+      {
+        id: 'map.ground',
+        components: [
+          {
+            kind: 'tile.layer',
+            fields: {
+              tileWidth: 16,
+              tileHeight: 20,
+              columns: 2,
+              rows: 1,
+              tiles: [[0, 2]],
+              palette: {
+                0: { kind: 'empty' },
+                2: { kind: 'rect', width: 4, height: 6 }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  });
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.drawCalls, [
+    {
+      kind: 'rect',
+      id: 'map.ground.tile.0.1',
+      x: 16,
+      y: 0,
+      width: 4,
+      height: 6,
+      layer: 0
+    }
+  ]);
+});
+
+test('buildRenderSnapshotV1 uses layer 0 when tile.layer omits layer', async () => {
+  const snapshot = await buildRenderSnapshotV1({
+    metadata: { name: 'tile-layer-default-layer' },
+    entities: [
+      {
+        id: 'map.ground',
+        components: [
+          {
+            kind: 'tile.layer',
+            fields: {
+              tileWidth: 8,
+              tileHeight: 8,
+              columns: 1,
+              rows: 1,
+              tiles: [[1]],
+              palette: {
+                1: { kind: 'rect' }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  });
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.drawCalls, [
+    {
+      kind: 'rect',
+      id: 'map.ground.tile.0.0',
+      x: 0,
+      y: 0,
+      width: 8,
+      height: 8,
+      layer: 0
+    }
+  ]);
+});
+
+test('buildRenderSnapshotV1 keeps tile.layer and visual.sprite ordered by layer then id', async () => {
+  const assetManifest = await loadValidAssetManifest();
+  const snapshot = await buildRenderSnapshotV1(
+    {
+      metadata: { name: 'tile-layer-with-visual-sprite' },
+      entities: [
+        {
+          id: 'player.hero',
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 10, y: 12 }
+            },
+            {
+              kind: 'visual.sprite',
+              fields: { assetId: 'player.sprite', layer: -1 }
+            }
+          ]
+        },
+        {
+          id: 'map.ground',
+          components: [
+            {
+              kind: 'tile.layer',
+              fields: {
+                tileWidth: 16,
+                tileHeight: 16,
+                columns: 1,
+                rows: 1,
+                layer: -1,
+                tiles: [[1]],
+                palette: {
+                  1: { kind: 'rect' }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    { assetManifest }
+  );
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.drawCalls.map((drawCall) => `${drawCall.layer}:${drawCall.id}:${drawCall.kind}`), [
+    '-1:map.ground.tile.0.0:rect',
+    '-1:player.hero:sprite'
+  ]);
+});
+
+test('buildRenderSnapshotV1 is deterministic for tile.layer across multiple layers', async () => {
+  const scene = {
+    metadata: { name: 'multi-layer-tile-layer' },
+    entities: [
+      {
+        id: 'map.front',
+        components: [
+          {
+            kind: 'tile.layer',
+            fields: {
+              tileWidth: 4,
+              tileHeight: 4,
+              columns: 2,
+              rows: 1,
+              layer: 5,
+              tiles: [[1, 1]],
+              palette: {
+                1: { kind: 'rect' }
+              }
+            }
+          }
+        ]
+      },
+      {
+        id: 'map.back',
+        components: [
+          {
+            kind: 'tile.layer',
+            fields: {
+              tileWidth: 8,
+              tileHeight: 8,
+              columns: 2,
+              rows: 1,
+              layer: -2,
+              tiles: [[1, 1]],
+              palette: {
+                1: { kind: 'rect' }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
+
+  const first = await buildRenderSnapshotV1(scene);
+  const second = await buildRenderSnapshotV1(scene);
+
+  assertRenderSnapshotV1(first);
+  assert.deepEqual(first, second);
+  assert.deepEqual(first.drawCalls.map((drawCall) => `${drawCall.layer}:${drawCall.id}`), [
+    '-2:map.back.tile.0.0',
+    '-2:map.back.tile.0.1',
+    '5:map.front.tile.0.0',
+    '5:map.front.tile.0.1'
+  ]);
+});
+
 test('buildRenderSnapshotV1 emits sprite drawCalls when asset manifest is provided explicitly', async () => {
   const assetManifest = await loadValidAssetManifest();
   const snapshot = await buildRenderSnapshotV1(

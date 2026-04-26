@@ -531,6 +531,25 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       /invalid_visual_sprite_asset_id\.scene\.json/
     );
 
+    const renderSnapshotInvalidTileLayerResponse = await client.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './engine/runtime/test/fixtures/invalid_tile_layer_unknown_palette.scene.json'
+      }
+    });
+
+    assert.equal(renderSnapshotInvalidTileLayerResponse.result.isError, true);
+    assert.equal(renderSnapshotInvalidTileLayerResponse.result.structuredContent.ok, false);
+    assert.equal(renderSnapshotInvalidTileLayerResponse.result.structuredContent.errorName, 'SceneValidationError');
+    assert.match(
+      renderSnapshotInvalidTileLayerResponse.result.content[0].text,
+      /Scene validation failed for/
+    );
+    assert.match(
+      renderSnapshotInvalidTileLayerResponse.result.structuredContent.errorMessage,
+      /invalid_tile_layer_unknown_palette\.scene\.json/
+    );
+
     const renderSnapshotMissingManifestResponse = await client.request('tools/call', {
       name: 'render_snapshot',
       arguments: {
