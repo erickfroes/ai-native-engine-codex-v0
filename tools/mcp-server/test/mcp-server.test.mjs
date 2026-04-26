@@ -407,6 +407,67 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       }
     ]);
 
+    const renderSnapshotMissingManifestResponse = await client.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        assetManifestPath: './fixtures/assets/missing.asset-manifest.json'
+      }
+    });
+
+    assert.equal(renderSnapshotMissingManifestResponse.result.isError, true);
+    assert.equal(renderSnapshotMissingManifestResponse.result.structuredContent.ok, false);
+    assert.equal(renderSnapshotMissingManifestResponse.result.structuredContent.errorName, 'Error');
+    assert.match(renderSnapshotMissingManifestResponse.result.content[0].text, /ENOENT: no such file or directory/);
+    assert.match(
+      renderSnapshotMissingManifestResponse.result.structuredContent.errorMessage,
+      /missing\.asset-manifest\.json/
+    );
+
+    const renderSnapshotInvalidManifestResponse = await client.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        assetManifestPath: './fixtures/assets/invalid.non-positive-size.asset-manifest.json'
+      }
+    });
+
+    assert.equal(renderSnapshotInvalidManifestResponse.result.isError, true);
+    assert.equal(renderSnapshotInvalidManifestResponse.result.structuredContent.ok, false);
+    assert.equal(renderSnapshotInvalidManifestResponse.result.structuredContent.errorName, 'AssetManifestValidationError');
+    assert.match(
+      renderSnapshotInvalidManifestResponse.result.content[0].text,
+      /asset manifest is invalid:/
+    );
+    assert.match(
+      renderSnapshotInvalidManifestResponse.result.structuredContent.errorMessage,
+      /\$\.assets\[0\]\.width: must be >= 1/
+    );
+    assert.match(
+      renderSnapshotInvalidManifestResponse.result.structuredContent.errorMessage,
+      /\$\.assets\[0\]\.height: must be >= 1/
+    );
+
+    const renderSnapshotMissingAssetIdResponse = await client.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        assetManifestPath: './fixtures/assets/valid.camera-only.asset-manifest.json'
+      }
+    });
+
+    assert.equal(renderSnapshotMissingAssetIdResponse.result.isError, true);
+    assert.equal(renderSnapshotMissingAssetIdResponse.result.structuredContent.ok, false);
+    assert.equal(renderSnapshotMissingAssetIdResponse.result.structuredContent.errorName, 'Error');
+    assert.match(
+      renderSnapshotMissingAssetIdResponse.result.content[0].text,
+      /buildRenderSnapshotV1: entity `player\.hero` references unknown assetId `player\.sprite`/
+    );
+    assert.match(
+      renderSnapshotMissingAssetIdResponse.result.structuredContent.errorMessage,
+      /references unknown assetId `player\.sprite`/
+    );
+
     const renderSvgResponseA = await client.request('tools/call', {
       name: 'render_svg',
       arguments: {

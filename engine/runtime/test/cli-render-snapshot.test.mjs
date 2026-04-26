@@ -12,6 +12,9 @@ const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
+const cameraOnlyAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.camera-only.asset-manifest.json');
+const invalidAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'invalid.non-positive-size.asset-manifest.json');
+const missingAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'missing.asset-manifest.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -136,4 +139,46 @@ test('render-snapshot fails predictably for invalid numeric options', () => {
   assert.match(invalidHeight.stderr, /buildRenderSnapshotV1: `height` must be an integer >= 1/);
   assert.notEqual(invalidAssetManifest.status, 0);
   assert.match(invalidAssetManifest.stderr, /render-snapshot: --asset-manifest must be a non-empty string/);
+});
+
+test('render-snapshot fails predictably when --asset-manifest path does not exist', () => {
+  const result = runCli([
+    'render-snapshot',
+    spriteScenePath,
+    '--asset-manifest',
+    missingAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /ENOENT: no such file or directory/);
+  assert.match(result.stderr, /missing\.asset-manifest\.json/);
+});
+
+test('render-snapshot fails predictably when --asset-manifest is invalid', () => {
+  const result = runCli([
+    'render-snapshot',
+    spriteScenePath,
+    '--asset-manifest',
+    invalidAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /AssetManifestValidationError: asset manifest is invalid:/);
+  assert.match(result.stderr, /\$\.assets\[0\]\.width: must be >= 1/);
+  assert.match(result.stderr, /\$\.assets\[0\]\.height: must be >= 1/);
+});
+
+test('render-snapshot fails predictably when manifest does not contain a referenced assetId', () => {
+  const result = runCli([
+    'render-snapshot',
+    spriteScenePath,
+    '--asset-manifest',
+    cameraOnlyAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /buildRenderSnapshotV1: entity `player\.hero` references unknown assetId `player\.sprite`/);
 });
