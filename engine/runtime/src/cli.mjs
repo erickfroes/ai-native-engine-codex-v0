@@ -38,7 +38,8 @@ import {
   simulateStateV1WithMutationTrace,
   buildCollisionBoundsReportV1,
   buildCollisionOverlapReportV1,
-  buildMovementBlockingReportV1
+  buildMovementBlockingReportV1,
+  buildTileCollisionReportV1
 } from './index.mjs';
 
 function printUsage() {
@@ -61,6 +62,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-state <path> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs inspect-collision-bounds <path> [--json]
   node engine/runtime/src/cli.mjs inspect-collision-overlaps <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-tile-collision <path> [--json]
   node engine/runtime/src/cli.mjs inspect-movement-blocking <path> --input-intent <path> [--json]
   node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--input-intent <path>] [--keyboard-script <path>] [--json] [--trace]
@@ -762,6 +764,31 @@ async function run() {
       for (const overlap of report.overlaps) {
         console.log(
           `- ${overlap.entityAId} <-> ${overlap.entityBId} solid=${overlap.solid}`
+        );
+      }
+    }
+
+    return;
+  }
+
+  if (command === 'inspect-tile-collision') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildTileCollisionReportV1(maybePath);
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`Tile collision report version: ${report.tileCollisionReportVersion}`);
+      console.log(`Tiles: ${report.tiles.length}`);
+      for (const tile of report.tiles) {
+        console.log(
+          `- ${tile.tileId}: ${tile.x},${tile.y} ${tile.width}x${tile.height} palette=${tile.paletteId} solid=${tile.solid}`
         );
       }
     }

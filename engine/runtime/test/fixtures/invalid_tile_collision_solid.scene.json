@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "invalid-tile-collision-solid"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "map.invalid",
+      "components": [
+        {
+          "kind": "tile.layer",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "tileWidth": 16,
+            "tileHeight": 16,
+            "columns": 1,
+            "rows": 1,
+            "tiles": [
+              [1]
+            ],
+            "palette": {
+              "1": {
+                "kind": "rect",
+                "solid": "yes"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

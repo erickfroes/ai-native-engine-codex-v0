@@ -40,10 +40,11 @@ A engine agora avancou para a fundacao de gameplay 2D:
 - `CollisionBoundsReport v1` para inspecionar bounds;
 - `CollisionOverlapReport v1` para detectar overlaps AABB;
 - `MovementBlockingReport v1` para avaliar tentativas de movimento contra bounds solidos;
-- CLI/MCP para inspecao de colisao, overlap e blocking;
+- `TileCollisionReport v1` para inspecionar tiles solidos declarados em `tile.layer`;
+- CLI/MCP para inspecao de colisao, overlap, tile collision e blocking;
 - testes cross-interface para os reports principais.
 
-Importante: o bloqueio de movimento ainda e relatorio/inspecao. O `run-loop` e a Browser Demo ainda nao aplicam blocking real por padrao. O proximo bloco recomendado e Tile Collision v1.
+Importante: o bloqueio de movimento e tile collision ainda sao relatorios/inspecao. O `run-loop` e a Browser Demo ainda nao aplicam blocking real por padrao. O proximo bloco recomendado e Movement Blocking opt-in no `run-loop`.
 
 ## O que esta dentro da Meta 2
 
@@ -79,6 +80,7 @@ Importante: o bloqueio de movimento ainda e relatorio/inspecao. O `run-loop` e a
 - `inspect-state` e `simulate-state`: inspecao e simulacao opt-in de estado
 - `inspect-collision-bounds`: inspeciona bounds de colisao
 - `inspect-collision-overlaps`: detecta overlaps AABB
+- `inspect-tile-collision`: inspeciona tiles solidos declarados em `tile.layer`
 - `inspect-movement-blocking`: avalia tentativa de movimento contra colisao solida
 - `save-state` e `load-save`: persistencia minima de State Snapshot v1
 - `render-snapshot`: gera RenderSnapshot v1
@@ -108,6 +110,7 @@ Importante: o bloqueio de movimento ainda e relatorio/inspecao. O `run-loop` e a
 - `simulate_state`
 - `inspect_collision_bounds`
 - `inspect_collision_overlaps`
+- `inspect_tile_collision`
 - `inspect_movement_blocking`
 
 Observacao: `render-svg-demo` e um fluxo de CLI/runtime. A Meta 2 nao define uma tool MCP dedicada para a demo HTML de SVG.
