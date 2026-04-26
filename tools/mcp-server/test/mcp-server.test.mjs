@@ -124,6 +124,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(Object.prototype.hasOwnProperty.call(renderSnapshotTool.inputSchema.properties, 'tick'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderSnapshotTool.inputSchema.properties, 'width'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderSnapshotTool.inputSchema.properties, 'height'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderSnapshotTool.inputSchema.properties, 'assetManifestPath'));
     const renderSvgTool = toolsResponse.result.tools.find((tool) => tool.name === 'render_svg');
     assert.ok(renderSvgTool);
     assert.deepEqual(renderSvgTool.inputSchema.required, ['path']);
@@ -372,6 +373,39 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       renderSnapshotResponseA.result.structuredContent,
       renderSnapshotResponseB.result.structuredContent
     );
+
+    const renderSnapshotWithManifestResponse = await client.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        assetManifestPath: './fixtures/assets/valid.asset-manifest.json'
+      }
+    });
+
+    assert.equal(renderSnapshotWithManifestResponse.result.isError, false);
+    assertRenderSnapshotV1(renderSnapshotWithManifestResponse.result.structuredContent);
+    assert.deepEqual(renderSnapshotWithManifestResponse.result.structuredContent.drawCalls, [
+      {
+        kind: 'sprite',
+        id: 'camera.icon',
+        assetId: 'camera.icon',
+        x: 6,
+        y: 2,
+        width: 16,
+        height: 16,
+        layer: 0
+      },
+      {
+        kind: 'sprite',
+        id: 'player.hero',
+        assetId: 'player.sprite',
+        x: 10,
+        y: 12,
+        width: 16,
+        height: 16,
+        layer: 1
+      }
+    ]);
 
     const renderSvgResponseA = await client.request('tools/call', {
       name: 'render_svg',

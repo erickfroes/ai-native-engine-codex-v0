@@ -12,6 +12,8 @@ const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
+const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -111,6 +113,53 @@ test('RenderSnapshot v1 stays semantically aligned across runtime, CLI and MCP',
         tick,
         width,
         height
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpSnapshot = mcpResponse.result.structuredContent;
+    assertRenderSnapshotV1(mcpSnapshot);
+
+    assert.deepEqual(runtimeSnapshot, cliSnapshot);
+    assert.deepEqual(runtimeSnapshot, mcpSnapshot);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('RenderSnapshot v1 with asset manifest stays semantically aligned across runtime, CLI and MCP', async () => {
+  const runtimeSnapshot = await buildRenderSnapshotV1(spriteScenePath, {
+    assetManifestPath: validAssetManifestPath
+  });
+  assertRenderSnapshotV1(runtimeSnapshot);
+
+  const cliResult = runCli([
+    'render-snapshot',
+    spriteScenePath,
+    '--asset-manifest',
+    validAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliSnapshot = JSON.parse(cliResult.stdout);
+  assertRenderSnapshotV1(cliSnapshot);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        assetManifestPath: './fixtures/assets/valid.asset-manifest.json'
       }
     });
 

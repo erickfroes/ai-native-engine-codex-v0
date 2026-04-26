@@ -491,10 +491,23 @@ async function handleToolCall(params) {
         };
       }
 
+      if (
+        args.assetManifestPath !== undefined &&
+        (typeof args.assetManifestPath !== 'string' || args.assetManifestPath.trim().length === 0)
+      ) {
+        return {
+          content: toTextContent('render_snapshot: `assetManifestPath` must be a non-empty string when provided.'),
+          isError: true
+        };
+      }
+
       const snapshot = await buildRenderSnapshotV1(targetPath, {
         tick: args.tick,
         width: args.width,
-        height: args.height
+        height: args.height,
+        assetManifestPath: args.assetManifestPath === undefined
+          ? undefined
+          : resolveRepoPath(args.assetManifestPath)
       });
       return {
         content: toTextContent(`Render snapshot built for ${snapshot.scene} at tick ${snapshot.tick}.`),
