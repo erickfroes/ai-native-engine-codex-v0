@@ -10,6 +10,34 @@ O objetivo é maximizar:
 - validação automática,
 - produtividade com Codex.
 
+## Roadmap de produto
+
+A evolucao do engine segue uma progressao explicita:
+
+- V1: jogos pequenos 2D;
+- V2: jogos 2D/2.5D de escopo indie;
+- V3: 3D indie;
+- V4: runtime/editor AA;
+- V5/V6: caminho aspiracional para 3D AAA.
+
+Antes de propor uma feature grande, verifique `ROADMAP.md` e `docs/ENGINE_VERSION_ROADMAP.md`. Nao pular direto para metas AAA sem fechar as metas anteriores.
+
+## Orquestracao intensiva com subagentes
+
+Para pacotes medios ou grandes, use subagentes de forma explicita:
+
+- `explorer` ou agente equivalente para mapear o estado real;
+- `engine_architect` para limites arquiteturais;
+- `render_architect` para impacto visual/render;
+- `gameplay_worker` para implementacao de sistemas;
+- `asset_pipeline_architect` para manifests/assets;
+- `tooling_editor_architect` para editor/tooling;
+- `netcode_architect` para networking/authority;
+- `qa_contract_auditor` para schemas, fixtures, CLI/MCP e cross-interface;
+- `perf_auditor` para performance, determinismo e regressao.
+
+Subagentes devem reduzir risco, nao aumentar escopo. Se um subagente sugerir mudanca fora da meta, registre como backlog.
+
 ## Antes de editar qualquer coisa
 
 Leia nesta ordem:

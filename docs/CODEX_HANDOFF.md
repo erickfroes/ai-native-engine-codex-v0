@@ -1,17 +1,34 @@
-# Handoff para Codex - Meta 2 Visual/Interativa
+# Handoff para Codex - Estado atual e continuidade
 
-Este repositorio esta pronto para handoff como Meta 2 visual/interativa minima.
+Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e Meta 2 fechadas.
+
+## Estado atual
+
+- Meta 1 Headless: concluida.
+- Meta 2 Visual/Interativa minima: concluida.
+- Meta 3 Gameplay Foundation: iniciada com `collision.bounds` e CollisionBoundsReport v1.
 
 ## O que o Codex recebe
 
 - contratos v1 documentados;
-- runtime, CLI e MCP alinhados nos fluxos headless e visuais principais;
-- suites cross-interface para os contratos sensiveis;
-- fixtures pequenas e reproduziveis;
-- Browser Playable Demo autocontida com input local;
-- baseline de validacao claro antes de qualquer mudanca.
+- runtime, CLI e MCP alinhados;
+- Browser Playable Demo autocontida;
+- Asset Manifest, visual.sprite, tile.layer e camera.viewport;
+- collision.bounds inicial;
+- suites cross-interface;
+- roadmap progressivo ate 3D AAA;
+- estrategia de subagentes e skills.
 
-## O que conferir antes de editar
+## Leitura obrigatoria antes de editar
+
+1. `README.md`
+2. `ROADMAP.md`
+3. `docs/ENGINE_VERSION_ROADMAP.md`
+4. `docs/CODEX_SUBAGENT_STRATEGY.md`
+5. `docs/module-contracts.md`
+6. `AGENTS.md`
+
+## Baseline obrigatorio
 
 ```bash
 git status -sb
@@ -20,44 +37,39 @@ npm run validate:scenes
 npm run smoke
 ```
 
-## Sequencia recomendada dentro do Codex
+Nao implemente feature nova com baseline vermelho.
 
-1. Ler `README.md`, `AGENTS.md`, `docs/module-contracts.md` e este arquivo.
-2. Confirmar baseline verde com `npm test`, `npm run validate:scenes` e `npm run smoke`.
-3. Validar a cena tutorial por CLI e MCP.
-4. Exercitar `render-snapshot` / `render_snapshot`.
-5. Exercitar `render-svg` / `render_svg`.
-6. Exercitar `render-canvas-demo` / `render_canvas_demo`.
-7. Exercitar `render-browser-demo` / `render_browser_demo`.
-8. Conferir fixtures de `visual.sprite`, `tile.layer` e `camera.viewport`.
-9. Ampliar somente com contrato, fixture, validacao, CLI/MCP quando fizer sentido, docs e testes.
+## Linha de seguimento recomendada
 
-## Escopo entregue na Meta 2
+1. Collision Overlap Report v1.
+2. Movement Blocking v1.
+3. Tile Collision v1.
+4. Browser Demo usando blocking real.
+5. Fechamento V1 Small 2D.
+6. UI/audio/animation basicos para V2.
+7. 3D indie apenas depois de V1/V2 demonstradas.
 
-- base headless deterministica herdada da Meta 1;
-- RenderSnapshot v1;
-- Render SVG v1;
-- SVG Demo HTML v1;
-- Canvas2D Demo v1;
-- Browser Playable Demo v1;
-- Browser Runtime Loop v1 local ao HTML;
-- Asset Manifest v1;
-- sprite drawCall;
-- `visual.sprite`;
-- `tile.layer`;
-- `camera.viewport`.
+## Uso de subagentes
 
-## Fora de escopo que deve permanecer explicito
+Pacotes medios devem usar:
 
-- Pixi, Three, WebGL e renderer real do engine;
-- editor visual;
+- explorer para mapear arquivos;
+- agente de dominio para design;
+- gameplay_worker ou worker equivalente para implementar;
+- perf_auditor ou qa_contract_auditor para revisar determinismo e regressao.
+
+Subagentes adicionais recomendados estao em `.codex/agents/` e descritos em `docs/CODEX_SUBAGENT_STRATEGY.md`.
+
+## Fora de escopo imediato
+
+- Pixi/Three/WebGL como dependencia obrigatoria;
+- editor visual completo;
 - servidor;
 - pipeline pesado de assets;
-- colisao, pathfinding e chunk streaming;
-- animacao avancada;
 - multiplayer real;
-- loop/gameplay completo dentro do browser.
+- pathfinding/chunk streaming antes de colisao base;
+- 3D antes de consolidar V1/V2.
 
 ## Regra pratica de continuidade
 
-Se houver duvida sobre comportamento, preserve os contratos v1 atuais e adicione teste/fixture antes de ampliar escopo. A Browser Playable Demo e uma demo local autocontida; ela nao substitui o loop headless canonico do engine.
+Se houver duvida, preserve contratos v1 existentes, adicione fixture/teste primeiro e so depois implemente comportamento.

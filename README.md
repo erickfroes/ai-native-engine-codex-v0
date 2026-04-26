@@ -4,6 +4,22 @@ Este repositorio fecha a Meta 2 como uma base visual/interativa minima, determin
 
 A simulacao canonica continua headless. A camada visual atual transforma cenas validadas em snapshots e demos HTML autocontidas para inspecao, smoke e automacao com Codex.
 
+## Roadmap progressivo
+
+A engine agora segue um roadmap por versoes de produto:
+
+- V1: jogos pequenos 2D;
+- V2: jogos 2D/2.5D indie production;
+- V3: 3D indie;
+- V4: runtime/editor AA;
+- V5/V6: caminho aspiracional para 3D AAA.
+
+Leia:
+
+- `ROADMAP.md` para a visao resumida;
+- `docs/ENGINE_VERSION_ROADMAP.md` para a progressao completa;
+- `docs/CODEX_SUBAGENT_STRATEGY.md` para a estrategia de Codex, MCP, skills e subagentes.
+
 ## O que o engine ja consegue fazer visualmente
 
 - gerar `RenderSnapshot v1` deterministico a partir de uma cena;
