@@ -145,6 +145,19 @@ Compatibilidade:
 - sem `tile.layer`, cenas antigas continuam com o mesmo fallback `rect`;
 - fora de escopo: editor, autotile, colisao, pathfinding e chunk streaming.
 
+## Camera Viewport v1 (offset declarativo minimo)
+
+Contrato declarativo minimo para deslocar a camera nos drawCalls do render headless:
+
+- ver `docs/CAMERA_VIEWPORT_V1.md`.
+
+Compatibilidade:
+
+- nao altera o shape de `RenderSnapshot v1`;
+- sem `camera.viewport`, cenas antigas continuam iguais;
+- com `camera.viewport`, o builder desloca drawCalls por offset e pode derivar `viewport.width` e `viewport.height`;
+- nao adiciona zoom, culling, follow target, smooth camera, editor, Pixi, Three ou WebGL.
+
 ## Input Intent v1 (input headless opt-in no loop)
 
 Contrato de intenção de input headless, com integração opt-in no `run-loop`/`run_loop` e sem acoplamento com `Scene Document v1` ou `simulate-state`:
@@ -261,6 +274,7 @@ Componentes iniciais:
 - `velocity` v1.
 - `visual.sprite` v1.
 - `tile.layer` v1.
+- `camera.viewport` v1.
 
 ## State Processor Registry v1 (interno, opt-in)
 

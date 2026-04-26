@@ -63,6 +63,9 @@ Definir um contrato JSON headless e deterministico para descrever uma vista rend
 - entidades com `tile.layer` sao expandidas para multiplos drawCalls `rect`, um por tile `rect` da palette.
 - `tile.layer` usa ids deterministicas no formato `<entityId>.tile.<row>.<col>` e posicao `x = col * tileWidth`, `y = row * tileHeight`.
 - tiles `empty` nao geram drawCall; `tile.layer` nao cria um novo `drawCall.kind`.
+- quando a cena declara `camera.viewport`, o builder subtrai `fields.x` e `fields.y` de todos os drawCalls.
+- quando a cena declara `camera.viewport`, `viewport.width` e `viewport.height` podem vir do componente, salvo override explicito por opcoes.
+- `camera.viewport` nao faz culling, zoom ou follow target nesta versao.
 - se `visual.sprite` for invalido, a cena falha validacao antes de o builder emitir snapshot.
 - se `tile.layer` for invalido, a cena falha validacao antes de o builder emitir snapshot.
 - sem manifesto, o builder preserva o fallback atual para `rect`.
