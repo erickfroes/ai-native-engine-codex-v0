@@ -256,6 +256,49 @@ function createSpriteSnapshotWithFailingAssetSources() {
   };
 }
 
+function createMultiSpriteSnapshotWithEscapedAssetSources() {
+  return {
+    renderSnapshotVersion: 1,
+    scene: 'sprite-scene',
+    tick: 2,
+    viewport: {
+      width: 64,
+      height: 48
+    },
+    drawCalls: [
+      {
+        kind: 'sprite',
+        id: 'player.hero',
+        assetId: 'player.sprite',
+        assetSrc: 'images/player & "hero" </script><script>alert("x")</script>.png',
+        x: 0,
+        y: 0,
+        width: 16,
+        height: 16,
+        layer: 0
+      },
+      {
+        kind: 'sprite',
+        id: 'camera.icon',
+        assetId: 'camera.icon',
+        assetSrc: 'images/camera-icon.png',
+        x: 20,
+        y: 4,
+        width: 12,
+        height: 12,
+        layer: 1
+      }
+    ]
+  };
+}
+
+function assertNoForbiddenBrowserDemoHtmlSurface(html) {
+  assert.doesNotMatch(
+    html,
+    /<script[^>]+src=|<link[^>]+href=|fetch\(|XMLHttpRequest|WebSocket|import\(|Date\.now|new Date|performance\.now|toISOString|localStorage/
+  );
+}
+
 test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and keyboard capture', () => {
   const htmlA = renderBrowserPlayableDemoHtmlV1({
     title: 'tutorial Browser Playable Demo',
@@ -314,7 +357,7 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.match(htmlA, /Pause rendering/);
   assert.match(htmlA, />Reset<\/button>/);
   assert.doesNotMatch(htmlA, /<script[^>]+src=/);
-  assert.doesNotMatch(htmlA, /https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|Date\.now|new Date|performance\.now|toISOString|localStorage/);
+  assertNoForbiddenBrowserDemoHtmlSurface(htmlA);
   assert.equal(BROWSER_PLAYABLE_DEMO_VERSION, 1);
 });
 
@@ -423,7 +466,7 @@ test('renderBrowserPlayableDemoHtmlV1 escapes HTML and JSON payload safely', () 
   );
   assert.doesNotMatch(html, /<\/script><script>/);
   assert.doesNotMatch(html, /<script[^>]+src=|<link[^>]+href=|https?:\/\//);
-  assert.doesNotMatch(html, /Date\.now|new Date|performance\.now|fetch\(|XMLHttpRequest|WebSocket|toISOString|localStorage/);
+  assertNoForbiddenBrowserDemoHtmlSurface(html);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 preserves snapshot order for multiple rect draw calls', () => {
@@ -560,6 +603,65 @@ test('renderBrowserPlayableDemoHtmlV1 falls back visually when sprite image fail
 
   const fallbackRects = harness.operations.filter((entry) => entry.method === 'fillRect');
   assert.ok(fallbackRects.some((entry) => entry.fillStyle === '#b74f2a'), 'expected fallback rect stroke on load error');
+});
+
+test('renderBrowserPlayableDemoHtmlV1 safely embeds escaped assetSrc and isolates multiple sprite image states', () => {
+  const firstAssetSrc = 'images/player & "hero" </script><script>alert("x")</script>.png';
+  const secondAssetSrc = 'images/camera-icon.png';
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'sprite-escape Browser Playable Demo',
+    renderSnapshot: createMultiSpriteSnapshotWithEscapedAssetSources(),
+    metadata: {
+      controllableEntityId: 'player.hero'
+    }
+  });
+  const inlineJson = extractInlineJson(html);
+  const harness = createCanvasHarness(html);
+
+  assertNoForbiddenBrowserDemoHtmlSurface(html);
+  assert.doesNotMatch(html, /<\/script><script>/);
+  assert.match(inlineJson, /\\u0026/);
+  assert.match(inlineJson, /\\u003C\/script\\u003E\\u003Cscript\\u003Ealert/);
+  assert.deepEqual(
+    harness.imageInstances.map((image) => image.src),
+    [firstAssetSrc, secondAssetSrc]
+  );
+
+  assert.equal(harness.operations.filter((entry) => entry.method === 'drawImage').length, 0);
+  assert.ok(
+    harness.operations.some(
+      (entry) => entry.method === 'fillRect' && entry.args.join(',') === '0,0,16,16'
+    ),
+    'expected fallback rect before first sprite load'
+  );
+  assert.ok(
+    harness.operations.some(
+      (entry) => entry.method === 'fillRect' && entry.args.join(',') === '20,4,12,12'
+    ),
+    'expected fallback rect before second sprite load'
+  );
+
+  harness.operations.length = 0;
+  harness.imageInstances[1].onerror();
+
+  assert.equal(harness.operations.filter((entry) => entry.method === 'drawImage').length, 0);
+  assert.ok(
+    harness.operations.some(
+      (entry) => entry.method === 'fillRect' && entry.args.join(',') === '20,4,12,12'
+    ),
+    'expected failed second sprite to keep rect fallback'
+  );
+
+  harness.operations.length = 0;
+  harness.imageInstances[0].onload();
+
+  assert.equal(harness.operations.filter((entry) => entry.method === 'drawImage').length, 1);
+  assert.ok(
+    harness.operations.some(
+      (entry) => entry.method === 'fillRect' && entry.args.join(',') === '20,4,12,12'
+    ),
+    'expected failed second sprite fallback after first sprite load'
+  );
 });
 
 test('renderBrowserPlayableDemoHtmlV1 falls back to the first rect when player.hero is absent', () => {
