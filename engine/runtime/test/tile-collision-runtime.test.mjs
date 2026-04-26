@@ -48,8 +48,8 @@ test('buildTileCollisionReportV1 returns deterministic solid tile bounds from ti
         paletteId: 'wall',
         x: 32,
         y: 0,
-        width: 16,
-        height: 16,
+        width: 24,
+        height: 24,
         solid: true
       },
       {

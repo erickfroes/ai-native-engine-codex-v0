@@ -111,8 +111,8 @@ function toSolidTiles(entity) {
         paletteId,
         x: columnIndex * fields.tileWidth,
         y: rowIndex * fields.tileHeight,
-        width: fields.tileWidth,
-        height: fields.tileHeight,
+        width: paletteEntry.width ?? fields.tileWidth,
+        height: paletteEntry.height ?? fields.tileHeight,
         solid: true
       });
     }
