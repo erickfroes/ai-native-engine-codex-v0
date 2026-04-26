@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "invalid-tile-layer-unknown-palette"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "map.ground",
+      "components": [
+        {
+          "kind": "tile.layer",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "tileWidth": 16,
+            "tileHeight": 16,
+            "columns": 2,
+            "rows": 1,
+            "tiles": [
+              [
+                1,
+                2
+              ]
+            ],
+            "palette": {
+              "1": {
+                "kind": "rect"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -21,6 +21,14 @@ const invalidVisualSpriteScenePath = path.join(
   'fixtures',
   'invalid_visual_sprite_asset_id.scene.json'
 );
+const invalidTileLayerScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'invalid_tile_layer_unknown_palette.scene.json'
+);
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const cameraOnlyAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.camera-only.asset-manifest.json');
@@ -313,4 +321,16 @@ test('render-snapshot fails predictably when visual.sprite component is invalid'
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /SceneValidationError: Scene validation failed for/);
   assert.match(result.stderr, /invalid_visual_sprite_asset_id\.scene\.json/);
+});
+
+test('render-snapshot fails predictably when tile.layer component is invalid', () => {
+  const result = runCli([
+    'render-snapshot',
+    invalidTileLayerScenePath,
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /SceneValidationError: Scene validation failed for/);
+  assert.match(result.stderr, /invalid_tile_layer_unknown_palette\.scene\.json/);
 });
