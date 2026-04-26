@@ -3,7 +3,11 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { loadSceneFile, runMinimalSystemLoop, runMinimalSystemLoopWithTrace } from '../src/index.mjs';
+import {
+  loadSceneFile,
+  runMinimalSystemLoop,
+  runMinimalSystemLoopWithTrace
+} from '../src/index.mjs';
 import { runDeterministicReplay } from '../src/replay/run-deterministic-replay.mjs';
 import { resolveSystemHandler } from '../src/loop/system-handlers.mjs';
 
@@ -12,6 +16,10 @@ const repoRoot = path.resolve(testDir, '../../..');
 
 function scenePath(relativePath) {
   return path.join(repoRoot, 'scenes', relativePath);
+}
+
+function fixturePath(relativePath) {
+  return path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', relativePath);
 }
 
 function createValidInputIntent(overrides = {}) {
@@ -29,6 +37,23 @@ function createValidInputIntent(overrides = {}) {
       }
     ],
     ...overrides
+  };
+}
+
+function createRightMoveInputIntent() {
+  return {
+    inputIntentVersion: 1,
+    tick: 1,
+    entityId: 'player.hero',
+    actions: [
+      {
+        type: 'move',
+        axis: {
+          x: 1,
+          y: 0
+        }
+      }
+    ]
   };
 }
 
@@ -263,4 +288,82 @@ test('headless composition of known systems applies +6 per tick and preserves de
     ticksN.executedSystems,
     Array.from({ length: ticksNValue }, () => ['core.loop', 'input.keyboard', 'networking.replication']).flat()
   );
+});
+
+test('runMinimalSystemLoop movementBlocking is opt-in and deterministic', async () => {
+  const blockedScene = await loadSceneFile(fixturePath('movement-blocking-loop-blocked.scene.json'));
+  const openScene = await loadSceneFile(fixturePath('movement-blocking-loop-open.scene.json'));
+  const nonSolidScene = await loadSceneFile(fixturePath('movement-blocking-loop-non-solid.scene.json'));
+
+  const inputIntent = createRightMoveInputIntent();
+  const ticks = 1;
+  const seed = 40;
+
+  const blockedWithoutFlag = runMinimalSystemLoop(blockedScene, {
+    ticks,
+    seed,
+    inputIntent
+  });
+  const blockedWithFlag = runMinimalSystemLoop(blockedScene, {
+    ticks,
+    seed,
+    inputIntent,
+    movementBlocking: true
+  });
+  const blockedWithFlagAgain = runMinimalSystemLoop(blockedScene, {
+    ticks,
+    seed,
+    inputIntent,
+    movementBlocking: true
+  });
+
+  assert.equal(blockedWithFlag.ticksExecuted, ticks);
+  assert.equal(blockedWithFlag.finalState, blockedWithoutFlag.finalState - 1);
+  assert.deepEqual(blockedWithFlag, blockedWithFlagAgain);
+
+  const openWithoutFlag = runMinimalSystemLoop(openScene, {
+    ticks,
+    seed,
+    inputIntent
+  });
+  const openWithFlag = runMinimalSystemLoop(openScene, {
+    ticks,
+    seed,
+    inputIntent,
+    movementBlocking: true
+  });
+  assert.equal(openWithFlag.finalState, openWithoutFlag.finalState);
+
+  const nonSolidWithoutFlag = runMinimalSystemLoop(nonSolidScene, {
+    ticks,
+    seed,
+    inputIntent
+  });
+  const nonSolidWithFlag = runMinimalSystemLoop(nonSolidScene, {
+    ticks,
+    seed,
+    inputIntent,
+    movementBlocking: true
+  });
+  assert.equal(nonSolidWithFlag.finalState, nonSolidWithoutFlag.finalState);
+});
+
+test('runMinimalSystemLoopWithTrace movementBlocking preserves trace and report shape', async () => {
+  const openScene = await loadSceneFile(fixturePath('movement-blocking-loop-open.scene.json'));
+  const inputIntent = createRightMoveInputIntent();
+
+  const withoutFlag = runMinimalSystemLoopWithTrace(openScene, {
+    ticks: 1,
+    seed: 11,
+    inputIntent
+  });
+  const withFlag = runMinimalSystemLoopWithTrace(openScene, {
+    ticks: 1,
+    seed: 11,
+    inputIntent,
+    movementBlocking: true
+  });
+
+  assert.equal(withoutFlag.report.finalState, withFlag.report.finalState);
+  assert.equal(withoutFlag.trace.systemsPerTick[0].systems[0].name, 'core.loop');
 });

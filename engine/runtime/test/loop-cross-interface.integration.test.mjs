@@ -13,6 +13,31 @@ const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const inputIntentPath = path.join(repoRoot, 'fixtures', 'input', 'valid.move.intent.json');
+const movementBlockingBlockedScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-loop-blocked.scene.json'
+);
+const movementBlockingOpenScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-loop-open.scene.json'
+);
+const movementBlockingNonSolidScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-loop-non-solid.scene.json'
+);
+const movePlayerRightIntentPath = path.join(repoRoot, 'fixtures', 'input', 'move-player-right.intent.json');
 
 function normalizeLoopReport(report) {
   return {
@@ -295,6 +320,228 @@ test('run-loop input intent stays opt-in and semantically aligned across runtime
     assert.deepEqual(runtimeWithIntentFirst, cliWithIntentFirst);
     assert.deepEqual(runtimeWithIntentFirst, mcpWithIntentFirst);
     assert.deepEqual(cliWithIntentFirst, mcpWithIntentFirst);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('run-loop movement-blocking is opt-in and aligned across runtime, CLI, and MCP', async () => {
+  const ticks = 1;
+  const seed = 40;
+  const blockedScene = await loadSceneFile(movementBlockingBlockedScenePath);
+  const openScene = await loadSceneFile(movementBlockingOpenScenePath);
+  const nonSolidScene = await loadSceneFile(movementBlockingNonSolidScenePath);
+  const movementIntent = await loadValidatedInputIntentV1(movePlayerRightIntentPath);
+
+  const baselineBlocked = normalizeLoopReport({
+    loopReportVersion: 1,
+    scene: blockedScene.metadata.name,
+    ticks,
+    seed,
+    ...runMinimalSystemLoop(blockedScene, {
+      ticks,
+      seed,
+      inputIntent: movementIntent
+    })
+  });
+  const blockedWithMovementBlocking = normalizeLoopReport({
+    loopReportVersion: 1,
+    scene: blockedScene.metadata.name,
+    ticks,
+    seed,
+    ...runMinimalSystemLoop(blockedScene, {
+      ticks,
+      seed,
+      inputIntent: movementIntent,
+      movementBlocking: true
+    })
+  });
+  const openWithoutMovementBlocking = normalizeLoopReport({
+    loopReportVersion: 1,
+    scene: openScene.metadata.name,
+    ticks,
+    seed,
+    ...runMinimalSystemLoop(openScene, {
+      ticks,
+      seed,
+      inputIntent: movementIntent
+    })
+  });
+  const openWithMovementBlocking = normalizeLoopReport({
+    loopReportVersion: 1,
+    scene: openScene.metadata.name,
+    ticks,
+    seed,
+    ...runMinimalSystemLoop(openScene, {
+      ticks,
+      seed,
+      inputIntent: movementIntent,
+      movementBlocking: true
+    })
+  });
+  const nonSolidWithoutMovementBlocking = normalizeLoopReport({
+    loopReportVersion: 1,
+    scene: nonSolidScene.metadata.name,
+    ticks,
+    seed,
+    ...runMinimalSystemLoop(nonSolidScene, {
+      ticks,
+      seed,
+      inputIntent: movementIntent
+    })
+  });
+  const nonSolidWithMovementBlocking = normalizeLoopReport({
+    loopReportVersion: 1,
+    scene: nonSolidScene.metadata.name,
+    ticks,
+    seed,
+    ...runMinimalSystemLoop(nonSolidScene, {
+      ticks,
+      seed,
+      inputIntent: movementIntent,
+      movementBlocking: true
+    })
+  });
+
+  assertLoopReportV1(baselineBlocked);
+  assertLoopReportV1(blockedWithMovementBlocking);
+  assertLoopReportV1(openWithoutMovementBlocking);
+  assertLoopReportV1(nonSolidWithoutMovementBlocking);
+  assert.equal(openWithMovementBlocking.finalState, openWithoutMovementBlocking.finalState);
+  assert.equal(nonSolidWithMovementBlocking.finalState, nonSolidWithoutMovementBlocking.finalState);
+  assert.equal(blockedWithMovementBlocking.finalState, baselineBlocked.finalState - 1);
+
+  const cliBlockedBase = runCli([
+    'run-loop',
+    movementBlockingBlockedScenePath,
+    '--ticks',
+    String(ticks),
+    '--seed',
+    String(seed),
+    '--input-intent',
+    movePlayerRightIntentPath,
+    '--json'
+  ]);
+  const cliBlockedWithMovementBlocking = runCli([
+    'run-loop',
+    movementBlockingBlockedScenePath,
+    '--ticks',
+    String(ticks),
+    '--seed',
+    String(seed),
+    '--movement-blocking',
+    '--input-intent',
+    movePlayerRightIntentPath,
+    '--json'
+  ]);
+
+  assert.equal(cliBlockedBase.status, 0, cliBlockedBase.stderr);
+  assert.equal(cliBlockedWithMovementBlocking.status, 0, cliBlockedWithMovementBlocking.stderr);
+
+  const cliBlocked = normalizeLoopReport(JSON.parse(cliBlockedBase.stdout));
+  const cliBlockedWithFlag = normalizeLoopReport(JSON.parse(cliBlockedWithMovementBlocking.stdout));
+  assert.equal(cliBlockedWithFlag.finalState, cliBlocked.finalState - 1);
+  assert.deepEqual(cliBlocked.finalState, baselineBlocked.finalState);
+  assert.deepEqual(cliBlockedWithFlag.finalState, blockedWithMovementBlocking.finalState);
+
+  const cliOpenWithMovementBlocking = runCli([
+    'run-loop',
+    movementBlockingOpenScenePath,
+    '--ticks',
+    String(ticks),
+    '--seed',
+    String(seed),
+    '--movement-blocking',
+    '--input-intent',
+    movePlayerRightIntentPath,
+    '--json'
+  ]);
+  assert.equal(cliOpenWithMovementBlocking.status, 0, cliOpenWithMovementBlocking.stderr);
+  const cliOpen = normalizeLoopReport(JSON.parse(cliOpenWithMovementBlocking.stdout));
+
+  assert.equal(cliOpen.finalState, openWithMovementBlocking.finalState);
+  assert.deepEqual(cliOpen.finalState, openWithoutMovementBlocking.finalState);
+
+  const cliNonSolidWithMovementBlocking = runCli([
+    'run-loop',
+    movementBlockingNonSolidScenePath,
+    '--ticks',
+    String(ticks),
+    '--seed',
+    String(seed),
+    '--movement-blocking',
+    '--input-intent',
+    movePlayerRightIntentPath,
+    '--json'
+  ]);
+  assert.equal(cliNonSolidWithMovementBlocking.status, 0, cliNonSolidWithMovementBlocking.stderr);
+  const cliNonSolid = normalizeLoopReport(JSON.parse(cliNonSolidWithMovementBlocking.stdout));
+  assert.equal(cliNonSolid.finalState, nonSolidWithMovementBlocking.finalState);
+  assert.deepEqual(cliNonSolid.finalState, nonSolidWithoutMovementBlocking.finalState);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpWithMovementBlockingBlocked = await mcp.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-loop-blocked.scene.json',
+        ticks,
+        seed,
+        movementBlocking: true,
+        inputIntentPath: './fixtures/input/move-player-right.intent.json'
+      }
+    });
+    const mcpBlockedBaseline = await mcp.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-loop-blocked.scene.json',
+        ticks,
+        seed,
+        inputIntentPath: './fixtures/input/move-player-right.intent.json'
+      }
+    });
+    const mcpOpenWithMovementBlocking = await mcp.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-loop-open.scene.json',
+        ticks,
+        seed,
+        movementBlocking: true,
+        inputIntentPath: './fixtures/input/move-player-right.intent.json'
+      }
+    });
+    const mcpNonSolidWithMovementBlocking = await mcp.request('tools/call', {
+      name: 'run_loop',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-loop-non-solid.scene.json',
+        ticks,
+        seed,
+        movementBlocking: true,
+        inputIntentPath: './fixtures/input/move-player-right.intent.json'
+      }
+    });
+
+    assert.equal(mcpWithMovementBlockingBlocked.result.isError, false);
+    assert.equal(mcpBlockedBaseline.result.isError, false);
+    assert.equal(mcpOpenWithMovementBlocking.result.isError, false);
+    assert.equal(mcpNonSolidWithMovementBlocking.result.isError, false);
+
+    const mcpBlocked = normalizeLoopReport(mcpWithMovementBlockingBlocked.result.structuredContent);
+    const mcpBlockedBaselineReport = normalizeLoopReport(mcpBlockedBaseline.result.structuredContent);
+    const mcpOpen = normalizeLoopReport(mcpOpenWithMovementBlocking.result.structuredContent);
+    const mcpNonSolid = normalizeLoopReport(mcpNonSolidWithMovementBlocking.result.structuredContent);
+
+    assert.equal(mcpBlocked.finalState, mcpBlockedBaselineReport.finalState - 1);
+    assert.equal(mcpOpen.finalState, openWithMovementBlocking.finalState);
+    assert.equal(mcpNonSolid.finalState, nonSolidWithMovementBlocking.finalState);
   } finally {
     await mcp.close();
   }
