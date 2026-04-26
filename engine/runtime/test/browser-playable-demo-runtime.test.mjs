@@ -32,6 +32,7 @@ function createCanvasHarness(html) {
   const cancelledAnimationFrames = new Set();
   let nextAnimationFrameHandle = 1;
   const statusElement = { textContent: '' };
+  const positionElement = { textContent: '' };
   const dataElement = { textContent: extractInlineJson(html) };
   const pauseButton = {
     textContent: '',
@@ -277,6 +278,25 @@ test('renderBrowserPlayableDemoHtmlV1 returns deterministic HTML with canvas and
   assert.match(htmlA, /^<!DOCTYPE html>/);
   assert.match(htmlA, /<canvas id="browser-playable-demo-canvas"/);
   assert.match(htmlA, /tabindex="0"/);
+  assert.match(htmlA, /<section class="frame" aria-labelledby="browser-playable-demo-instructions-title">/);
+  assert.match(htmlA, /<h2 id="browser-playable-demo-instructions-title">tutorial Browser Playable Demo<\/h2>/);
+  assert.match(htmlA, /Click the canvas and use WASD or Arrow Keys to move\./);
+  assert.match(htmlA, /<ul class="controls-list" aria-label="Controls">/);
+  assert.match(htmlA, /W or ArrowUp moves up by 4 px\./);
+  assert.match(htmlA, /A or ArrowLeft moves left by 4 px\./);
+  assert.match(htmlA, /S or ArrowDown moves down by 4 px\./);
+  assert.match(htmlA, /D or ArrowRight moves right by 4 px\./);
+  assert.match(
+    htmlA,
+    /aria-describedby="browser-playable-demo-instructions browser-playable-demo-status"/
+  );
+  assert.match(htmlA, /<p id="browser-playable-demo-position" class="hud" aria-live="polite">Position: x 0, y 0<\/p>/);
+  assert.match(htmlA, /function updatePositionHud\(\)/);
+  assert.match(htmlA, /positionElement\.textContent = "Position: x " \+ controlled\.x \+ ", y " \+ controlled\.y;/);
+  assert.match(htmlA, /<button id="browser-playable-demo-reset" type="button" aria-controls="browser-playable-demo-canvas">Reset position<\/button>/);
+  assert.match(htmlA, /function resetControlledPosition\(\)/);
+  assert.match(htmlA, /resetButton\.addEventListener\("click"/);
+  assert.doesNotMatch(htmlA, /localStorage|requestAnimationFrame/);
   assert.match(htmlA, /addEventListener\("keydown"/);
   assert.match(htmlA, /id="browser-playable-demo-pause"/);
   assert.match(htmlA, /requestAnimationFrame\(renderFrame\)/);
@@ -354,6 +374,7 @@ test('renderBrowserPlayableDemoHtmlV1 renders deterministic empty HTML when draw
   );
   assert.ok(first.includes('"drawCalls":[]'));
   assert.match(first, /No controllable rect\. Step 4 px\./);
+  assert.match(first, /<button id="browser-playable-demo-reset" type="button" aria-controls="browser-playable-demo-canvas" disabled>Reset position<\/button>/);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 escapes HTML and JSON payload safely', () => {
@@ -603,6 +624,7 @@ test('renderBrowserPlayableDemoHtmlV1 moves the nominated controllable rect by t
   );
   assert.deepEqual(highlightedRects[0].args, [0, 0, 16, 16]);
   assert.deepEqual(highlightedRects[1].args, [4, 0, 16, 16]);
+  assert.equal(harness.positionElement.textContent, 'Position: x 4, y 0');
   assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 0\)/);
 });
 

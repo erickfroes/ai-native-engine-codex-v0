@@ -43,6 +43,14 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]`
 - MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?)`
 
+Exemplo para gerar um arquivo HTML:
+
+```bash
+node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --out ./tmp/tutorial-browser-demo.html
+```
+
+Depois de gerar com `--out`, abra o arquivo HTML diretamente no navegador. A demo e autocontida: nao precisa de servidor local, assets reais ou runtime Node no cliente.
+
 Envelope minimo de CLI `--json` e MCP `structuredContent`:
 
 ```json
@@ -71,6 +79,7 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 - nao usa backend grafico externo;
 - nao altera o loop headless;
 - nao salva estado automaticamente;
+- nao usa `localStorage`;
 - nao usa rede;
 - nao cria/transforma pipeline de assets reais no runtime;
 - nao cria servidor web.

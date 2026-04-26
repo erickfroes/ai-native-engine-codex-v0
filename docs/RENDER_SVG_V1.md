@@ -41,6 +41,7 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 ## Fora deste slice
 
 - rasterizacao real;
+- canvas real;
 - backend grafico;
 - assets reais obrigatorios;
 - editor visual.
