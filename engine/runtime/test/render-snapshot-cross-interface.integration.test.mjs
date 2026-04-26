@@ -18,6 +18,14 @@ const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
 const cameraViewportScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'camera-viewport.scene.json');
+const invalidCameraViewportScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'invalid_camera_viewport_x.scene.json'
+);
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -126,6 +134,30 @@ test('RenderSnapshot v1 stays semantically aligned across runtime, CLI and MCP',
 
     assert.deepEqual(runtimeSnapshot, cliSnapshot);
     assert.deepEqual(runtimeSnapshot, mcpSnapshot);
+    assert.deepEqual(runtimeSnapshot.viewport, {
+      width: 320,
+      height: 180
+    });
+    assert.deepEqual(runtimeSnapshot.drawCalls, [
+      {
+        kind: 'rect',
+        id: 'camera.main',
+        x: 0,
+        y: 4,
+        width: 16,
+        height: 16,
+        layer: 0
+      },
+      {
+        kind: 'rect',
+        id: 'player.hero',
+        x: 0,
+        y: 0,
+        width: 16,
+        height: 16,
+        layer: 0
+      }
+    ]);
   } finally {
     await mcp.close();
   }
@@ -458,6 +490,44 @@ test('RenderSnapshot v1 with camera.viewport stays aligned across runtime, CLI a
         layer: 2
       }
     ]);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('RenderSnapshot v1 reports invalid camera viewport scenes predictably across CLI and MCP', async () => {
+  const cliResult = runCli([
+    'render-snapshot',
+    invalidCameraViewportScenePath,
+    '--json'
+  ]);
+
+  assert.notEqual(cliResult.status, 0);
+  assert.match(cliResult.stderr, /SceneValidationError: Scene validation failed for/);
+  assert.match(cliResult.stderr, /invalid_camera_viewport_x\.scene\.json/);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: './engine/runtime/test/fixtures/invalid_camera_viewport_x.scene.json'
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, true);
+    assert.equal(mcpResponse.result.structuredContent.ok, false);
+    assert.equal(mcpResponse.result.structuredContent.errorName, 'SceneValidationError');
+    assert.match(mcpResponse.result.content[0].text, /Scene validation failed for/);
+    assert.match(mcpResponse.result.structuredContent.errorMessage, /invalid_camera_viewport_x\.scene\.json/);
   } finally {
     await mcp.close();
   }
