@@ -131,12 +131,12 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'tick'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'width'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'height'));
-    const renderBrowserDemoTool = toolsResponse.result.tools.find((tool) => tool.name === 'render_browser_demo');
-    assert.ok(renderBrowserDemoTool);
-    assert.deepEqual(renderBrowserDemoTool.inputSchema.required, ['path']);
-    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'tick'));
-    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'width'));
-    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'height'));
+    const renderCanvasDemoTool = toolsResponse.result.tools.find((tool) => tool.name === 'render_canvas_demo');
+    assert.ok(renderCanvasDemoTool);
+    assert.deepEqual(renderCanvasDemoTool.inputSchema.required, ['path']);
+    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'tick'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'width'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'height'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
     assert.ok(
       Object.prototype.hasOwnProperty.call(
@@ -440,8 +440,49 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(renderSvgResponseA.result.structuredContent.svg, /<rect id="player\.hero"/);
     assert.deepEqual(renderSvgResponseA.result.structuredContent, renderSvgResponseB.result.structuredContent);
 
-    const renderBrowserDemoResponseA = await client.request('tools/call', {
-      name: 'render_browser_demo',
+    const renderSvgInvalidWidthResponse = await client.request('tools/call', {
+      name: 'render_svg',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        width: 0
+      }
+    });
+
+    assert.equal(renderSvgInvalidWidthResponse.result.isError, true);
+    assert.match(
+      renderSvgInvalidWidthResponse.result.content[0].text,
+      /render_svg: `width` must be an integer >= 1 when provided/
+    );
+
+    const renderSvgInvalidHeightResponse = await client.request('tools/call', {
+      name: 'render_svg',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        height: 0
+      }
+    });
+
+    assert.equal(renderSvgInvalidHeightResponse.result.isError, true);
+    assert.match(
+      renderSvgInvalidHeightResponse.result.content[0].text,
+      /render_svg: `height` must be an integer >= 1 when provided/
+    );
+
+    const renderSvgMissingPathResponse = await client.request('tools/call', {
+      name: 'render_svg',
+      arguments: {
+        path: './scenes/missing.scene.json'
+      }
+    });
+
+    assert.equal(renderSvgMissingPathResponse.result.isError, true);
+    assert.equal(renderSvgMissingPathResponse.result.structuredContent.ok, false);
+    assert.equal(renderSvgMissingPathResponse.result.structuredContent.errorName, 'Error');
+    assert.match(renderSvgMissingPathResponse.result.content[0].text, /ENOENT/);
+    assert.match(renderSvgMissingPathResponse.result.content[0].text, /missing\.scene\.json/);
+
+    const renderCanvasDemoResponseA = await client.request('tools/call', {
+      name: 'render_canvas_demo',
       arguments: {
         path: './scenes/tutorial.scene.json',
         tick: 4,
@@ -450,8 +491,8 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       }
     });
 
-    const renderBrowserDemoResponseB = await client.request('tools/call', {
-      name: 'render_browser_demo',
+    const renderCanvasDemoResponseB = await client.request('tools/call', {
+      name: 'render_canvas_demo',
       arguments: {
         path: './scenes/tutorial.scene.json',
         tick: 4,
@@ -464,22 +505,22 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assertBrowserDemoStructuredContent(renderBrowserDemoResponseA.result.structuredContent);
     assertBrowserDemoStructuredContent(renderBrowserDemoResponseB.result.structuredContent);
     assert.deepEqual(
-      renderBrowserDemoResponseA.result.structuredContent,
-      renderBrowserDemoResponseB.result.structuredContent
+      renderCanvasDemoResponseA.result.structuredContent,
+      renderCanvasDemoResponseB.result.structuredContent
     );
 
-    const renderBrowserDemoInvalidWidthResponse = await client.request('tools/call', {
-      name: 'render_browser_demo',
+    const renderCanvasDemoInvalidWidthResponse = await client.request('tools/call', {
+      name: 'render_canvas_demo',
       arguments: {
         path: './scenes/tutorial.scene.json',
         width: 0
       }
     });
 
-    assert.equal(renderBrowserDemoInvalidWidthResponse.result.isError, true);
+    assert.equal(renderCanvasDemoInvalidWidthResponse.result.isError, true);
     assert.match(
-      renderBrowserDemoInvalidWidthResponse.result.content[0].text,
-      /render_browser_demo: `width` must be an integer >= 1 when provided\./
+      renderCanvasDemoInvalidWidthResponse.result.content[0].text,
+      /render_canvas_demo: `width` must be an integer >= 1 when provided/
     );
 
     const renderBrowserDemoInvalidHeightResponse = await client.request('tools/call', {

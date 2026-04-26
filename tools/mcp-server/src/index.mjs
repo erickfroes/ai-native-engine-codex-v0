@@ -23,9 +23,8 @@ import {
   buildRenderSnapshotV1,
   renderSnapshotToSvgV1,
   RENDER_SVG_VERSION,
-  renderBrowserPlayableDemoHtmlV1,
-  createBrowserPlayableDemoMetadataV1,
-  BROWSER_PLAYABLE_DEMO_VERSION,
+  renderCanvas2DDemoHtmlV1,
+  CANVAS_2D_DEMO_VERSION,
   runDeterministicReplay,
   buildReplayArtifact,
   snapshotStateV1,
@@ -108,7 +107,7 @@ async function handleToolCall(params) {
     params.name !== 'emit_world_snapshot' &&
     params.name !== 'render_snapshot' &&
     params.name !== 'render_svg' &&
-    params.name !== 'render_browser_demo' &&
+    params.name !== 'render_canvas_demo' &&
     params.name !== 'plan_loop' &&
     params.name !== 'run_loop' &&
     params.name !== 'run_replay' &&
@@ -557,46 +556,47 @@ async function handleToolCall(params) {
       };
     }
 
-    if (params.name === 'render_browser_demo') {
+    if (params.name === 'render_canvas_demo') {
       if (args.tick !== undefined && (!Number.isInteger(args.tick) || args.tick < 0)) {
         return {
-          content: toTextContent('render_browser_demo: `tick` must be an integer >= 0 when provided.'),
+          content: toTextContent('render_canvas_demo: `tick` must be an integer >= 0 when provided.'),
           isError: true
         };
       }
 
       if (args.width !== undefined && (!Number.isInteger(args.width) || args.width < 1)) {
         return {
-          content: toTextContent('render_browser_demo: `width` must be an integer >= 1 when provided.'),
+          content: toTextContent('render_canvas_demo: `width` must be an integer >= 1 when provided.'),
           isError: true
         };
       }
 
       if (args.height !== undefined && (!Number.isInteger(args.height) || args.height < 1)) {
         return {
-          content: toTextContent('render_browser_demo: `height` must be an integer >= 1 when provided.'),
+          content: toTextContent('render_canvas_demo: `height` must be an integer >= 1 when provided.'),
           isError: true
         };
       }
 
-      const scene = await loadSceneFile(targetPath);
-      const snapshot = await buildRenderSnapshotV1(scene, {
+      const snapshot = await buildRenderSnapshotV1(targetPath, {
         tick: args.tick,
         width: args.width,
         height: args.height
       });
-      const title = `${snapshot.scene} Browser Playable Demo`;
-      const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot);
-      const html = renderBrowserPlayableDemoHtmlV1({
-        title,
+      const html = renderCanvas2DDemoHtmlV1({
+        title: `${snapshot.scene} Canvas 2D Demo`,
         renderSnapshot: snapshot,
-        metadata
+        metadata: {
+          scene: snapshot.scene,
+          tick: snapshot.tick,
+          viewport: `${snapshot.viewport.width}x${snapshot.viewport.height}`
+        }
       });
 
       return {
-        content: toTextContent(`Browser playable demo built for ${snapshot.scene} at tick ${snapshot.tick}.`),
+        content: toTextContent(`Canvas 2D demo built for ${snapshot.scene} at tick ${snapshot.tick}.`),
         structuredContent: {
-          browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+          canvasDemoVersion: CANVAS_2D_DEMO_VERSION,
           scene: snapshot.scene,
           tick: snapshot.tick,
           html

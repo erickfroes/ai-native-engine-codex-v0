@@ -1,23 +1,60 @@
-# STATUS — V0 (resumo curto)
+# STATUS - Meta 1 / V0 Headless
 
-## Estado atual da V0
+## Estado atual
 
-A V0 está funcional e orientada a contrato: cenas são validadas por schema + invariantes, com suporte a replay determinístico e snapshot mínimo para rede.
+A Meta 1 esta concluida como V0 headless, deterministica e orientada a contrato.
 
-## Foco atual (runtime/CLI/MCP)
+O repositorio hoje entrega:
 
-- **Runtime**: manter evolução incremental com determinismo e compatibilidade dos contratos.
-- **CLI**: permanecer como superfície canônica de automação local.
-- **MCP**: manter paridade com a CLI nas capacidades críticas para agentes.
+- runtime estavel para cenas pequenas;
+- loop headless interpretavel;
+- InputIntent v1 opt-in;
+- KeyboardInputScript v1 opt-in;
+- save/load v1 minimo;
+- State Mutation Trace v1 opt-in;
+- RenderSnapshot v1;
+- Render SVG v1;
+- demo HTML estatica derivada de SVG;
+- CLI e MCP cobrindo os fluxos headless principais;
+- suites cross-interface para contratos criticos.
 
-## 3 riscos principais
+## O que esta dentro da V0 Headless
 
-1. **Drift de documentação**: docs podem descolar do estado real do runtime.
-2. **Drift de paridade CLI/MCP**: novas capacidades podem aparecer em uma interface e faltar na outra.
-3. **Falsa completude de rede/runtime real-time**: validação e contratos evoluem mais rápido que a integração online em tempo de execução.
+- validacao de cena, save e input;
+- planejamento e execucao deterministica de loop;
+- replay deterministico e replay artifact;
+- inspecao e simulacao opt-in de estado;
+- persistencia minima de State Snapshot v1;
+- render declarativo textual sem backend grafico real.
 
-## Próximos 3 passos objetivos
+## O que fica fora de escopo da Meta 1
 
-1. Entregar replicação **real-time mínima** no loop de runtime.
-2. Expandir replay para **multi-sistema** com verificação determinística.
-3. Publicar **métricas de tick para CI** como baseline de evolução.
+- canvas, Pixi, Three e WebGL;
+- editor visual;
+- assets reais como pipeline de producao;
+- captura real de teclado;
+- multiplayer real;
+- ECS completo.
+
+## Superficies canonicas
+
+- CLI: automacao local e exemplos humanos
+- MCP: automacao para agentes
+- runtime: funcoes e contratos internos versionados
+
+## Validacao obrigatoria
+
+```bash
+npm test
+npm run validate:scenes
+npm run smoke
+```
+
+## Sinal para Meta 2
+
+A Meta 2 pode partir desta base para explorar:
+
+- runtime visual real;
+- authority/rede alem de contratos headless;
+- ampliacao de ECS e gameplay;
+- tooling/editor acima da base headless.
