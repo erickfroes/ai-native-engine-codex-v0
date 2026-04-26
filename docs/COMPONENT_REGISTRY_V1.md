@@ -19,6 +19,8 @@ Componentes conhecidos iniciais:
 - `velocity` v1
 - `visual.sprite` v1
 - `tile.layer` v1
+- `camera.viewport` v1
+- `collision.bounds` v1
 
 ## Separação de responsabilidade
 

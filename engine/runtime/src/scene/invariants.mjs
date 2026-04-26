@@ -239,6 +239,54 @@ function validateCameraViewportComponent(component, componentPath, errors) {
   }
 }
 
+function validateCollisionBoundsComponent(component, componentPath, errors) {
+  const fields = component.fields;
+  const allowedFieldNames = new Set(['x', 'y', 'width', 'height', 'solid']);
+
+  if (component.version !== 1) {
+    pushMessage(errors, `${componentPath}.version`, 'collision.bounds version must be exactly 1');
+  }
+
+  if (component.replicated !== false) {
+    pushMessage(errors, `${componentPath}.replicated`, 'collision.bounds must not be replicated');
+  }
+
+  if (!isPlainObject(fields)) {
+    pushMessage(errors, `${componentPath}.fields`, 'collision.bounds fields must be an object');
+    return;
+  }
+
+  for (const fieldName of Object.keys(fields)) {
+    if (!allowedFieldNames.has(fieldName)) {
+      pushMessage(errors, `${componentPath}.fields.${fieldName}`, 'is not allowed for collision.bounds');
+    }
+  }
+
+  for (const coordinateName of ['x', 'y']) {
+    if (fields[coordinateName] !== undefined && !Number.isInteger(fields[coordinateName])) {
+      pushMessage(
+        errors,
+        `${componentPath}.fields.${coordinateName}`,
+        `collision.bounds ${coordinateName} must be an integer when provided`
+      );
+    }
+  }
+
+  for (const dimensionName of ['width', 'height']) {
+    if (!Number.isInteger(fields[dimensionName]) || fields[dimensionName] < 1) {
+      pushMessage(
+        errors,
+        `${componentPath}.fields.${dimensionName}`,
+        `collision.bounds ${dimensionName} must be an integer >= 1`
+      );
+    }
+  }
+
+  if (fields.solid !== undefined && typeof fields.solid !== 'boolean') {
+    pushMessage(errors, `${componentPath}.fields.solid`, 'collision.bounds solid must be a boolean when provided');
+  }
+}
+
 export function validateSceneInvariants(scene) {
   const errors = [];
   const warnings = [];
@@ -301,6 +349,10 @@ export function validateSceneInvariants(scene) {
           componentPath
         });
         validateCameraViewportComponent(component, componentPath, errors);
+      }
+
+      if (component.kind === 'collision.bounds') {
+        validateCollisionBoundsComponent(component, componentPath, errors);
       }
     }
 

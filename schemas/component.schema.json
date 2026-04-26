@@ -231,6 +231,58 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "collision.bounds"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "kind": {
+            "const": "collision.bounds"
+          },
+          "version": {
+            "const": 1
+          },
+          "replicated": {
+            "const": false
+          },
+          "fields": {
+            "type": "object",
+            "required": [
+              "width",
+              "height"
+            ],
+            "properties": {
+              "x": {
+                "type": "integer",
+                "default": 0
+              },
+              "y": {
+                "type": "integer",
+                "default": 0
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "solid": {
+                "type": "boolean",
+                "default": true
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
     }
   ],
   "additionalProperties": false
