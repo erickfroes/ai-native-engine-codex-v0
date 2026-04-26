@@ -4,6 +4,8 @@ import { validateAssetManifestV1 } from '../assets/validate-asset-manifest-v1.mj
 
 const DEFAULT_VIEWPORT = Object.freeze({ width: 320, height: 180 });
 const DEFAULT_DRAW_SIZE = 16;
+const LEGACY_SPRITE_COMPONENT_KIND = 'sprite';
+const VISUAL_SPRITE_COMPONENT_KIND = 'visual.sprite';
 
 function assertIntegerOption(name, value, minimum) {
   if (!Number.isInteger(value) || value < minimum) {
@@ -13,6 +15,11 @@ function assertIntegerOption(name, value, minimum) {
 
 function getComponent(entity, kind) {
   return (entity.components ?? []).find((component) => component?.kind === kind);
+}
+
+function getSpriteComponent(entity) {
+  return getComponent(entity, VISUAL_SPRITE_COMPONENT_KIND)
+    ?? getComponent(entity, LEGACY_SPRITE_COMPONENT_KIND);
 }
 
 function toInteger(value, fallback) {
@@ -32,7 +39,7 @@ function resolveTransformPosition(transform) {
 }
 
 function resolveDrawSize(entity) {
-  const sprite = getComponent(entity, 'sprite');
+  const sprite = getSpriteComponent(entity);
   const fields = sprite?.fields ?? {};
   const width = toInteger(fields.width, DEFAULT_DRAW_SIZE);
   const height = toInteger(fields.height, DEFAULT_DRAW_SIZE);
@@ -44,7 +51,7 @@ function resolveDrawSize(entity) {
 }
 
 function resolveDrawSizeWithAssetFallback(entity, asset) {
-  const sprite = getComponent(entity, 'sprite');
+  const sprite = getSpriteComponent(entity);
   const fields = sprite?.fields ?? {};
   const width = toInteger(fields.width, toInteger(asset?.width, DEFAULT_DRAW_SIZE));
   const height = toInteger(fields.height, toInteger(asset?.height, DEFAULT_DRAW_SIZE));
@@ -56,7 +63,7 @@ function resolveDrawSizeWithAssetFallback(entity, asset) {
 }
 
 function resolveLayer(entity) {
-  const sprite = getComponent(entity, 'sprite');
+  const sprite = getSpriteComponent(entity);
   return toInteger(sprite?.fields?.layer, 0);
 }
 
@@ -65,14 +72,14 @@ function resolveSpriteAssetId(entity, assetManifestProvided) {
     return undefined;
   }
 
-  const sprite = getComponent(entity, 'sprite');
+  const sprite = getSpriteComponent(entity);
   const assetId = sprite?.fields?.assetId;
   if (assetId === undefined) {
     return undefined;
   }
 
   if (typeof assetId !== 'string' || assetId.trim().length === 0) {
-    throw new Error(`buildRenderSnapshotV1: entity \`${entity.id}\` sprite.assetId must be a non-empty string`);
+    throw new Error(`buildRenderSnapshotV1: entity \`${entity.id}\` ${sprite.kind}.assetId must be a non-empty string`);
   }
 
   return assetId.trim();
