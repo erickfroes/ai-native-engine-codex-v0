@@ -1,4 +1,5 @@
 import { loadSceneFile } from '../scene/load-scene.mjs';
+import { validateSceneInvariants } from '../scene/invariants.mjs';
 
 const COLLISION_BOUNDS_COMPONENT_KIND = 'collision.bounds';
 const TRANSFORM_COMPONENT_KIND = 'transform';
@@ -23,17 +24,67 @@ function resolveTransformPosition(transform) {
   };
 }
 
+function pushSceneStructureError(errors, errorPath, message) {
+  errors.push(`${errorPath}: ${message}`);
+}
+
 function validateSceneObject(scene) {
+  const errors = [];
+
   if (!scene || typeof scene !== 'object' || Array.isArray(scene)) {
     throw new Error('buildCollisionBoundsReportV1: `sceneOrPath` must be a scene object or path string');
   }
 
-  if (!scene.metadata || typeof scene.metadata !== 'object' || typeof scene.metadata.name !== 'string') {
-    throw new Error('buildCollisionBoundsReportV1: scene object is invalid: $.metadata.name must be a string');
+  if (!scene.metadata || typeof scene.metadata !== 'object' || Array.isArray(scene.metadata)) {
+    pushSceneStructureError(errors, '$.metadata', 'must be an object');
+  } else if (typeof scene.metadata.name !== 'string' || scene.metadata.name.trim().length === 0) {
+    pushSceneStructureError(errors, '$.metadata.name', 'must be a non-empty string');
   }
 
   if (!Array.isArray(scene.entities)) {
-    throw new Error('buildCollisionBoundsReportV1: scene object is invalid: $.entities must be an array');
+    pushSceneStructureError(errors, '$.entities', 'must be an array');
+  } else {
+    for (const [entityIndex, entity] of scene.entities.entries()) {
+      const entityPath = `$.entities[${entityIndex}]`;
+
+      if (!entity || typeof entity !== 'object' || Array.isArray(entity)) {
+        pushSceneStructureError(errors, entityPath, 'must be an object');
+        continue;
+      }
+
+      if (typeof entity.id !== 'string' || entity.id.trim().length === 0) {
+        pushSceneStructureError(errors, `${entityPath}.id`, 'must be a non-empty string');
+      }
+
+      if (!Array.isArray(entity.components)) {
+        pushSceneStructureError(errors, `${entityPath}.components`, 'must be an array');
+        continue;
+      }
+
+      for (const [componentIndex, component] of entity.components.entries()) {
+        const componentPath = `${entityPath}.components[${componentIndex}]`;
+
+        if (!component || typeof component !== 'object' || Array.isArray(component)) {
+          pushSceneStructureError(errors, componentPath, 'must be an object');
+          continue;
+        }
+
+        if (typeof component.kind !== 'string' || component.kind.trim().length === 0) {
+          pushSceneStructureError(errors, `${componentPath}.kind`, 'must be a non-empty string');
+        }
+      }
+    }
+  }
+
+  if (errors.length === 0) {
+    const invariantReport = validateSceneInvariants(scene);
+    for (const error of invariantReport.errors) {
+      pushSceneStructureError(errors, error.path, error.message);
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`buildCollisionBoundsReportV1: scene object is invalid: ${errors.join('; ')}`);
   }
 }
 
@@ -68,7 +119,13 @@ function toCollisionBound(entity) {
 }
 
 function sortBounds(left, right) {
-  return left.entityId.localeCompare(right.entityId);
+  if (left.entityId < right.entityId) {
+    return -1;
+  }
+  if (left.entityId > right.entityId) {
+    return 1;
+  }
+  return 0;
 }
 
 export async function buildCollisionBoundsReportV1(sceneOrPath) {

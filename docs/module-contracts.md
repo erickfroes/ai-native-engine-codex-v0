@@ -158,6 +158,21 @@ Compatibilidade:
 - com `camera.viewport`, o builder desloca drawCalls por offset e pode derivar `viewport.width` e `viewport.height`;
 - nao adiciona zoom, culling, follow target, smooth camera, editor, Pixi, Three ou WebGL.
 
+## Collision Bounds v1 (gameplay declarativo minimo)
+
+Contrato declarativo minimo para bounds retangulares de colisao em entidades:
+
+- ver `docs/COLLISION_BOUNDS_V1.md`.
+
+Compatibilidade:
+
+- gera `CollisionBoundsReport v1` via runtime, CLI e MCP;
+- combina `transform` com offset local de `collision.bounds`;
+- ordena bounds por `entityId` para preservar determinismo;
+- cenas sem `collision.bounds` retornam `bounds: []`;
+- nao altera `RenderSnapshot v1`, Render SVG, Canvas2D Demo ou Browser Playable Demo;
+- nao adiciona fisica, resolucao de colisao, bloqueio de movimento, colisao com `tile.layer`, pathfinding, editor ou servidor.
+
 ## Input Intent v1 (input headless opt-in no loop)
 
 Contrato de intenção de input headless, com integração opt-in no `run-loop`/`run_loop` e sem acoplamento com `Scene Document v1` ou `simulate-state`:

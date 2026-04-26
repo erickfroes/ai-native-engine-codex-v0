@@ -190,6 +190,47 @@ test('buildRenderSnapshotV1 keeps old scenes without visual.sprite on rect fallb
   assert.deepEqual(snapshot.drawCalls.map((drawCall) => drawCall.id), ['camera.main', 'player.hero']);
 });
 
+test('buildRenderSnapshotV1 ignores collision.bounds without changing drawCalls', async () => {
+  const scene = await loadSceneFile(tutorialScenePath);
+  const sceneWithCollisionBounds = {
+    ...scene,
+    metadata: {
+      ...scene.metadata,
+      name: 'tutorial-with-collision-bounds'
+    },
+    entities: scene.entities.map((entity) => {
+      if (entity.id !== 'player.hero') {
+        return entity;
+      }
+
+      return {
+        ...entity,
+        components: [
+          ...entity.components,
+          {
+            kind: 'collision.bounds',
+            version: 1,
+            replicated: false,
+            fields: {
+              x: 1,
+              y: 2,
+              width: 12,
+              height: 14,
+              solid: true
+            }
+          }
+        ]
+      };
+    })
+  };
+
+  const withoutCollisionBounds = await buildRenderSnapshotV1(scene);
+  const withCollisionBounds = await buildRenderSnapshotV1(sceneWithCollisionBounds);
+
+  assertRenderSnapshotV1(withCollisionBounds);
+  assert.deepEqual(withCollisionBounds.drawCalls, withoutCollisionBounds.drawCalls);
+});
+
 test('buildRenderSnapshotV1 applies camera viewport offsets to tile.layer and visual.sprite drawCalls', async () => {
   const snapshot = await buildRenderSnapshotV1(cameraViewportScenePath, {
     assetManifestPath: visualSpriteAssetManifestPath

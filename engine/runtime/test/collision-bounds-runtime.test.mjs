@@ -120,6 +120,33 @@ test('buildCollisionBoundsReportV1 supports scene objects, local offsets, solid 
   ]);
 });
 
+test('buildCollisionBoundsReportV1 fails predictably for invalid raw collision bounds scene objects', async () => {
+  await assert.rejects(
+    () => buildCollisionBoundsReportV1({
+      version: 1,
+      metadata: { name: 'invalid-raw-collision-bounds' },
+      systems: ['core.loop'],
+      entities: [
+        {
+          id: 'player.hero',
+          components: [
+            {
+              kind: 'collision.bounds',
+              version: 1,
+              replicated: false,
+              fields: {
+                width: 0,
+                height: 16
+              }
+            }
+          ]
+        }
+      ]
+    }),
+    /buildCollisionBoundsReportV1: scene object is invalid: \$\.entities\[0\]\.components\[0\]\.fields\.width: collision\.bounds width must be an integer >= 1/
+  );
+});
+
 test('buildCollisionBoundsReportV1 does not detect or resolve collisions', async () => {
   const report = await buildCollisionBoundsReportV1({
     version: 1,
