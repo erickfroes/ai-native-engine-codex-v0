@@ -90,7 +90,7 @@ function assertBrowserDemoStructuredContent(payload, options = {}) {
   assert.match(payload.html, /addEventListener\("keydown"/);
   assert.doesNotMatch(
     payload.html,
-    /<script[^>]+src=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|Date\.now|new Date|performance\.now|localStorage/
+    /<script[^>]+src=|<link[^>]+href=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|import\(|Date\.now|new Date|performance\.now|localStorage/
   );
 }
 
@@ -103,6 +103,8 @@ function assertBrowserDemoStructuredContentWithAssetLoading(payload) {
   assert.match(payload.html, /new Image\(\)/);
   assert.match(payload.html, /drawImage\(/);
   assert.match(payload.html, /assetSrc/);
+  assert.match(payload.html, /"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/);
+  assert.match(payload.html, /"assetSrc":"file:\/\/\/[^"]+images\/camera-icon\.png"/);
 }
 
 test('mcp server lists tools, validates scenes, emits snapshots and runs deterministic replay', async () => {
@@ -599,6 +601,28 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(
       renderBrowserDemoWithManifestInvalidFormatResponse.result.content[0].text,
       /asset manifest is invalid:/
+    );
+
+    const renderBrowserDemoWithManifestTraversalResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        assetManifestPath: './fixtures/assets/invalid.traversal-src.asset-manifest.json'
+      }
+    });
+
+    assert.equal(renderBrowserDemoWithManifestTraversalResponse.result.isError, true);
+    assert.equal(
+      renderBrowserDemoWithManifestTraversalResponse.result.structuredContent.errorName,
+      'AssetManifestValidationError'
+    );
+    assert.match(
+      renderBrowserDemoWithManifestTraversalResponse.result.content[0].text,
+      /asset manifest is invalid:/
+    );
+    assert.match(
+      renderBrowserDemoWithManifestTraversalResponse.result.structuredContent.errorMessage,
+      /\$\.assets\[0\]\.src: must stay inside the manifest directory/
     );
 
     const renderBrowserDemoInvalidWidthResponse = await client.request('tools/call', {
