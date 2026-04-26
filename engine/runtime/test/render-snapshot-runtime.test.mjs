@@ -444,6 +444,50 @@ test('buildRenderSnapshotV1 lets visual.sprite dimensions override manifest dime
   assert.equal(snapshot.drawCalls[0].height, 24);
 });
 
+test('buildRenderSnapshotV1 prefers visual.sprite over legacy sprite when both exist', async () => {
+  const assetManifest = await loadValidAssetManifest();
+  const snapshot = await buildRenderSnapshotV1(
+    {
+      metadata: { name: 'visual-sprite-precedence' },
+      entities: [
+        {
+          id: 'player.hero',
+          components: [
+            {
+              kind: 'transform',
+              fields: { x: 10, y: 12 }
+            },
+            {
+              kind: 'sprite',
+              fields: { assetId: 'camera.icon', width: 8, height: 8, layer: 0 }
+            },
+            {
+              kind: 'visual.sprite',
+              fields: { assetId: 'player.sprite', width: 20, height: 24, layer: 2 }
+            }
+          ]
+        }
+      ]
+    },
+    { assetManifest }
+  );
+
+  assertRenderSnapshotV1(snapshot);
+  assert.deepEqual(snapshot.drawCalls, [
+    {
+      kind: 'sprite',
+      id: 'player.hero',
+      assetId: 'player.sprite',
+      assetSrc: 'images/player.png',
+      x: 10,
+      y: 12,
+      width: 20,
+      height: 24,
+      layer: 2
+    }
+  ]);
+});
+
 test('buildRenderSnapshotV1 uses asset dimensions when visual.sprite omits size', async () => {
   const scene = await loadSceneFile(visualSpriteScenePath);
   const visualSprite = scene.entities[0].components.find((component) => component.kind === 'visual.sprite');

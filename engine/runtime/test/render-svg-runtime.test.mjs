@@ -94,3 +94,31 @@ test('renderSnapshotToSvgV1 preserves drawCall order already present in the snap
 
   assert.ok(svg.indexOf('id="z.entity"') < svg.indexOf('id="a.entity"'));
 });
+
+test('renderSnapshotToSvgV1 ignores optional assetSrc when rendering sprite fallback rects', () => {
+  const svg = renderSnapshotToSvgV1({
+    renderSnapshotVersion: 1,
+    scene: 'visual-sprite-svg',
+    tick: 4,
+    viewport: {
+      width: 64,
+      height: 48
+    },
+    drawCalls: [
+      {
+        kind: 'sprite',
+        id: 'player.hero',
+        assetId: 'player.sprite',
+        assetSrc: 'file:///repo/fixtures/assets/images/player.png',
+        x: 10,
+        y: 12,
+        width: 20,
+        height: 24,
+        layer: 2
+      }
+    ]
+  });
+
+  assert.match(svg, /data-asset-id="player\.sprite"/);
+  assert.doesNotMatch(svg, /assetSrc|file:\/\/\//);
+});

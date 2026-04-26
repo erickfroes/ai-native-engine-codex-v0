@@ -112,6 +112,36 @@ test('visual.sprite component invariants are validated predictably', () => {
   assert.ok(report.errors.some((error) => error.path.endsWith('.fields.tint') && error.message.includes('not allowed')));
 });
 
+test('visual.sprite rejects non-object fields predictably', () => {
+  const report = validateSceneInvariants({
+    version: 1,
+    metadata: { name: 'invalid-visual-fields' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'player.hero',
+        components: [
+          {
+            kind: 'transform',
+            version: 1,
+            replicated: false,
+            fields: { x: 0, y: 0 }
+          },
+          {
+            kind: 'visual.sprite',
+            version: 1,
+            replicated: false,
+            fields: null
+          }
+        ]
+      }
+    ]
+  });
+
+  assert.ok(report.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
+  assert.equal(report.errors.some((error) => error.path.endsWith('.fields.assetId')), false);
+});
+
 test('visual.sprite rejects missing assetId predictably', () => {
   const report = validateVisualSpriteFields({ width: 16, height: 16 });
 
