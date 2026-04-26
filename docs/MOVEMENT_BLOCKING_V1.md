@@ -60,6 +60,16 @@ MCP:
 - se a entidade nao tiver `collision.bounds`, o report nao bloqueia e ainda retorna a posicao candidata.
 - o algoritmo v1 e uma varredura simples sobre bounds (`O(n)` contra os bounds da cena), adequada para V1 small 2D.
 
+## Bordas previsiveis
+
+- entidade alvo ausente falha de forma previsivel no runtime, CLI e MCP.
+- sem `transform`, `from` usa `0,0`.
+- sem `collision.bounds` na entidade alvo, a tentativa nao bloqueia porque nao ha bounds candidato.
+- action `move` ausente ou eixo `0,0` produz `attemptedMove: { "x": 0, "y": 0 }`.
+- multiplos blockers solidos aparecem em `blockingEntities` ordenados por `entityId`.
+- `inputIntent` invalido falha via validador de `InputIntent v1` nos fluxos CLI/MCP.
+- paths inexistentes de cena ou input intent falham como erro de arquivo previsivel.
+
 ## Compatibilidade
 
 - nao altera `run-loop`;
