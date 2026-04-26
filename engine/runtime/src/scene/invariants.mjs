@@ -6,6 +6,10 @@ function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+function isValidTileId(value) {
+  return Number.isInteger(value) || (typeof value === 'string' && value.trim().length > 0);
+}
+
 function validateVisualSpriteComponent(component, componentPath, errors) {
   const fields = component.fields;
   const allowedFieldNames = new Set(['assetId', 'width', 'height', 'layer']);
@@ -44,6 +48,150 @@ function validateVisualSpriteComponent(component, componentPath, errors) {
 
   if (fields.layer !== undefined && !Number.isInteger(fields.layer)) {
     pushMessage(errors, `${componentPath}.fields.layer`, 'visual.sprite layer must be an integer');
+  }
+}
+
+function validateTileLayerPaletteEntry(entry, entryPath, errors) {
+  if (!isPlainObject(entry)) {
+    pushMessage(errors, entryPath, 'tile.layer palette entry must be an object');
+    return;
+  }
+
+  if (entry.kind === 'empty') {
+    for (const fieldName of Object.keys(entry)) {
+      if (fieldName !== 'kind') {
+        pushMessage(errors, `${entryPath}.${fieldName}`, 'is not allowed for tile.layer empty palette entry');
+      }
+    }
+    return;
+  }
+
+  if (entry.kind === 'rect') {
+    const allowedFieldNames = new Set(['kind', 'width', 'height']);
+    for (const fieldName of Object.keys(entry)) {
+      if (!allowedFieldNames.has(fieldName)) {
+        pushMessage(errors, `${entryPath}.${fieldName}`, 'is not allowed for tile.layer rect palette entry');
+      }
+    }
+
+    for (const dimensionName of ['width', 'height']) {
+      if (
+        entry[dimensionName] !== undefined &&
+        (!Number.isInteger(entry[dimensionName]) || entry[dimensionName] < 1)
+      ) {
+        pushMessage(
+          errors,
+          `${entryPath}.${dimensionName}`,
+          `tile.layer palette rect ${dimensionName} must be an integer >= 1`
+        );
+      }
+    }
+    return;
+  }
+
+  pushMessage(errors, `${entryPath}.kind`, 'tile.layer palette entry kind must be `empty` or `rect`');
+}
+
+function validateTileLayerComponent(component, componentPath, errors) {
+  const fields = component.fields;
+  const allowedFieldNames = new Set([
+    'tileWidth',
+    'tileHeight',
+    'columns',
+    'rows',
+    'layer',
+    'tiles',
+    'palette'
+  ]);
+
+  if (component.version !== 1) {
+    pushMessage(errors, `${componentPath}.version`, 'tile.layer version must be exactly 1');
+  }
+
+  if (component.replicated !== false) {
+    pushMessage(errors, `${componentPath}.replicated`, 'tile.layer must not be replicated');
+  }
+
+  if (!isPlainObject(fields)) {
+    pushMessage(errors, `${componentPath}.fields`, 'tile.layer fields must be an object');
+    return;
+  }
+
+  for (const fieldName of Object.keys(fields)) {
+    if (!allowedFieldNames.has(fieldName)) {
+      pushMessage(errors, `${componentPath}.fields.${fieldName}`, 'is not allowed for tile.layer');
+    }
+  }
+
+  for (const dimensionName of ['tileWidth', 'tileHeight', 'columns', 'rows']) {
+    if (!Number.isInteger(fields[dimensionName]) || fields[dimensionName] < 1) {
+      pushMessage(
+        errors,
+        `${componentPath}.fields.${dimensionName}`,
+        `tile.layer ${dimensionName} must be an integer >= 1`
+      );
+    }
+  }
+
+  if (fields.layer !== undefined && !Number.isInteger(fields.layer)) {
+    pushMessage(errors, `${componentPath}.fields.layer`, 'tile.layer layer must be an integer');
+  }
+
+  const paletteIds = new Set();
+  if (!isPlainObject(fields.palette)) {
+    pushMessage(errors, `${componentPath}.fields.palette`, 'tile.layer palette must be an object');
+  } else {
+    const paletteKeys = Object.keys(fields.palette);
+    if (paletteKeys.length === 0) {
+      pushMessage(errors, `${componentPath}.fields.palette`, 'tile.layer palette must define at least one tile');
+    }
+
+    for (const tileId of paletteKeys) {
+      if (tileId.trim().length === 0) {
+        pushMessage(errors, `${componentPath}.fields.palette`, 'tile.layer palette tile ids must be non-empty strings');
+      } else {
+        paletteIds.add(tileId);
+      }
+      validateTileLayerPaletteEntry(
+        fields.palette[tileId],
+        `${componentPath}.fields.palette.${JSON.stringify(tileId)}`,
+        errors
+      );
+    }
+  }
+
+  if (!Array.isArray(fields.tiles)) {
+    pushMessage(errors, `${componentPath}.fields.tiles`, 'tile.layer tiles must be an array of rows');
+    return;
+  }
+
+  if (Number.isInteger(fields.rows) && fields.rows >= 1 && fields.tiles.length !== fields.rows) {
+    pushMessage(errors, `${componentPath}.fields.tiles`, 'tile.layer tiles row count must equal rows');
+  }
+
+  for (const [rowIndex, row] of fields.tiles.entries()) {
+    const rowPath = `${componentPath}.fields.tiles[${rowIndex}]`;
+    if (!Array.isArray(row)) {
+      pushMessage(errors, rowPath, 'tile.layer tiles row must be an array');
+      continue;
+    }
+
+    if (Number.isInteger(fields.columns) && fields.columns >= 1 && row.length !== fields.columns) {
+      pushMessage(errors, rowPath, 'tile.layer tiles column count must equal columns');
+    }
+
+    for (const [columnIndex, tileId] of row.entries()) {
+      const tilePath = `${rowPath}[${columnIndex}]`;
+      if (!isValidTileId(tileId)) {
+        pushMessage(errors, tilePath, 'tile.layer tile id must be an integer or non-empty string');
+        continue;
+      }
+
+      const paletteId = String(tileId);
+      if (isPlainObject(fields.palette) && !paletteIds.has(paletteId)) {
+        pushMessage(errors, tilePath, `tile.layer tile id \`${paletteId}\` must exist in palette`);
+      }
+    }
   }
 }
 
@@ -96,6 +244,10 @@ export function validateSceneInvariants(scene) {
 
       if (component.kind === 'visual.sprite') {
         validateVisualSpriteComponent(component, componentPath, errors);
+      }
+
+      if (component.kind === 'tile.layer') {
+        validateTileLayerComponent(component, componentPath, errors);
       }
     }
   }

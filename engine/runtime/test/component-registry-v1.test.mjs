@@ -13,10 +13,11 @@ test('Component Registry v1 has stable known components and lookup APIs', () => 
   const registry = getComponentRegistryV1();
   assertComponentRegistryV1(registry);
 
-  assert.deepEqual(listKnownComponents(), ['transform', 'velocity', 'visual.sprite']);
+  assert.deepEqual(listKnownComponents(), ['transform', 'velocity', 'visual.sprite', 'tile.layer']);
   assert.equal(isKnownComponent('transform'), true);
   assert.equal(isKnownComponent('velocity'), true);
   assert.equal(isKnownComponent('visual.sprite'), true);
+  assert.equal(isKnownComponent('tile.layer'), true);
   assert.equal(isKnownComponent('unknown'), false);
 
   const transform = getKnownComponent('transform');
@@ -26,6 +27,10 @@ test('Component Registry v1 has stable known components and lookup APIs', () => 
   const visualSprite = getKnownComponent('visual.sprite');
   assert.equal(visualSprite?.name, 'visual.sprite');
   assert.equal(visualSprite?.version, 1);
+
+  const tileLayer = getKnownComponent('tile.layer');
+  assert.equal(tileLayer?.name, 'tile.layer');
+  assert.equal(tileLayer?.version, 1);
 
   const missing = getKnownComponent('missing.component');
   assert.equal(missing, null);

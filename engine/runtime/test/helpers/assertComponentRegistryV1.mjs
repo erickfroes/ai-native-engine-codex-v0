@@ -7,7 +7,7 @@ export function assertComponentRegistryV1(registry) {
   assert.equal(Array.isArray(registry.components), true);
 
   const names = registry.components.map((component) => component.name);
-  assert.deepEqual(names, ['transform', 'velocity', 'visual.sprite']);
+  assert.deepEqual(names, ['transform', 'velocity', 'visual.sprite', 'tile.layer']);
 
   const uniqueNames = new Set(names);
   assert.equal(uniqueNames.size, names.length);
