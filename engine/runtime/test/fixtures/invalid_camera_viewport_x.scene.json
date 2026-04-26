@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "invalid-camera-viewport-x"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "camera.main",
+      "components": [
+        {
+          "kind": "camera.viewport",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": "left",
+            "y": 0,
+            "width": 160,
+            "height": 90
+          }
+        }
+      ]
+    }
+  ]
+}

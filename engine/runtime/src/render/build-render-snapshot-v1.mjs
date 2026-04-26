@@ -7,6 +7,7 @@ const DEFAULT_DRAW_SIZE = 16;
 const LEGACY_SPRITE_COMPONENT_KIND = 'sprite';
 const VISUAL_SPRITE_COMPONENT_KIND = 'visual.sprite';
 const TILE_LAYER_COMPONENT_KIND = 'tile.layer';
+const CAMERA_VIEWPORT_COMPONENT_KIND = 'camera.viewport';
 
 function assertIntegerOption(name, value, minimum) {
   if (!Number.isInteger(value) || value < minimum) {
@@ -25,6 +26,10 @@ function getSpriteComponent(entity) {
 
 function getTileLayerComponent(entity) {
   return getComponent(entity, TILE_LAYER_COMPONENT_KIND);
+}
+
+function getCameraViewportComponent(entity) {
+  return getComponent(entity, CAMERA_VIEWPORT_COMPONENT_KIND);
 }
 
 function toInteger(value, fallback) {
@@ -90,6 +95,70 @@ function resolveSpriteAssetId(entity, assetManifestProvided) {
   return assetId.trim();
 }
 
+function offsetPosition(position, cameraPosition) {
+  return {
+    x: position.x - cameraPosition.x,
+    y: position.y - cameraPosition.y
+  };
+}
+
+function resolveCameraViewport(scene) {
+  const entities = Array.isArray(scene?.entities) ? scene.entities : [];
+  const cameraEntities = entities.filter((entity) => getCameraViewportComponent(entity));
+
+  if (cameraEntities.length === 0) {
+    return undefined;
+  }
+
+  if (cameraEntities.length > 1) {
+    throw new Error(
+      `buildRenderSnapshotV1: camera.viewport must be unique per scene; found multiple on entities: ${cameraEntities
+        .map((entity) => entity.id)
+        .join(', ')}`
+    );
+  }
+
+  const entity = cameraEntities[0];
+  const fields = getCameraViewportComponent(entity)?.fields ?? {};
+
+  for (const coordinateName of ['x', 'y']) {
+    if (!Number.isInteger(fields[coordinateName])) {
+      throw new Error(
+        `buildRenderSnapshotV1: entity \`${entity.id}\` camera.viewport.${coordinateName} must be an integer`
+      );
+    }
+  }
+
+  for (const dimensionName of ['width', 'height']) {
+    if (!Number.isInteger(fields[dimensionName]) || fields[dimensionName] < 1) {
+      throw new Error(
+        `buildRenderSnapshotV1: entity \`${entity.id}\` camera.viewport.${dimensionName} must be an integer >= 1`
+      );
+    }
+  }
+
+  return {
+    entityId: entity.id,
+    x: fields.x,
+    y: fields.y,
+    width: fields.width,
+    height: fields.height
+  };
+}
+
+function resolveViewport(scene, options) {
+  const cameraViewport = resolveCameraViewport(scene);
+
+  return {
+    cameraPosition: {
+      x: cameraViewport?.x ?? 0,
+      y: cameraViewport?.y ?? 0
+    },
+    width: options.width ?? cameraViewport?.width ?? DEFAULT_VIEWPORT.width,
+    height: options.height ?? cameraViewport?.height ?? DEFAULT_VIEWPORT.height
+  };
+}
+
 function toRectDrawCall(entity, position, size) {
   return {
     kind: 'rect',
@@ -115,7 +184,7 @@ function toSpriteDrawCall(entity, position, size, assetId) {
   };
 }
 
-function toTileLayerDrawCalls(entity) {
+function toTileLayerDrawCalls(entity, cameraPosition) {
   const tileLayer = getTileLayerComponent(entity);
   if (!tileLayer) {
     return [];
@@ -147,11 +216,18 @@ function toTileLayerDrawCalls(entity) {
 
       const width = toInteger(paletteEntry.width, tileWidth);
       const height = toInteger(paletteEntry.height, tileHeight);
+      const position = offsetPosition(
+        {
+          x: columnIndex * tileWidth,
+          y: rowIndex * tileHeight
+        },
+        cameraPosition
+      );
       drawCalls.push({
         kind: 'rect',
         id: `${entity.id}.tile.${rowIndex}.${columnIndex}`,
-        x: columnIndex * tileWidth,
-        y: rowIndex * tileHeight,
+        x: position.x,
+        y: position.y,
         width: width >= 1 ? width : tileWidth,
         height: height >= 1 ? height : tileHeight,
         layer
@@ -162,13 +238,17 @@ function toTileLayerDrawCalls(entity) {
   return drawCalls;
 }
 
-function toDrawCall(entity, assetsById = undefined) {
+function toDrawCall(entity, cameraPosition, assetsById = undefined) {
+  if (getCameraViewportComponent(entity)) {
+    return undefined;
+  }
+
   const transform = getComponent(entity, 'transform');
   if (!transform) {
     return undefined;
   }
 
-  const position = resolveTransformPosition(transform);
+  const position = offsetPosition(resolveTransformPosition(transform), cameraPosition);
   const assetId = resolveSpriteAssetId(entity, assetsById !== undefined);
   if (assetId === undefined) {
     return toRectDrawCall(entity, position, resolveDrawSize(entity));
@@ -185,9 +265,9 @@ function toDrawCall(entity, assetsById = undefined) {
   };
 }
 
-function toEntityDrawCalls(entity, assetsById = undefined) {
-  const drawCalls = toTileLayerDrawCalls(entity);
-  const entityDrawCall = toDrawCall(entity, assetsById);
+function toEntityDrawCalls(entity, cameraPosition, assetsById = undefined) {
+  const drawCalls = toTileLayerDrawCalls(entity, cameraPosition);
+  const entityDrawCall = toDrawCall(entity, cameraPosition, assetsById);
   if (entityDrawCall) {
     drawCalls.push(entityDrawCall);
   }
@@ -241,20 +321,23 @@ async function resolveAssetManifest(options) {
 
 export async function buildRenderSnapshotV1(sceneOrPath, options = {}) {
   const tick = options.tick ?? 0;
-  const width = options.width ?? DEFAULT_VIEWPORT.width;
-  const height = options.height ?? DEFAULT_VIEWPORT.height;
 
   assertIntegerOption('tick', tick, 0);
+
+  const scene = await resolveScene(sceneOrPath);
+  const viewport = resolveViewport(scene, options);
+  const width = viewport.width;
+  const height = viewport.height;
+
   assertIntegerOption('width', width, 1);
   assertIntegerOption('height', height, 1);
 
-  const scene = await resolveScene(sceneOrPath);
   const assetManifest = await resolveAssetManifest(options);
   const assetsById = assetManifest === undefined
     ? undefined
     : new Map(assetManifest.assets.map((asset) => [asset.id, asset]));
   const drawCalls = (scene.entities ?? [])
-    .flatMap((entity) => toEntityDrawCalls(entity, assetsById))
+    .flatMap((entity) => toEntityDrawCalls(entity, viewport.cameraPosition, assetsById))
     .sort(sortDrawCalls);
 
   return {
