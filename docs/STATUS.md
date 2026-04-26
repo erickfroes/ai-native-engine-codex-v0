@@ -1,63 +1,59 @@
-# STATUS - Meta 2 Visual/Interativa
+# STATUS - Engine AI-native
 
 ## Estado atual
 
-A Meta 2 esta concluida como camada visual/interativa minima sobre a base headless deterministica da Meta 1.
+A Meta 1 Headless e a Meta 2 Visual/Interativa estao concluidas como bases de engine pequenas, deterministicas e automatizaveis por Codex.
 
-O repositorio hoje entrega:
+O projeto agora entra na Meta 3, cujo foco e **Gameplay Foundation**: colisao, overlap, bloqueio de movimento, colisao com tile layer e uma demo browser com regras reais de gameplay.
 
-- validacao de cena, save e input;
-- loop headless interpretavel;
-- replay e replay artifact deterministico;
+## Capacidades consolidadas
+
+- contratos v1 e schemas documentados;
+- runtime headless deterministico;
+- loop interpretavel;
+- InputIntent v1 e KeyboardInputScript v1;
 - save/load v1 minimo;
-- State Mutation Trace v1 opt-in;
+- State Simulation v1 e State Mutation Trace v1;
 - RenderSnapshot v1;
 - Render SVG v1;
-- SVG Demo HTML v1;
 - Canvas2D Demo v1;
 - Browser Playable Demo v1;
-- Browser Runtime Loop v1 local ao HTML;
+- Browser Runtime Loop v1;
 - Asset Manifest v1;
-- drawCall `sprite`;
+- sprite drawCall;
 - `visual.sprite`;
 - `tile.layer`;
 - `camera.viewport`;
-- image loading local opcional com fallback;
-- CLI e MCP para os principais fluxos visuais;
-- suites cross-interface para contratos criticos.
+- image loading local com fallback;
+- `collision.bounds` e CollisionBoundsReport v1;
+- CLI/MCP para fluxos principais;
+- testes cross-interface.
 
-## O que esta dentro da Meta 2
+## Foco atual recomendado
 
-- render declarativo por `RenderSnapshot v1`;
-- serializacao textual por `Render SVG v1`;
-- demos HTML autocontidas por SVG, Canvas2D e Browser Playable Demo;
-- componentes visuais declarativos pequenos;
-- camera declarativa minima via offset de drawCalls;
-- carregamento local de imagem apenas na Browser Playable Demo, com fallback deterministico;
-- validacao automatica por runtime, CLI, MCP e testes cross-interface.
+1. Collision Overlap Report v1.
+2. Movement Blocking v1.
+3. Tile Collision v1.
+4. Browser Demo com blocking real.
+5. Fechamento da V1 Small 2D Games.
 
-## O que fica fora de escopo da Meta 2
+## Versoes de produto
 
-- Pixi;
-- Three;
-- WebGL;
-- renderer real do engine;
-- editor visual;
-- servidor;
-- pipeline pesado de assets;
-- colisao;
-- pathfinding;
-- chunk streaming;
-- animacao avancada;
-- multiplayer real;
-- gameplay em tempo real no browser.
+- V1: jogos pequenos 2D.
+- V2: jogos 2D/2.5D indie production.
+- V3: 3D indie.
+- V4: runtime/editor AA.
+- V5/V6: caminho aspiracional para 3D AAA.
 
-## Superficies canonicas
+Detalhes: `docs/ENGINE_VERSION_ROADMAP.md`.
 
-- runtime: funcoes e contratos internos versionados;
-- CLI: automacao local e exemplos humanos;
-- MCP: automacao para agentes;
-- docs: contratos curtos e limites de escopo.
+## Riscos atuais
+
+- expandir gameplay sem contratos de colisao/movimento;
+- acoplar browser demo ao runtime canonico;
+- criar editor antes de solidificar V1 gameplay;
+- criar pipeline de assets pesado antes de uma demo jogavel real;
+- usar subagentes sem delimitar escopo, gerando patches conflitantes.
 
 ## Validacao obrigatoria
 
@@ -67,12 +63,8 @@ npm run validate:scenes
 npm run smoke
 ```
 
-## Sinal para Meta 3
+## Regra de continuidade
 
-A Meta 3 pode partir desta base para explorar:
+Toda proxima feature deve seguir o padrao:
 
-- renderer real do engine sem quebrar contratos v1;
-- editor/tooling visual sobre os contratos existentes;
-- assets pipeline mais completo;
-- gameplay e interacao alem da Browser Playable Demo local;
-- auditoria visual/performance mais rica.
+contrato -> fixture -> runtime -> CLI/MCP -> cross-interface -> docs -> hardening.
