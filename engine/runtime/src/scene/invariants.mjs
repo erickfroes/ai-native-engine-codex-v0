@@ -67,7 +67,7 @@ function validateTileLayerPaletteEntry(entry, entryPath, errors) {
   }
 
   if (entry.kind === 'rect') {
-    const allowedFieldNames = new Set(['kind', 'width', 'height']);
+    const allowedFieldNames = new Set(['kind', 'width', 'height', 'solid']);
     for (const fieldName of Object.keys(entry)) {
       if (!allowedFieldNames.has(fieldName)) {
         pushMessage(errors, `${entryPath}.${fieldName}`, 'is not allowed for tile.layer rect palette entry');
@@ -85,6 +85,10 @@ function validateTileLayerPaletteEntry(entry, entryPath, errors) {
           `tile.layer palette rect ${dimensionName} must be an integer >= 1`
         );
       }
+    }
+
+    if (entry.solid !== undefined && typeof entry.solid !== 'boolean') {
+      pushMessage(errors, `${entryPath}.solid`, 'tile.layer palette rect solid must be a boolean when provided');
     }
     return;
   }

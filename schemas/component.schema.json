@@ -171,6 +171,10 @@
                         "height": {
                           "type": "integer",
                           "minimum": 1
+                        },
+                        "solid": {
+                          "type": "boolean",
+                          "default": false
                         }
                       },
                       "additionalProperties": false

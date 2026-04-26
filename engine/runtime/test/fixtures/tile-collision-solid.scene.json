@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "tile-collision-solid-fixture"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "map.walls",
+      "components": [
+        {
+          "kind": "tile.layer",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "tileWidth": 16,
+            "tileHeight": 16,
+            "columns": 3,
+            "rows": 2,
+            "layer": -10,
+            "tiles": [
+              [1, 0, "wall"],
+              [0, 1, 0]
+            ],
+            "palette": {
+              "0": {
+                "kind": "empty"
+              },
+              "1": {
+                "kind": "rect",
+                "solid": true
+              },
+              "wall": {
+                "kind": "rect",
+                "width": 24,
+                "height": 24,
+                "solid": true
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

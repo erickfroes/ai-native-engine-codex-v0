@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "tile-collision-empty-fixture"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "map.decor",
+      "components": [
+        {
+          "kind": "tile.layer",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "tileWidth": 16,
+            "tileHeight": 16,
+            "columns": 2,
+            "rows": 2,
+            "tiles": [
+              [0, 1],
+              [1, 0]
+            ],
+            "palette": {
+              "0": {
+                "kind": "empty"
+              },
+              "1": {
+                "kind": "rect"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

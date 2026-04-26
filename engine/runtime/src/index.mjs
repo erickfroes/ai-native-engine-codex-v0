@@ -62,6 +62,7 @@ export {
 export { buildCollisionBoundsReportV1 } from './collision/build-collision-bounds-report-v1.mjs';
 export { buildCollisionOverlapReportV1 } from './collision/build-collision-overlap-report-v1.mjs';
 export { buildMovementBlockingReportV1 } from './collision/build-movement-blocking-report-v1.mjs';
+export { buildTileCollisionReportV1 } from './collision/build-tile-collision-report-v1.mjs';
 export { getSystemRegistryV1, getKnownSystemDefinition } from './systems/system-registry.mjs';
 export {
   getSystemPhaseRegistryV1,
