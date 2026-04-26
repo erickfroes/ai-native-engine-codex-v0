@@ -6,6 +6,7 @@ const DEFAULT_VIEWPORT = Object.freeze({ width: 320, height: 180 });
 const DEFAULT_DRAW_SIZE = 16;
 const LEGACY_SPRITE_COMPONENT_KIND = 'sprite';
 const VISUAL_SPRITE_COMPONENT_KIND = 'visual.sprite';
+const TILE_LAYER_COMPONENT_KIND = 'tile.layer';
 
 function assertIntegerOption(name, value, minimum) {
   if (!Number.isInteger(value) || value < minimum) {
@@ -20,6 +21,10 @@ function getComponent(entity, kind) {
 function getSpriteComponent(entity) {
   return getComponent(entity, VISUAL_SPRITE_COMPONENT_KIND)
     ?? getComponent(entity, LEGACY_SPRITE_COMPONENT_KIND);
+}
+
+function getTileLayerComponent(entity) {
+  return getComponent(entity, TILE_LAYER_COMPONENT_KIND);
 }
 
 function toInteger(value, fallback) {
@@ -110,6 +115,53 @@ function toSpriteDrawCall(entity, position, size, assetId) {
   };
 }
 
+function toTileLayerDrawCalls(entity) {
+  const tileLayer = getTileLayerComponent(entity);
+  if (!tileLayer) {
+    return [];
+  }
+
+  const fields = tileLayer.fields ?? {};
+  const tileWidth = toInteger(fields.tileWidth, DEFAULT_DRAW_SIZE);
+  const tileHeight = toInteger(fields.tileHeight, DEFAULT_DRAW_SIZE);
+  const layer = toInteger(fields.layer, 0);
+  const tiles = Array.isArray(fields.tiles) ? fields.tiles : [];
+  const palette = fields.palette && typeof fields.palette === 'object' ? fields.palette : {};
+  const drawCalls = [];
+
+  for (const [rowIndex, row] of tiles.entries()) {
+    if (!Array.isArray(row)) {
+      continue;
+    }
+
+    for (const [columnIndex, tileId] of row.entries()) {
+      const paletteId = String(tileId);
+      const paletteEntry = palette[paletteId];
+      if (!paletteEntry || paletteEntry.kind === 'empty') {
+        continue;
+      }
+
+      if (paletteEntry.kind !== 'rect') {
+        continue;
+      }
+
+      const width = toInteger(paletteEntry.width, tileWidth);
+      const height = toInteger(paletteEntry.height, tileHeight);
+      drawCalls.push({
+        kind: 'rect',
+        id: `${entity.id}.tile.${rowIndex}.${columnIndex}`,
+        x: columnIndex * tileWidth,
+        y: rowIndex * tileHeight,
+        width: width >= 1 ? width : tileWidth,
+        height: height >= 1 ? height : tileHeight,
+        layer
+      });
+    }
+  }
+
+  return drawCalls;
+}
+
 function toDrawCall(entity, assetsById = undefined) {
   const transform = getComponent(entity, 'transform');
   if (!transform) {
@@ -131,6 +183,15 @@ function toDrawCall(entity, assetsById = undefined) {
     ...toSpriteDrawCall(entity, position, resolveDrawSizeWithAssetFallback(entity, asset), assetId),
     assetSrc: asset.src
   };
+}
+
+function toEntityDrawCalls(entity, assetsById = undefined) {
+  const drawCalls = toTileLayerDrawCalls(entity);
+  const entityDrawCall = toDrawCall(entity, assetsById);
+  if (entityDrawCall) {
+    drawCalls.push(entityDrawCall);
+  }
+  return drawCalls;
 }
 
 function sortDrawCalls(left, right) {
@@ -193,8 +254,7 @@ export async function buildRenderSnapshotV1(sceneOrPath, options = {}) {
     ? undefined
     : new Map(assetManifest.assets.map((asset) => [asset.id, asset]));
   const drawCalls = (scene.entities ?? [])
-    .map((entity) => toDrawCall(entity, assetsById))
-    .filter(Boolean)
+    .flatMap((entity) => toEntityDrawCalls(entity, assetsById))
     .sort(sortDrawCalls);
 
   return {
