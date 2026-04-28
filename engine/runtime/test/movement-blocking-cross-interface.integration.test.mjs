@@ -26,6 +26,22 @@ const openScenePath = path.join(
   'fixtures',
   'movement-blocking-open.scene.json'
 );
+const tileBlockedScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-tile-blocked.scene.json'
+);
+const tileOpenScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-tile-open.scene.json'
+);
 const inputIntentPath = path.join(repoRoot, 'fixtures', 'input', 'move-player-right.intent.json');
 const inputIntent = {
   inputIntentVersion: 1,
@@ -118,16 +134,32 @@ async function callMcpTool(name, args) {
 
 test('MovementBlockingReport v1 stays aligned across runtime, CLI and MCP when blocked', async () => {
   const runtimeReport = await buildMovementBlockingReportV1(blockedScenePath, { inputIntent });
+  const runtimeTileReport = await buildMovementBlockingReportV1(tileBlockedScenePath, { inputIntent });
   const cliResult = runCli(['inspect-movement-blocking', blockedScenePath, '--input-intent', inputIntentPath, '--json']);
+  const cliTileResult = runCli([
+    'inspect-movement-blocking',
+    tileBlockedScenePath,
+    '--input-intent',
+    inputIntentPath,
+    '--json'
+  ]);
   const mcpResponse = await callMcpTool('inspect_movement_blocking', {
     path: './engine/runtime/test/fixtures/movement-blocking-blocked.scene.json',
     inputIntentPath: './fixtures/input/move-player-right.intent.json'
   });
+  const mcpTileResponse = await callMcpTool('inspect_movement_blocking', {
+    path: './engine/runtime/test/fixtures/movement-blocking-tile-blocked.scene.json',
+    inputIntentPath: './fixtures/input/move-player-right.intent.json'
+  });
 
   assert.equal(cliResult.status, 0, cliResult.stderr);
+  assert.equal(cliTileResult.status, 0, cliTileResult.stderr);
   assert.equal(mcpResponse.result.isError, false);
+  assert.equal(mcpTileResponse.result.isError, false);
   assert.deepEqual(runtimeReport, JSON.parse(cliResult.stdout));
   assert.deepEqual(runtimeReport, mcpResponse.result.structuredContent);
+  assert.deepEqual(runtimeTileReport, JSON.parse(cliTileResult.stdout));
+  assert.deepEqual(runtimeTileReport, mcpTileResponse.result.structuredContent);
   assert.deepEqual(runtimeReport, {
     movementBlockingReportVersion: 1,
     scene: 'movement-blocking-blocked-fixture',
@@ -140,22 +172,53 @@ test('MovementBlockingReport v1 stays aligned across runtime, CLI and MCP when b
     blocked: true,
     blockingEntities: ['wall.block']
   });
+  assert.deepEqual(runtimeTileReport, {
+    movementBlockingReportVersion: 1,
+    scene: 'movement-blocking-tile-blocked-fixture',
+    entityId: 'player.hero',
+    inputIntentTick: 1,
+    attemptedMove: { x: 1, y: 0 },
+    from: { x: 0, y: 0 },
+    candidate: { x: 1, y: 0 },
+    final: { x: 0, y: 0 },
+    blocked: true,
+    blockingEntities: ['map.walls.tile.0.1']
+  });
 });
 
 test('MovementBlockingReport v1 stays aligned across runtime, CLI and MCP when unblocked', async () => {
   const runtimeReport = await buildMovementBlockingReportV1(openScenePath, { inputIntent });
+  const runtimeTileOpenReport = await buildMovementBlockingReportV1(tileOpenScenePath, { inputIntent });
   const cliResult = runCli(['inspect-movement-blocking', openScenePath, '--input-intent', inputIntentPath, '--json']);
+  const cliTileOpenResult = runCli([
+    'inspect-movement-blocking',
+    tileOpenScenePath,
+    '--input-intent',
+    inputIntentPath,
+    '--json'
+  ]);
   const mcpResponse = await callMcpTool('inspect_movement_blocking', {
     path: './engine/runtime/test/fixtures/movement-blocking-open.scene.json',
     inputIntentPath: './fixtures/input/move-player-right.intent.json'
   });
+  const mcpTileOpenResponse = await callMcpTool('inspect_movement_blocking', {
+    path: './engine/runtime/test/fixtures/movement-blocking-tile-open.scene.json',
+    inputIntentPath: './fixtures/input/move-player-right.intent.json'
+  });
 
   assert.equal(cliResult.status, 0, cliResult.stderr);
+  assert.equal(cliTileOpenResult.status, 0, cliTileOpenResult.stderr);
   assert.equal(mcpResponse.result.isError, false);
+  assert.equal(mcpTileOpenResponse.result.isError, false);
   assert.deepEqual(runtimeReport, JSON.parse(cliResult.stdout));
   assert.deepEqual(runtimeReport, mcpResponse.result.structuredContent);
+  assert.deepEqual(runtimeTileOpenReport, JSON.parse(cliTileOpenResult.stdout));
+  assert.deepEqual(runtimeTileOpenReport, mcpTileOpenResponse.result.structuredContent);
   assert.equal(runtimeReport.blocked, false);
   assert.deepEqual(runtimeReport.final, { x: 1, y: 0 });
+  assert.equal(runtimeTileOpenReport.blocked, false);
+  assert.deepEqual(runtimeTileOpenReport.blockingEntities, []);
+  assert.deepEqual(runtimeTileOpenReport.final, { x: 1, y: 0 });
 });
 
 test('movement blocking does not change run-loop or render-snapshot outputs', () => {
@@ -175,3 +238,4 @@ test('movement blocking does not change run-loop or render-snapshot outputs', ()
     ['wall.block', 8, 0]
   ]);
 });
+

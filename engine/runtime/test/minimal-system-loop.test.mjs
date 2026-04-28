@@ -294,6 +294,8 @@ test('runMinimalSystemLoop movementBlocking is opt-in and deterministic', async 
   const blockedScene = await loadSceneFile(fixturePath('movement-blocking-loop-blocked.scene.json'));
   const openScene = await loadSceneFile(fixturePath('movement-blocking-loop-open.scene.json'));
   const nonSolidScene = await loadSceneFile(fixturePath('movement-blocking-loop-non-solid.scene.json'));
+  const tileBlockedScene = await loadSceneFile(fixturePath('movement-blocking-tile-blocked.scene.json'));
+  const tileOpenScene = await loadSceneFile(fixturePath('movement-blocking-tile-open.scene.json'));
 
   const inputIntent = createRightMoveInputIntent();
   const ticks = 1;
@@ -346,6 +348,32 @@ test('runMinimalSystemLoop movementBlocking is opt-in and deterministic', async 
     movementBlocking: true
   });
   assert.equal(nonSolidWithFlag.finalState, nonSolidWithoutFlag.finalState);
+
+  const tileBlockedWithoutFlag = runMinimalSystemLoop(tileBlockedScene, {
+    ticks,
+    seed,
+    inputIntent
+  });
+  const tileBlockedWithFlag = runMinimalSystemLoop(tileBlockedScene, {
+    ticks,
+    seed,
+    inputIntent,
+    movementBlocking: true
+  });
+  assert.equal(tileBlockedWithFlag.finalState, tileBlockedWithoutFlag.finalState - 1);
+
+  const tileOpenWithoutFlag = runMinimalSystemLoop(tileOpenScene, {
+    ticks,
+    seed,
+    inputIntent
+  });
+  const tileOpenWithFlag = runMinimalSystemLoop(tileOpenScene, {
+    ticks,
+    seed,
+    inputIntent,
+    movementBlocking: true
+  });
+  assert.equal(tileOpenWithFlag.finalState, tileOpenWithoutFlag.finalState);
 });
 
 test('runMinimalSystemLoopWithTrace movementBlocking preserves trace and report shape', async () => {

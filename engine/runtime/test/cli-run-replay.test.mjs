@@ -25,6 +25,22 @@ const movementBlockingLoopOpenScenePath = path.join(
   'fixtures',
   'movement-blocking-loop-open.scene.json'
 );
+const movementBlockingTileBlockedScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-tile-blocked.scene.json'
+);
+const movementBlockingTileOpenScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-tile-open.scene.json'
+);
 const movementBlockingLoopInputIntentPath = path.join(repoRoot, 'fixtures', 'input', 'move-player-right.intent.json');
 
 function runCli(args) {
@@ -197,6 +213,41 @@ test('run-loop --movement-blocking keeps open movement and non-movement paths un
   assert.equal(blocked.status, 0, blocked.stderr);
   assert.equal(open.status, 0, open.stderr);
   assert.deepEqual(JSON.parse(blocked.stdout), JSON.parse(open.stdout));
+});
+
+test('run-loop --movement-blocking blocks movement when tiles are solid', () => {
+  const blocked = runCli([
+    'run-loop',
+    movementBlockingTileBlockedScenePath,
+    '--ticks',
+    '1',
+    '--seed',
+    '40',
+    '--movement-blocking',
+    '--input-intent',
+    movementBlockingLoopInputIntentPath,
+    '--json'
+  ]);
+  const open = runCli([
+    'run-loop',
+    movementBlockingTileOpenScenePath,
+    '--ticks',
+    '1',
+    '--seed',
+    '40',
+    '--movement-blocking',
+    '--input-intent',
+    movementBlockingLoopInputIntentPath,
+    '--json'
+  ]);
+
+  assert.equal(blocked.status, 0, blocked.stderr);
+  assert.equal(open.status, 0, open.stderr);
+
+  const blockedReport = JSON.parse(blocked.stdout);
+  const openReport = JSON.parse(open.stdout);
+
+  assert.notEqual(blockedReport.finalState, openReport.finalState);
 });
 
 test('run-loop --movement-blocking works predictably when no input intent is provided', () => {

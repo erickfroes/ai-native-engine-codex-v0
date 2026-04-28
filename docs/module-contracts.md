@@ -162,7 +162,7 @@ Compatibilidade:
 - usa `palette.width` e `palette.height` quando presentes, com fallback em `tileWidth` e `tileHeight`;
 - ordena tiles por `layerEntityId`, depois `row`, depois `column`, depois `paletteId`;
 - nao altera `RenderSnapshot v1`, Render SVG, Canvas2D Demo ou Browser Playable Demo;
-- nao altera `CollisionBoundsReport v1`, `CollisionOverlapReport v1` ou `MovementBlockingReport v1`;
+- nao altera `CollisionBoundsReport v1` ou `CollisionOverlapReport v1`;
 - nao adiciona fisica, resolucao de colisao, bloqueio de movimento, pathfinding, editor ou servidor.
 
 ## Camera Viewport v1 (offset declarativo minimo)
@@ -210,7 +210,7 @@ Compatibilidade:
 
 ## Movement Blocking v1 (inspecao deterministica de movimento)
 
-Contrato deterministico para avaliar uma tentativa de movimento de `InputIntent v1` contra `collision.bounds` solidos:
+Contrato deterministico para avaliar uma tentativa de movimento de `InputIntent v1` contra `collision.bounds` solidos e tiles solidos de `tile.layer`:
 
 - ver `docs/MOVEMENT_BLOCKING_V1.md`.
 
@@ -218,6 +218,7 @@ Compatibilidade:
 
 - gera `MovementBlockingReport v1` via runtime, CLI e MCP;
 - deriva de `CollisionBoundsReport v1` sem alterar `collision.bounds`, `CollisionBoundsReport v1` ou `CollisionOverlapReport v1`;
+- pode reutilizar tiles solidos declarados em `tile.layer` sem alterar `TileCollisionReport v1`;
 - usa `from`, `candidate` e `final` para separar posicao atual, tentativa e resultado efetivo do report;
 - se a tentativa causaria overlap solido, `blocked: true` e `final` permanece igual a `from`;
 - se a tentativa nao e bloqueada, `blocked: false` e `final` fica igual a `candidate`;

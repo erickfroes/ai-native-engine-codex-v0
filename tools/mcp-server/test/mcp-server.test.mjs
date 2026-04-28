@@ -1740,6 +1740,17 @@ test('mcp inspect_movement_blocking returns blocked and unblocked reports', asyn
       blockingEntities: ['wall.block']
     });
 
+    const blockedByTileResponse = await client.request('tools/call', {
+      name: 'inspect_movement_blocking',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-tile-blocked.scene.json',
+        inputIntentPath: './fixtures/input/move-player-right.intent.json'
+      }
+    });
+
+    assert.equal(blockedByTileResponse.result.isError, false);
+    assert.deepEqual(blockedByTileResponse.result.structuredContent.blockingEntities, ['map.walls.tile.0.1']);
+
     const unblockedResponse = await client.request('tools/call', {
       name: 'inspect_movement_blocking',
       arguments: {

@@ -34,6 +34,30 @@ const nonSolidScenePath = path.join(
   'fixtures',
   'movement-blocking-non-solid.scene.json'
 );
+const tileBlockedScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-tile-blocked.scene.json'
+);
+const tileOpenScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-tile-open.scene.json'
+);
+const tileNonSolidScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-tile-non-solid.scene.json'
+);
 const overlapScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'collision-overlap.scene.json');
 
 const moveRightInputIntent = {
@@ -90,6 +114,39 @@ test('buildMovementBlockingReportV1 does not block on non-solid overlap', async 
   assert.equal(report.blocked, false);
   assert.deepEqual(report.blockingEntities, []);
   assert.deepEqual(report.final, { x: 1, y: 0 });
+});
+
+test('buildMovementBlockingReportV1 blocks movement that would overlap a solid tile', async () => {
+  const report = await buildMovementBlockingReportV1(tileBlockedScenePath, { inputIntent: moveRightInputIntent });
+
+  assert.deepEqual(report, {
+    movementBlockingReportVersion: 1,
+    scene: 'movement-blocking-tile-blocked-fixture',
+    entityId: 'player.hero',
+    inputIntentTick: 1,
+    attemptedMove: { x: 1, y: 0 },
+    from: { x: 0, y: 0 },
+    candidate: { x: 1, y: 0 },
+    final: { x: 0, y: 0 },
+    blocked: true,
+    blockingEntities: ['map.walls.tile.0.1']
+  });
+});
+
+test('buildMovementBlockingReportV1 allows movement when solid tiles do not overlap the candidate bound', async () => {
+  const report = await buildMovementBlockingReportV1(tileOpenScenePath, { inputIntent: moveRightInputIntent });
+
+  assert.equal(report.blocked, false);
+  assert.deepEqual(report.blockingEntities, []);
+  assert.deepEqual(report.final, { x: 1, y: 0 });
+});
+
+test('buildMovementBlockingReportV1 does not block when overlapping tile is non-solid', async () => {
+  const report = await buildMovementBlockingReportV1(tileNonSolidScenePath, { inputIntent: moveRightInputIntent });
+
+  assert.equal(report.blocked, false);
+  assert.deepEqual(report.final, { x: 1, y: 0 });
+  assert.deepEqual(report.blockingEntities, []);
 });
 
 test('buildMovementBlockingReportV1 returns a stable no-op report when attempted move is zero', async () => {
@@ -402,3 +459,4 @@ test('buildMovementBlockingReportV1 keeps CollisionOverlapReport v1 intact', asy
     ]
   });
 });
+

@@ -85,16 +85,13 @@ MCP:
 - nao altera `visual.sprite`, `camera.viewport` ou `Asset Manifest v1`;
 - nao altera `CollisionBoundsReport v1`;
 - nao altera `CollisionOverlapReport v1`;
-- nao altera `MovementBlockingReport v1`;
+- pode ser reutilizado por `MovementBlockingReport v1` e `run-loop` com `movementBlocking` sem alterar o shape do report;
 - nao altera `run-loop`, `InputIntent v1`, `KeyboardInputScript v1` ou Save/Load v1.
 
 ## Fora de escopo
 
 - fisica;
 - resolucao de colisao;
-- bloquear movimento;
-- integrar com `MovementBlockingReport v1`;
-- aplicar no `run-loop`;
 - aplicar na Browser Demo;
 - pathfinding;
 - chunk streaming;

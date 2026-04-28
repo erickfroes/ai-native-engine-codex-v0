@@ -304,7 +304,7 @@ export const toolCatalog = [
         },
         movementBlocking: {
           type: 'boolean',
-          description: 'When true, apply movement blocking to input intent driven movement in the loop.'
+          description: 'When true, apply movement blocking from solid collision.bounds and tile.layer tiles to input intent driven movement in the loop.'
         },
         inputIntentPath: {
           type: 'string',
@@ -441,7 +441,7 @@ export const toolCatalog = [
   {
     name: 'inspect_movement_blocking',
     title: 'Inspect Movement Blocking',
-    description: 'Build MovementBlockingReport v1 from collision.bounds and an Input Intent v1 without mutating the run loop.',
+    description: 'Build MovementBlockingReport v1 from solid collision.bounds, solid tile.layer tiles, and an Input Intent v1 without mutating the run loop.',
     inputSchema: {
       type: 'object',
       required: ['path', 'inputIntentPath'],
