@@ -181,6 +181,11 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     );
     assert.ok(inspectCollisionOverlapsTool);
     assert.deepEqual(inspectCollisionOverlapsTool.inputSchema.required, ['path']);
+    const inspectTileCollisionTool = toolsResponse.result.tools.find(
+      (tool) => tool.name === 'inspect_tile_collision'
+    );
+    assert.ok(inspectTileCollisionTool);
+    assert.deepEqual(inspectTileCollisionTool.inputSchema.required, ['path']);
     const inspectMovementBlockingTool = toolsResponse.result.tools.find(
       (tool) => tool.name === 'inspect_movement_blocking'
     );
@@ -1606,6 +1611,91 @@ test('mcp inspect_collision_overlaps returns deterministic overlaps and empty re
       collisionOverlapReportVersion: 1,
       scene: 'collision-no-overlap-fixture',
       overlaps: []
+    });
+  } finally {
+    await client.close();
+  }
+});
+
+test('mcp inspect_tile_collision returns deterministic solid tiles and empty reports', async () => {
+  const client = createClient();
+
+  try {
+    const initResponse = await client.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: {
+        name: 'node-test',
+        version: '1.0.0'
+      }
+    });
+
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    client.notify('notifications/initialized');
+
+    const solidResponse = await client.request('tools/call', {
+      name: 'inspect_tile_collision',
+      arguments: {
+        path: './engine/runtime/test/fixtures/tile-collision-solid.scene.json'
+      }
+    });
+
+    assert.equal(solidResponse.result.isError, false);
+    assert.deepEqual(solidResponse.result.structuredContent, {
+      tileCollisionReportVersion: 1,
+      scene: 'tile-collision-solid-fixture',
+      tiles: [
+        {
+          tileId: 'map.walls.tile.0.0',
+          layerEntityId: 'map.walls',
+          row: 0,
+          column: 0,
+          paletteId: '1',
+          x: 0,
+          y: 0,
+          width: 16,
+          height: 16,
+          solid: true
+        },
+        {
+          tileId: 'map.walls.tile.0.2',
+          layerEntityId: 'map.walls',
+          row: 0,
+          column: 2,
+          paletteId: 'wall',
+          x: 32,
+          y: 0,
+          width: 24,
+          height: 24,
+          solid: true
+        },
+        {
+          tileId: 'map.walls.tile.1.1',
+          layerEntityId: 'map.walls',
+          row: 1,
+          column: 1,
+          paletteId: '1',
+          x: 16,
+          y: 16,
+          width: 16,
+          height: 16,
+          solid: true
+        }
+      ]
+    });
+
+    const emptyResponse = await client.request('tools/call', {
+      name: 'inspect_tile_collision',
+      arguments: {
+        path: './engine/runtime/test/fixtures/tile-collision-empty.scene.json'
+      }
+    });
+
+    assert.equal(emptyResponse.result.isError, false);
+    assert.deepEqual(emptyResponse.result.structuredContent, {
+      tileCollisionReportVersion: 1,
+      scene: 'tile-collision-empty-fixture',
+      tiles: []
     });
   } finally {
     await client.close();

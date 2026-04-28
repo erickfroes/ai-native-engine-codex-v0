@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tile-collision-report-v1.schema.json",
+  "title": "TileCollisionReportV1",
+  "type": "object",
+  "required": [
+    "tileCollisionReportVersion",
+    "scene",
+    "tiles"
+  ],
+  "properties": {
+    "tileCollisionReportVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "scene": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tileId",
+          "layerEntityId",
+          "row",
+          "column",
+          "paletteId",
+          "x",
+          "y",
+          "width",
+          "height",
+          "solid"
+        ],
+        "properties": {
+          "tileId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "layerEntityId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "row": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "column": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "paletteId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "x": {
+            "type": "integer"
+          },
+          "y": {
+            "type": "integer"
+          },
+          "width": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "solid": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

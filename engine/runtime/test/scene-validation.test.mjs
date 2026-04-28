@@ -311,6 +311,7 @@ test('tile.layer component invariants are validated predictably', () => {
           kind: 'rect',
           width: 0,
           height: 1.5,
+          solid: 'yes',
           tint: '#fff'
         }
       },
@@ -347,10 +348,35 @@ test('tile.layer component invariants are validated predictably', () => {
   assert.ok(
     report.errors.some(
       (error) =>
+        error.path.endsWith('.fields.palette."1".solid') &&
+        error.message === 'tile.layer palette rect solid must be a boolean when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
         error.path.endsWith('.fields.palette."1".tint') &&
         error.message === 'is not allowed for tile.layer rect palette entry'
     )
   );
+});
+
+test('tile.layer accepts solid rect palette entries for tile collision v1', () => {
+  const report = validateTileLayerFields({
+    tileWidth: 16,
+    tileHeight: 16,
+    columns: 1,
+    rows: 1,
+    tiles: [[1]],
+    palette: {
+      1: {
+        kind: 'rect',
+        solid: true
+      }
+    }
+  });
+
+  assert.equal(report.errors.length, 0);
 });
 
 test('tile.layer rejects non-object fields predictably', () => {

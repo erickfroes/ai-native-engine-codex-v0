@@ -143,7 +143,27 @@ Compatibilidade:
 - tiles `rect` viram drawCalls `rect` ordenadas por `layer` e `id`;
 - tiles `empty` nao geram drawCall;
 - sem `tile.layer`, cenas antigas continuam com o mesmo fallback `rect`;
-- fora de escopo: editor, autotile, colisao, pathfinding e chunk streaming.
+- entries `rect` da palette podem declarar `solid: true` para Tile Collision v1 sem alterar render;
+- fora de escopo: editor, autotile, bloqueio de movimento por tile, resolucao de colisao, pathfinding e chunk streaming.
+
+## Tile Collision v1 (diagnostico minimo de tiles solidos)
+
+Contrato deterministico para listar tiles solidos declarados em `tile.layer`:
+
+- ver `docs/TILE_COLLISION_V1.md`.
+- schema formal: `docs/schemas/tile-collision-report-v1.schema.json`.
+
+Compatibilidade:
+
+- gera `TileCollisionReport v1` via runtime, CLI e MCP;
+- deriva apenas de entries `rect` em `tile.layer.fields.palette` com `solid: true`;
+- cenas sem `tile.layer` ou sem tiles solidos retornam `tiles: []`;
+- usa a mesma origem de `tile.layer`: `x = column * tileWidth`, `y = row * tileHeight`;
+- usa `palette.width` e `palette.height` quando presentes, com fallback em `tileWidth` e `tileHeight`;
+- ordena tiles por `layerEntityId`, depois `row`, depois `column`, depois `paletteId`;
+- nao altera `RenderSnapshot v1`, Render SVG, Canvas2D Demo ou Browser Playable Demo;
+- nao altera `CollisionBoundsReport v1`, `CollisionOverlapReport v1` ou `MovementBlockingReport v1`;
+- nao adiciona fisica, resolucao de colisao, bloqueio de movimento, pathfinding, editor ou servidor.
 
 ## Camera Viewport v1 (offset declarativo minimo)
 

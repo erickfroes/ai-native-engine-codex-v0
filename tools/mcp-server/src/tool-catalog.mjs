@@ -423,6 +423,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_tile_collision',
+    title: 'Inspect Tile Collision',
+    description: 'Build TileCollisionReport v1 from tile.layer solid palette entries without physics or movement resolution.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'inspect_movement_blocking',
     title: 'Inspect Movement Blocking',
     description: 'Build MovementBlockingReport v1 from collision.bounds and an Input Intent v1 without mutating the run loop.',
