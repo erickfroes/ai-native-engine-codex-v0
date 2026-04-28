@@ -93,16 +93,17 @@ Entregas alvo:
 - `CollisionOverlapReport v1` concluido;
 - `MovementBlockingReport v1` concluido e endurecido;
 - `tile.layer` solido / Tile Collision v1 concluido;
-- bloqueio de movimento opt-in no `run-loop` como proximo bloco;
+- bloqueio de movimento opt-in no `run-loop` concluido;
 - camera/viewport endurecida;
-- Browser Demo usando regras de gameplay reais;
-- UI/HUD declarativo minimo;
+- Browser Demo usando regras de gameplay reais concluida em modo opt-in;
+- readiness gate V1 Small 2D concluido com cena consolidada;
+- UI/HUD declarativo minimo como proximo bloco;
 - audio-lite opcional;
 - export de demo jogavel HTML;
 - matriz de regressao visual/headless;
 - pacote Codex com prompts/skills/subagentes para criar um jogo 2D pequeno.
 
-Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1` e Tile Collision v1 ja estao implementados. O proximo bloco recomendado e Movement Blocking opt-in no `run-loop`, sem fisica completa e sem pathfinding.
+Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in e o readiness gate V1 Small 2D ja estao implementados. O proximo bloco recomendado e Browser Gameplay HUD Lite v1, sem fisica completa e sem pathfinding.
 
 Criterio de conclusao:
 
@@ -119,10 +120,9 @@ Subagentes recomendados:
 
 Linha de trabalho atual recomendada:
 
-1. Movement Blocking opt-in no `run-loop`.
-2. Browser Demo com blocking real.
-3. Fechamento Meta 3 / V1 small 2D.
-4. UI/audio/animation basicos para V2.
+1. Browser Gameplay HUD Lite v1.
+2. Hardening de exemplos jogaveis pequenos.
+3. UI/audio/animation basicos para V2.
 
 ---
 

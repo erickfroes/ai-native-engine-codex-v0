@@ -41,14 +41,15 @@ Neste ponto, a fundacao de colisao por entidade ja existe:
 - MovementBlockingReport v1;
 - TileCollisionReport v1;
 - Browser Playable Demo movement blocking opt-in;
+- V1 Small 2D readiness gate com cena consolidada (`docs/V1_SMALL_2D_READINESS.md`);
 - CLI/MCP para fluxos principais;
 - testes cross-interface.
 
 ## Foco atual recomendado
 
-1. Fechamento e hardening da V1 Small 2D Games.
-2. Integracoes basicas de UI/audio/animation para V2.
-3. Consolidacao de exemplos jogaveis pequenos.
+1. Browser Gameplay HUD Lite v1.
+2. Hardening de exemplos jogaveis pequenos.
+3. Integracoes basicas de UI/audio/animation para V2.
 
 ## Versoes de produto
 
@@ -64,6 +65,7 @@ Detalhes: `docs/ENGINE_VERSION_ROADMAP.md`.
 
 - aplicar blocking real sem contrato opt-in explicito no `run-loop` ou Browser Demo;
 - acoplar Browser Demo ao runtime canonico como se fosse loop oficial;
+- transformar HUD browser em sistema de UI completo antes do pacote lite;
 - criar editor antes de solidificar V1 gameplay;
 - criar pipeline de assets pesado antes de uma demo jogavel real;
 - usar subagentes sem delimitar escopo, gerando patches conflitantes.
