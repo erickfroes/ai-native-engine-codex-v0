@@ -78,13 +78,13 @@ MCP:
 
 - `run-loop` / `run_loop` continuam iguais por padrao (flag/opcao ausente);
 - com `movementBlocking` (`run-loop` CLI/MCP), so o movimento derivado de `InputIntent v1` e bloqueado;
-- sem `movementBlocking`, o comportamento permanece exatamente igual;
-- nao altera Browser Playable Demo;
+- Browser Playable Demo tambem pode usar blocking local opt-in via `render-browser-demo --movement-blocking` ou `render_browser_demo({ movementBlocking: true })`;
+- sem `movementBlocking`, o comportamento do `run-loop` e da Browser Playable Demo permanece exatamente igual;
 - nao altera `InputIntent v1` ou `KeyboardInputScript v1`;
 - nao altera `CollisionBoundsReport v1`;
 - nao altera `CollisionOverlapReport v1`;
 - nao altera `TileCollisionReport v1`;
-- nao altera `RenderSnapshot v1`, Render SVG, Canvas2D Demo ou Browser Playable Demo;
+- nao altera `RenderSnapshot v1`, Render SVG ou Canvas2D Demo;
 - nao altera `visual.sprite`, `tile.layer`, `camera.viewport` ou Save/Load v1.
 
 ## Fora de escopo
@@ -93,6 +93,7 @@ MCP:
 - resolver fisica;
 - empurrar ou separar entidades;
 - bloquear input em runtime sem flag/opcao;
+- transformar a Browser Demo em runtime canonico do engine;
 - pathfinding;
 - editor;
 - servidor;

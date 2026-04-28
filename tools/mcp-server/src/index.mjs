@@ -715,6 +715,13 @@ async function handleToolCall(params) {
         };
       }
 
+      if (args.movementBlocking !== undefined && typeof args.movementBlocking !== 'boolean') {
+        return {
+          content: toTextContent('render_browser_demo: `movementBlocking` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
       const scene = await loadSceneFile(targetPath);
       const resolvedAssetManifestPath = args.assetManifestPath === undefined
         ? undefined
@@ -727,7 +734,9 @@ async function handleToolCall(params) {
       });
       const snapshot = materializeBrowserDemoAssetSrcV1(rawSnapshot, resolvedAssetManifestPath);
       const title = `${snapshot.scene} Browser Playable Demo`;
-      const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot);
+      const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+        movementBlocking: args.movementBlocking === true
+      });
       const html = renderBrowserPlayableDemoHtmlV1({
         title,
         renderSnapshot: snapshot,

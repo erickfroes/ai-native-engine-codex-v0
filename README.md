@@ -41,10 +41,11 @@ A engine agora avancou para a fundacao de gameplay 2D:
 - `CollisionOverlapReport v1` para detectar overlaps AABB;
 - `MovementBlockingReport v1` para avaliar tentativas de movimento contra bounds solidos;
 - `TileCollisionReport v1` para inspecionar tiles solidos declarados em `tile.layer`;
+- blocking opt-in no `run-loop` e na Browser Playable Demo;
 - CLI/MCP para inspecao de colisao, overlap, tile collision e blocking;
 - testes cross-interface para os reports principais.
 
-Importante: o bloqueio de movimento e tile collision ainda sao relatorios/inspecao. O `run-loop` e a Browser Demo ainda nao aplicam blocking real por padrao. O proximo bloco recomendado e Movement Blocking opt-in no `run-loop`.
+Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-loop` e a Browser Demo preservam o comportamento antigo quando a flag/opcao `movementBlocking` nao e fornecida.
 
 ## O que esta dentro da Meta 2
 
@@ -87,7 +88,7 @@ Importante: o bloqueio de movimento e tile collision ainda sao relatorios/inspec
 - `render-svg`: gera SVG textual deterministico
 - `render-svg-demo`: gera HTML estatico com SVG inline
 - `render-canvas-demo`: gera HTML estatico com Canvas 2D
-- `render-browser-demo`: gera HTML interativo minimo com Canvas 2D, teclado local e fallback de sprites
+- `render-browser-demo`: gera HTML interativo minimo com Canvas 2D, teclado local, fallback de sprites e blocking local opt-in
 
 ## Tools MCP principais
 
@@ -132,6 +133,9 @@ node ./engine/runtime/src/cli.mjs validate-scene ./scenes/tutorial.scene.json --
 # executar loop headless
 node ./engine/runtime/src/cli.mjs run-loop ./scenes/tutorial.scene.json --ticks 3 --seed 42 --json
 
+# executar loop headless com blocking opt-in
+node ./engine/runtime/src/cli.mjs run-loop ./engine/runtime/test/fixtures/movement-blocking-loop-blocked.scene.json --ticks 1 --movement-blocking --input-intent ./fixtures/input/move-player-right.intent.json --json
+
 # gerar RenderSnapshot v1
 node ./engine/runtime/src/cli.mjs render-snapshot ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --json
 
@@ -146,6 +150,9 @@ node ./engine/runtime/src/cli.mjs render-canvas-demo ./scenes/tutorial.scene.jso
 
 # gerar Browser Playable Demo com input local
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --out ./tmp/tutorial-browser-demo.html --json
+
+# gerar Browser Playable Demo com blocking local opt-in
+node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/movement-blocking-tile-blocked.scene.json --movement-blocking --out ./tmp/tile-blocking-browser-demo.html --json
 ```
 
 ## Validacao obrigatoria

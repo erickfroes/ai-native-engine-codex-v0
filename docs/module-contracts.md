@@ -161,9 +161,9 @@ Compatibilidade:
 - usa a mesma origem de `tile.layer`: `x = column * tileWidth`, `y = row * tileHeight`;
 - usa `palette.width` e `palette.height` quando presentes, com fallback em `tileWidth` e `tileHeight`;
 - ordena tiles por `layerEntityId`, depois `row`, depois `column`, depois `paletteId`;
-- nao altera `RenderSnapshot v1`, Render SVG, Canvas2D Demo ou Browser Playable Demo;
+- nao altera `RenderSnapshot v1`, Render SVG, Canvas2D Demo ou Browser Playable Demo por padrao;
 - nao altera `CollisionBoundsReport v1` ou `CollisionOverlapReport v1`;
-- nao adiciona fisica, resolucao de colisao, bloqueio de movimento, pathfinding, editor ou servidor.
+- nao adiciona fisica, resolucao de colisao, bloqueio de movimento por padrao, pathfinding, editor ou servidor.
 
 ## Camera Viewport v1 (offset declarativo minimo)
 
@@ -228,7 +228,9 @@ Compatibilidade:
 - com `movementBlocking` no `run-loop`, o fluxo aplica bloqueio de deslocamento derivado de `InputIntent v1`;
 - sem `movementBlocking`, não há alteração no resultado atual de `run-loop`;
 - `run-loop` aplica apenas bloqueio de movimento (sem física completa);
-- Browser Playable Demo, `InputIntent v1`, `KeyboardInputScript v1`, RenderSnapshot v1, Save/Load v1 e renderers permanecem inalterados;
+- Browser Playable Demo pode aplicar blocking local opt-in com `render-browser-demo --movement-blocking` ou `render_browser_demo({ movementBlocking: true })`;
+- sem essa flag/opcao, Browser Playable Demo permanece igual;
+- `InputIntent v1`, `KeyboardInputScript v1`, RenderSnapshot v1, Save/Load v1 e renderers permanecem inalterados;
 - nao adiciona fisica completa, resolucao complexa, tile collision, pathfinding, editor ou servidor.
 
 ## Input Intent v1 (input headless opt-in no loop)

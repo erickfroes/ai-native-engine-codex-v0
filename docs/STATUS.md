@@ -13,6 +13,7 @@ Neste ponto, a fundacao de colisao por entidade ja existe:
 - CollisionOverlapReport v1;
 - MovementBlockingReport v1;
 - TileCollisionReport v1;
+- blocking opt-in no `run-loop` e na Browser Playable Demo;
 - CLI/MCP e runtime para inspecao de bounds, overlaps, tile collision e blocking;
 - hardening de bordas do Movement Blocking v1.
 
@@ -39,14 +40,15 @@ Neste ponto, a fundacao de colisao por entidade ja existe:
 - CollisionOverlapReport v1;
 - MovementBlockingReport v1;
 - TileCollisionReport v1;
+- Browser Playable Demo movement blocking opt-in;
 - CLI/MCP para fluxos principais;
 - testes cross-interface.
 
 ## Foco atual recomendado
 
-1. Movement Blocking opt-in no `run-loop`.
-2. Browser Demo com blocking real.
-3. Fechamento da V1 Small 2D Games.
+1. Fechamento e hardening da V1 Small 2D Games.
+2. Integracoes basicas de UI/audio/animation para V2.
+3. Consolidacao de exemplos jogaveis pequenos.
 
 ## Versoes de produto
 
@@ -60,8 +62,8 @@ Detalhes: `docs/ENGINE_VERSION_ROADMAP.md`.
 
 ## Riscos atuais
 
-- aplicar blocking real sem contrato opt-in explicito no `run-loop`;
-- acoplar Browser Demo ao runtime canonico sem contrato opt-in;
+- aplicar blocking real sem contrato opt-in explicito no `run-loop` ou Browser Demo;
+- acoplar Browser Demo ao runtime canonico como se fosse loop oficial;
 - criar editor antes de solidificar V1 gameplay;
 - criar pipeline de assets pesado antes de uma demo jogavel real;
 - usar subagentes sem delimitar escopo, gerando patches conflitantes.

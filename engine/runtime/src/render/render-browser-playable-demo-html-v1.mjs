@@ -3,6 +3,10 @@ import { canonicalJSONStringify } from '../save/canonical-json.mjs';
 export const BROWSER_PLAYABLE_DEMO_VERSION = 1;
 export const DEFAULT_BROWSER_PLAYABLE_STEP_PX = 4;
 
+const CAMERA_VIEWPORT_COMPONENT_KIND = 'camera.viewport';
+const COLLISION_BOUNDS_COMPONENT_KIND = 'collision.bounds';
+const TILE_LAYER_COMPONENT_KIND = 'tile.layer';
+
 function assertObject(value, name) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}\` must be an object`);
@@ -20,6 +24,100 @@ function assertNonEmptyString(name, value) {
   if (typeof value !== 'string' || value.trim().length === 0) {
     throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}\` must be a non-empty string`);
   }
+}
+
+function getComponent(entity, kind) {
+  return (entity.components ?? []).find((component) => component?.kind === kind);
+}
+
+function toInteger(value, fallback) {
+  return Number.isFinite(value) ? Math.trunc(value) : fallback;
+}
+
+function resolveTransformPosition(entity) {
+  const transform = getComponent(entity, 'transform');
+  const fields = transform?.fields ?? {};
+  const position = fields.position && typeof fields.position === 'object'
+    ? fields.position
+    : fields;
+
+  return {
+    x: toInteger(position.x, 0),
+    y: toInteger(position.y, 0)
+  };
+}
+
+function resolveCameraPosition(scene) {
+  const cameraEntity = (scene.entities ?? [])
+    .find((entity) => getComponent(entity, CAMERA_VIEWPORT_COMPONENT_KIND));
+  const fields = getComponent(cameraEntity ?? {}, CAMERA_VIEWPORT_COMPONENT_KIND)?.fields ?? {};
+
+  return {
+    x: toInteger(fields.x, 0),
+    y: toInteger(fields.y, 0)
+  };
+}
+
+function toScreenRect(rect, cameraPosition) {
+  return {
+    x: rect.x - cameraPosition.x,
+    y: rect.y - cameraPosition.y,
+    width: rect.width,
+    height: rect.height
+  };
+}
+
+function resolveEntityCollisionBounds(entity, cameraPosition) {
+  const bounds = getComponent(entity, COLLISION_BOUNDS_COMPONENT_KIND)?.fields;
+  if (!bounds || typeof bounds !== 'object') {
+    return undefined;
+  }
+
+  const position = resolveTransformPosition(entity);
+  return {
+    id: entity.id,
+    ...toScreenRect({
+      x: position.x + toInteger(bounds.x, 0),
+      y: position.y + toInteger(bounds.y, 0),
+      width: toInteger(bounds.width, 0),
+      height: toInteger(bounds.height, 0)
+    }, cameraPosition),
+    solid: bounds.solid === undefined ? true : bounds.solid === true
+  };
+}
+
+function resolveTileCollisionBounds(entity, cameraPosition) {
+  const tileLayer = getComponent(entity, TILE_LAYER_COMPONENT_KIND);
+  const fields = tileLayer?.fields ?? {};
+  const tiles = Array.isArray(fields.tiles) ? fields.tiles : [];
+  const palette = fields.palette && typeof fields.palette === 'object' ? fields.palette : {};
+  const tileBounds = [];
+
+  for (const [rowIndex, row] of tiles.entries()) {
+    if (!Array.isArray(row)) {
+      continue;
+    }
+
+    for (const [columnIndex, tileId] of row.entries()) {
+      const paletteId = String(tileId);
+      const paletteEntry = palette[paletteId];
+      if (!paletteEntry || paletteEntry.kind !== 'rect' || paletteEntry.solid !== true) {
+        continue;
+      }
+
+      tileBounds.push({
+        id: `${entity.id}.tile.${rowIndex}.${columnIndex}`,
+        ...toScreenRect({
+          x: columnIndex * fields.tileWidth,
+          y: rowIndex * fields.tileHeight,
+          width: paletteEntry.width ?? fields.tileWidth,
+          height: paletteEntry.height ?? fields.tileHeight
+        }, cameraPosition)
+      });
+    }
+  }
+
+  return tileBounds;
 }
 
 function escapeHtml(value) {
@@ -104,6 +202,66 @@ function validateMetadata(metadata) {
   if (metadata.stepPx !== undefined) {
     assertInteger('metadata.stepPx', metadata.stepPx, 1);
   }
+
+  if (metadata.movementBlocking !== undefined) {
+    validateMovementBlockingMetadata(metadata.movementBlocking);
+  }
+}
+
+function validateMetadataOverrides(overrides) {
+  assertObject(overrides, 'metadata overrides');
+
+  if (overrides.controllableEntityId !== undefined) {
+    assertNonEmptyString('metadata.controllableEntityId', overrides.controllableEntityId);
+  }
+
+  if (overrides.stepPx !== undefined) {
+    assertInteger('metadata.stepPx', overrides.stepPx, 1);
+  }
+
+  if (overrides.movementBlocking !== undefined && typeof overrides.movementBlocking !== 'boolean') {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.movementBlocking` override must be a boolean');
+  }
+}
+
+function validateBoundsRect(value, name) {
+  assertObject(value, name);
+  assertNonEmptyString(`${name}.id`, value.id);
+  assertInteger(`${name}.x`, value.x);
+  assertInteger(`${name}.y`, value.y);
+  assertInteger(`${name}.width`, value.width, 1);
+  assertInteger(`${name}.height`, value.height, 1);
+}
+
+function validateControllableBounds(value, name) {
+  assertObject(value, name);
+  assertInteger(`${name}.offsetX`, value.offsetX);
+  assertInteger(`${name}.offsetY`, value.offsetY);
+  assertInteger(`${name}.width`, value.width, 1);
+  assertInteger(`${name}.height`, value.height, 1);
+}
+
+function validateMovementBlockingMetadata(movementBlocking) {
+  assertObject(movementBlocking, 'metadata.movementBlocking');
+
+  if (movementBlocking.enabled !== true) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.movementBlocking.enabled` must be exactly true');
+  }
+
+  if (movementBlocking.controllableBounds !== null) {
+    validateControllableBounds(
+      movementBlocking.controllableBounds,
+      'metadata.movementBlocking.controllableBounds'
+    );
+  }
+
+  if (!Array.isArray(movementBlocking.blockers)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.movementBlocking.blockers` must be an array');
+  }
+
+  movementBlocking.blockers.forEach((blocker, index) => {
+    validateBoundsRect(blocker, `metadata.movementBlocking.blockers[${index}]`);
+  });
 }
 
 function normalizeMetadataEntries(metadata) {
@@ -163,10 +321,51 @@ function createInitialPositionText(drawCalls, controllableEntityId) {
   return `Position: x ${controllableDrawCall.x}, y ${controllableDrawCall.y}`;
 }
 
+function createMovementBlockingMetadata(scene, renderSnapshot, controllableEntityId) {
+  const cameraPosition = resolveCameraPosition(scene);
+  const controllableDrawCall = renderSnapshot.drawCalls.find((drawCall) => drawCall.id === controllableEntityId);
+  const controllableEntity = (scene.entities ?? []).find((entity) => entity?.id === controllableEntityId);
+  const controllableBounds = controllableEntity
+    ? resolveEntityCollisionBounds(controllableEntity, cameraPosition)
+    : undefined;
+  const blockers = (scene.entities ?? [])
+    .flatMap((entity) => {
+      const entityBounds = resolveEntityCollisionBounds(entity, cameraPosition);
+      const collisionBounds = entityBounds?.solid === true && entity.id !== controllableEntityId
+        ? [{
+            id: entityBounds.id,
+            x: entityBounds.x,
+            y: entityBounds.y,
+            width: entityBounds.width,
+            height: entityBounds.height
+          }]
+        : [];
+
+      return [
+        ...collisionBounds,
+        ...resolveTileCollisionBounds(entity, cameraPosition)
+      ];
+    })
+    .sort((left, right) => left.id.localeCompare(right.id));
+
+  return {
+    enabled: true,
+    controllableBounds: controllableDrawCall && controllableBounds?.solid === true
+      ? {
+          offsetX: controllableBounds.x - controllableDrawCall.x,
+          offsetY: controllableBounds.y - controllableDrawCall.y,
+          width: controllableBounds.width,
+          height: controllableBounds.height
+        }
+      : null,
+    blockers
+  };
+}
+
 export function createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overrides = {}) {
   assertObject(scene, 'scene');
   validateRenderSnapshot(renderSnapshot);
-  validateMetadata(overrides);
+  validateMetadataOverrides(overrides);
 
   const drawCallIds = new Set(renderSnapshot.drawCalls.map((drawCall) => drawCall.id));
   const sceneEntities = Array.isArray(scene.entities) ? scene.entities : [];
@@ -181,7 +380,10 @@ export function createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overr
 
   return {
     ...(controllableEntityId ? { controllableEntityId } : {}),
-    stepPx: overrides.stepPx ?? DEFAULT_BROWSER_PLAYABLE_STEP_PX
+    stepPx: overrides.stepPx ?? DEFAULT_BROWSER_PLAYABLE_STEP_PX,
+    ...(overrides.movementBlocking === true
+      ? { movementBlocking: createMovementBlockingMetadata(scene, renderSnapshot, controllableEntityId) }
+      : {})
   };
 }
 
@@ -195,9 +397,13 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
   const stepPx = metadata.stepPx ?? DEFAULT_BROWSER_PLAYABLE_STEP_PX;
   const normalizedMetadata = {
     ...(controllableEntityId ? { controllableEntityId } : {}),
-    stepPx
+    stepPx,
+    ...(metadata.movementBlocking ? { movementBlocking: metadata.movementBlocking } : {})
   };
-  const metadataEntries = normalizeMetadataEntries(normalizedMetadata);
+  const metadataEntries = normalizeMetadataEntries({
+    ...(controllableEntityId ? { controllableEntityId } : {}),
+    stepPx
+  });
   const metadataBlock = renderMetadataBlock(metadataEntries);
   const initialStatusText = createInitialStatusText(
     renderSnapshot,
@@ -464,6 +670,27 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '        }',
     '        return undefined;',
     '      }',
+    '      function boundsOverlap(left, right) {',
+    '        return (',
+    '          left.x < right.x + right.width &&',
+    '          left.x + left.width > right.x &&',
+    '          left.y < right.y + right.height &&',
+    '          left.y + left.height > right.y',
+    '        );',
+    '      }',
+    '      function movementWouldBeBlocked(candidateX, candidateY) {',
+    '        const movementBlocking = payload.metadata.movementBlocking;',
+    '        if (!movementBlocking || movementBlocking.enabled !== true || movementBlocking.controllableBounds === null) {',
+    '          return false;',
+    '        }',
+    '        const candidateBounds = {',
+    '          x: candidateX + movementBlocking.controllableBounds.offsetX,',
+    '          y: candidateY + movementBlocking.controllableBounds.offsetY,',
+    '          width: movementBlocking.controllableBounds.width,',
+    '          height: movementBlocking.controllableBounds.height',
+    '        };',
+    '        return movementBlocking.blockers.some((blocker) => boundsOverlap(candidateBounds, blocker));',
+    '      }',
     '      canvas.addEventListener("click", () => {',
     '        canvas.focus();',
     '      });',
@@ -479,8 +706,15 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '          return;',
     '        }',
     '        event.preventDefault();',
-    '        drawCalls[controllableIndex].x += delta.x * stepPx;',
-    '        drawCalls[controllableIndex].y += delta.y * stepPx;',
+    '        const controlled = drawCalls[controllableIndex];',
+    '        const candidateX = controlled.x + delta.x * stepPx;',
+    '        const candidateY = controlled.y + delta.y * stepPx;',
+    '        if (movementWouldBeBlocked(candidateX, candidateY)) {',
+    '          redraw();',
+    '          return;',
+    '        }',
+    '        controlled.x = candidateX;',
+    '        controlled.y = candidateY;',
     '        inputCount += 1;',
     '        redraw();',
     '      });',
