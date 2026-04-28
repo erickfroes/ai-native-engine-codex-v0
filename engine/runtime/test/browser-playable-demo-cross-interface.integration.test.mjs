@@ -23,6 +23,22 @@ const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
+const movementBlockingTileBlockedScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-tile-blocked.scene.json'
+);
+const movementBlockingTileOpenScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-tile-open.scene.json'
+);
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -434,6 +450,89 @@ test('browser playable demo with tile.layer stays aligned across runtime, CLI an
     assert.match(runtimeEnvelope.html, /fillRect\(/);
     assert.match(runtimeEnvelope.html, /strokeRect\(/);
     assert.doesNotMatch(runtimeEnvelope.html, /fetch\(|XMLHttpRequest|WebSocket|<script[^>]+src=|<link[^>]+href=/);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('browser playable demo movementBlocking stays aligned across runtime, CLI and MCP', async () => {
+  const testCases = [
+    {
+      scenePath: movementBlockingTileBlockedScenePath,
+      mcpPath: './engine/runtime/test/fixtures/movement-blocking-tile-blocked.scene.json',
+      expectedScene: 'movement-blocking-tile-blocked-fixture',
+      expectedTileId: 'map.walls.tile.0.1'
+    },
+    {
+      scenePath: movementBlockingTileOpenScenePath,
+      mcpPath: './engine/runtime/test/fixtures/movement-blocking-tile-open.scene.json',
+      expectedScene: 'movement-blocking-tile-open-fixture',
+      expectedTileId: 'map.walls.tile.0.2'
+    }
+  ];
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    for (const testCase of testCases) {
+      const scene = await loadSceneFile(testCase.scenePath);
+      const snapshot = await buildRenderSnapshotV1(scene);
+      const runtimeEnvelope = {
+        browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+        scene: snapshot.scene,
+        tick: snapshot.tick,
+        html: renderBrowserPlayableDemoHtmlV1({
+          title: `${snapshot.scene} Browser Playable Demo`,
+          renderSnapshot: snapshot,
+          metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { movementBlocking: true })
+        })
+      };
+
+      const cliResult = runCli([
+        'render-browser-demo',
+        testCase.scenePath,
+        '--movement-blocking',
+        '--json'
+      ]);
+
+      assert.equal(cliResult.status, 0, cliResult.stderr);
+      const cliEnvelope = JSON.parse(cliResult.stdout);
+
+      const mcpResponse = await mcp.request('tools/call', {
+        name: 'render_browser_demo',
+        arguments: {
+          path: testCase.mcpPath,
+          movementBlocking: true
+        }
+      });
+
+      assert.equal(mcpResponse.result.isError, false);
+      const mcpEnvelope = mcpResponse.result.structuredContent;
+
+      assertBrowserDemoEnvelope(runtimeEnvelope, {
+        expectedScene: testCase.expectedScene,
+        expectedTick: 0
+      });
+      assertBrowserDemoEnvelope(cliEnvelope, {
+        expectedScene: testCase.expectedScene,
+        expectedTick: 0
+      });
+      assertBrowserDemoEnvelope(mcpEnvelope, {
+        expectedScene: testCase.expectedScene,
+        expectedTick: 0
+      });
+      assert.deepEqual(runtimeEnvelope, cliEnvelope);
+      assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+      assert.match(runtimeEnvelope.html, /"movementBlocking":/);
+      assert.match(runtimeEnvelope.html, new RegExp(`"id":"${testCase.expectedTileId.replaceAll('.', '\\.')}"`));
+    }
   } finally {
     await mcp.close();
   }

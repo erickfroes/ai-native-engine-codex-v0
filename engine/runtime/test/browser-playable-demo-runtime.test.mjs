@@ -214,6 +214,215 @@ function createTutorialSnapshot() {
   };
 }
 
+function createMovementBlockedScene() {
+  return {
+    version: 1,
+    metadata: { name: 'movement-blocking-blocked-fixture' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'player.hero',
+        components: [
+          {
+            kind: 'transform',
+            version: 1,
+            replicated: false,
+            fields: { x: 0, y: 0 }
+          },
+          {
+            kind: 'collision.bounds',
+            version: 1,
+            replicated: false,
+            fields: { width: 8, height: 8, solid: true }
+          }
+        ]
+      },
+      {
+        id: 'wall.block',
+        components: [
+          {
+            kind: 'transform',
+            version: 1,
+            replicated: false,
+            fields: { x: 8, y: 0 }
+          },
+          {
+            kind: 'collision.bounds',
+            version: 1,
+            replicated: false,
+            fields: { width: 8, height: 8, solid: true }
+          }
+        ]
+      }
+    ],
+    assetRefs: []
+  };
+}
+
+function createMovementOpenScene() {
+  const scene = createMovementBlockedScene();
+  scene.metadata.name = 'movement-blocking-open-fixture';
+  scene.entities[1].components[0].fields.x = 20;
+  return scene;
+}
+
+function createMovementTileBlockedScene() {
+  return {
+    version: 1,
+    metadata: { name: 'movement-blocking-tile-blocked-fixture' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'player.hero',
+        components: [
+          {
+            kind: 'transform',
+            version: 1,
+            replicated: false,
+            fields: { x: 0, y: 0 }
+          },
+          {
+            kind: 'collision.bounds',
+            version: 1,
+            replicated: false,
+            fields: { width: 8, height: 8, solid: true }
+          }
+        ]
+      },
+      {
+        id: 'map.walls',
+        components: [
+          {
+            kind: 'tile.layer',
+            version: 1,
+            replicated: false,
+            fields: {
+              tileWidth: 8,
+              tileHeight: 8,
+              columns: 2,
+              rows: 1,
+              tiles: [[0, 1]],
+              palette: {
+                0: { kind: 'empty' },
+                1: { kind: 'rect', solid: true }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    assetRefs: []
+  };
+}
+
+function createMovementCameraTileBlockedScene() {
+  return {
+    version: 1,
+    metadata: { name: 'movement-blocking-camera-tile-blocked-fixture' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'camera.main',
+        components: [
+          {
+            kind: 'camera.viewport',
+            version: 1,
+            replicated: false,
+            fields: { x: 4, y: 0, width: 64, height: 48 }
+          }
+        ]
+      },
+      {
+        id: 'player.hero',
+        components: [
+          {
+            kind: 'transform',
+            version: 1,
+            replicated: false,
+            fields: { x: 4, y: 0 }
+          },
+          {
+            kind: 'collision.bounds',
+            version: 1,
+            replicated: false,
+            fields: { width: 4, height: 8, solid: true }
+          }
+        ]
+      },
+      {
+        id: 'map.walls',
+        components: [
+          {
+            kind: 'tile.layer',
+            version: 1,
+            replicated: false,
+            fields: {
+              tileWidth: 8,
+              tileHeight: 8,
+              columns: 2,
+              rows: 1,
+              tiles: [[0, 1]],
+              palette: {
+                0: { kind: 'empty' },
+                1: { kind: 'rect', solid: true }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    assetRefs: []
+  };
+}
+
+function createMovementBlockingSnapshot(sceneName = 'movement-blocking-blocked-fixture') {
+  return {
+    renderSnapshotVersion: 1,
+    scene: sceneName,
+    tick: 0,
+    viewport: {
+      width: 64,
+      height: 48
+    },
+    drawCalls: [
+      { kind: 'rect', id: 'player.hero', x: 0, y: 0, width: 16, height: 16, layer: 0 },
+      { kind: 'rect', id: 'wall.block', x: 8, y: 0, width: 16, height: 16, layer: 0 }
+    ]
+  };
+}
+
+function createMovementTileBlockingSnapshot() {
+  return {
+    renderSnapshotVersion: 1,
+    scene: 'movement-blocking-tile-blocked-fixture',
+    tick: 0,
+    viewport: {
+      width: 64,
+      height: 48
+    },
+    drawCalls: [
+      { kind: 'rect', id: 'map.walls.tile.0.1', x: 8, y: 0, width: 8, height: 8, layer: 0 },
+      { kind: 'rect', id: 'player.hero', x: 0, y: 0, width: 16, height: 16, layer: 0 }
+    ]
+  };
+}
+
+function createMovementCameraTileBlockingSnapshot() {
+  return {
+    renderSnapshotVersion: 1,
+    scene: 'movement-blocking-camera-tile-blocked-fixture',
+    tick: 0,
+    viewport: {
+      width: 64,
+      height: 48
+    },
+    drawCalls: [
+      { kind: 'rect', id: 'map.walls.tile.0.1', x: 4, y: 0, width: 8, height: 8, layer: 0 },
+      { kind: 'rect', id: 'player.hero', x: 0, y: 0, width: 8, height: 8, layer: 0 }
+    ]
+  };
+}
+
 function createSpriteSnapshot() {
   return {
     renderSnapshotVersion: 1,
@@ -810,6 +1019,121 @@ test('renderBrowserPlayableDemoHtmlV1 moves the nominated controllable rect by t
   assert.deepEqual(highlightedRects[1].args, [4, 0, 16, 16]);
   assert.equal(harness.positionElement.textContent, 'Position: x 4, y 0');
   assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 0\)/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 keeps blocked scenes freely movable without movementBlocking metadata', () => {
+  const snapshot = createMovementBlockingSnapshot();
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'movement-blocking-blocked-fixture Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(createMovementBlockedScene(), snapshot)
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+
+  assert.doesNotMatch(html, /"movementBlocking"/);
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+
+  assert.equal(harness.positionElement.textContent, 'Position: x 4, y 0');
+  assert.match(harness.statusElement.textContent, /Inputs 1/);
+  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 0\)/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 blocks movement against solid entity bounds when movementBlocking is enabled', () => {
+  const scene = createMovementBlockedScene();
+  const snapshot = createMovementBlockingSnapshot();
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'movement-blocking-blocked-fixture Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { movementBlocking: true })
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+
+  assert.match(html, /"movementBlocking":\{"blockers":\[\{"height":8,"id":"wall\.block","width":8,"x":8,"y":0\}\],"controllableBounds":\{"height":8,"offsetX":0,"offsetY":0,"width":8\},"enabled":true\}/);
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+
+  assert.equal(harness.positionElement.textContent, 'Position: x 0, y 0');
+  assert.match(harness.statusElement.textContent, /Inputs 0/);
+  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(0, 0\)/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 allows open movement when movementBlocking is enabled', () => {
+  const scene = createMovementOpenScene();
+  const snapshot = createMovementBlockingSnapshot('movement-blocking-open-fixture');
+  snapshot.drawCalls[1].x = 20;
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'movement-blocking-open-fixture Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { movementBlocking: true })
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+
+  assert.equal(harness.positionElement.textContent, 'Position: x 4, y 0');
+  assert.match(harness.statusElement.textContent, /Inputs 1/);
+  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 0\)/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 blocks movement against solid tile.layer tiles when movementBlocking is enabled', () => {
+  const scene = createMovementTileBlockedScene();
+  const snapshot = createMovementTileBlockingSnapshot();
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'movement-blocking-tile-blocked-fixture Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { movementBlocking: true })
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+
+  assert.match(html, /"id":"map\.walls\.tile\.0\.1"/);
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+
+  assert.equal(harness.positionElement.textContent, 'Position: x 0, y 0');
+  assert.match(harness.statusElement.textContent, /Inputs 0/);
+  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(0, 0\)/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 blocks camera-shifted tile bounds in screen coordinates when movementBlocking is enabled', () => {
+  const scene = createMovementCameraTileBlockedScene();
+  const snapshot = createMovementCameraTileBlockingSnapshot();
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'movement-blocking-camera-tile-blocked-fixture Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { movementBlocking: true })
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+
+  assert.match(html, /"id":"map\.walls\.tile\.0\.1"/);
+  assert.match(html, /"x":4,"y":0/);
+  assert.match(html, /"controllableBounds":\{"height":8,"offsetX":0,"offsetY":0,"width":4\}/);
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+
+  assert.equal(harness.positionElement.textContent, 'Position: x 0, y 0');
+  assert.match(harness.statusElement.textContent, /Inputs 0/);
+  assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(0, 0\)/);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 ignores invalid keydown events without moving the controlled rect', () => {

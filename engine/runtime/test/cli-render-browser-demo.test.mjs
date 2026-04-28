@@ -12,6 +12,22 @@ const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
+const movementBlockingTileBlockedScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-tile-blocked.scene.json'
+);
+const movementBlockingTileOpenScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-tile-open.scene.json'
+);
 const invalidVisualSpriteScenePath = path.join(
   repoRoot,
   'engine',
@@ -295,6 +311,68 @@ test('render-browser-demo --json stays deterministic for the same scene options'
   assert.equal(first.status, 0, first.stderr);
   assert.equal(second.status, 0, second.stderr);
   assert.equal(first.stdout, second.stdout);
+});
+
+test('render-browser-demo --movement-blocking keeps the envelope shape and embeds local blocking data', () => {
+  const result = runCli([
+    'render-browser-demo',
+    movementBlockingTileBlockedScenePath,
+    '--movement-blocking',
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.browserDemoVersion, 1);
+  assert.equal(payload.scene, 'movement-blocking-tile-blocked-fixture');
+  assert.match(payload.html, /"movementBlocking":/);
+  assert.match(payload.html, /"id":"map\.walls\.tile\.0\.1"/);
+  assert.match(payload.html, /function movementWouldBeBlocked\(candidateX, candidateY\)/);
+});
+
+test('render-browser-demo leaves movement blocking data out without --movement-blocking', () => {
+  const result = runCli([
+    'render-browser-demo',
+    movementBlockingTileBlockedScenePath,
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'movement-blocking-tile-blocked-fixture');
+  assert.doesNotMatch(payload.html, /"movementBlocking":/);
+});
+
+test('render-browser-demo --movement-blocking is deterministic for blocked and open tile scenes', () => {
+  const blockedArgs = [
+    'render-browser-demo',
+    movementBlockingTileBlockedScenePath,
+    '--movement-blocking',
+    '--json'
+  ];
+  const openArgs = [
+    'render-browser-demo',
+    movementBlockingTileOpenScenePath,
+    '--movement-blocking',
+    '--json'
+  ];
+  const firstBlocked = runCli(blockedArgs);
+  const secondBlocked = runCli(blockedArgs);
+  const open = runCli(openArgs);
+
+  assert.equal(firstBlocked.status, 0, firstBlocked.stderr);
+  assert.equal(secondBlocked.status, 0, secondBlocked.stderr);
+  assert.equal(open.status, 0, open.stderr);
+  assert.equal(firstBlocked.stdout, secondBlocked.stdout);
+
+  const blockedPayload = JSON.parse(firstBlocked.stdout);
+  const openPayload = JSON.parse(open.stdout);
+  assert.match(blockedPayload.html, /"id":"map\.walls\.tile\.0\.1"/);
+  assert.match(openPayload.html, /"id":"map\.walls\.tile\.0\.2"/);
 });
 
 test('render-browser-demo fails predictably for invalid width and height flags', () => {

@@ -156,6 +156,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'width'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'height'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'assetManifestPath'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'movementBlocking'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
     assert.ok(
       Object.prototype.hasOwnProperty.call(
@@ -715,6 +716,26 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       renderBrowserDemoResponseB.result.structuredContent
     );
 
+    const renderBrowserDemoWithMovementBlockingResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './engine/runtime/test/fixtures/movement-blocking-tile-blocked.scene.json',
+        movementBlocking: true
+      }
+    });
+
+    assert.equal(renderBrowserDemoWithMovementBlockingResponse.result.isError, false);
+    assertBrowserDemoStructuredContent(renderBrowserDemoWithMovementBlockingResponse.result.structuredContent, {
+      scene: 'movement-blocking-tile-blocked-fixture',
+      tick: 0,
+      controllableEntityId: 'player.hero'
+    });
+    assert.match(renderBrowserDemoWithMovementBlockingResponse.result.structuredContent.html, /"movementBlocking":/);
+    assert.match(
+      renderBrowserDemoWithMovementBlockingResponse.result.structuredContent.html,
+      /"id":"map\.walls\.tile\.0\.1"/
+    );
+
     const renderBrowserDemoWithManifestResponseA = await client.request('tools/call', {
       name: 'render_browser_demo',
       arguments: {
@@ -836,6 +857,20 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(
       renderBrowserDemoInvalidHeightResponse.result.content[0].text,
       /render_browser_demo: `height` must be an integer >= 1 when provided\./
+    );
+
+    const renderBrowserDemoInvalidMovementBlockingResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        movementBlocking: 'yes'
+      }
+    });
+
+    assert.equal(renderBrowserDemoInvalidMovementBlockingResponse.result.isError, true);
+    assert.match(
+      renderBrowserDemoInvalidMovementBlockingResponse.result.content[0].text,
+      /render_browser_demo: `movementBlocking` must be a boolean when provided\./
     );
 
     const renderBrowserDemoMissingPathResponse = await client.request('tools/call', {
