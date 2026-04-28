@@ -81,18 +81,18 @@ MCP:
 ## Compatibilidade
 
 - nao altera `RenderSnapshot v1`;
-- nao altera Render SVG, Canvas2D Demo ou Browser Playable Demo;
+- nao altera Render SVG, Canvas2D Demo ou Browser Playable Demo por padrao;
 - nao altera `visual.sprite`, `camera.viewport` ou `Asset Manifest v1`;
 - nao altera `CollisionBoundsReport v1`;
 - nao altera `CollisionOverlapReport v1`;
-- pode ser reutilizado por `MovementBlockingReport v1` e `run-loop` com `movementBlocking` sem alterar o shape do report;
+- pode ser reutilizado por `MovementBlockingReport v1`, `run-loop` com `movementBlocking` e Browser Playable Demo opt-in sem alterar o shape do report;
 - nao altera `run-loop`, `InputIntent v1`, `KeyboardInputScript v1` ou Save/Load v1.
 
 ## Fora de escopo
 
 - fisica;
 - resolucao de colisao;
-- aplicar na Browser Demo;
+- aplicar na Browser Demo sem opt-in explicito;
 - pathfinding;
 - chunk streaming;
 - editor;

@@ -11,6 +11,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - CollisionOverlapReport v1: concluido.
 - MovementBlockingReport v1: concluido e endurecido.
 - Tile Collision v1: concluido como relatorio diagnostico de tiles solidos.
+- Movement Blocking opt-in no `run-loop` e na Browser Playable Demo: concluido.
 
 ## O que o Codex recebe
 
@@ -23,6 +24,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - CollisionOverlapReport v1;
 - MovementBlockingReport v1;
 - TileCollisionReport v1;
+- Browser Playable Demo com blocking local opt-in;
 - suites cross-interface;
 - roadmap progressivo ate 3D AAA;
 - estrategia de subagentes e skills.
@@ -53,11 +55,10 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Movement Blocking opt-in no `run-loop` usando colisao com entidade/tile.
-2. Browser Demo usando blocking real.
-3. Fechamento V1 Small 2D.
-4. UI/audio/animation basicos para V2.
-5. 3D indie apenas depois de V1/V2 demonstradas.
+1. Fechamento V1 Small 2D.
+2. Hardening de exemplos jogaveis pequenos.
+3. UI/audio/animation basicos para V2.
+4. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Uso de subagentes
 

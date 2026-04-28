@@ -11,6 +11,7 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - `createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overrides?)` escolhe o rect controlavel pela ordem original das entidades da cena; se isso falhar, o HTML faz fallback deterministicamente para o primeiro rect do snapshot.
 - `metadata.controllableEntityId` pode fixar o rect controlavel quando necessario.
 - `metadata.stepPx` define o passo fixo por input; o default atual e `4`.
+- `metadata.movementBlocking` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede blocking local.
 - o loop visual local usa `requestAnimationFrame` apenas para redraw continuo do estado atual.
 
 ## Comportamento
@@ -29,6 +30,8 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
   - `ArrowUp` ou `KeyW` -> `y -1`
   - `ArrowDown` ou `KeyS` -> `y +1`
 - aplica `4 px` por keydown valido;
+- com `movementBlocking` opt-in, calcula uma posicao candidata antes de mover e bloqueia localmente se o bounds controlavel sobrepor `collision.bounds` solido ou tile solido de `tile.layer`;
+- sem `movementBlocking`, o movimento local continua livre como antes;
 - faz redraw continuo e tambem logo apos cada input valido;
 - expoe controle local `Pause rendering` / `Resume rendering` para pausar ou retomar apenas o redraw loop;
 - o botao `Reset` restaura a posicao inicial do snapshot e zera o contador local de inputs;
@@ -37,16 +40,23 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - nao importa o runtime Node no browser;
 - nao usa `Date.now`, `new Date`, `performance.now`, `fetch`, rede, scripts externos, `link href`, `import(`, `localStorage` ou dependencia de canvas libs;
 - nao executa loop de jogo completo, tick continuo, systems de gameplay ou simulacao realtime do engine neste slice.
+- o blocking local da Browser Demo e diagnostico/interativo, nao substitui `run-loop` nem `MovementBlockingReport v1`.
 
 ## CLI e MCP
 
-- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]`
-- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?)`
+- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--out <path>] [--json]`
+- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?, movementBlocking?)`
 
 Exemplo para gerar um arquivo HTML:
 
 ```bash
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --out ./tmp/tutorial-browser-demo.html
+```
+
+Exemplo com blocking local opt-in:
+
+```bash
+node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/movement-blocking-tile-blocked.scene.json --movement-blocking --out ./tmp/tile-blocking-browser-demo.html --json
 ```
 
 Depois de gerar com `--out`, abra o arquivo HTML diretamente no navegador. A demo e autocontida: nao precisa de servidor local, assets reais ou runtime Node no cliente.
@@ -63,6 +73,15 @@ Envelope minimo de CLI `--json` e MCP `structuredContent`:
 ```
 
 No CLI, `outputPath` so aparece quando `--out` e usado.
+
+### Movement Blocking Local
+
+- `--movement-blocking` no CLI e `movementBlocking: true` no MCP embutem dados locais de blocking no HTML.
+- os dados sao internos ao payload inline da demo e nao alteram `RenderSnapshot v1` nem o envelope publico `browserDemoVersion`.
+- blockers de entidade usam `collision.bounds` solido.
+- blockers de tile usam entries `rect` de `tile.layer.fields.palette` com `solid: true`.
+- `camera.viewport` e respeitado porque os bounds embutidos usam a mesma coordenada de tela dos drawCalls renderizados.
+- o resultado e deterministico para a mesma cena, snapshot, manifesto e opcoes.
 
 ### Asset Manifest Local
 
