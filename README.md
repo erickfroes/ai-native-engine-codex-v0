@@ -42,6 +42,7 @@ A engine agora avancou para a fundacao de gameplay 2D:
 - `MovementBlockingReport v1` para avaliar tentativas de movimento contra bounds solidos;
 - `TileCollisionReport v1` para inspecionar tiles solidos declarados em `tile.layer`;
 - blocking opt-in no `run-loop` e na Browser Playable Demo;
+- cena consolidada `v1-small-2d` para readiness da V1;
 - CLI/MCP para inspecao de colisao, overlap, tile collision e blocking;
 - testes cross-interface para os reports principais.
 
@@ -153,6 +154,9 @@ node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/tutorial.scene.js
 
 # gerar Browser Playable Demo com blocking local opt-in
 node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/movement-blocking-tile-blocked.scene.json --movement-blocking --out ./tmp/tile-blocking-browser-demo.html --json
+
+# gerar Browser Playable Demo da cena consolidada V1 small 2D
+node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene.json --movement-blocking --out ./tmp/v1-small-2d.html --json
 ```
 
 ## Validacao obrigatoria
@@ -170,6 +174,8 @@ npm run smoke
 - `docs/STATUS.md`: status consolidado da Meta 2
 - `docs/META2_VISUAL_TEST_MATRIX.md`: matriz runtime/CLI/MCP/testes visuais
 - `docs/META2_VISUAL_INTERACTIVE_CHECKLIST.md`: checklist final da Meta 2
+- `docs/V1_SMALL_2D_READINESS.md`: gate consolidado da V1 Small 2D
+- `docs/V1_SMALL_2D_TEST_MATRIX.md`: matriz runtime/CLI/MCP/testes da cena consolidada
 
 ## Primeira leitura recomendada
 

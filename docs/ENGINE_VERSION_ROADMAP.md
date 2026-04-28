@@ -49,6 +49,7 @@ Capacidades alvo:
 - Tile Collision v1 concluido;
 - movimento bloqueado opt-in no `run-loop`;
 - Browser Demo com blocking real;
+- V1 Small 2D readiness gate com cena consolidada;
 - UI/HUD simples;
 - audio-lite;
 - save/load jogavel;
@@ -203,7 +204,6 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Movement Blocking opt-in no `run-loop`.
-2. Browser Demo com blocking real.
-3. Fechamento Meta 3 / V1 small 2D.
-4. UI/audio/animation basicos para V2.
+1. Browser Gameplay HUD Lite v1.
+2. Hardening de exemplos jogaveis pequenos.
+3. UI/audio/animation basicos para V2.
