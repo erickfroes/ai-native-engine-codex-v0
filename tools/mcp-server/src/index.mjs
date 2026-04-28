@@ -283,6 +283,13 @@ async function handleToolCall(params) {
         };
       }
 
+      if (params.name === 'run_loop' && args.movementBlocking !== undefined && typeof args.movementBlocking !== 'boolean') {
+        return {
+          content: toTextContent('run_loop: `movementBlocking` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
       if (
         params.name === 'run_loop' &&
         args.inputIntentPath !== undefined &&
@@ -335,13 +342,15 @@ async function handleToolCall(params) {
         const inputIntentResolver = keyboardInputScript === undefined
           ? undefined
           : createKeyboardInputIntentResolverFromScriptV1(keyboardInputScript);
+        const movementBlocking = args.movementBlocking === true;
 
         if (args.trace === true) {
           const traced = runMinimalSystemLoopWithTrace(scene, {
             ticks: args.ticks,
             seed: args.seed,
             inputIntent,
-            inputIntentResolver
+            inputIntentResolver,
+            movementBlocking
           });
           return {
             content: toTextContent(`Loop trace completed for ${traced.report.scene} at tick ${traced.report.ticks}.`),
@@ -354,7 +363,8 @@ async function handleToolCall(params) {
           ticks: args.ticks,
           seed: args.seed,
           inputIntent,
-          inputIntentResolver
+          inputIntentResolver,
+          movementBlocking
         });
         const loopReport = {
           loopReportVersion: 1,

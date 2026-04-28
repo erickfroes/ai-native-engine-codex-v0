@@ -302,6 +302,10 @@ export const toolCatalog = [
           type: 'integer',
           description: 'Optional deterministic seed override.'
         },
+        movementBlocking: {
+          type: 'boolean',
+          description: 'When true, apply movement blocking to input intent driven movement in the loop.'
+        },
         inputIntentPath: {
           type: 'string',
           description: 'Optional repository-relative or absolute path to an Input Intent v1 JSON file.'

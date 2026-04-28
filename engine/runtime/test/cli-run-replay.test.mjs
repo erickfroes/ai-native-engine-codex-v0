@@ -9,6 +9,23 @@ const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const scenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const inputIntentPath = path.join(repoRoot, 'fixtures', 'input', 'valid.move.intent.json');
+const movementBlockingLoopBlockedScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-loop-blocked.scene.json'
+);
+const movementBlockingLoopOpenScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-loop-open.scene.json'
+);
+const movementBlockingLoopInputIntentPath = path.join(repoRoot, 'fixtures', 'input', 'move-player-right.intent.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -117,6 +134,103 @@ test('run-loop --json without --seed uses default seed deterministically', () =>
   assert.equal(firstReport.ticksExecuted, 4);
   assert.equal(firstReport.finalState, 1361);
   assert.deepEqual(firstReport, secondReport);
+});
+
+test('run-loop --movement-blocking blocks input delta when collision is blocked', () => {
+  const baseline = runCli([
+    'run-loop',
+    movementBlockingLoopBlockedScenePath,
+    '--ticks',
+    '1',
+    '--seed',
+    '40',
+    '--input-intent',
+    movementBlockingLoopInputIntentPath,
+    '--json'
+  ]);
+  const blocked = runCli([
+    'run-loop',
+    movementBlockingLoopBlockedScenePath,
+    '--ticks',
+    '1',
+    '--seed',
+    '40',
+    '--movement-blocking',
+    '--input-intent',
+    movementBlockingLoopInputIntentPath,
+    '--json'
+  ]);
+
+  assert.equal(baseline.status, 0, baseline.stderr);
+  assert.equal(blocked.status, 0, blocked.stderr);
+
+  const baselineReport = JSON.parse(baseline.stdout);
+  const blockedReport = JSON.parse(blocked.stdout);
+  assert.equal(blockedReport.finalState, baselineReport.finalState - 1);
+});
+
+test('run-loop --movement-blocking keeps open movement and non-movement paths unchanged', () => {
+  const blocked = runCli([
+    'run-loop',
+    movementBlockingLoopOpenScenePath,
+    '--ticks',
+    '1',
+    '--seed',
+    '40',
+    '--movement-blocking',
+    '--input-intent',
+    movementBlockingLoopInputIntentPath,
+    '--json'
+  ]);
+  const open = runCli([
+    'run-loop',
+    movementBlockingLoopOpenScenePath,
+    '--ticks',
+    '1',
+    '--seed',
+    '40',
+    '--input-intent',
+    movementBlockingLoopInputIntentPath,
+    '--json'
+  ]);
+
+  assert.equal(blocked.status, 0, blocked.stderr);
+  assert.equal(open.status, 0, open.stderr);
+  assert.deepEqual(JSON.parse(blocked.stdout), JSON.parse(open.stdout));
+});
+
+test('run-loop --movement-blocking works predictably when no input intent is provided', () => {
+  const baseline = runCli(['run-loop', movementBlockingLoopBlockedScenePath, '--ticks', '1', '--seed', '40', '--json']);
+  const withFlag = runCli([
+    'run-loop',
+    movementBlockingLoopBlockedScenePath,
+    '--ticks',
+    '1',
+    '--seed',
+    '40',
+    '--movement-blocking',
+    '--json'
+  ]);
+
+  assert.equal(baseline.status, 0, baseline.stderr);
+  assert.equal(withFlag.status, 0, withFlag.stderr);
+  assert.deepEqual(JSON.parse(baseline.stdout), JSON.parse(withFlag.stdout));
+});
+
+test('run-loop --movement-blocking validates input intent input path', () => {
+  const missingInput = runCli([
+    'run-loop',
+    movementBlockingLoopOpenScenePath,
+    '--ticks',
+    '1',
+    '--input-intent',
+    path.join(repoRoot, 'fixtures', 'input', 'does-not-exist.intent.json'),
+    '--movement-blocking',
+    '--json'
+  ]);
+
+  assert.notEqual(missingInput.status, 0);
+  assert.match(missingInput.stderr, /ENOENT: no such file or directory/);
 });
 
 test('run-loop --input-intent keeps report shape and changes finalState predictably', () => {

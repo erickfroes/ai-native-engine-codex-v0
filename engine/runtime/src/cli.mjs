@@ -65,7 +65,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-tile-collision <path> [--json]
   node engine/runtime/src/cli.mjs inspect-movement-blocking <path> --input-intent <path> [--json]
   node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json] [--trace]
-  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--input-intent <path>] [--keyboard-script <path>] [--json] [--trace]
+  node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--input-intent <path>] [--keyboard-script <path>] [--movement-blocking] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
   node engine/runtime/src/cli.mjs validate-all-scenes [dir] [--json]`);
 }
@@ -924,13 +924,15 @@ async function run() {
     const seed = readNumberFlag('run-loop', '--seed', undefined);
     const inputIntentPath = readStringFlag('run-loop', '--input-intent', undefined);
     const keyboardScriptPath = readStringFlag('run-loop', '--keyboard-script', undefined);
+    const movementBlocking = hasFlag('--movement-blocking');
     const withTrace = hasFlag('--trace');
 
     if (keyboardScriptPath) {
       const result = await runLoopWithKeyboardInputScriptV1(maybePath, keyboardScriptPath, {
         ticks,
         seed,
-        trace: withTrace
+        trace: withTrace,
+        movementBlocking
       });
       const scene = await loadSceneFile(maybePath);
 
@@ -981,7 +983,12 @@ async function run() {
       : undefined;
 
     if (withTrace) {
-      const traced = runMinimalSystemLoopWithTrace(scene, { ticks, seed, inputIntent });
+      const traced = runMinimalSystemLoopWithTrace(scene, {
+        ticks,
+        seed,
+        inputIntent,
+        movementBlocking
+      });
 
       if (asJson) {
         console.log(JSON.stringify(traced, null, 2));
@@ -998,7 +1005,13 @@ async function run() {
       return;
     }
 
-    const loopResult = runMinimalSystemLoop(scene, { ticks, seed, inputIntent });
+    const loopResult = runMinimalSystemLoop(scene, {
+      ticks,
+      seed,
+      inputIntent,
+      movementBlocking
+    });
+
     const loopReport = {
       loopReportVersion: 1,
       scene: scene.metadata.name,
