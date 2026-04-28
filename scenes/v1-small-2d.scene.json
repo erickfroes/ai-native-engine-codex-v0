@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "v1-small-2d"
+  },
+  "systems": [
+    "core.loop",
+    "input.keyboard"
+  ],
+  "entities": [
+    {
+      "id": "camera.main",
+      "name": "Camera",
+      "components": [
+        {
+          "kind": "camera.viewport",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 4,
+            "y": 0,
+            "width": 32,
+            "height": 24
+          }
+        }
+      ]
+    },
+    {
+      "id": "map.ground",
+      "name": "Ground",
+      "components": [
+        {
+          "kind": "tile.layer",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "tileWidth": 4,
+            "tileHeight": 4,
+            "columns": 5,
+            "rows": 4,
+            "layer": -10,
+            "tiles": [
+              [1, 1, 1, 1, 1],
+              [1, 1, 1, 1, 1],
+              [1, 1, 1, 2, 1],
+              [1, 1, 1, 1, 1]
+            ],
+            "palette": {
+              "1": {
+                "kind": "rect"
+              },
+              "2": {
+                "kind": "rect",
+                "solid": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "player.hero",
+      "name": "Player",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 4,
+            "y": 8
+          }
+        },
+        {
+          "kind": "visual.sprite",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "assetId": "player.hero.sprite",
+            "width": 8,
+            "height": 8,
+            "layer": 5
+          }
+        },
+        {
+          "kind": "collision.bounds",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "width": 8,
+            "height": 8,
+            "solid": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ghost.trigger",
+      "name": "Ghost Trigger",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 6,
+            "y": 10
+          }
+        },
+        {
+          "kind": "collision.bounds",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "width": 4,
+            "height": 4,
+            "solid": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "wall.block",
+      "name": "Wall Block",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "kind": "collision.bounds",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "width": 8,
+            "height": 8,
+            "solid": true
+          }
+        }
+      ]
+    }
+  ],
+  "assetRefs": []
+}
