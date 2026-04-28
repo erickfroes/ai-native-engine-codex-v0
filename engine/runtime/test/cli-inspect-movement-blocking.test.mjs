@@ -23,6 +23,14 @@ const openScenePath = path.join(
   'fixtures',
   'movement-blocking-open.scene.json'
 );
+const tileBlockedScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'movement-blocking-tile-blocked.scene.json'
+);
 const invalidScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'invalid_collision_bounds.scene.json');
 const inputIntentPath = path.join(repoRoot, 'fixtures', 'input', 'move-player-right.intent.json');
 const invalidInputIntentPath = path.join(repoRoot, 'fixtures', 'input', 'invalid.missing-entity.intent.json');
@@ -54,6 +62,24 @@ test('inspect-movement-blocking returns deterministic MovementBlockingReport v1 
     final: { x: 0, y: 0 },
     blocked: true,
     blockingEntities: ['wall.block']
+  });
+});
+
+test('inspect-movement-blocking reports tile.layer blockers with stable layer entity ids', () => {
+  const result = runCli(['inspect-movement-blocking', tileBlockedScenePath, '--input-intent', inputIntentPath, '--json']);
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(JSON.parse(result.stdout), {
+    movementBlockingReportVersion: 1,
+    scene: 'movement-blocking-tile-blocked-fixture',
+    entityId: 'player.hero',
+    inputIntentTick: 1,
+    attemptedMove: { x: 1, y: 0 },
+    from: { x: 0, y: 0 },
+    candidate: { x: 1, y: 0 },
+    final: { x: 0, y: 0 },
+    blocked: true,
+    blockingEntities: ['map.walls.tile.0.1']
   });
 });
 
@@ -127,3 +153,4 @@ test('inspect-movement-blocking fails predictably for a missing scene path', () 
   assert.match(result.stderr, /ENOENT: no such file or directory/);
   assert.match(result.stderr, /missing-movement\.scene\.json/);
 });
+

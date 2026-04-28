@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "movement-blocking-tile-open-fixture"
+  },
+  "systems": [
+    "core.loop",
+    "input.keyboard"
+  ],
+  "entities": [
+    {
+      "id": "player.hero",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "kind": "collision.bounds",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "width": 8,
+            "height": 8,
+            "solid": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "map.walls",
+      "components": [
+        {
+          "kind": "tile.layer",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "tileWidth": 8,
+            "tileHeight": 8,
+            "columns": 3,
+            "rows": 1,
+            "tiles": [
+              [0, 0, 1]
+            ],
+            "palette": {
+              "0": {
+                "kind": "empty"
+              },
+              "1": {
+                "kind": "rect",
+                "solid": true
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "assetRefs": []
+}
