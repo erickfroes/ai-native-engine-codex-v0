@@ -253,6 +253,10 @@ export const toolCatalog = [
         assetManifestPath: {
           type: 'string',
           description: 'Optional repository-relative or absolute path to an Asset Manifest v1 JSON file.'
+        },
+        movementBlocking: {
+          type: 'boolean',
+          description: 'When true, embed local Browser Demo movement blocking data from collision.bounds and solid tile.layer tiles.'
         }
       },
       additionalProperties: false
