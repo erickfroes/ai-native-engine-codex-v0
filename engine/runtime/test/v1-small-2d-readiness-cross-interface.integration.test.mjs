@@ -98,6 +98,18 @@ function normalizeLoopReport(report) {
   };
 }
 
+function assertBrowserDemoEnvelopeShape(payload) {
+  assert.deepEqual(Object.keys(payload).sort(), ['browserDemoVersion', 'html', 'scene', 'tick']);
+  assert.equal('outputPath' in payload, false);
+}
+
+function assertNoForbiddenBrowserSurface(html) {
+  assert.doesNotMatch(
+    html,
+    /<script[^>]+src=|<link[^>]+href=|fetch\(|XMLHttpRequest|WebSocket|EventSource|localStorage|sessionStorage|Date\.now|new Date|performance\.now|import\(/
+  );
+}
+
 async function initializeMcp(mcp) {
   const initResponse = await mcp.request('initialize', {
     protocolVersion: '2025-06-18',
@@ -210,6 +222,18 @@ test('v1 small 2d readiness render outputs stay aligned across runtime, CLI and 
     assert.deepEqual(runtimeHudBrowserDemo, mcpHudBrowserResponse.result.structuredContent);
     assert.deepEqual(runtimeBlockingHudBrowserDemo, JSON.parse(cliBlockingHudBrowserResult.stdout));
     assert.deepEqual(runtimeBlockingHudBrowserDemo, mcpBlockingHudBrowserResponse.result.structuredContent);
+    assertBrowserDemoEnvelopeShape(runtimeBrowserDemo);
+    assertBrowserDemoEnvelopeShape(runtimeBlockingBrowserDemo);
+    assertBrowserDemoEnvelopeShape(runtimeHudBrowserDemo);
+    assertBrowserDemoEnvelopeShape(runtimeBlockingHudBrowserDemo);
+    assertBrowserDemoEnvelopeShape(mcpBrowserResponse.result.structuredContent);
+    assertBrowserDemoEnvelopeShape(mcpBlockingBrowserResponse.result.structuredContent);
+    assertBrowserDemoEnvelopeShape(mcpHudBrowserResponse.result.structuredContent);
+    assertBrowserDemoEnvelopeShape(mcpBlockingHudBrowserResponse.result.structuredContent);
+    assertNoForbiddenBrowserSurface(runtimeBrowserDemo.html);
+    assertNoForbiddenBrowserSurface(runtimeBlockingBrowserDemo.html);
+    assertNoForbiddenBrowserSurface(runtimeHudBrowserDemo.html);
+    assertNoForbiddenBrowserSurface(runtimeBlockingHudBrowserDemo.html);
     assert.doesNotMatch(runtimeBrowserDemo.html, /"gameplayHud":/);
     assert.doesNotMatch(runtimeBrowserDemo.html, /"movementBlocking":/);
     assert.match(runtimeBlockingBrowserDemo.html, /"movementBlocking":/);

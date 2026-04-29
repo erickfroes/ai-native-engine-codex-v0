@@ -406,6 +406,34 @@ test('render-browser-demo --gameplay-hud --movement-blocking embeds HUD and bloc
   assert.match(payload.html, /<dd id="browser-gameplay-hud-movement-blocking">enabled<\/dd>/);
 });
 
+test('render-browser-demo V1 small 2D only includes outputPath when --out is used', async (t) => {
+  const outDir = await createTempDir(t);
+  const outPath = path.join(outDir, 'v1-small-2d-browser-demo.html');
+  const result = runCli([
+    'render-browser-demo',
+    v1Small2dScenePath,
+    '--gameplay-hud',
+    '--movement-blocking',
+    '--out',
+    outPath,
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: true });
+  assert.equal(payload.browserDemoVersion, 1);
+  assert.equal(payload.scene, 'v1-small-2d');
+  assert.equal(payload.tick, 0);
+  assert.equal(payload.outputPath, path.resolve(outPath));
+  assert.match(payload.html, /id="browser-gameplay-hud"/);
+  assert.match(payload.html, /"movementBlocking":/);
+
+  const writtenHtml = await readFile(payload.outputPath, 'utf8');
+  assert.equal(writtenHtml, payload.html);
+});
+
 test('render-browser-demo --movement-blocking is deterministic for blocked and open tile scenes', () => {
   const blockedArgs = [
     'render-browser-demo',

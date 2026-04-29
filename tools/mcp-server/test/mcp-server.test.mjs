@@ -906,6 +906,20 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       /render_browser_demo: `gameplayHud` must be a boolean when provided\./
     );
 
+    const renderBrowserDemoUnexpectedArgumentResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/v1-small-2d.scene.json',
+        outputPath: './tmp/should-not-be-accepted.html'
+      }
+    });
+
+    assert.equal(renderBrowserDemoUnexpectedArgumentResponse.result.isError, true);
+    assert.match(
+      renderBrowserDemoUnexpectedArgumentResponse.result.content[0].text,
+      /render_browser_demo: unexpected argument `outputPath`\./
+    );
+
     const renderBrowserDemoMissingPathResponse = await client.request('tools/call', {
       name: 'render_browser_demo',
       arguments: {
