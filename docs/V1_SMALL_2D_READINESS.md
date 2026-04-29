@@ -27,6 +27,14 @@ Elementos:
 - `ghost.trigger`: bounds nao solido sobreposto ao player para validar overlap diagnostico sem bloquear.
 - `wall.block`: bounds solido distante para validar bounds solidos sem interferir no caminho livre.
 
+Geometria canônica:
+
+- `camera.main` usa offset world `(4, 0)` e viewport `32x24`.
+- `player.hero` nasce em world `(4, 8)`, portanto aparece no Browser Demo em screen `(0, 8)`.
+- o tile solido `map.ground.tile.2.3` nasce em world `(12, 8)`, portanto aparece em screen `(8, 8)`.
+- com `movementBlocking` ligado, `ArrowRight` tenta mover o player para o tile solido e e bloqueado.
+- `ArrowDown` permanece caminho livre e move o player para screen `(0, 12)` na Browser Demo.
+
 Inputs:
 
 - `fixtures/input/v1-small-2d-move-right.intent.json`: movimento para direita, bloqueado pelo tile solido.
@@ -50,6 +58,9 @@ O gate passa quando:
 - runtime, CLI e MCP permanecem alinhados.
 - `render-browser-demo --gameplay-hud` expoe HUD Lite local sem alterar o comportamento padrao.
 - `render-browser-demo --gameplay-hud --movement-blocking` expoe contadores locais de blocking no HTML.
+- a Browser Demo da cena canônica cobre as combinacoes sem flags, `movementBlocking`, `gameplayHud` e `gameplayHud + movementBlocking`.
+- o HTML gerado permanece autocontido e sem APIs proibidas como `fetch`, `localStorage`, timers de relogio, scripts externos ou imports dinamicos.
+- os envelopes CLI/MCP preservam `browserDemoVersion`, `scene`, `tick` e `html`; `outputPath` aparece apenas no CLI quando `--out` e usado.
 
 ## Fora De Escopo
 
@@ -66,6 +77,8 @@ O gate passa quando:
 
 ## Seguimento
 
-`Browser Gameplay HUD Lite v1` complementa este gate expondo estado minimo de gameplay na Browser Playable Demo.
+`Browser Gameplay HUD Lite v1` e o hardening dos exemplos jogaveis pequenos ja complementam este gate expondo estado minimo de gameplay na Browser Playable Demo.
 
 Esse HUD Lite continua opt-in, local ao HTML e nao transforma a Browser Demo no runtime canonico do engine.
+
+O proximo pacote recomendado e `Playable Save/Load Lite`, ou um pacote equivalente de export/save V1 para o exemplo jogavel pequeno.

@@ -83,7 +83,7 @@ Fora de escopo assumido nesta meta:
 
 ## Meta 3 - V1: jogos pequenos 2D completos
 
-Status: proxima fase.
+Status: em andamento.
 
 Objetivo: transformar a engine visual/interativa minima em uma engine capaz de produzir jogos pequenos 2D, ainda com foco em determinismo, contratos e automacao por Codex.
 
@@ -98,13 +98,14 @@ Entregas alvo:
 - Browser Demo usando regras de gameplay reais concluida em modo opt-in;
 - readiness gate V1 Small 2D concluido com cena consolidada;
 - Browser Gameplay HUD Lite opt-in concluido;
+- hardening de exemplos jogaveis pequenos concluido;
 - UI system declarativo minimo como bloco futuro;
 - audio-lite opcional;
 - export de demo jogavel HTML;
 - matriz de regressao visual/headless;
 - pacote Codex com prompts/skills/subagentes para criar um jogo 2D pequeno.
 
-Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D e Browser Gameplay HUD Lite v1 ja estao implementados. O proximo bloco recomendado e hardening de exemplos jogaveis pequenos, sem fisica completa e sem pathfinding.
+Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1 e hardening de exemplos jogaveis pequenos ja estao implementados. O proximo bloco recomendado e Playable Save/Load Lite, sem fisica completa e sem pathfinding.
 
 Criterio de conclusao:
 
@@ -121,9 +122,9 @@ Subagentes recomendados:
 
 Linha de trabalho atual recomendada:
 
-1. Hardening de exemplos jogaveis pequenos.
-2. UI/audio/animation basicos para V2.
-3. Preservar HUD Lite como diagnostico local ate existir UI system formal.
+1. Playable Save/Load Lite.
+2. Export/save V1 para exemplo jogavel pequeno.
+3. UI/audio/animation basicos para V2, preservando HUD Lite como diagnostico local ate existir UI system formal.
 
 ---
 

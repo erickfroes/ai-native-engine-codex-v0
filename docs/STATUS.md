@@ -43,14 +43,15 @@ Neste ponto, a fundacao de colisao por entidade ja existe:
 - Browser Playable Demo movement blocking opt-in;
 - Browser Gameplay HUD Lite v1 opt-in;
 - V1 Small 2D readiness gate com cena consolidada (`docs/V1_SMALL_2D_READINESS.md`);
+- V1 Small 2D playable example hardening;
 - CLI/MCP para fluxos principais;
 - testes cross-interface.
 
 ## Foco atual recomendado
 
-1. Hardening de exemplos jogaveis pequenos.
-2. Integracoes basicas de UI/audio/animation para V2.
-3. Preparar proximo pacote V1 sem transformar HUD Lite em UI system completo.
+1. Playable Save/Load Lite para a cena canônica V1 Small 2D.
+2. Export/save V1 para exemplo jogavel pequeno.
+3. Integracoes basicas de UI/audio/animation para V2, sem transformar HUD Lite em UI system completo.
 
 ## Versoes de produto
 
