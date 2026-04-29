@@ -261,6 +261,10 @@ export const toolCatalog = [
         gameplayHud: {
           type: 'boolean',
           description: 'When true, embed Browser Gameplay HUD Lite v1 local diagnostic state in the generated HTML.'
+        },
+        playableSaveLoad: {
+          type: 'boolean',
+          description: 'When true, embed Playable Save/Load Lite v1 local export/import controls in the generated HTML.'
         }
       },
       additionalProperties: false

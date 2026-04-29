@@ -216,6 +216,10 @@ function validateMetadata(metadata) {
       );
     }
   }
+
+  if (metadata.playableSaveLoad !== undefined) {
+    validatePlayableSaveLoadMetadata(metadata.playableSaveLoad);
+  }
 }
 
 function validateMetadataOverrides(overrides) {
@@ -235,6 +239,10 @@ function validateMetadataOverrides(overrides) {
 
   if (overrides.gameplayHud !== undefined && typeof overrides.gameplayHud !== 'boolean') {
     throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.gameplayHud` override must be a boolean');
+  }
+
+  if (overrides.playableSaveLoad !== undefined && typeof overrides.playableSaveLoad !== 'boolean') {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.playableSaveLoad` override must be a boolean');
   }
 }
 
@@ -289,6 +297,22 @@ function validateGameplayHudMetadata(gameplayHud) {
 
   if (typeof gameplayHud.movementBlockingEnabled !== 'boolean') {
     throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.gameplayHud.movementBlockingEnabled` must be a boolean');
+  }
+}
+
+function validatePlayableSaveLoadMetadata(playableSaveLoad) {
+  assertObject(playableSaveLoad, 'metadata.playableSaveLoad');
+
+  if (playableSaveLoad.enabled !== true) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.playableSaveLoad.enabled` must be exactly true');
+  }
+
+  if (playableSaveLoad.kind !== 'browser.playable-demo.local-state') {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.playableSaveLoad.kind` must be `browser.playable-demo.local-state`');
+  }
+
+  if (playableSaveLoad.version !== 1) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.playableSaveLoad.version` must be exactly 1');
   }
 }
 
@@ -413,6 +437,25 @@ function renderGameplayHudBlock(rows) {
   ].join('\n');
 }
 
+function renderPlayableSaveLoadBlock(enabled) {
+  if (!enabled) {
+    return '';
+  }
+
+  return [
+    '      <section id="browser-playable-save-load" class="save-load" aria-label="Playable save load lite">',
+    '        <h3>Playable Save/Load Lite</h3>',
+    '        <p>Export or import this demo local state as deterministic JSON. It stays in this page and is not saved automatically.</p>',
+    '        <div class="save-load-actions">',
+    '          <button id="browser-playable-demo-export-state" type="button">Export State</button>',
+    '          <button id="browser-playable-demo-import-state" type="button">Import State</button>',
+    '        </div>',
+    '        <textarea id="browser-playable-demo-local-state" rows="10" spellcheck="false" aria-label="Playable local state JSON"></textarea>',
+    '        <p id="browser-playable-demo-save-load-status" class="save-load-status" aria-live="polite">No local state exported.</p>',
+    '      </section>'
+  ].join('\n');
+}
+
 function createMovementBlockingMetadata(scene, renderSnapshot, controllableEntityId) {
   const cameraPosition = resolveCameraPosition(scene);
   const controllableDrawCall = renderSnapshot.drawCalls.find((drawCall) => drawCall.id === controllableEntityId);
@@ -462,6 +505,14 @@ function createGameplayHudMetadata(renderSnapshot, movementBlockingEnabled) {
   };
 }
 
+function createPlayableSaveLoadMetadata() {
+  return {
+    enabled: true,
+    kind: 'browser.playable-demo.local-state',
+    version: 1
+  };
+}
+
 export function createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overrides = {}) {
   assertObject(scene, 'scene');
   validateRenderSnapshot(renderSnapshot);
@@ -486,6 +537,9 @@ export function createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overr
       : {}),
     ...(overrides.gameplayHud === true
       ? { gameplayHud: createGameplayHudMetadata(renderSnapshot, overrides.movementBlocking === true) }
+      : {}),
+    ...(overrides.playableSaveLoad === true
+      ? { playableSaveLoad: createPlayableSaveLoadMetadata() }
       : {})
   };
 }
@@ -497,12 +551,14 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
 
   const resolvedTitle = title.trim();
   const controllableEntityId = resolveControllableEntityId(renderSnapshot.drawCalls, metadata.controllableEntityId);
+  const playableSaveLoadEnabled = Boolean(metadata.playableSaveLoad && typeof controllableEntityId === 'string');
   const stepPx = metadata.stepPx ?? DEFAULT_BROWSER_PLAYABLE_STEP_PX;
   const normalizedMetadata = {
     ...(controllableEntityId ? { controllableEntityId } : {}),
     stepPx,
     ...(metadata.movementBlocking ? { movementBlocking: metadata.movementBlocking } : {}),
-    ...(metadata.gameplayHud ? { gameplayHud: metadata.gameplayHud } : {})
+    ...(metadata.gameplayHud ? { gameplayHud: metadata.gameplayHud } : {}),
+    ...(playableSaveLoadEnabled ? { playableSaveLoad: metadata.playableSaveLoad } : {})
   };
   const metadataEntries = normalizeMetadataEntries({
     ...(controllableEntityId ? { controllableEntityId } : {}),
@@ -520,6 +576,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     ? createInitialGameplayHudRows(renderSnapshot, renderSnapshot.drawCalls, controllableEntityId, metadata)
     : null;
   const gameplayHudBlock = renderGameplayHudBlock(gameplayHudRows);
+  const playableSaveLoadBlock = renderPlayableSaveLoadBlock(playableSaveLoadEnabled);
   const inlineData = escapeInlineJson({
     metadata: normalizedMetadata,
     renderSnapshot,
@@ -552,9 +609,19 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
           '    .gameplay-hud dd { margin: 0; }'
         ]
       : []),
+    ...(playableSaveLoadEnabled
+      ? [
+          '    .save-load { display: grid; gap: 8px; margin: 12px 0 0; padding: 12px; border: 1px dashed #7e9170; background: #f5ffef; }',
+          '    .save-load h3 { margin: 0; font-size: 1rem; }',
+          '    .save-load p { margin: 0; }',
+          '    .save-load-actions { display: flex; flex-wrap: wrap; gap: 8px; }',
+          '    .save-load textarea { width: 100%; min-height: 140px; box-sizing: border-box; font: inherit; border: 1px solid #201a13; background: #fffdf8; color: #201a13; }',
+          '    .save-load-status { font-weight: 700; }'
+        ]
+      : []),
     '    canvas { display: block; width: min(100%, 640px); height: auto; border: 1px solid #d7cfc2; background: #fffdf8; image-rendering: pixelated; }',
     '    canvas:focus { outline: 2px solid #201a13; outline-offset: 3px; }',
-    '    .actions { display: flex; gap: 12px; margin-top: 12px; }',
+    '    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }',
     '    button { font: inherit; padding: 8px 12px; border: 1px solid #201a13; background: #fffdf8; color: #201a13; cursor: pointer; }',
     '    button:focus { outline: 2px solid #201a13; outline-offset: 3px; }',
     '    button:disabled { cursor: not-allowed; opacity: 0.6; }',
@@ -583,6 +650,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     `      <p class="hint">Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by ${stepPx} px per keydown. Pause rendering stops the local redraw loop. Reset restores the snapshot position.</p>`,
     `      <p id="browser-playable-demo-position" class="hud" aria-live="polite">${escapeHtml(initialPositionText)}</p>`,
     gameplayHudBlock,
+    playableSaveLoadBlock,
     '      <noscript>This demo needs JavaScript enabled to capture keyboard input.</noscript>',
     `      <canvas id="browser-playable-demo-canvas" data-browser-demo-version="${BROWSER_PLAYABLE_DEMO_VERSION}" data-scene="${escapeHtml(renderSnapshot.scene)}" data-tick="${renderSnapshot.tick}" data-controllable-entity="${escapeHtml(controllableEntityId ?? '')}" width="${renderSnapshot.viewport.width}" height="${renderSnapshot.viewport.height}" tabindex="0" aria-label="Browser playable demo canvas" aria-describedby="browser-playable-demo-instructions browser-playable-demo-status"></canvas>`,
     '      <div class="actions">',
@@ -625,6 +693,21 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
       : [
           '      const gameplayHudEnabled = false;',
           '      const gameplayHudElements = null;'
+        ]),
+    ...(playableSaveLoadEnabled
+      ? [
+          '      const playableSaveLoadEnabled = payload.metadata.playableSaveLoad?.enabled === true;',
+          '      const exportStateButton = document.getElementById("browser-playable-demo-export-state");',
+          '      const importStateButton = document.getElementById("browser-playable-demo-import-state");',
+          '      const localStateTextArea = document.getElementById("browser-playable-demo-local-state");',
+          '      const saveLoadStatusElement = document.getElementById("browser-playable-demo-save-load-status");'
+        ]
+      : [
+          '      const playableSaveLoadEnabled = false;',
+          '      const exportStateButton = null;',
+          '      const importStateButton = null;',
+          '      const localStateTextArea = null;',
+          '      const saveLoadStatusElement = null;'
         ]),
     '      const context = canvas.getContext("2d");',
     '      if (!context) {',
@@ -738,6 +821,107 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '      function updatePauseButton() {',
     '        pauseButton.textContent = redrawLoopPaused ? "Resume rendering" : "Pause rendering";',
     '      }',
+    '      function buildPlayableLocalState() {',
+    '        const controlled = controllableIndex === -1 ? null : drawCalls[controllableIndex];',
+    '        const state = {',
+    '          version: 1,',
+    '          kind: "browser.playable-demo.local-state",',
+    '          sceneId: payload.renderSnapshot.scene,',
+    '          tick: snapshotTick,',
+    '          controlledEntityId: controlled ? controlled.id : null,',
+    '          positions: controlled ? [{ entityId: controlled.id, x: controlled.x, y: controlled.y }] : [],',
+    '          options: {',
+    '            movementBlocking: payload.metadata.movementBlocking?.enabled === true,',
+    '            gameplayHud: gameplayHudEnabled,',
+    '            playableSaveLoad: playableSaveLoadEnabled',
+    '          }',
+    '        };',
+    '        if (gameplayHudEnabled) {',
+    '          state.gameplayHud = {',
+    '            inputs: inputCount,',
+    '            blockedMoves: blockedMoveCount,',
+    '            lastInput,',
+    '            lastResult',
+    '          };',
+    '        }',
+    '        return state;',
+    '      }',
+    '      function formatPlayableLocalState(state) {',
+    '        return JSON.stringify(state, null, 2);',
+    '      }',
+    '      function updateSaveLoadStatus(message) {',
+    '        if (saveLoadStatusElement) {',
+    '          saveLoadStatusElement.textContent = message;',
+    '        }',
+    '      }',
+    '      function exportPlayableLocalState() {',
+    '        if (!localStateTextArea) {',
+    '          return;',
+    '        }',
+    '        localStateTextArea.value = formatPlayableLocalState(buildPlayableLocalState());',
+    '        updateSaveLoadStatus("Local state exported.");',
+    '        canvas.focus();',
+    '      }',
+    '      function assertPlayableLocalState(condition, message) {',
+    '        if (!condition) {',
+    '          throw new Error(message);',
+    '        }',
+    '      }',
+    '      function readPlayableLocalStatePosition(state) {',
+    '        assertPlayableLocalState(state && typeof state === "object" && !Array.isArray(state), "state must be an object");',
+    '        assertPlayableLocalState(state.version === 1, "version must be 1");',
+    '        assertPlayableLocalState(state.kind === "browser.playable-demo.local-state", "kind is unsupported");',
+    '        assertPlayableLocalState(state.sceneId === payload.renderSnapshot.scene, "sceneId does not match this demo");',
+    '        assertPlayableLocalState(state.tick === snapshotTick, "tick does not match this demo");',
+    '        const controlled = controllableIndex === -1 ? null : drawCalls[controllableIndex];',
+    '        assertPlayableLocalState(controlled !== null, "this demo has no controllable entity");',
+    '        assertPlayableLocalState(state.controlledEntityId === controlled.id, "controlledEntityId does not match this demo");',
+    '        assertPlayableLocalState(Array.isArray(state.positions), "positions must be an array");',
+    '        const position = state.positions.find((entry) => entry && entry.entityId === controlled.id);',
+    '        assertPlayableLocalState(position !== undefined, "controlled position is missing");',
+    '        assertPlayableLocalState(Number.isInteger(position.x), "position.x must be an integer");',
+    '        assertPlayableLocalState(Number.isInteger(position.y), "position.y must be an integer");',
+    '        if (state.options !== undefined) {',
+    '          assertPlayableLocalState(state.options && typeof state.options === "object" && !Array.isArray(state.options), "options must be an object");',
+    '          assertPlayableLocalState(state.options.playableSaveLoad === true, "options.playableSaveLoad must be true");',
+    '          assertPlayableLocalState(state.options.gameplayHud === gameplayHudEnabled, "options.gameplayHud does not match this demo");',
+    '          assertPlayableLocalState(state.options.movementBlocking === (payload.metadata.movementBlocking?.enabled === true), "options.movementBlocking does not match this demo");',
+    '        }',
+    '        return position;',
+    '      }',
+    '      function applyPlayableLocalState(state) {',
+    '        const position = readPlayableLocalStatePosition(state);',
+    '        if (movementWouldBeBlocked(position.x, position.y)) {',
+    '          throw new Error("position is blocked in this demo");',
+    '        }',
+    '        const controlled = drawCalls[controllableIndex];',
+    '        controlled.x = position.x;',
+    '        controlled.y = position.y;',
+    '        if (gameplayHudEnabled) {',
+    '          const loadedHud = state.gameplayHud && typeof state.gameplayHud === "object" ? state.gameplayHud : {};',
+    '          inputCount = Number.isInteger(loadedHud.inputs) ? loadedHud.inputs : 0;',
+    '          blockedMoveCount = Number.isInteger(loadedHud.blockedMoves) ? loadedHud.blockedMoves : 0;',
+    '          lastInput = typeof loadedHud.lastInput === "string" && loadedHud.lastInput.length > 0 ? loadedHud.lastInput : "none";',
+    '          lastResult = typeof loadedHud.lastResult === "string" && loadedHud.lastResult.length > 0 ? loadedHud.lastResult : "loaded";',
+    '        } else {',
+    '          lastResult = "loaded";',
+    '        }',
+    '        redraw();',
+    '        updateGameplayHud();',
+    '        updateSaveLoadStatus("Local state imported.");',
+    '        canvas.focus();',
+    '      }',
+    '      function importPlayableLocalState() {',
+    '        if (!localStateTextArea) {',
+    '          return;',
+    '        }',
+    '        try {',
+    '          applyPlayableLocalState(JSON.parse(localStateTextArea.value));',
+    '        } catch (error) {',
+    '          updateSaveLoadStatus("Import failed: " + error.message);',
+    '          canvas.focus();',
+    '        }',
+    '      }',
     '      function resetDrawCalls() {',
     '        drawCalls.length = 0;',
     '        for (let index = 0; index < initialDrawCalls.length; index += 1) {',
@@ -747,6 +931,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '        blockedMoveCount = 0;',
     '        lastInput = "none";',
     '        lastResult = "reset";',
+    '        updateSaveLoadStatus("Local state reset.");',
     '      }',
     '      function resetControlledPosition() {',
     '        if (controllableIndex === -1 || initialControlledPosition === null) {',
@@ -865,6 +1050,12 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '      resetButton.addEventListener("click", () => {',
     '        resetControlledPosition();',
     '      });',
+    '      if (exportStateButton) {',
+    '        exportStateButton.addEventListener("click", exportPlayableLocalState);',
+    '      }',
+    '      if (importStateButton) {',
+    '        importStateButton.addEventListener("click", importPlayableLocalState);',
+    '      }',
     '      canvas.addEventListener("keydown", (event) => {',
     '        const delta = getMovementDelta(event.code);',
     '        if (!delta) {',

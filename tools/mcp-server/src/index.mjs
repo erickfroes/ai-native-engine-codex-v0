@@ -688,7 +688,16 @@ async function handleToolCall(params) {
     if (params.name === 'render_browser_demo') {
       const unexpectedArgument = findUnexpectedArgument(
         args,
-        new Set(['path', 'tick', 'width', 'height', 'assetManifestPath', 'movementBlocking', 'gameplayHud'])
+        new Set([
+          'path',
+          'tick',
+          'width',
+          'height',
+          'assetManifestPath',
+          'movementBlocking',
+          'gameplayHud',
+          'playableSaveLoad'
+        ])
       );
       if (unexpectedArgument !== undefined) {
         return {
@@ -744,6 +753,13 @@ async function handleToolCall(params) {
         };
       }
 
+      if (args.playableSaveLoad !== undefined && typeof args.playableSaveLoad !== 'boolean') {
+        return {
+          content: toTextContent('render_browser_demo: `playableSaveLoad` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
       const scene = await loadSceneFile(targetPath);
       const resolvedAssetManifestPath = args.assetManifestPath === undefined
         ? undefined
@@ -758,7 +774,8 @@ async function handleToolCall(params) {
       const title = `${snapshot.scene} Browser Playable Demo`;
       const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, {
         movementBlocking: args.movementBlocking === true,
-        gameplayHud: args.gameplayHud === true
+        gameplayHud: args.gameplayHud === true,
+        playableSaveLoad: args.playableSaveLoad === true
       });
       const html = renderBrowserPlayableDemoHtmlV1({
         title,
