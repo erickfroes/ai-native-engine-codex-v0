@@ -40,7 +40,8 @@ import {
   buildCollisionBoundsReportV1,
   buildCollisionOverlapReportV1,
   buildMovementBlockingReportV1,
-  buildTileCollisionReportV1
+  buildTileCollisionReportV1,
+  buildAudioLiteReportV1
 } from './index.mjs';
 
 function printUsage() {
@@ -66,6 +67,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-collision-overlaps <path> [--json]
   node engine/runtime/src/cli.mjs inspect-tile-collision <path> [--json]
   node engine/runtime/src/cli.mjs inspect-movement-blocking <path> --input-intent <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-audio-lite <path> [--json]
   node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--input-intent <path>] [--keyboard-script <path>] [--movement-blocking] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
@@ -864,6 +866,33 @@ async function run() {
       console.log(`Final: ${report.final.x},${report.final.y}`);
       console.log(`Blocked: ${report.blocked}`);
       console.log(`Blocking entities: ${report.blockingEntities.length === 0 ? '(none)' : report.blockingEntities.join(', ')}`);
+    }
+
+    return;
+  }
+
+  if (command === 'inspect-audio-lite') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildAudioLiteReportV1(maybePath);
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`Audio Lite report version: ${report.audioLiteReportVersion}`);
+      console.log(`Clips: ${report.clips.length}`);
+      for (const clip of report.clips) {
+        console.log(
+          `- ${clip.clipId}: entity=${clip.entityId} kind=${clip.kind} trigger=${clip.trigger} volume=${clip.volume} loop=${clip.loop} src=${clip.src ?? '(none)'}`
+        );
+      }
+      console.log(`Warnings: ${report.warnings.length}`);
+      console.log(`Invalid refs: ${report.invalidRefs.length}`);
     }
 
     return;
