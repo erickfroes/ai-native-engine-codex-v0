@@ -147,6 +147,12 @@ O V1 Small 2D Game Creation Guide / Codex package esta concluido como fluxo Code
 - `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`
 - `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md`
 
+O V1 Small 2D Release Checkpoint tambem esta concluido:
+
+- `docs/V1_SMALL_2D_RELEASE_CHECKPOINT.md`
+- `docs/V1_SMALL_2D_CAPABILITY_MATRIX.md`
+- `docs/V1_SMALL_2D_RELEASE_VALIDATION.md`
+
 ## Proximo pacote recomendado
 
-`codex/v1-small-2d-release-checkpoint`.
+`codex/audio-lite-v1`.

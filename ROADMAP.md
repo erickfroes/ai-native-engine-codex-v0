@@ -83,7 +83,7 @@ Fora de escopo assumido nesta meta:
 
 ## Meta 3 - V1: jogos pequenos 2D completos
 
-Status: em andamento.
+Status: release-checkpointed. A fundacao V1 Small 2D esta fechada o suficiente para iniciar V2 incrementalmente, mantendo V1 aberta apenas para bugfix, hardening e compatibilidade.
 
 Objetivo: transformar a engine visual/interativa minima em uma engine capaz de produzir jogos pequenos 2D, ainda com foco em determinismo, contratos e automacao por Codex.
 
@@ -103,13 +103,13 @@ Entregas alvo:
 - Simple HTML Export v1 concluido;
 - Game Templates v1 concluido com exemplos copiar-e-adaptar;
 - V1 Small 2D Game Creation Guide / Codex package concluido;
-- UI system declarativo minimo como bloco futuro;
-- audio-lite opcional;
-- release checkpoint V1 Small 2D como proximo gate de fechamento;
+- release checkpoint V1 Small 2D concluido;
+- UI system declarativo minimo como bloco futuro de V2;
+- audio-lite como proximo pacote incremental;
 - matriz de regressao visual/headless;
 - pacote Codex com prompts/skills/subagentes para criar um jogo 2D pequeno.
 
-Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1 e V1 Small 2D Game Creation Guide / Codex package ja estao implementados. O proximo bloco recomendado e `codex/v1-small-2d-release-checkpoint`, sem editor, servidor, fisica completa ou pathfinding.
+Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. O proximo bloco recomendado e `codex/audio-lite-v1`, sem editor, servidor, fisica completa ou pathfinding.
 
 Criterio de conclusao:
 
@@ -126,9 +126,9 @@ Subagentes recomendados:
 
 Linha de trabalho atual recomendada:
 
-1. `codex/v1-small-2d-release-checkpoint`.
-2. Export/save V1 mais formal para exemplo jogavel pequeno, se ainda necessario apos o HTML export.
-3. UI/audio/animation basicos para V2, preservando HUD Lite como diagnostico local ate existir UI system formal.
+1. `codex/audio-lite-v1`.
+2. `codex/sprite-animation-v1`.
+3. UI system/prefab system V2 conforme roadmap, preservando HUD Lite como diagnostico local ate existir UI system formal.
 
 ---
 

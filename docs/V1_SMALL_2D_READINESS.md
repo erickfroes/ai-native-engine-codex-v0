@@ -94,4 +94,10 @@ Playable Save/Load Lite tambem continua opt-in, local ao HTML e nao substitui `s
 
 `V1 Small 2D Game Creation Guide / Codex package` tambem fica concluido como workflow Codex-first para criar jogos pequenos a partir dos templates e do export HTML simples.
 
-O proximo pacote recomendado e `codex/v1-small-2d-release-checkpoint`.
+`V1 Small 2D Release Checkpoint` tambem fica concluido como fechamento documental, matriz de capacidades e validacao canonica:
+
+- `docs/V1_SMALL_2D_RELEASE_CHECKPOINT.md`
+- `docs/V1_SMALL_2D_CAPABILITY_MATRIX.md`
+- `docs/V1_SMALL_2D_RELEASE_VALIDATION.md`
+
+O proximo pacote recomendado e `codex/audio-lite-v1`.

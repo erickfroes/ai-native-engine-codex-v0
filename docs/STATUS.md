@@ -4,7 +4,7 @@
 
 A Meta 1 Headless e a Meta 2 Visual/Interativa estao concluidas como bases pequenas, deterministicas e automatizaveis por Codex.
 
-O projeto esta na Meta 3, cujo foco e **Gameplay Foundation**: colisao, overlap, bloqueio de movimento, colisao com tile layer e uma demo browser com regras reais de gameplay.
+O projeto esta com a Meta 3 em estado **V1 Small 2D release-checkpointed**: colisao, overlap, bloqueio de movimento, colisao com tile layer, Browser Demo com regras reais de gameplay, templates, export HTML simples e workflow Codex-first estao documentados e validados.
 
 Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
@@ -46,6 +46,9 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - Simple HTML Export v1;
 - Game Templates v1 com `top-down-basic` e `side-view-blocking-basic`;
 - V1 Small 2D Game Creation Guide / Codex package;
+- V1 Small 2D Release Checkpoint;
+- V1 Small 2D Capability Matrix;
+- V1 Small 2D Release Validation;
 - V1 Small 2D readiness gate com cena consolidada (`docs/V1_SMALL_2D_READINESS.md`);
 - V1 Small 2D playable example hardening;
 - CLI/MCP para fluxos principais;
@@ -53,9 +56,9 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. `codex/v1-small-2d-release-checkpoint`.
-2. Export/save V1 mais formal para exemplo jogavel pequeno, se ainda necessario apos o HTML export.
-3. Integracoes basicas de UI/audio/animation para V2, sem transformar HUD Lite em UI system completo.
+1. `codex/audio-lite-v1`.
+2. `codex/sprite-animation-v1`.
+3. UI system/prefab system V2 conforme roadmap, sem transformar HUD Lite em UI system completo antes do pacote apropriado.
 
 ## Versoes de produto
 
