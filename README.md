@@ -43,6 +43,7 @@ A engine agora avancou para a fundacao de gameplay 2D:
 - `TileCollisionReport v1` para inspecionar tiles solidos declarados em `tile.layer`;
 - blocking opt-in no `run-loop` e na Browser Playable Demo;
 - Playable Save/Load Lite browser-local opt-in na Browser Playable Demo;
+- Simple HTML Export v1 para gerar um arquivo HTML jogavel autocontido;
 - cena consolidada `v1-small-2d` para readiness da V1;
 - CLI/MCP para inspecao de colisao, overlap, tile collision e blocking;
 - testes cross-interface para os reports principais.
@@ -91,6 +92,7 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 - `render-svg-demo`: gera HTML estatico com SVG inline
 - `render-canvas-demo`: gera HTML estatico com Canvas 2D
 - `render-browser-demo`: gera HTML interativo minimo com Canvas 2D, teclado local, fallback de sprites, blocking local opt-in, HUD Lite opt-in e Playable Save/Load Lite opt-in
+- `export-html-game`: escreve um HTML jogavel autocontido com opcoes da Browser Demo
 
 ## Tools MCP principais
 
@@ -105,6 +107,7 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 - `render_svg`
 - `render_canvas_demo`
 - `render_browser_demo`
+- `export_html_game`
 - `plan_loop`
 - `run_loop`
 - `run_replay`
@@ -125,6 +128,7 @@ Observacao: `render-svg-demo` e um fluxo de CLI/runtime. A Meta 2 nao define uma
 3. Serializar uma saida textual com `render-svg` ou `render_svg`.
 4. Gerar demos HTML com `render-svg-demo`, `render-canvas-demo` ou `render-browser-demo`.
 5. Usar `--asset-manifest` ou `assetManifestPath` apenas quando a cena declarar sprites locais.
+6. Para entregar um arquivo jogavel simples, usar `export-html-game`.
 
 ## Exemplos minimos
 
@@ -161,6 +165,9 @@ node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene
 
 # gerar Browser Playable Demo da cena consolidada com export/import local opt-in
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene.json --gameplay-hud --movement-blocking --playable-save-load --out ./tmp/v1-small-2d-save-load.html --json
+
+# exportar um HTML jogavel simples da cena consolidada V1 small 2D
+node ./engine/runtime/src/cli.mjs export-html-game ./scenes/v1-small-2d.scene.json --movement-blocking --gameplay-hud --playable-save-load --out ./tmp/v1-small-2d-export.html --json
 ```
 
 ## Validacao obrigatoria
@@ -181,6 +188,7 @@ npm run smoke
 - `docs/V1_SMALL_2D_READINESS.md`: gate consolidado da V1 Small 2D
 - `docs/V1_SMALL_2D_TEST_MATRIX.md`: matriz runtime/CLI/MCP/testes da cena consolidada
 - `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`: formato local do Playable Save/Load Lite
+- `docs/SIMPLE_HTML_EXPORT_V1.md`: contrato do export HTML jogavel simples
 
 ## Primeira leitura recomendada
 

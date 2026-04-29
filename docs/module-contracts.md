@@ -508,3 +508,17 @@ Regra de compatibilidade:
 - Load falha de forma previsível quando o payload JSON está malformado.
 - Sem usar save/load explicitamente, `run-loop`, `simulate-state`, `validate-save` e os demais comandos continuam com o mesmo comportamento padrão.
 - Fora de escopo neste slice: persistência automática, autosave, editor e slots avançados.
+
+## Simple HTML Export v1
+
+Contrato de export simples para escrever uma cena jogavel pequena como arquivo HTML autocontido:
+
+- ver `docs/SIMPLE_HTML_EXPORT_V1.md`.
+- CLI: `export-html-game <scene> --out <file> [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--json]`.
+- MCP: `export_html_game({ scenePath, outputPath, movementBlocking?, gameplayHud?, playableSaveLoad? })`.
+- Runtime: `buildHtmlGameExportV1(sceneOrPath, options)` e `exportHtmlGameV1(sceneOrPath, options)`.
+- reutiliza Browser Playable Demo v1, `RenderSnapshot v1` e os envelopes internos ja existentes de blocking/HUD/save-load local.
+- retorna envelope `exportVersion`, `scene`, `outputPath`, `options`, `sizeBytes` e `htmlHash`.
+- nao inclui o HTML no envelope; o conteudo fica no arquivo escrito.
+- nao altera Browser Demo Local State v1, Save/Load v1, RenderSnapshot v1, InputIntent v1 ou reports de colisao.
+- nao e bundler, servidor, editor, build pipeline V2, asset copier ou runtime canonico de gameplay.

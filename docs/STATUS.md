@@ -43,6 +43,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - Browser Playable Demo movement blocking opt-in;
 - Browser Gameplay HUD Lite v1 opt-in;
 - Playable Save/Load Lite v1 browser-local opt-in;
+- Simple HTML Export v1;
 - V1 Small 2D readiness gate com cena consolidada (`docs/V1_SMALL_2D_READINESS.md`);
 - V1 Small 2D playable example hardening;
 - CLI/MCP para fluxos principais;
@@ -50,7 +51,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. Simple HTML Export v1 para empacotar a cena jogavel pequena.
+1. Game Templates v1 usando a cena consolidada e o export HTML simples.
 2. Export/save V1 mais formal para exemplo jogavel pequeno, se ainda necessario apos o HTML export.
 3. Integracoes basicas de UI/audio/animation para V2, sem transformar HUD Lite em UI system completo.
 
@@ -70,6 +71,7 @@ Detalhes: `docs/ENGINE_VERSION_ROADMAP.md`.
 - acoplar Browser Demo ao runtime canonico como se fosse loop oficial;
 - transformar HUD browser lite em sistema de UI completo antes do pacote V2 apropriado;
 - confundir Playable Save/Load Lite browser-local com `savegame v1` ou `State Snapshot v1`;
+- transformar Simple HTML Export v1 em bundler, servidor ou build pipeline V2;
 - criar editor antes de solidificar V1 gameplay;
 - criar pipeline de assets pesado antes de uma demo jogavel real;
 - usar subagentes sem delimitar escopo, gerando patches conflitantes.

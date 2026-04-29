@@ -29,6 +29,11 @@
 - `render-browser-demo --gameplay-hud --playable-save-load`
 - `render-browser-demo --gameplay-hud --movement-blocking`
 - `render-browser-demo --gameplay-hud --movement-blocking --playable-save-load`
+- `export-html-game`
+- `export-html-game --movement-blocking`
+- `export-html-game --gameplay-hud`
+- `export-html-game --playable-save-load`
+- `export-html-game --movement-blocking --gameplay-hud --playable-save-load`
 - `inspect-collision-bounds`
 - `inspect-collision-overlaps`
 - `inspect-tile-collision`
@@ -45,6 +50,8 @@
 - `render_browser_demo` com `playableSaveLoad: true`
 - `render_browser_demo` com `gameplayHud: true` e `movementBlocking: true`
 - `render_browser_demo` com `gameplayHud: true`, `movementBlocking: true` e `playableSaveLoad: true`
+- `export_html_game`
+- `export_html_game` com `movementBlocking: true`, `gameplayHud: true` e `playableSaveLoad: true`
 - `inspect_collision_bounds`
 - `inspect_collision_overlaps`
 - `inspect_tile_collision`
@@ -58,6 +65,7 @@
 - `engine/runtime/test/v1-small-2d-readiness-cross-interface.integration.test.mjs`
 - `engine/runtime/test/browser-playable-demo-runtime.test.mjs`
 - `engine/runtime/test/cli-render-browser-demo.test.mjs`
+- `engine/runtime/test/simple-html-export-v1.test.mjs`
 - `tools/mcp-server/test/mcp-server.test.mjs`
 
 ## Validacao Obrigatoria
@@ -76,8 +84,10 @@ npm run smoke
 - `outputPath` aparece apenas no CLI quando `--out` e usado.
 - Playable Save/Load Lite exporta/importa JSON local no textarea e nao usa `savegame v1`, `save-state` ou `load-save`.
 - `npm run smoke` valida essa cobertura por meio de `npm test`; ele nao tem comando dedicado separado para gerar o HTML V1.
+- `export-html-game` cobre escrita de arquivo, envelope `exportVersion`, `outputPath`, `options`, `sizeBytes` e `htmlHash`.
+- `export_html_game` cobre escrita MCP segura dentro do repo e paridade minima com CLI.
 
 ## Proximo Pacote Recomendado
 
-- `Simple HTML Export v1` para empacotar a demo jogavel pequena.
+- `Game Templates v1` usando a cena consolidada e o export HTML simples.
 - Manter fora deste pacote: editor, servidor, build system amplo, UI system completo e savegame avancado.
