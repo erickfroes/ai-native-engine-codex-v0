@@ -131,14 +131,44 @@ test('v1 small 2d readiness render outputs stay aligned across runtime, CLI and 
       metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { movementBlocking: true })
     })
   };
+  const runtimeHudBrowserDemo = {
+    browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderBrowserPlayableDemoHtmlV1({
+      title: `${snapshot.scene} Browser Playable Demo`,
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { gameplayHud: true })
+    })
+  };
+  const runtimeBlockingHudBrowserDemo = {
+    browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderBrowserPlayableDemoHtmlV1({
+      title: `${snapshot.scene} Browser Playable Demo`,
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { movementBlocking: true, gameplayHud: true })
+    })
+  };
 
   const cliSnapshotResult = runCli(['render-snapshot', scenePath, '--json']);
   const cliBrowserResult = runCli(['render-browser-demo', scenePath, '--json']);
   const cliBlockingBrowserResult = runCli(['render-browser-demo', scenePath, '--movement-blocking', '--json']);
+  const cliHudBrowserResult = runCli(['render-browser-demo', scenePath, '--gameplay-hud', '--json']);
+  const cliBlockingHudBrowserResult = runCli([
+    'render-browser-demo',
+    scenePath,
+    '--movement-blocking',
+    '--gameplay-hud',
+    '--json'
+  ]);
 
   assert.equal(cliSnapshotResult.status, 0, cliSnapshotResult.stderr);
   assert.equal(cliBrowserResult.status, 0, cliBrowserResult.stderr);
   assert.equal(cliBlockingBrowserResult.status, 0, cliBlockingBrowserResult.stderr);
+  assert.equal(cliHudBrowserResult.status, 0, cliHudBrowserResult.stderr);
+  assert.equal(cliBlockingHudBrowserResult.status, 0, cliBlockingHudBrowserResult.stderr);
 
   const mcp = createMcpClient();
   try {
@@ -156,18 +186,37 @@ test('v1 small 2d readiness render outputs stay aligned across runtime, CLI and 
       name: 'render_browser_demo',
       arguments: { path: sceneMcpPath, movementBlocking: true }
     });
+    const mcpHudBrowserResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: { path: sceneMcpPath, gameplayHud: true }
+    });
+    const mcpBlockingHudBrowserResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: { path: sceneMcpPath, movementBlocking: true, gameplayHud: true }
+    });
 
     assert.equal(mcpSnapshotResponse.result.isError, false);
     assert.equal(mcpBrowserResponse.result.isError, false);
     assert.equal(mcpBlockingBrowserResponse.result.isError, false);
+    assert.equal(mcpHudBrowserResponse.result.isError, false);
+    assert.equal(mcpBlockingHudBrowserResponse.result.isError, false);
     assert.deepEqual(snapshot, JSON.parse(cliSnapshotResult.stdout));
     assert.deepEqual(snapshot, mcpSnapshotResponse.result.structuredContent);
     assert.deepEqual(runtimeBrowserDemo, JSON.parse(cliBrowserResult.stdout));
     assert.deepEqual(runtimeBrowserDemo, mcpBrowserResponse.result.structuredContent);
     assert.deepEqual(runtimeBlockingBrowserDemo, JSON.parse(cliBlockingBrowserResult.stdout));
     assert.deepEqual(runtimeBlockingBrowserDemo, mcpBlockingBrowserResponse.result.structuredContent);
+    assert.deepEqual(runtimeHudBrowserDemo, JSON.parse(cliHudBrowserResult.stdout));
+    assert.deepEqual(runtimeHudBrowserDemo, mcpHudBrowserResponse.result.structuredContent);
+    assert.deepEqual(runtimeBlockingHudBrowserDemo, JSON.parse(cliBlockingHudBrowserResult.stdout));
+    assert.deepEqual(runtimeBlockingHudBrowserDemo, mcpBlockingHudBrowserResponse.result.structuredContent);
+    assert.doesNotMatch(runtimeBrowserDemo.html, /"gameplayHud":/);
     assert.doesNotMatch(runtimeBrowserDemo.html, /"movementBlocking":/);
     assert.match(runtimeBlockingBrowserDemo.html, /"movementBlocking":/);
+    assert.match(runtimeHudBrowserDemo.html, /"gameplayHud":/);
+    assert.doesNotMatch(runtimeHudBrowserDemo.html, /"movementBlocking":/);
+    assert.match(runtimeBlockingHudBrowserDemo.html, /"gameplayHud":/);
+    assert.match(runtimeBlockingHudBrowserDemo.html, /"movementBlocking":/);
     assert.match(runtimeBlockingBrowserDemo.html, /"id":"map\.ground\.tile\.2\.3"/);
   } finally {
     await mcp.close();
