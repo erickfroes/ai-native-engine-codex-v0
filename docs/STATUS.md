@@ -6,7 +6,7 @@ A Meta 1 Headless e a Meta 2 Visual/Interativa estao concluidas como bases peque
 
 O projeto esta na Meta 3, cujo foco e **Gameplay Foundation**: colisao, overlap, bloqueio de movimento, colisao com tile layer e uma demo browser com regras reais de gameplay.
 
-Neste ponto, a fundacao de colisao por entidade ja existe:
+Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 - `collision.bounds`;
 - CollisionBoundsReport v1;
@@ -42,6 +42,7 @@ Neste ponto, a fundacao de colisao por entidade ja existe:
 - TileCollisionReport v1;
 - Browser Playable Demo movement blocking opt-in;
 - Browser Gameplay HUD Lite v1 opt-in;
+- Playable Save/Load Lite v1 browser-local opt-in;
 - V1 Small 2D readiness gate com cena consolidada (`docs/V1_SMALL_2D_READINESS.md`);
 - V1 Small 2D playable example hardening;
 - CLI/MCP para fluxos principais;
@@ -49,8 +50,8 @@ Neste ponto, a fundacao de colisao por entidade ja existe:
 
 ## Foco atual recomendado
 
-1. Playable Save/Load Lite para a cena canônica V1 Small 2D.
-2. Export/save V1 para exemplo jogavel pequeno.
+1. Simple HTML Export v1 para empacotar a cena jogavel pequena.
+2. Export/save V1 mais formal para exemplo jogavel pequeno, se ainda necessario apos o HTML export.
 3. Integracoes basicas de UI/audio/animation para V2, sem transformar HUD Lite em UI system completo.
 
 ## Versoes de produto
@@ -68,6 +69,7 @@ Detalhes: `docs/ENGINE_VERSION_ROADMAP.md`.
 - aplicar blocking real sem contrato opt-in explicito no `run-loop` ou Browser Demo;
 - acoplar Browser Demo ao runtime canonico como se fosse loop oficial;
 - transformar HUD browser lite em sistema de UI completo antes do pacote V2 apropriado;
+- confundir Playable Save/Load Lite browser-local com `savegame v1` ou `State Snapshot v1`;
 - criar editor antes de solidificar V1 gameplay;
 - criar pipeline de assets pesado antes de uma demo jogavel real;
 - usar subagentes sem delimitar escopo, gerando patches conflitantes.

@@ -13,6 +13,7 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - `metadata.stepPx` define o passo fixo por input; o default atual e `4`.
 - `metadata.movementBlocking` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede blocking local.
 - `metadata.gameplayHud` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede HUD Lite local.
+- `metadata.playableSaveLoad` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede Playable Save/Load Lite local.
 - o loop visual local usa `requestAnimationFrame` apenas para redraw continuo do estado atual.
 
 ## Comportamento
@@ -40,17 +41,20 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - sem `gameplayHud`, o HTML nao embute o bloco `browser-gameplay-hud` nem o payload `metadata.gameplayHud`;
 - com `gameplayHud` e sem `movementBlocking`, `blocked moves` permanece `0` e o HUD mostra movement blocking `disabled`;
 - com `gameplayHud` e `movementBlocking`, movimentos bloqueados incrementam `blocked moves` e mostram ultimo resultado `blocked`;
+- com `playableSaveLoad` opt-in, exibe controles locais `Export State`, `Import State`, textarea JSON e mensagem curta de erro/importacao;
+- o formato exportado e browser-local: `kind: "browser.playable-demo.local-state"`, `version: 1`, `sceneId`, `tick`, `controlledEntityId`, `positions`, `options` e, quando HUD esta ativo, `gameplayHud`;
+- import restaura a posicao local do controlavel e atualiza o HUD quando ele esta ativo; se o JSON for invalido ou incompatível com a cena atual, a demo mostra erro curto e preserva o estado atual;
 - `Pause rendering`, `Resume rendering` e `Reset` sao controles locais do HTML autocontido e nao alteram contratos v1 publicados;
 - se a entidade controlavel configurada nao existir, faz fallback deterministico para o primeiro rect do snapshot; se nao houver rect, a demo permanece sem alvo controlavel;
 - nao importa o runtime Node no browser;
-- nao usa `Date.now`, `new Date`, `performance.now`, `fetch`, rede, scripts externos, `link href`, `import(`, `localStorage` ou dependencia de canvas libs;
+- nao usa `Date.now`, `new Date`, `performance.now`, `fetch`, rede, scripts externos, `link href`, `import(`, `localStorage`, `sessionStorage`, `IndexedDB` ou dependencia de canvas libs;
 - nao executa loop de jogo completo, tick continuo, systems de gameplay ou simulacao realtime do engine neste slice.
 - o blocking local da Browser Demo e diagnostico/interativo, nao substitui `run-loop` nem `MovementBlockingReport v1`.
 
 ## CLI e MCP
 
-- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--out <path>] [--json]`
-- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?, movementBlocking?, gameplayHud?)`
+- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--out <path>] [--json]`
+- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?, movementBlocking?, gameplayHud?, playableSaveLoad?)`
 
 Exemplo para gerar um arquivo HTML:
 
@@ -68,6 +72,12 @@ Exemplo com HUD Lite local opt-in na cena V1 Small 2D:
 
 ```bash
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene.json --gameplay-hud --movement-blocking --out ./tmp/v1-small-2d-hud.html --json
+```
+
+Exemplo com Playable Save/Load Lite local opt-in:
+
+```bash
+node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene.json --gameplay-hud --movement-blocking --playable-save-load --out ./tmp/v1-small-2d-save-load.html --json
 ```
 
 Depois de gerar com `--out`, abra o arquivo HTML diretamente no navegador. A demo e autocontida: nao precisa de servidor local, assets reais ou runtime Node no cliente.
@@ -104,6 +114,21 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 - `rendering` mostra apenas o estado do redraw loop local (`running` ou `paused`), nao um tick de simulacao do engine.
 - o HUD nao altera `RenderSnapshot v1`, `InputIntent v1`, `MovementBlockingReport v1`, `TileCollisionReport v1`, `run-loop` ou o envelope publico `browserDemoVersion`.
 
+### Playable Save/Load Lite Local
+
+- `--playable-save-load` no CLI e `playableSaveLoad: true` no MCP embutem controles locais de export/import no HTML.
+- contrato do JSON local: `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`.
+- o estado exportado e local a pagina e nao e `savegame v1`.
+- o formato minimo usa `kind: "browser.playable-demo.local-state"` e `version: 1`.
+- `positions` salva apenas posicoes locais de entidades controladas pela demo; hoje o foco e a cena `scenes/v1-small-2d.scene.json`.
+- `options` registra `movementBlocking`, `gameplayHud` e `playableSaveLoad` para rejeitar import incompatível com o HTML atual.
+- quando `gameplayHud` esta ativo, `gameplayHud` salva `inputs`, `blockedMoves`, `lastInput` e `lastResult`.
+- `Export State` escreve JSON deterministico no textarea local; `Import State` le esse textarea e restaura a posicao local.
+- import com `movementBlocking` ativo rejeita posicoes bloqueadas por bounds/tile solido para preservar a regra local da demo.
+- se nao houver entidade controlavel no snapshot, a demo nao renderiza os controles de Playable Save/Load Lite.
+- nao usa `localStorage`, `sessionStorage`, `IndexedDB`, rede, disco, autosave, `save-state`, `load-save` ou `State Snapshot v1`.
+- nao substitui Save/Load v1 existente; e apenas uma conveniencia jogavel e manual da Browser Playable Demo.
+
 ### Asset Manifest Local
 
 - `render-browser-demo --asset-manifest <path>` e `render_browser_demo(assetManifestPath)` materializam `assetSrc` para `file:///...` local a partir do diretorio do manifesto.
@@ -122,7 +147,9 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 - nao altera o loop headless;
 - nao salva estado automaticamente;
 - nao usa `localStorage`;
+- nao usa `sessionStorage` ou `IndexedDB`;
 - nao usa rede;
+- nao substitui `State Snapshot v1`, `savegame v1`, `save-state` ou `load-save`;
 - nao cria/transforma pipeline de assets reais no runtime;
 - nao cria servidor web.
 - nao cria UI system completo, widgets declarativos, menus, layout engine ou HUD canonico de jogo.

@@ -66,6 +66,8 @@ function assertBrowserDemoStructuredContent(payload, options = {}) {
   const expectedScene = options.scene ?? 'tutorial';
   const expectedTick = options.tick ?? 4;
   const expectedControllableEntityId = options.controllableEntityId ?? 'player.hero';
+  const expectedWidth = options.width ?? 320;
+  const expectedHeight = options.height ?? 180;
   assert.deepEqual(Object.keys(payload), ['browserDemoVersion', 'scene', 'tick', 'html']);
   assert.equal(payload.browserDemoVersion, 1);
   assert.equal(payload.scene, expectedScene);
@@ -75,7 +77,7 @@ function assertBrowserDemoStructuredContent(payload, options = {}) {
   assert.match(
     payload.html,
     new RegExp(
-      `<canvas id="browser-playable-demo-canvas" data-browser-demo-version="1" data-scene="${expectedScene}" data-tick="${expectedTick}" data-controllable-entity="${expectedControllableEntityId}" width="320" height="180" tabindex="0"`
+      `<canvas id="browser-playable-demo-canvas" data-browser-demo-version="1" data-scene="${expectedScene}" data-tick="${expectedTick}" data-controllable-entity="${expectedControllableEntityId}" width="${expectedWidth}" height="${expectedHeight}" tabindex="0"`
     )
   );
   assert.match(payload.html, /aria-label="Browser playable demo canvas"/);
@@ -90,7 +92,7 @@ function assertBrowserDemoStructuredContent(payload, options = {}) {
   assert.match(payload.html, /addEventListener\("keydown"/);
   assert.doesNotMatch(
     payload.html,
-    /<script[^>]+src=|<link[^>]+href=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|import\(|Date\.now|new Date|performance\.now|localStorage/
+    /<script[^>]+src=|<link[^>]+href=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|import\(|Date\.now|new Date|performance\.now|localStorage|sessionStorage|IndexedDB/
   );
 }
 
@@ -158,6 +160,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'assetManifestPath'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'movementBlocking'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'gameplayHud'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'playableSaveLoad'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
     assert.ok(
       Object.prototype.hasOwnProperty.call(
@@ -755,6 +758,56 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     );
     assert.doesNotMatch(renderBrowserDemoWithGameplayHudResponse.result.structuredContent.html, /"movementBlocking":/);
 
+    const renderBrowserDemoWithPlayableSaveLoadResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/v1-small-2d.scene.json',
+        playableSaveLoad: true
+      }
+    });
+
+    assert.equal(renderBrowserDemoWithPlayableSaveLoadResponse.result.isError, false);
+    assertBrowserDemoStructuredContent(renderBrowserDemoWithPlayableSaveLoadResponse.result.structuredContent, {
+      scene: 'v1-small-2d',
+      tick: 0,
+      controllableEntityId: 'player.hero',
+      width: 32,
+      height: 24
+    });
+    assert.match(renderBrowserDemoWithPlayableSaveLoadResponse.result.structuredContent.html, /"playableSaveLoad":/);
+    assert.match(
+      renderBrowserDemoWithPlayableSaveLoadResponse.result.structuredContent.html,
+      /id="browser-playable-save-load"/
+    );
+    assert.doesNotMatch(renderBrowserDemoWithPlayableSaveLoadResponse.result.structuredContent.html, /"gameplayHud":/);
+    assert.doesNotMatch(renderBrowserDemoWithPlayableSaveLoadResponse.result.structuredContent.html, /"movementBlocking":/);
+
+    const renderBrowserDemoWithHudBlockingSaveLoadResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/v1-small-2d.scene.json',
+        movementBlocking: true,
+        gameplayHud: true,
+        playableSaveLoad: true
+      }
+    });
+
+    assert.equal(renderBrowserDemoWithHudBlockingSaveLoadResponse.result.isError, false);
+    assertBrowserDemoStructuredContent(renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent, {
+      scene: 'v1-small-2d',
+      tick: 0,
+      controllableEntityId: 'player.hero',
+      width: 32,
+      height: 24
+    });
+    assert.match(renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html, /"movementBlocking":/);
+    assert.match(renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html, /"gameplayHud":/);
+    assert.match(renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html, /"playableSaveLoad":/);
+    assert.match(
+      renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html,
+      /id="browser-playable-save-load"/
+    );
+
     const renderBrowserDemoWithManifestResponseA = await client.request('tools/call', {
       name: 'render_browser_demo',
       arguments: {
@@ -904,6 +957,20 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(
       renderBrowserDemoInvalidGameplayHudResponse.result.content[0].text,
       /render_browser_demo: `gameplayHud` must be a boolean when provided\./
+    );
+
+    const renderBrowserDemoInvalidPlayableSaveLoadResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        playableSaveLoad: 'yes'
+      }
+    });
+
+    assert.equal(renderBrowserDemoInvalidPlayableSaveLoadResponse.result.isError, true);
+    assert.match(
+      renderBrowserDemoInvalidPlayableSaveLoadResponse.result.content[0].text,
+      /render_browser_demo: `playableSaveLoad` must be a boolean when provided\./
     );
 
     const renderBrowserDemoUnexpectedArgumentResponse = await client.request('tools/call', {

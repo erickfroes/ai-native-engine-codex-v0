@@ -78,7 +78,14 @@ function assertBrowserDemoHtmlWithImageLoadingSurface(html) {
   assert.match(html, /requestAnimationFrame\(renderFrame\)/);
   assert.doesNotMatch(
     html,
-    /<script[^>]+src=|<link[^>]+href=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|import\(|Date\.now|new Date|performance\.now|localStorage/
+    /<script[^>]+src=|<link[^>]+href=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|import\(|setTimeout|setInterval|Date\.now|new Date|performance\.now|localStorage|sessionStorage|IndexedDB/
+  );
+}
+
+function assertNoForbiddenBrowserDemoHtmlSurface(html) {
+  assert.doesNotMatch(
+    html,
+    /<script[^>]+src=|<link[^>]+href=|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|import\(|setTimeout|setInterval|Date\.now|new Date|performance\.now|localStorage|sessionStorage|IndexedDB/
   );
 }
 
@@ -404,6 +411,75 @@ test('render-browser-demo --gameplay-hud --movement-blocking embeds HUD and bloc
   assert.match(payload.html, /"id":"map\.ground\.tile\.2\.3"/);
   assert.match(payload.html, /id="browser-gameplay-hud-blocked-moves"/);
   assert.match(payload.html, /<dd id="browser-gameplay-hud-movement-blocking">enabled<\/dd>/);
+});
+
+test('render-browser-demo leaves Playable Save/Load Lite out without --playable-save-load', () => {
+  const result = runCli([
+    'render-browser-demo',
+    v1Small2dScenePath,
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'v1-small-2d');
+  assert.doesNotMatch(payload.html, /"playableSaveLoad":/);
+  assert.doesNotMatch(payload.html, /browser-playable-save-load/);
+  assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
+});
+
+test('render-browser-demo --playable-save-load embeds local export import controls', () => {
+  const result = runCli([
+    'render-browser-demo',
+    v1Small2dScenePath,
+    '--playable-save-load',
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'v1-small-2d');
+  assert.match(payload.html, /id="browser-playable-save-load"/);
+  assert.match(payload.html, /id="browser-playable-demo-export-state"/);
+  assert.match(payload.html, /id="browser-playable-demo-import-state"/);
+  assert.match(
+    payload.html,
+    /"playableSaveLoad":\{"enabled":true,"kind":"browser\.playable-demo\.local-state","version":1\}/
+  );
+  assert.doesNotMatch(payload.html, /"gameplayHud":/);
+  assert.doesNotMatch(payload.html, /"movementBlocking":/);
+  assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
+});
+
+test('render-browser-demo combines HUD, movement blocking and Playable Save/Load Lite', () => {
+  const result = runCli([
+    'render-browser-demo',
+    v1Small2dScenePath,
+    '--movement-blocking',
+    '--gameplay-hud',
+    '--playable-save-load',
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'v1-small-2d');
+  assert.match(payload.html, /id="browser-gameplay-hud"/);
+  assert.match(payload.html, /id="browser-playable-save-load"/);
+  assert.match(payload.html, /"movementBlocking":/);
+  assert.match(payload.html, /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":true,"snapshotTick":0\}/);
+  assert.match(
+    payload.html,
+    /"playableSaveLoad":\{"enabled":true,"kind":"browser\.playable-demo\.local-state","version":1\}/
+  );
+  assert.match(payload.html, /blockedMoves: blockedMoveCount/);
+  assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
 });
 
 test('render-browser-demo V1 small 2D only includes outputPath when --out is used', async (t) => {

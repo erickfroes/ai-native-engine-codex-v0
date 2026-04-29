@@ -42,6 +42,7 @@ A engine agora avancou para a fundacao de gameplay 2D:
 - `MovementBlockingReport v1` para avaliar tentativas de movimento contra bounds solidos;
 - `TileCollisionReport v1` para inspecionar tiles solidos declarados em `tile.layer`;
 - blocking opt-in no `run-loop` e na Browser Playable Demo;
+- Playable Save/Load Lite browser-local opt-in na Browser Playable Demo;
 - cena consolidada `v1-small-2d` para readiness da V1;
 - CLI/MCP para inspecao de colisao, overlap, tile collision e blocking;
 - testes cross-interface para os reports principais.
@@ -89,7 +90,7 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 - `render-svg`: gera SVG textual deterministico
 - `render-svg-demo`: gera HTML estatico com SVG inline
 - `render-canvas-demo`: gera HTML estatico com Canvas 2D
-- `render-browser-demo`: gera HTML interativo minimo com Canvas 2D, teclado local, fallback de sprites, blocking local opt-in e HUD Lite opt-in
+- `render-browser-demo`: gera HTML interativo minimo com Canvas 2D, teclado local, fallback de sprites, blocking local opt-in, HUD Lite opt-in e Playable Save/Load Lite opt-in
 
 ## Tools MCP principais
 
@@ -157,6 +158,9 @@ node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixt
 
 # gerar Browser Playable Demo da cena consolidada V1 small 2D com HUD Lite opt-in
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene.json --gameplay-hud --movement-blocking --out ./tmp/v1-small-2d.html --json
+
+# gerar Browser Playable Demo da cena consolidada com export/import local opt-in
+node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene.json --gameplay-hud --movement-blocking --playable-save-load --out ./tmp/v1-small-2d-save-load.html --json
 ```
 
 ## Validacao obrigatoria
@@ -176,6 +180,7 @@ npm run smoke
 - `docs/META2_VISUAL_INTERACTIVE_CHECKLIST.md`: checklist final da Meta 2
 - `docs/V1_SMALL_2D_READINESS.md`: gate consolidado da V1 Small 2D
 - `docs/V1_SMALL_2D_TEST_MATRIX.md`: matriz runtime/CLI/MCP/testes da cena consolidada
+- `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`: formato local do Playable Save/Load Lite
 
 ## Primeira leitura recomendada
 

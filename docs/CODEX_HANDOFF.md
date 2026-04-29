@@ -14,6 +14,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Movement Blocking opt-in no `run-loop` e na Browser Playable Demo: concluido.
 - V1 Small 2D readiness gate: concluido com cena consolidada.
 - Browser Gameplay HUD Lite v1: concluido como HUD local opt-in da Browser Playable Demo.
+- Playable Save/Load Lite v1: concluido como export/import JSON browser-local opt-in da Browser Playable Demo.
 - V1 Small 2D playable example hardening: concluido com matriz Browser Demo/runtime/CLI/MCP reforcada.
 
 ## O que o Codex recebe
@@ -29,7 +30,9 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - TileCollisionReport v1;
 - Browser Playable Demo com blocking local opt-in;
 - Browser Playable Demo com HUD Lite local opt-in;
+- Browser Playable Demo com Playable Save/Load Lite local opt-in;
 - cena `scenes/v1-small-2d.scene.json` para readiness V1;
+- `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`;
 - `docs/V1_SMALL_2D_READINESS.md`;
 - `docs/V1_SMALL_2D_TEST_MATRIX.md`;
 - suites cross-interface;
@@ -47,9 +50,11 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 7. `docs/COLLISION_OVERLAP_V1.md`
 8. `docs/MOVEMENT_BLOCKING_V1.md`
 9. `docs/TILE_COLLISION_V1.md`
-10. `docs/V1_SMALL_2D_READINESS.md`
-11. `docs/V1_SMALL_2D_TEST_MATRIX.md`
-12. `AGENTS.md`
+10. `docs/BROWSER_PLAYABLE_DEMO_V1.md`
+11. `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`
+12. `docs/V1_SMALL_2D_READINESS.md`
+13. `docs/V1_SMALL_2D_TEST_MATRIX.md`
+14. `AGENTS.md`
 
 ## Baseline obrigatorio
 
@@ -64,8 +69,8 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Playable Save/Load Lite para a cena canônica V1 Small 2D.
-2. Export/save V1 para exemplo jogavel pequeno.
+1. Simple HTML Export v1 para empacotar a cena jogavel pequena.
+2. Export/save V1 mais formal para exemplo jogavel pequeno, se ainda necessario apos o HTML export.
 3. UI/audio/animation basicos para V2.
 4. Evitar transformar HUD Lite em UI system completo antes do pacote apropriado.
 5. 3D indie apenas depois de V1/V2 demonstradas.
@@ -92,6 +97,7 @@ Subagentes adicionais recomendados estao em `.codex/agents/` e descritos em `doc
 - multiplayer real;
 - pathfinding/chunk streaming antes de colisao tile;
 - fisica completa antes de movement blocking opt-in;
+- savegame avancado antes de consolidar o export HTML simples;
 - 3D antes de consolidar V1/V2.
 
 ## Regra pratica de continuidade

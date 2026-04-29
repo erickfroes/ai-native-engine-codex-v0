@@ -35,7 +35,7 @@ function loadJson(filePath) {
 function assertNoForbiddenBrowserSurface(html) {
   assert.doesNotMatch(
     html,
-    /<script[^>]+src=|<link[^>]+href=|fetch\(|XMLHttpRequest|WebSocket|EventSource|localStorage|sessionStorage|Date\.now|new Date|performance\.now|import\(/
+    /<script[^>]+src=|<link[^>]+href=|fetch\(|XMLHttpRequest|WebSocket|EventSource|localStorage|sessionStorage|IndexedDB|setTimeout|setInterval|Date\.now|new Date|performance\.now|import\(/
   );
 }
 
@@ -90,6 +90,14 @@ test('v1 small 2d Browser Demo keeps default movement free and embeds blocking o
   const defaultResult = runCli(['render-browser-demo', scenePath, '--json']);
   const blockingResult = runCli(['render-browser-demo', scenePath, '--movement-blocking', '--json']);
   const hudResult = runCli(['render-browser-demo', scenePath, '--gameplay-hud', '--json']);
+  const saveLoadResult = runCli(['render-browser-demo', scenePath, '--playable-save-load', '--json']);
+  const hudSaveLoadResult = runCli([
+    'render-browser-demo',
+    scenePath,
+    '--gameplay-hud',
+    '--playable-save-load',
+    '--json'
+  ]);
   const blockingHudResult = runCli([
     'render-browser-demo',
     scenePath,
@@ -97,35 +105,60 @@ test('v1 small 2d Browser Demo keeps default movement free and embeds blocking o
     '--gameplay-hud',
     '--json'
   ]);
+  const blockingHudSaveLoadResult = runCli([
+    'render-browser-demo',
+    scenePath,
+    '--movement-blocking',
+    '--gameplay-hud',
+    '--playable-save-load',
+    '--json'
+  ]);
 
   assert.equal(defaultResult.status, 0, defaultResult.stderr);
   assert.equal(blockingResult.status, 0, blockingResult.stderr);
   assert.equal(hudResult.status, 0, hudResult.stderr);
+  assert.equal(saveLoadResult.status, 0, saveLoadResult.stderr);
+  assert.equal(hudSaveLoadResult.status, 0, hudSaveLoadResult.stderr);
   assert.equal(blockingHudResult.status, 0, blockingHudResult.stderr);
+  assert.equal(blockingHudSaveLoadResult.status, 0, blockingHudSaveLoadResult.stderr);
 
   const defaultEnvelope = JSON.parse(defaultResult.stdout);
   const blockingEnvelope = JSON.parse(blockingResult.stdout);
   const hudEnvelope = JSON.parse(hudResult.stdout);
+  const saveLoadEnvelope = JSON.parse(saveLoadResult.stdout);
+  const hudSaveLoadEnvelope = JSON.parse(hudSaveLoadResult.stdout);
   const blockingHudEnvelope = JSON.parse(blockingHudResult.stdout);
+  const blockingHudSaveLoadEnvelope = JSON.parse(blockingHudSaveLoadResult.stdout);
 
   assert.deepEqual(Object.keys(defaultEnvelope).sort(), ['browserDemoVersion', 'html', 'scene', 'tick']);
   assert.deepEqual(Object.keys(blockingEnvelope).sort(), ['browserDemoVersion', 'html', 'scene', 'tick']);
   assert.deepEqual(Object.keys(hudEnvelope).sort(), ['browserDemoVersion', 'html', 'scene', 'tick']);
+  assert.deepEqual(Object.keys(saveLoadEnvelope).sort(), ['browserDemoVersion', 'html', 'scene', 'tick']);
+  assert.deepEqual(Object.keys(hudSaveLoadEnvelope).sort(), ['browserDemoVersion', 'html', 'scene', 'tick']);
   assert.deepEqual(Object.keys(blockingHudEnvelope).sort(), ['browserDemoVersion', 'html', 'scene', 'tick']);
+  assert.deepEqual(Object.keys(blockingHudSaveLoadEnvelope).sort(), ['browserDemoVersion', 'html', 'scene', 'tick']);
   assert.equal(defaultEnvelope.scene, 'v1-small-2d');
   assert.equal(blockingEnvelope.scene, 'v1-small-2d');
   assert.equal(hudEnvelope.scene, 'v1-small-2d');
+  assert.equal(saveLoadEnvelope.scene, 'v1-small-2d');
+  assert.equal(hudSaveLoadEnvelope.scene, 'v1-small-2d');
   assert.equal(blockingHudEnvelope.scene, 'v1-small-2d');
+  assert.equal(blockingHudSaveLoadEnvelope.scene, 'v1-small-2d');
   assert.equal(defaultEnvelope.browserDemoVersion, 1);
   assert.equal(blockingEnvelope.browserDemoVersion, 1);
   assert.equal(hudEnvelope.browserDemoVersion, 1);
+  assert.equal(saveLoadEnvelope.browserDemoVersion, 1);
+  assert.equal(hudSaveLoadEnvelope.browserDemoVersion, 1);
   assert.equal(blockingHudEnvelope.browserDemoVersion, 1);
+  assert.equal(blockingHudSaveLoadEnvelope.browserDemoVersion, 1);
   assert.match(defaultEnvelope.html, /data-controllable-entity="player\.hero"/);
   assert.match(defaultEnvelope.html, /"id":"map\.ground\.tile\.2\.3"/);
   assert.doesNotMatch(defaultEnvelope.html, /"metadata":\{[^}]*"gameplayHud"/);
   assert.doesNotMatch(defaultEnvelope.html, /"metadata":\{[^}]*"movementBlocking"/);
   assert.doesNotMatch(defaultEnvelope.html, /"gameplayHud":/);
+  assert.doesNotMatch(defaultEnvelope.html, /"playableSaveLoad":/);
   assert.doesNotMatch(defaultEnvelope.html, /id="browser-gameplay-hud"/);
+  assert.doesNotMatch(defaultEnvelope.html, /id="browser-playable-save-load"/);
   assert.doesNotMatch(defaultEnvelope.html, /"movementBlocking":/);
   assert.match(blockingEnvelope.html, /"movementBlocking":/);
   assert.match(blockingEnvelope.html, /"id":"map\.ground\.tile\.2\.3"/);
@@ -133,16 +166,36 @@ test('v1 small 2d Browser Demo keeps default movement free and embeds blocking o
   assert.match(hudEnvelope.html, /id="browser-gameplay-hud"/);
   assert.match(hudEnvelope.html, /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":false,"snapshotTick":0\}/);
   assert.doesNotMatch(hudEnvelope.html, /"movementBlocking":/);
+  assert.match(saveLoadEnvelope.html, /id="browser-playable-save-load"/);
+  assert.match(
+    saveLoadEnvelope.html,
+    /"playableSaveLoad":\{"enabled":true,"kind":"browser\.playable-demo\.local-state","version":1\}/
+  );
+  assert.doesNotMatch(saveLoadEnvelope.html, /"gameplayHud":/);
+  assert.doesNotMatch(saveLoadEnvelope.html, /"movementBlocking":/);
+  assert.match(hudSaveLoadEnvelope.html, /id="browser-gameplay-hud"/);
+  assert.match(hudSaveLoadEnvelope.html, /id="browser-playable-save-load"/);
+  assert.match(hudSaveLoadEnvelope.html, /"gameplayHud":/);
+  assert.match(hudSaveLoadEnvelope.html, /"playableSaveLoad":/);
+  assert.doesNotMatch(hudSaveLoadEnvelope.html, /"movementBlocking":/);
   assert.match(blockingHudEnvelope.html, /id="browser-gameplay-hud"/);
   assert.match(
     blockingHudEnvelope.html,
     /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":true,"snapshotTick":0\}/
   );
   assert.match(blockingHudEnvelope.html, /"movementBlocking":/);
+  assert.match(blockingHudSaveLoadEnvelope.html, /id="browser-gameplay-hud"/);
+  assert.match(blockingHudSaveLoadEnvelope.html, /id="browser-playable-save-load"/);
+  assert.match(blockingHudSaveLoadEnvelope.html, /"gameplayHud":/);
+  assert.match(blockingHudSaveLoadEnvelope.html, /"movementBlocking":/);
+  assert.match(blockingHudSaveLoadEnvelope.html, /"playableSaveLoad":/);
   assertNoForbiddenBrowserSurface(defaultEnvelope.html);
   assertNoForbiddenBrowserSurface(blockingEnvelope.html);
   assertNoForbiddenBrowserSurface(hudEnvelope.html);
+  assertNoForbiddenBrowserSurface(saveLoadEnvelope.html);
+  assertNoForbiddenBrowserSurface(hudSaveLoadEnvelope.html);
   assertNoForbiddenBrowserSurface(blockingHudEnvelope.html);
+  assertNoForbiddenBrowserSurface(blockingHudSaveLoadEnvelope.html);
 });
 
 test('v1 small 2d readiness diagnostics stay deterministic through runtime and CLI', async () => {
