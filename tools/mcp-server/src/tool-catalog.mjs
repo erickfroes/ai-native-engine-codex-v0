@@ -265,6 +265,10 @@ export const toolCatalog = [
         playableSaveLoad: {
           type: 'boolean',
           description: 'When true, embed Playable Save/Load Lite v1 local export/import controls in the generated HTML.'
+        },
+        audioLite: {
+          type: 'boolean',
+          description: 'When true, embed Audio Lite v1 diagnostic metadata and user-gesture controls in the generated HTML.'
         }
       },
       additionalProperties: false
@@ -297,6 +301,10 @@ export const toolCatalog = [
         playableSaveLoad: {
           type: 'boolean',
           description: 'When true, embed Playable Save/Load Lite v1 local export/import controls.'
+        },
+        audioLite: {
+          type: 'boolean',
+          description: 'When true, embed Audio Lite v1 diagnostic metadata and user-gesture controls.'
         }
       },
       additionalProperties: false
@@ -470,6 +478,22 @@ export const toolCatalog = [
     name: 'inspect_tile_collision',
     title: 'Inspect Tile Collision',
     description: 'Build TileCollisionReport v1 from tile.layer solid palette entries without physics or movement resolution.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
+    name: 'inspect_audio_lite',
+    title: 'Inspect Audio Lite',
+    description: 'Build AudioLiteReport v1 from declarative audio.clip components without playback side effects.',
     inputSchema: {
       type: 'object',
       required: ['path'],

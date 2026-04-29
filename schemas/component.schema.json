@@ -287,6 +287,71 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "audio.clip"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "kind": {
+            "const": "audio.clip"
+          },
+          "version": {
+            "const": 1
+          },
+          "replicated": {
+            "const": false
+          },
+          "fields": {
+            "type": "object",
+            "required": [
+              "clipId",
+              "kind"
+            ],
+            "properties": {
+              "clipId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "src": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "enum": [
+                  "sfx",
+                  "music"
+                ]
+              },
+              "volume": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "default": 1
+              },
+              "loop": {
+                "type": "boolean",
+                "default": false
+              },
+              "trigger": {
+                "enum": [
+                  "onDemoStart",
+                  "onMove",
+                  "onBlockedMove",
+                  "manual"
+                ],
+                "default": "manual"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
     }
   ],
   "additionalProperties": false

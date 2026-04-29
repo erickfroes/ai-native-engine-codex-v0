@@ -118,6 +118,28 @@ function validateCollisionBoundsFields(fields, componentOverrides = {}) {
   });
 }
 
+function validateAudioClipFields(fields, componentOverrides = {}) {
+  return validateSceneInvariants({
+    version: 1,
+    metadata: { name: 'audio-clip-negative' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'audio.step',
+        components: [
+          {
+            kind: 'audio.clip',
+            version: 1,
+            replicated: false,
+            fields,
+            ...componentOverrides
+          }
+        ]
+      }
+    ]
+  });
+}
+
 test('validates tutorial scene successfully', async () => {
   const report = await validateSceneFile(scenePath('tutorial.scene.json'));
 
@@ -931,4 +953,93 @@ test('collision.bounds rejects invalid solid predictably', () => {
         error.message === 'collision.bounds solid must be a boolean when provided'
     )
   );
+});
+
+test('audio.clip component invariants are validated predictably', () => {
+  const report = validateAudioClipFields(
+    {
+      clipId: ' ',
+      src: '../audio/bump.wav',
+      kind: 'voice',
+      volume: 1.5,
+      loop: 'yes',
+      trigger: 'onJump',
+      pan: 0
+    },
+    {
+      version: 2,
+      replicated: true
+    }
+  );
+
+  assert.ok(report.errors.some((error) => error.path.endsWith('.version') && error.message.includes('version')));
+  assert.ok(report.errors.some((error) => error.path.endsWith('.replicated') && error.message.includes('must not be replicated')));
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.clipId' &&
+        error.message === 'audio.clip clipId must be a non-empty string'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.src' &&
+        error.message === 'audio.clip src must be a safe relative path when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.kind' &&
+        error.message === 'audio.clip kind must be `sfx` or `music`'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.volume' &&
+        error.message === 'audio.clip volume must be a number between 0 and 1 when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.loop' &&
+        error.message === 'audio.clip loop must be a boolean when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.trigger' &&
+        error.message === 'audio.clip trigger must be onDemoStart, onMove, onBlockedMove or manual when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.pan' &&
+        error.message === 'is not allowed for audio.clip'
+    )
+  );
+});
+
+test('audio.clip accepts minimal valid clips and defaults report-level fields later', () => {
+  const report = validateAudioClipFields({
+    clipId: 'sfx.step',
+    kind: 'sfx'
+  });
+
+  assert.equal(report.errors.length, 0);
+});
+
+test('audio.clip rejects missing fields and non-object fields predictably', () => {
+  const missingFields = validateAudioClipFields(undefined);
+  const nonObjectFields = validateAudioClipFields('invalid');
+
+  assert.ok(missingFields.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
+  assert.equal(missingFields.errors.some((error) => error.path.endsWith('.fields.clipId')), false);
+  assert.ok(nonObjectFields.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
+  assert.equal(nonObjectFields.errors.some((error) => error.path.endsWith('.fields.clipId')), false);
 });

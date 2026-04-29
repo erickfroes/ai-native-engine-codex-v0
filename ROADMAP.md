@@ -105,11 +105,11 @@ Entregas alvo:
 - V1 Small 2D Game Creation Guide / Codex package concluido;
 - release checkpoint V1 Small 2D concluido;
 - UI system declarativo minimo como bloco futuro de V2;
-- audio-lite como proximo pacote incremental;
+- Audio Lite v1 como primeiro pacote incremental pos-checkpoint;
 - matriz de regressao visual/headless;
 - pacote Codex com prompts/skills/subagentes para criar um jogo 2D pequeno.
 
-Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. O proximo bloco recomendado e `codex/audio-lite-v1`, sem editor, servidor, fisica completa ou pathfinding.
+Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. Audio Lite v1 inicia V2 de forma incremental, sem editor, servidor, fisica completa ou pathfinding.
 
 Criterio de conclusao:
 
@@ -126,9 +126,8 @@ Subagentes recomendados:
 
 Linha de trabalho atual recomendada:
 
-1. `codex/audio-lite-v1`.
-2. `codex/sprite-animation-v1`.
-3. UI system/prefab system V2 conforme roadmap, preservando HUD Lite como diagnostico local ate existir UI system formal.
+1. `codex/sprite-animation-v1`.
+2. UI system/prefab system V2 conforme roadmap, preservando HUD Lite como diagnostico local ate existir UI system formal.
 
 ---
 

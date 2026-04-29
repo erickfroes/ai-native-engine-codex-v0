@@ -6,6 +6,8 @@ export const DEFAULT_BROWSER_PLAYABLE_STEP_PX = 4;
 const CAMERA_VIEWPORT_COMPONENT_KIND = 'camera.viewport';
 const COLLISION_BOUNDS_COMPONENT_KIND = 'collision.bounds';
 const TILE_LAYER_COMPONENT_KIND = 'tile.layer';
+const AUDIO_CLIP_COMPONENT_KIND = 'audio.clip';
+const AUDIO_LITE_TRIGGERS = ['onDemoStart', 'onMove', 'onBlockedMove', 'manual'];
 
 function assertObject(value, name) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -220,6 +222,10 @@ function validateMetadata(metadata) {
   if (metadata.playableSaveLoad !== undefined) {
     validatePlayableSaveLoadMetadata(metadata.playableSaveLoad);
   }
+
+  if (metadata.audioLite !== undefined) {
+    validateAudioLiteMetadata(metadata.audioLite);
+  }
 }
 
 function validateMetadataOverrides(overrides) {
@@ -243,6 +249,10 @@ function validateMetadataOverrides(overrides) {
 
   if (overrides.playableSaveLoad !== undefined && typeof overrides.playableSaveLoad !== 'boolean') {
     throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.playableSaveLoad` override must be a boolean');
+  }
+
+  if (overrides.audioLite !== undefined && typeof overrides.audioLite !== 'boolean') {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.audioLite` override must be a boolean');
   }
 }
 
@@ -313,6 +323,67 @@ function validatePlayableSaveLoadMetadata(playableSaveLoad) {
 
   if (playableSaveLoad.version !== 1) {
     throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.playableSaveLoad.version` must be exactly 1');
+  }
+}
+
+function validateAudioLiteMetadata(audioLite) {
+  assertObject(audioLite, 'metadata.audioLite');
+
+  if (audioLite.enabled !== true) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.audioLite.enabled` must be exactly true');
+  }
+
+  if (audioLite.version !== 1) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.audioLite.version` must be exactly 1');
+  }
+
+  if (!Array.isArray(audioLite.clips)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.audioLite.clips` must be an array');
+  }
+
+  audioLite.clips.forEach((clip, index) => {
+    const name = `metadata.audioLite.clips[${index}]`;
+    assertObject(clip, name);
+    assertNonEmptyString(`${name}.entityId`, clip.entityId);
+    assertNonEmptyString(`${name}.clipId`, clip.clipId);
+    if (clip.kind !== 'sfx' && clip.kind !== 'music') {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.kind\` must be \`sfx\` or \`music\``);
+    }
+    if (!AUDIO_LITE_TRIGGERS.includes(clip.trigger)) {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.trigger\` must be a supported Audio Lite trigger`);
+    }
+    if (typeof clip.volume !== 'number' || !Number.isFinite(clip.volume) || clip.volume < 0 || clip.volume > 1) {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.volume\` must be a number between 0 and 1`);
+    }
+    if (typeof clip.loop !== 'boolean') {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.loop\` must be a boolean`);
+    }
+    if (clip.src !== null && (typeof clip.src !== 'string' || clip.src.trim().length === 0)) {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.src\` must be null or a non-empty string`);
+    }
+  });
+
+  if (!Array.isArray(audioLite.triggers)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.audioLite.triggers` must be an array');
+  }
+
+  audioLite.triggers.forEach((entry, index) => {
+    const name = `metadata.audioLite.triggers[${index}]`;
+    assertObject(entry, name);
+    if (!AUDIO_LITE_TRIGGERS.includes(entry.trigger)) {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.trigger\` must be a supported Audio Lite trigger`);
+    }
+    if (!Array.isArray(entry.clipIds) || entry.clipIds.some((clipId) => typeof clipId !== 'string' || clipId.trim().length === 0)) {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.clipIds\` must be an array of non-empty strings`);
+    }
+  });
+
+  if (!Array.isArray(audioLite.warnings)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.audioLite.warnings` must be an array');
+  }
+
+  if (!Array.isArray(audioLite.invalidRefs)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.audioLite.invalidRefs` must be an array');
   }
 }
 
@@ -456,6 +527,31 @@ function renderPlayableSaveLoadBlock(enabled) {
   ].join('\n');
 }
 
+function renderAudioLiteBlock(audioLite) {
+  if (!audioLite) {
+    return '';
+  }
+
+  const clipCount = audioLite.clips.length;
+  const triggerCount = audioLite.triggers.length;
+  const warningText = audioLite.warnings.length > 0
+    ? ` Warnings: ${audioLite.warnings.length}.`
+    : '';
+
+  return [
+    '      <section id="browser-audio-lite" class="audio-lite" aria-label="Audio Lite v1">',
+    '        <h3>Audio Lite v1</h3>',
+    `        <p>Diagnostic audio is opt-in and starts only after a user gesture. Clips: ${clipCount}. Triggers: ${triggerCount}.${escapeHtml(warningText)}</p>`,
+    '        <div class="audio-lite-actions">',
+    '          <button id="browser-audio-lite-enable" type="button">Enable Audio Lite</button>',
+    '          <button id="browser-audio-lite-test" type="button">Trigger manual cue</button>',
+    '        </div>',
+    '        <p id="browser-audio-lite-status" class="audio-lite-status" aria-live="polite">Audio Lite disabled until user gesture.</p>',
+    '        <p id="browser-audio-lite-event-count" class="audio-lite-status" aria-live="polite">Audio events: 0</p>',
+    '      </section>'
+  ].join('\n');
+}
+
 function createMovementBlockingMetadata(scene, renderSnapshot, controllableEntityId) {
   const cameraPosition = resolveCameraPosition(scene);
   const controllableDrawCall = renderSnapshot.drawCalls.find((drawCall) => drawCall.id === controllableEntityId);
@@ -513,6 +609,68 @@ function createPlayableSaveLoadMetadata() {
   };
 }
 
+function getAudioClipComponents(scene) {
+  const clips = [];
+
+  for (const entity of scene.entities ?? []) {
+    for (const component of entity.components ?? []) {
+      if (component?.kind !== AUDIO_CLIP_COMPONENT_KIND) {
+        continue;
+      }
+
+      const fields = component.fields ?? {};
+      clips.push({
+        entityId: entity.id,
+        clipId: fields.clipId,
+        kind: fields.kind,
+        trigger: fields.trigger ?? 'manual',
+        volume: fields.volume ?? 1,
+        loop: fields.loop === true,
+        src: fields.src ?? null
+      });
+    }
+  }
+
+  return clips.sort((left, right) => {
+    const clipOrder = left.clipId < right.clipId ? -1 : left.clipId > right.clipId ? 1 : 0;
+    if (clipOrder !== 0) {
+      return clipOrder;
+    }
+    return left.entityId < right.entityId ? -1 : left.entityId > right.entityId ? 1 : 0;
+  });
+}
+
+function createAudioLiteTriggers(clips) {
+  return AUDIO_LITE_TRIGGERS
+    .map((trigger) => ({
+      trigger,
+      clipIds: clips
+        .filter((clip) => clip.trigger === trigger)
+        .map((clip) => clip.clipId)
+        .sort((left, right) => left < right ? -1 : left > right ? 1 : 0)
+    }))
+    .filter((entry) => entry.clipIds.length > 0);
+}
+
+function createAudioLiteMetadata(scene) {
+  const clips = getAudioClipComponents(scene);
+  return {
+    enabled: true,
+    version: 1,
+    clips,
+    triggers: createAudioLiteTriggers(clips),
+    warnings: clips
+      .filter((clip) => clip.src === null)
+      .map((clip) => ({
+        code: 'AUDIO_CLIP_SRC_MISSING',
+        entityId: clip.entityId,
+        clipId: clip.clipId,
+        message: 'audio.clip src is missing; browser playback will use silent diagnostic fallback'
+      })),
+    invalidRefs: []
+  };
+}
+
 export function createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overrides = {}) {
   assertObject(scene, 'scene');
   validateRenderSnapshot(renderSnapshot);
@@ -540,6 +698,9 @@ export function createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overr
       : {}),
     ...(overrides.playableSaveLoad === true
       ? { playableSaveLoad: createPlayableSaveLoadMetadata() }
+      : {}),
+    ...(overrides.audioLite === true
+      ? { audioLite: createAudioLiteMetadata(scene) }
       : {})
   };
 }
@@ -552,13 +713,15 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
   const resolvedTitle = title.trim();
   const controllableEntityId = resolveControllableEntityId(renderSnapshot.drawCalls, metadata.controllableEntityId);
   const playableSaveLoadEnabled = Boolean(metadata.playableSaveLoad && typeof controllableEntityId === 'string');
+  const audioLiteEnabled = metadata.audioLite?.enabled === true;
   const stepPx = metadata.stepPx ?? DEFAULT_BROWSER_PLAYABLE_STEP_PX;
   const normalizedMetadata = {
     ...(controllableEntityId ? { controllableEntityId } : {}),
     stepPx,
     ...(metadata.movementBlocking ? { movementBlocking: metadata.movementBlocking } : {}),
     ...(metadata.gameplayHud ? { gameplayHud: metadata.gameplayHud } : {}),
-    ...(playableSaveLoadEnabled ? { playableSaveLoad: metadata.playableSaveLoad } : {})
+    ...(playableSaveLoadEnabled ? { playableSaveLoad: metadata.playableSaveLoad } : {}),
+    ...(audioLiteEnabled ? { audioLite: metadata.audioLite } : {})
   };
   const metadataEntries = normalizeMetadataEntries({
     ...(controllableEntityId ? { controllableEntityId } : {}),
@@ -577,6 +740,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     : null;
   const gameplayHudBlock = renderGameplayHudBlock(gameplayHudRows);
   const playableSaveLoadBlock = renderPlayableSaveLoadBlock(playableSaveLoadEnabled);
+  const audioLiteBlock = renderAudioLiteBlock(audioLiteEnabled ? metadata.audioLite : undefined);
   const inlineData = escapeInlineJson({
     metadata: normalizedMetadata,
     renderSnapshot,
@@ -619,6 +783,15 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
           '    .save-load-status { font-weight: 700; }'
         ]
       : []),
+    ...(audioLiteEnabled
+      ? [
+          '    .audio-lite { display: grid; gap: 8px; margin: 12px 0 0; padding: 12px; border: 1px dashed #7b8fa8; background: #eef6ff; }',
+          '    .audio-lite h3 { margin: 0; font-size: 1rem; }',
+          '    .audio-lite p { margin: 0; }',
+          '    .audio-lite-actions { display: flex; flex-wrap: wrap; gap: 8px; }',
+          '    .audio-lite-status { font-weight: 700; }'
+        ]
+      : []),
     '    canvas { display: block; width: min(100%, 640px); height: auto; border: 1px solid #d7cfc2; background: #fffdf8; image-rendering: pixelated; }',
     '    canvas:focus { outline: 2px solid #201a13; outline-offset: 3px; }',
     '    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }',
@@ -651,6 +824,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     `      <p id="browser-playable-demo-position" class="hud" aria-live="polite">${escapeHtml(initialPositionText)}</p>`,
     gameplayHudBlock,
     playableSaveLoadBlock,
+    audioLiteBlock,
     '      <noscript>This demo needs JavaScript enabled to capture keyboard input.</noscript>',
     `      <canvas id="browser-playable-demo-canvas" data-browser-demo-version="${BROWSER_PLAYABLE_DEMO_VERSION}" data-scene="${escapeHtml(renderSnapshot.scene)}" data-tick="${renderSnapshot.tick}" data-controllable-entity="${escapeHtml(controllableEntityId ?? '')}" width="${renderSnapshot.viewport.width}" height="${renderSnapshot.viewport.height}" tabindex="0" aria-label="Browser playable demo canvas" aria-describedby="browser-playable-demo-instructions browser-playable-demo-status"></canvas>`,
     '      <div class="actions">',
@@ -708,6 +882,21 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
           '      const importStateButton = null;',
           '      const localStateTextArea = null;',
           '      const saveLoadStatusElement = null;'
+        ]),
+    ...(audioLiteEnabled
+      ? [
+          '      const audioLiteEnabled = payload.metadata.audioLite?.enabled === true;',
+          '      const audioLiteEnableButton = document.getElementById("browser-audio-lite-enable");',
+          '      const audioLiteTestButton = document.getElementById("browser-audio-lite-test");',
+          '      const audioLiteStatusElement = document.getElementById("browser-audio-lite-status");',
+          '      const audioLiteEventCountElement = document.getElementById("browser-audio-lite-event-count");'
+        ]
+      : [
+          '      const audioLiteEnabled = false;',
+          '      const audioLiteEnableButton = null;',
+          '      const audioLiteTestButton = null;',
+          '      const audioLiteStatusElement = null;',
+          '      const audioLiteEventCountElement = null;'
         ]),
     '      const context = canvas.getContext("2d");',
     '      if (!context) {',
@@ -767,6 +956,9 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '      let lastResult = "idle";',
     '      let animationFrameHandle = null;',
     '      let redrawLoopPaused = false;',
+    '      let audioLiteUnlocked = false;',
+    '      let audioLiteEventCount = 0;',
+    '      let audioLiteContext = null;',
     '      if (resetButton && controllableIndex === -1) {',
     '        resetButton.disabled = true;',
     '      }',
@@ -833,7 +1025,8 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '          options: {',
     '            movementBlocking: payload.metadata.movementBlocking?.enabled === true,',
     '            gameplayHud: gameplayHudEnabled,',
-    '            playableSaveLoad: playableSaveLoadEnabled',
+    '            playableSaveLoad: playableSaveLoadEnabled,',
+    '            ...(audioLiteEnabled ? { audioLite: true } : {})',
     '          }',
     '        };',
     '        if (gameplayHudEnabled) {',
@@ -886,6 +1079,9 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '          assertPlayableLocalState(state.options.playableSaveLoad === true, "options.playableSaveLoad must be true");',
     '          assertPlayableLocalState(state.options.gameplayHud === gameplayHudEnabled, "options.gameplayHud does not match this demo");',
     '          assertPlayableLocalState(state.options.movementBlocking === (payload.metadata.movementBlocking?.enabled === true), "options.movementBlocking does not match this demo");',
+    '          if (state.options.audioLite !== undefined) {',
+    '            assertPlayableLocalState(state.options.audioLite === audioLiteEnabled, "options.audioLite does not match this demo");',
+    '          }',
     '        }',
     '        return position;',
     '      }',
@@ -933,6 +1129,84 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '        lastResult = "reset";',
     '        updateSaveLoadStatus("Local state reset.");',
     '      }',
+    ...(audioLiteEnabled
+      ? [
+          '      function updateAudioLiteStatus(message) {',
+          '        if (audioLiteStatusElement) {',
+          '          audioLiteStatusElement.textContent = message;',
+          '        }',
+          '      }',
+          '      function updateAudioLiteEventCount() {',
+          '        if (audioLiteEventCountElement) {',
+          '          audioLiteEventCountElement.textContent = "Audio events: " + audioLiteEventCount;',
+          '        }',
+          '      }',
+          '      function audioLiteClipIdsForTrigger(trigger) {',
+          '        const entry = payload.metadata.audioLite.triggers.find((candidate) => candidate.trigger === trigger);',
+          '        return entry ? entry.clipIds : [];',
+          '      }',
+          '      function audioLiteVolumeForClipIds(clipIds) {',
+          '        let volume = 0.25;',
+          '        for (const clipId of clipIds) {',
+          '          const clip = payload.metadata.audioLite.clips.find((candidate) => candidate.clipId === clipId);',
+          '          if (clip) {',
+          '            volume = Math.max(volume, clip.volume);',
+          '          }',
+          '        }',
+          '        return Math.min(volume, 1) * 0.08;',
+          '      }',
+          '      function enableAudioLite() {',
+          '        audioLiteUnlocked = true;',
+          '        if (audioLiteContext === null) {',
+          '          const AudioContextCtor = globalThis.AudioContext || globalThis.webkitAudioContext;',
+          '          if (typeof AudioContextCtor === "function") {',
+          '            try {',
+          '              audioLiteContext = new AudioContextCtor();',
+          '            } catch (error) {',
+          '              audioLiteContext = false;',
+          '            }',
+          '          } else {',
+          '            audioLiteContext = false;',
+          '          }',
+          '        }',
+          '        updateAudioLiteStatus(audioLiteContext ? "Audio Lite enabled. Diagnostic cues active." : "Audio Lite enabled. Silent diagnostic fallback active.");',
+          '        recordAudioLiteTrigger("onDemoStart");',
+          '        canvas.focus();',
+          '      }',
+          '      function playAudioLiteDiagnosticCue(trigger, clipIds) {',
+          '        if (!audioLiteContext || typeof audioLiteContext.createOscillator !== "function") {',
+          '          return;',
+          '        }',
+          '        const oscillator = audioLiteContext.createOscillator();',
+          '        const gain = audioLiteContext.createGain();',
+          '        const baseFrequency = trigger === "onBlockedMove" ? 164 : trigger === "onMove" ? 330 : trigger === "manual" ? 440 : 220;',
+          '        oscillator.type = "square";',
+          '        oscillator.frequency.value = baseFrequency;',
+          '        gain.gain.value = audioLiteVolumeForClipIds(clipIds);',
+          '        oscillator.connect(gain);',
+          '        gain.connect(audioLiteContext.destination);',
+          '        oscillator.start(audioLiteContext.currentTime);',
+          '        oscillator.stop(audioLiteContext.currentTime + 0.08);',
+          '      }',
+          '      function recordAudioLiteTrigger(trigger) {',
+          '        const clipIds = audioLiteClipIdsForTrigger(trigger);',
+          '        if (clipIds.length === 0) {',
+          '          return;',
+          '        }',
+          '        audioLiteEventCount += 1;',
+          '        updateAudioLiteEventCount();',
+          '        if (!audioLiteUnlocked) {',
+          '          updateAudioLiteStatus("Audio Lite cue queued until user gesture: " + trigger + ".");',
+          '          return;',
+          '        }',
+          '        playAudioLiteDiagnosticCue(trigger, clipIds);',
+          '        updateAudioLiteStatus("Audio Lite trigger: " + trigger + " (" + clipIds.join(", ") + ").");',
+          '      }'
+        ]
+      : [
+          '      function recordAudioLiteTrigger() {}',
+          '      function updateAudioLiteEventCount() {}'
+        ]),
     '      function resetControlledPosition() {',
     '        if (controllableIndex === -1 || initialControlledPosition === null) {',
     '          return;',
@@ -1056,6 +1330,18 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '      if (importStateButton) {',
     '        importStateButton.addEventListener("click", importPlayableLocalState);',
     '      }',
+    '      if (audioLiteEnableButton) {',
+    '        audioLiteEnableButton.addEventListener("click", enableAudioLite);',
+    '      }',
+    '      if (audioLiteTestButton) {',
+    '        audioLiteTestButton.addEventListener("click", () => {',
+    '          if (!audioLiteUnlocked) {',
+    '            enableAudioLite();',
+    '          }',
+    '          recordAudioLiteTrigger("manual");',
+    '          canvas.focus();',
+    '        });',
+    '      }',
     '      canvas.addEventListener("keydown", (event) => {',
     '        const delta = getMovementDelta(event.code);',
     '        if (!delta) {',
@@ -1078,6 +1364,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '        if (movementWouldBeBlocked(candidateX, candidateY)) {',
     '          blockedMoveCount += 1;',
     '          lastResult = "blocked";',
+    '          recordAudioLiteTrigger("onBlockedMove");',
     '          redraw();',
     '          updateGameplayHud();',
     '          return;',
@@ -1086,12 +1373,14 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '        controlled.y = candidateY;',
     '        inputCount += 1;',
     '        lastResult = "moved";',
+    '        recordAudioLiteTrigger("onMove");',
     '        redraw();',
     '        updateGameplayHud();',
     '      });',
     '      updatePauseButton();',
     '      redraw();',
     '      updateGameplayHud();',
+    '      updateAudioLiteEventCount();',
     '      scheduleRedrawLoop();',
     '      canvas.focus();',
     '    })();',

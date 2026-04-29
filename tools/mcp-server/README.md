@@ -26,6 +26,7 @@ Servidor MCP local via stdio.
 - `inspect_collision_overlaps`
 - `inspect_tile_collision`
 - `inspect_movement_blocking`
+- `inspect_audio_lite`
 
 ## Execucao manual
 
@@ -35,4 +36,4 @@ node ./tools/mcp-server/src/index.mjs
 
 ## Papel atual
 
-Expor validacao, inspecao headless, render/export visual e diagnosticos V1 para o Codex sem depender de GUI.
+Expor validacao, inspecao headless, render/export visual e diagnosticos V1/V2 incrementais para o Codex sem depender de GUI. Audio Lite v1 aparece como report deterministico via `inspect_audio_lite` e como opt-in em `render_browser_demo`/`export_html_game`.

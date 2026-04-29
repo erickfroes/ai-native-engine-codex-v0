@@ -26,7 +26,7 @@ function assertNonEmptyString(name, value) {
 function normalizeExportOptions(options) {
   assertObject(options, 'options');
 
-  for (const key of ['movementBlocking', 'gameplayHud', 'playableSaveLoad']) {
+  for (const key of ['movementBlocking', 'gameplayHud', 'playableSaveLoad', 'audioLite']) {
     if (options[key] !== undefined && typeof options[key] !== 'boolean') {
       throw new Error(`exportHtmlGameV1: \`options.${key}\` must be a boolean when provided`);
     }
@@ -35,7 +35,8 @@ function normalizeExportOptions(options) {
   return {
     movementBlocking: options.movementBlocking === true,
     gameplayHud: options.gameplayHud === true,
-    playableSaveLoad: options.playableSaveLoad === true
+    playableSaveLoad: options.playableSaveLoad === true,
+    audioLite: options.audioLite === true
   };
 }
 

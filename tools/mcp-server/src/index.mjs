@@ -38,7 +38,8 @@ import {
   buildCollisionBoundsReportV1,
   buildCollisionOverlapReportV1,
   buildMovementBlockingReportV1,
-  buildTileCollisionReportV1
+  buildTileCollisionReportV1,
+  buildAudioLiteReportV1
 } from '../../../engine/runtime/src/index.mjs';
 import { toolCatalog } from './tool-catalog.mjs';
 
@@ -131,6 +132,7 @@ async function handleToolCall(params) {
     params.name !== 'inspect_collision_bounds' &&
     params.name !== 'inspect_collision_overlaps' &&
     params.name !== 'inspect_tile_collision' &&
+    params.name !== 'inspect_audio_lite' &&
     params.name !== 'inspect_movement_blocking' &&
     params.name !== 'simulate_state'
   ) {
@@ -203,7 +205,7 @@ async function handleToolCall(params) {
     if (params.name === 'export_html_game') {
       const unexpectedArgument = findUnexpectedArgument(
         args,
-        new Set(['scenePath', 'outputPath', 'movementBlocking', 'gameplayHud', 'playableSaveLoad'])
+        new Set(['scenePath', 'outputPath', 'movementBlocking', 'gameplayHud', 'playableSaveLoad', 'audioLite'])
       );
       if (unexpectedArgument !== undefined) {
         return {
@@ -247,11 +249,19 @@ async function handleToolCall(params) {
         };
       }
 
+      if (args.audioLite !== undefined && typeof args.audioLite !== 'boolean') {
+        return {
+          content: toTextContent('export_html_game: `audioLite` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
       const exportEnvelope = await exportHtmlGameV1(resolveRepoPath(args.scenePath), {
         outputPath: resolveRepoPath(args.outputPath),
         movementBlocking: args.movementBlocking === true,
         gameplayHud: args.gameplayHud === true,
-        playableSaveLoad: args.playableSaveLoad === true
+        playableSaveLoad: args.playableSaveLoad === true,
+        audioLite: args.audioLite === true
       });
 
       return {
@@ -527,6 +537,17 @@ async function handleToolCall(params) {
       };
     }
 
+    if (params.name === 'inspect_audio_lite') {
+      const report = await buildAudioLiteReportV1(targetPath);
+      return {
+        content: toTextContent(
+          `Audio Lite report built for ${report.scene} with ${report.clips.length} clip(s).`
+        ),
+        structuredContent: report,
+        isError: false
+      };
+    }
+
     if (params.name === 'inspect_movement_blocking') {
       if (
         typeof args.inputIntentPath !== 'string' ||
@@ -760,7 +781,8 @@ async function handleToolCall(params) {
           'assetManifestPath',
           'movementBlocking',
           'gameplayHud',
-          'playableSaveLoad'
+          'playableSaveLoad',
+          'audioLite'
         ])
       );
       if (unexpectedArgument !== undefined) {
@@ -824,6 +846,13 @@ async function handleToolCall(params) {
         };
       }
 
+      if (args.audioLite !== undefined && typeof args.audioLite !== 'boolean') {
+        return {
+          content: toTextContent('render_browser_demo: `audioLite` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
       const scene = await loadSceneFile(targetPath);
       const resolvedAssetManifestPath = args.assetManifestPath === undefined
         ? undefined
@@ -839,7 +868,8 @@ async function handleToolCall(params) {
       const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, {
         movementBlocking: args.movementBlocking === true,
         gameplayHud: args.gameplayHud === true,
-        playableSaveLoad: args.playableSaveLoad === true
+        playableSaveLoad: args.playableSaveLoad === true,
+        audioLite: args.audioLite === true
       });
       const html = renderBrowserPlayableDemoHtmlV1({
         title,
@@ -920,7 +950,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, export_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, export_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_audio_lite, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }

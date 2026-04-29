@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "audio-lite-sfx-fixture"
+  },
+  "systems": ["core.loop"],
+  "entities": [
+    {
+      "id": "audio.step",
+      "components": [
+        {
+          "kind": "audio.clip",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "clipId": "sfx.step",
+            "kind": "sfx",
+            "volume": 0.75,
+            "trigger": "onMove"
+          }
+        }
+      ]
+    }
+  ]
+}

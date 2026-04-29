@@ -61,7 +61,7 @@ function assertExportEnvelopeShape(envelope) {
   ]);
   assert.equal(envelope.exportVersion, SIMPLE_HTML_EXPORT_VERSION);
   assert.equal(envelope.scene, 'v1-small-2d');
-  assert.deepEqual(Object.keys(envelope.options), ['movementBlocking', 'gameplayHud', 'playableSaveLoad']);
+  assert.deepEqual(Object.keys(envelope.options), ['movementBlocking', 'gameplayHud', 'playableSaveLoad', 'audioLite']);
   assert.equal(Number.isInteger(envelope.sizeBytes), true);
   assert.match(envelope.htmlHash, /^[a-f0-9]{64}$/);
 }
@@ -136,7 +136,8 @@ test('Simple HTML Export v1 builds a deterministic Browser Demo artifact without
   assert.deepEqual(baseline.options, {
     movementBlocking: false,
     gameplayHud: false,
-    playableSaveLoad: false
+    playableSaveLoad: false,
+    audioLite: false
   });
   assert.equal(baseline.sizeBytes, Buffer.byteLength(baseline.html, 'utf8'));
   assert.equal(baseline.htmlHash, sha256Hex(baseline.html));
@@ -146,7 +147,9 @@ test('Simple HTML Export v1 builds a deterministic Browser Demo artifact without
   assert.doesNotMatch(baseline.html, /"movementBlocking":/);
   assert.doesNotMatch(baseline.html, /"gameplayHud":/);
   assert.doesNotMatch(baseline.html, /"playableSaveLoad":/);
+  assert.doesNotMatch(baseline.html, /"audioLite":/);
   assert.doesNotMatch(baseline.html, /browser-playable-save-load/);
+  assert.doesNotMatch(baseline.html, /browser-audio-lite/);
   assertNoForbiddenExportHtmlSurface(baseline.html);
 });
 
@@ -156,36 +159,43 @@ test('export-html-game CLI writes deterministic files for each supported option 
     {
       name: 'default',
       flags: [],
-      options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: false },
+      options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: false, audioLite: false },
       present: [],
-      absent: [/"movementBlocking":/, /"gameplayHud":/, /"playableSaveLoad":/, /browser-playable-save-load/]
+      absent: [/"movementBlocking":/, /"gameplayHud":/, /"playableSaveLoad":/, /"audioLite":/, /browser-playable-save-load/, /browser-audio-lite/]
     },
     {
       name: 'movement-blocking',
       flags: ['--movement-blocking'],
-      options: { movementBlocking: true, gameplayHud: false, playableSaveLoad: false },
+      options: { movementBlocking: true, gameplayHud: false, playableSaveLoad: false, audioLite: false },
       present: [/"movementBlocking":/],
-      absent: [/"gameplayHud":/, /"playableSaveLoad":/]
+      absent: [/"gameplayHud":/, /"playableSaveLoad":/, /"audioLite":/]
     },
     {
       name: 'gameplay-hud',
       flags: ['--gameplay-hud'],
-      options: { movementBlocking: false, gameplayHud: true, playableSaveLoad: false },
+      options: { movementBlocking: false, gameplayHud: true, playableSaveLoad: false, audioLite: false },
       present: [/id="browser-gameplay-hud"/, /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":false,"snapshotTick":0\}/],
-      absent: [/"movementBlocking":/, /"playableSaveLoad":/]
+      absent: [/"movementBlocking":/, /"playableSaveLoad":/, /"audioLite":/]
     },
     {
       name: 'playable-save-load',
       flags: ['--playable-save-load'],
-      options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: true },
+      options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: true, audioLite: false },
       present: [/id="browser-playable-save-load"/, /"playableSaveLoad":/],
-      absent: [/"movementBlocking":/, /"gameplayHud":/]
+      absent: [/"movementBlocking":/, /"gameplayHud":/, /"audioLite":/]
+    },
+    {
+      name: 'audio-lite',
+      flags: ['--audio-lite'],
+      options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: false, audioLite: true },
+      present: [/id="browser-audio-lite"/, /"audioLite":\{"clips":\[/],
+      absent: [/"movementBlocking":/, /"gameplayHud":/, /"playableSaveLoad":/]
     },
     {
       name: 'all-options',
-      flags: ['--movement-blocking', '--gameplay-hud', '--playable-save-load'],
-      options: { movementBlocking: true, gameplayHud: true, playableSaveLoad: true },
-      present: [/"movementBlocking":/, /id="browser-gameplay-hud"/, /id="browser-playable-save-load"/],
+      flags: ['--movement-blocking', '--gameplay-hud', '--playable-save-load', '--audio-lite'],
+      options: { movementBlocking: true, gameplayHud: true, playableSaveLoad: true, audioLite: true },
+      present: [/"movementBlocking":/, /id="browser-gameplay-hud"/, /id="browser-playable-save-load"/, /id="browser-audio-lite"/],
       absent: []
     }
   ];
@@ -251,6 +261,7 @@ test('export_html_game MCP writes the same all-options HTML export as CLI', asyn
     '--movement-blocking',
     '--gameplay-hud',
     '--playable-save-load',
+    '--audio-lite',
     '--json'
   ]);
 
@@ -269,6 +280,7 @@ test('export_html_game MCP writes the same all-options HTML export as CLI', asyn
     assert.ok(Object.prototype.hasOwnProperty.call(tool.inputSchema.properties, 'movementBlocking'));
     assert.ok(Object.prototype.hasOwnProperty.call(tool.inputSchema.properties, 'gameplayHud'));
     assert.ok(Object.prototype.hasOwnProperty.call(tool.inputSchema.properties, 'playableSaveLoad'));
+    assert.ok(Object.prototype.hasOwnProperty.call(tool.inputSchema.properties, 'audioLite'));
 
     const mcpResponse = await client.request('tools/call', {
       name: 'export_html_game',
@@ -277,7 +289,8 @@ test('export_html_game MCP writes the same all-options HTML export as CLI', asyn
         outputPath: path.relative(repoRoot, mcpOutPath),
         movementBlocking: true,
         gameplayHud: true,
-        playableSaveLoad: true
+        playableSaveLoad: true,
+        audioLite: true
       }
     });
 
@@ -315,6 +328,14 @@ test('export_html_game MCP rejects invalid arguments and output paths outside th
         movementBlocking: 'yes'
       }
     });
+    const invalidAudioLiteFlag = await client.request('tools/call', {
+      name: 'export_html_game',
+      arguments: {
+        scenePath: sceneMcpPath,
+        outputPath: './tmp/out.html',
+        audioLite: 'yes'
+      }
+    });
     const outsideOutput = await client.request('tools/call', {
       name: 'export_html_game',
       arguments: {
@@ -327,6 +348,8 @@ test('export_html_game MCP rejects invalid arguments and output paths outside th
     assert.match(missingScenePath.result.content[0].text, /scenePath/);
     assert.equal(invalidFlag.result.isError, true);
     assert.match(invalidFlag.result.content[0].text, /movementBlocking/);
+    assert.equal(invalidAudioLiteFlag.result.isError, true);
+    assert.match(invalidAudioLiteFlag.result.content[0].text, /audioLite/);
     assert.equal(outsideOutput.result.isError, true);
     assert.match(outsideOutput.result.content[0].text, /path must stay inside the repository root/);
   } finally {

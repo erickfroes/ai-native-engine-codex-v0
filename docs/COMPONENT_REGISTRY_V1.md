@@ -21,6 +21,7 @@ Componentes conhecidos iniciais:
 - `tile.layer` v1
 - `camera.viewport` v1
 - `collision.bounds` v1
+- `audio.clip` v1
 
 ## Separação de responsabilidade
 

@@ -20,6 +20,7 @@ Opcoes:
 - `--movement-blocking` embute blocking local da Browser Demo.
 - `--gameplay-hud` embute Browser Gameplay HUD Lite.
 - `--playable-save-load` embute Playable Save/Load Lite.
+- `--audio-lite` embute Audio Lite v1 diagnostico com controles por gesto do usuario.
 - `--json` retorna envelope estavel.
 
 Envelope JSON:
@@ -32,7 +33,8 @@ Envelope JSON:
   "options": {
     "movementBlocking": true,
     "gameplayHud": true,
-    "playableSaveLoad": true
+    "playableSaveLoad": true,
+    "audioLite": true
   },
   "sizeBytes": 24000,
   "htmlHash": "sha256hex"
@@ -58,7 +60,8 @@ Input:
   "outputPath": "./tmp/v1-small-2d.html",
   "movementBlocking": true,
   "gameplayHud": true,
-  "playableSaveLoad": true
+  "playableSaveLoad": true,
+  "audioLite": true
 }
 ```
 
@@ -81,11 +84,12 @@ O MCP valida `scenePath` e `outputPath` dentro do repo, escreve o arquivo HTML e
 ## Compatibilidade
 
 - O HTML exportado preserva o comportamento da Browser Playable Demo v1.
-- Sem flags, o export nao embute `movementBlocking`, `gameplayHud` ou `playableSaveLoad`.
+- Sem flags, o export nao embute `movementBlocking`, `gameplayHud`, `playableSaveLoad` ou `audioLite`.
 - Com `--movement-blocking`, o movimento local pode ser bloqueado por `collision.bounds` solido e tiles solidos.
 - Com `--gameplay-hud`, o HUD Lite local aparece no HTML.
 - Com `--playable-save-load`, os controles locais de export/import aparecem no HTML.
-- Com as tres opcoes, blocking, HUD e save/load local coexistem no mesmo HTML.
+- Com `--audio-lite`, metadata e controles diagnosticos de Audio Lite v1 aparecem no HTML sem autoplay forcado.
+- Com todas as opcoes, blocking, HUD, save/load local e Audio Lite coexistem no mesmo HTML.
 
 ## Fora de escopo
 
@@ -97,7 +101,7 @@ O MCP valida `scenePath` e `outputPath` dentro do repo, escreve o arquivo HTML e
 - UI system completo;
 - fisica completa;
 - pathfinding;
-- audio ou animation;
+- mixer/audio graph completo ou animation;
 - persistencia automatica;
 - `localStorage`, `sessionStorage`, `IndexedDB`, rede ou `fetch`;
 - scripts externos;
@@ -107,4 +111,6 @@ O MCP valida `scenePath` e `outputPath` dentro do repo, escreve o arquivo HTML e
 
 `Game Templates v1`, `V1 Small 2D Game Creation Guide / Codex package` e `V1 Small 2D Release Checkpoint` ja foram concluidos sobre este export simples.
 
-O proximo pacote recomendado e `codex/audio-lite-v1`.
+Audio Lite v1 e o primeiro incremento pos-checkpoint sobre este export simples.
+
+O proximo pacote recomendado e `codex/sprite-animation-v1`.

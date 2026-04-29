@@ -97,11 +97,10 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. `codex/audio-lite-v1`.
-2. `codex/sprite-animation-v1`.
-3. UI system/prefab system V2 conforme roadmap.
-4. Evitar transformar HUD Lite em UI system completo antes do pacote apropriado.
-5. 3D indie apenas depois de V1/V2 demonstradas.
+1. `codex/sprite-animation-v1`.
+2. UI system/prefab system V2 conforme roadmap.
+3. Evitar transformar HUD Lite em UI system completo antes do pacote apropriado.
+4. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Uso de subagentes
 

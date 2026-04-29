@@ -29,6 +29,14 @@ const movementBlockingTileOpenScenePath = path.join(
   'fixtures',
   'movement-blocking-tile-open.scene.json'
 );
+const audioLiteSfxScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'audio-lite-sfx.scene.json'
+);
 const invalidVisualSpriteScenePath = path.join(
   repoRoot,
   'engine',
@@ -455,13 +463,52 @@ test('render-browser-demo --playable-save-load embeds local export import contro
   assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
 });
 
-test('render-browser-demo combines HUD, movement blocking and Playable Save/Load Lite', () => {
+test('render-browser-demo leaves Audio Lite out without --audio-lite', () => {
+  const result = runCli([
+    'render-browser-demo',
+    audioLiteSfxScenePath,
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'audio-lite-sfx-fixture');
+  assert.doesNotMatch(payload.html, /"audioLite":/);
+  assert.doesNotMatch(payload.html, /browser-audio-lite/);
+  assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
+});
+
+test('render-browser-demo --audio-lite embeds Audio Lite metadata and controls', () => {
+  const result = runCli([
+    'render-browser-demo',
+    audioLiteSfxScenePath,
+    '--audio-lite',
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'audio-lite-sfx-fixture');
+  assert.match(payload.html, /id="browser-audio-lite"/);
+  assert.match(payload.html, /"audioLite":\{"clips":\[/);
+  assert.match(payload.html, /"clipId":"sfx\.step"/);
+  assert.match(payload.html, /"trigger":"onMove"/);
+  assert.match(payload.html, /"code":"AUDIO_CLIP_SRC_MISSING"/);
+  assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
+});
+
+test('render-browser-demo combines HUD, movement blocking, Playable Save/Load Lite and Audio Lite', () => {
   const result = runCli([
     'render-browser-demo',
     v1Small2dScenePath,
     '--movement-blocking',
     '--gameplay-hud',
     '--playable-save-load',
+    '--audio-lite',
     '--json'
   ]);
 
@@ -472,12 +519,14 @@ test('render-browser-demo combines HUD, movement blocking and Playable Save/Load
   assert.equal(payload.scene, 'v1-small-2d');
   assert.match(payload.html, /id="browser-gameplay-hud"/);
   assert.match(payload.html, /id="browser-playable-save-load"/);
+  assert.match(payload.html, /id="browser-audio-lite"/);
   assert.match(payload.html, /"movementBlocking":/);
   assert.match(payload.html, /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":true,"snapshotTick":0\}/);
   assert.match(
     payload.html,
     /"playableSaveLoad":\{"enabled":true,"kind":"browser\.playable-demo\.local-state","version":1\}/
   );
+  assert.match(payload.html, /"audioLite":\{"clips":\[\]/);
   assert.match(payload.html, /blockedMoves: blockedMoveCount/);
   assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
 });

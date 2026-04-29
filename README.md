@@ -76,9 +76,9 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 - multiplayer real;
 - captura/input runtime completo fora da Browser Playable Demo local.
 
-A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint.
+A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. O primeiro incremento pos-checkpoint inicia V2 de forma pequena com Audio Lite v1.
 
-O proximo pacote recomendado e `codex/audio-lite-v1`.
+O proximo pacote recomendado e `codex/sprite-animation-v1`.
 
 ## Comandos CLI principais
 
@@ -93,13 +93,14 @@ O proximo pacote recomendado e `codex/audio-lite-v1`.
 - `inspect-collision-overlaps`: detecta overlaps AABB
 - `inspect-tile-collision`: inspeciona tiles solidos declarados em `tile.layer`
 - `inspect-movement-blocking`: avalia tentativa de movimento contra colisao solida
+- `inspect-audio-lite`: inspeciona clips e triggers declarativos de Audio Lite v1
 - `save-state` e `load-save`: persistencia minima de State Snapshot v1
 - `render-snapshot`: gera RenderSnapshot v1
 - `render-svg`: gera SVG textual deterministico
 - `render-svg-demo`: gera HTML estatico com SVG inline
 - `render-canvas-demo`: gera HTML estatico com Canvas 2D
-- `render-browser-demo`: gera HTML interativo minimo com Canvas 2D, teclado local, fallback de sprites, blocking local opt-in, HUD Lite opt-in e Playable Save/Load Lite opt-in
-- `export-html-game`: escreve um HTML jogavel autocontido com opcoes da Browser Demo
+- `render-browser-demo`: gera HTML interativo minimo com Canvas 2D, teclado local, fallback de sprites, blocking local opt-in, HUD Lite opt-in, Playable Save/Load Lite opt-in e Audio Lite opt-in
+- `export-html-game`: escreve um HTML jogavel autocontido com opcoes da Browser Demo, incluindo Audio Lite opt-in
 
 ## Tools MCP principais
 
@@ -173,8 +174,11 @@ node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene
 # gerar Browser Playable Demo da cena consolidada com export/import local opt-in
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene.json --gameplay-hud --movement-blocking --playable-save-load --out ./tmp/v1-small-2d-save-load.html --json
 
+# gerar Browser Playable Demo com Audio Lite diagnostico opt-in
+node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --audio-lite --out ./tmp/audio-lite-browser-demo.html --json
+
 # exportar um HTML jogavel simples da cena consolidada V1 small 2D
-node ./engine/runtime/src/cli.mjs export-html-game ./scenes/v1-small-2d.scene.json --movement-blocking --gameplay-hud --playable-save-load --out ./tmp/v1-small-2d-export.html --json
+node ./engine/runtime/src/cli.mjs export-html-game ./scenes/v1-small-2d.scene.json --movement-blocking --gameplay-hud --playable-save-load --audio-lite --out ./tmp/v1-small-2d-export.html --json
 ```
 
 ## Validacao obrigatoria

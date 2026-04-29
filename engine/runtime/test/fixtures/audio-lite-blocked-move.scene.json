@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "audio-lite-blocked-move-fixture"
+  },
+  "systems": ["core.loop"],
+  "entities": [
+    {
+      "id": "audio.bump",
+      "components": [
+        {
+          "kind": "audio.clip",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "clipId": "sfx.bump",
+            "kind": "sfx",
+            "volume": 1,
+            "trigger": "onBlockedMove"
+          }
+        }
+      ]
+    }
+  ]
+}

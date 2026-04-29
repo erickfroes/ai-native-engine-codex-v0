@@ -19,7 +19,8 @@ test('Component Registry v1 has stable known components and lookup APIs', () => 
     'visual.sprite',
     'tile.layer',
     'camera.viewport',
-    'collision.bounds'
+    'collision.bounds',
+    'audio.clip'
   ]);
   assert.equal(isKnownComponent('transform'), true);
   assert.equal(isKnownComponent('velocity'), true);
@@ -27,6 +28,7 @@ test('Component Registry v1 has stable known components and lookup APIs', () => 
   assert.equal(isKnownComponent('tile.layer'), true);
   assert.equal(isKnownComponent('camera.viewport'), true);
   assert.equal(isKnownComponent('collision.bounds'), true);
+  assert.equal(isKnownComponent('audio.clip'), true);
   assert.equal(isKnownComponent('unknown'), false);
 
   const transform = getKnownComponent('transform');
@@ -48,6 +50,10 @@ test('Component Registry v1 has stable known components and lookup APIs', () => 
   const collisionBounds = getKnownComponent('collision.bounds');
   assert.equal(collisionBounds?.name, 'collision.bounds');
   assert.equal(collisionBounds?.version, 1);
+
+  const audioClip = getKnownComponent('audio.clip');
+  assert.equal(audioClip?.name, 'audio.clip');
+  assert.equal(audioClip?.version, 1);
 
   const missing = getKnownComponent('missing.component');
   assert.equal(missing, null);
