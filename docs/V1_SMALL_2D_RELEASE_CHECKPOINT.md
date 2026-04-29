@@ -88,6 +88,27 @@ Motivos:
 
 Se futuramente um pacote precisar automatizar esse fluxo, ele deve compor comandos existentes sem adicionar dependencia nova.
 
+## Decisao Sobre Schemas Formais
+
+Este checkpoint nao adiciona schemas novos.
+
+Alguns outputs V1, como `MovementBlockingReport v1`, `CollisionBoundsReport v1`, `CollisionOverlapReport v1`, Browser Demo Local State v1 e o envelope de Simple HTML Export v1, permanecem contratos narrativos guardados por docs e testes cross-interface. O checkpoint registra essa decisao para nao misturar schema hardening com fechamento de release.
+
+Se uma proxima rodada transformar esses outputs em schemas formais, ela deve ser um pacote de hardening separado e sem mudanca de shape.
+
+## Aceitacao Manual Do HTML
+
+A validacao automatizada gera Browser Demo e Simple HTML Export, mas uma aceitacao manual curta continua recomendada para releases humanos:
+
+- abrir o HTML default diretamente no navegador;
+- confirmar movimento local livre;
+- abrir o HTML com `--movement-blocking --gameplay-hud --playable-save-load`;
+- confirmar movimento bloqueado para direita e caminho livre para baixo;
+- confirmar HUD Lite e round-trip manual de `Export State` / `Import State`;
+- confirmar que o arquivo nao depende de servidor, rede, storage ou scripts externos.
+
+Essa aceitacao manual nao substitui `npm test`, `npm run validate:scenes` ou `npm run smoke`.
+
 ## Criterio Para Iniciar V2
 
 V2 pode iniciar de forma incremental quando:

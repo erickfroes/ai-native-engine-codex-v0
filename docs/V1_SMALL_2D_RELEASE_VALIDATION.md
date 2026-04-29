@@ -53,7 +53,7 @@ node ./engine/runtime/src/cli.mjs export-html-game ./templates/side-view-blockin
 
 ## HTML Proibido
 
-O HTML gerado por Browser Demo ou Simple HTML Export nao deve conter:
+O HTML gerado pelos fluxos canonicos de Browser Demo ou Simple HTML Export, sem Asset Manifest externo, nao deve conter:
 
 - `fetch`;
 - `localStorage`;
@@ -65,6 +65,20 @@ O HTML gerado por Browser Demo ou Simple HTML Export nao deve conter:
 - scripts externos;
 - `import(`;
 - `link href` externo.
+
+Observacao: `render-browser-demo --asset-manifest` pode materializar `file:///...` para preview local de imagens. Esse caminho continua deterministico e local, mas nao e export portavel de assets.
+
+## Aceitacao Manual Recomendada
+
+Para checkpoint humano, alem dos comandos automatizados:
+
+- abra o HTML default diretamente no navegador;
+- confirme que o canvas recebe foco e aceita input local;
+- abra o HTML com `--movement-blocking --gameplay-hud --playable-save-load`;
+- confirme que movimento para direita e bloqueado e movimento para baixo e livre;
+- confirme que o HUD Lite atualiza `blocked moves`, `last input` e `last result`;
+- use `Export State`, altere a posicao local, depois use `Import State` e confirme o round-trip;
+- confirme que nao ha servidor local, rede, storage persistente ou scripts externos.
 
 ## Budgets Simples
 

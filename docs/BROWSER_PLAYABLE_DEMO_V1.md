@@ -6,7 +6,7 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 
 ## Runtime
 
-- `renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadata })` retorna um HTML completo e autocontido; com `assetManifestPath`, o conteudo continua deterministico para os mesmos inputs e o mesmo path absoluto do manifesto.
+- `renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadata })` retorna um HTML completo e autocontido para os fluxos sem assets externos; com `assetManifestPath`, o conteudo continua deterministico para os mesmos inputs e o mesmo path absoluto do manifesto, mas referencia imagens locais via `file:///...` e cai para fallback `rect` se elas nao carregarem.
 - `renderSnapshot` continua sendo exatamente `RenderSnapshot v1`.
 - `createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overrides?)` escolhe o rect controlavel pela ordem original das entidades da cena; se isso falhar, o HTML faz fallback deterministicamente para o primeiro rect do snapshot.
 - `metadata.controllableEntityId` pode fixar o rect controlavel quando necessario.
@@ -80,7 +80,7 @@ Exemplo com Playable Save/Load Lite local opt-in:
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene.json --gameplay-hud --movement-blocking --playable-save-load --out ./tmp/v1-small-2d-save-load.html --json
 ```
 
-Depois de gerar com `--out`, abra o arquivo HTML diretamente no navegador. A demo e autocontida: nao precisa de servidor local, assets reais ou runtime Node no cliente.
+Depois de gerar com `--out`, abra o arquivo HTML diretamente no navegador. A demo sem `--asset-manifest` e autocontida: nao precisa de servidor local, assets reais ou runtime Node no cliente. Quando `--asset-manifest` e usado, o HTML continua single-file e deterministico, mas nao e portavel sozinho porque referencia imagens locais por `file:///...`; se o arquivo for movido sem os assets, o fallback `rect` preserva funcionamento basico.
 
 Envelope minimo de CLI `--json` e MCP `structuredContent`:
 
@@ -137,6 +137,7 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 - se a imagem nao carregar, o fallback segue no `rect` e o demo continua funcional sem quebrar.
 - no manifesto, `assets[].src` continua relativo por design; paths absolutos e traversal continuam proibidos.
 - no HTML da browser demo, o `assetSrc` validado e resolvido para `file:///...` local.
+- esse fluxo nao e asset bundling portavel; Simple HTML Export v1 tambem nao copia assets reais.
 
 ## Fora de escopo
 

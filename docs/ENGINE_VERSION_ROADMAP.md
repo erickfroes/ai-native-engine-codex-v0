@@ -56,10 +56,11 @@ Capacidades alvo:
 - Simple HTML Export v1;
 - Game Templates v1;
 - V1 Small 2D Game Creation Guide / Codex package;
-- UI system simples futuro;
-- audio-lite;
+- V1 Small 2D Release Checkpoint;
+- UI system simples futuro de V2;
+- audio-lite como proximo pacote incremental;
 - save/load jogavel formal futuro, se ainda necessario;
-- release checkpoint V1 Small 2D como gate de fechamento.
+- release checkpoint V1 Small 2D concluido como gate de fechamento.
 
 Codex/subagentes:
 
@@ -71,6 +72,7 @@ Codex/subagentes:
 Criterio de saida:
 
 - um jogo 2D pequeno pode ser criado, testado, salvo/carregado e exportado.
+- V1 permanece aberta para bugfix, hardening e compatibilidade, enquanto V2 inicia de forma incremental.
 
 ## V2 - 2D/2.5D indie production
 
@@ -95,7 +97,7 @@ Codex/subagentes:
 - `asset_pipeline_architect` governa assets, atlas e manifests;
 - `tooling_editor_architect` governa editor-lite e UX de tooling;
 - `docs_handoff_auditor` mantem handoffs e guias de criacao de jogos;
-- skills para `create-gameplay-system`, `import-asset-pack`, `author-ui-screen`.
+- skills para `create-gameplay-system`, `import-asset-pack` e, em V2, `author-ui-screen`.
 
 Criterio de saida:
 
@@ -209,6 +211,6 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. `codex/v1-small-2d-release-checkpoint`.
-2. Export/save V1 mais formal para exemplo jogavel pequeno, se ainda necessario apos o HTML export.
-3. UI/audio/animation basicos para V2, preservando HUD Lite como diagnostico local ate existir UI system formal.
+1. `codex/audio-lite-v1`.
+2. `codex/sprite-animation-v1`.
+3. UI system/prefab system V2 conforme roadmap, preservando HUD Lite como diagnostico local ate existir UI system formal.
