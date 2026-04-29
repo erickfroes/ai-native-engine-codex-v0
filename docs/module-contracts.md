@@ -522,3 +522,16 @@ Contrato de export simples para escrever uma cena jogavel pequena como arquivo H
 - nao inclui o HTML no envelope; o conteudo fica no arquivo escrito.
 - nao altera Browser Demo Local State v1, Save/Load v1, RenderSnapshot v1, InputIntent v1 ou reports de colisao.
 - nao e bundler, servidor, editor, build pipeline V2, asset copier ou runtime canonico de gameplay.
+
+## Game Templates v1
+
+Contrato leve de conteudo para exemplos V1 Small 2D copiar-e-adaptar:
+
+- ver `docs/GAME_TEMPLATES_V1.md`.
+- templates atuais: `templates/top-down-basic` e `templates/side-view-blocking-basic`.
+- cada template contem `scene.json`, `README.md` e intents de exemplo em `input/`.
+- reutiliza Scene Document v1, InputIntent v1, Browser Playable Demo v1 e Simple HTML Export v1.
+- nao adiciona schema novo, runtime novo, comando novo ou tool MCP nova.
+- nao usa `entity.prefab` como semantica de runtime.
+- nao altera RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Save/Load v1.
+- nao e template engine, prefab system, editor, UI system, fisica, pathfinding, audio, animation ou platformer real.
