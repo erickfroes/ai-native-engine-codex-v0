@@ -54,10 +54,11 @@ Capacidades alvo:
 - hardening de exemplos jogaveis pequenos;
 - Playable Save/Load Lite browser-local opt-in;
 - Simple HTML Export v1;
+- Game Templates v1;
 - UI system simples futuro;
 - audio-lite;
 - save/load jogavel formal futuro, se ainda necessario;
-- templates de jogo top-down/platformer.
+- V1 Small 2D Game Creation Guide / Codex package como camada de criacao sobre os templates ja implementados.
 
 Codex/subagentes:
 
@@ -207,6 +208,6 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Game Templates v1.
+1. V1 Small 2D Game Creation Guide / Codex package.
 2. Export/save V1 mais formal para exemplo jogavel pequeno, se ainda necessario apos o HTML export.
 3. UI/audio/animation basicos para V2, preservando HUD Lite como diagnostico local ate existir UI system formal.

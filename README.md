@@ -1,6 +1,6 @@
-# AI-Native Engine for Codex - Meta 2 Visual/Interactive
+# AI-Native Engine for Codex - V1 Small 2D
 
-Este repositorio fecha a Meta 2 como uma base visual/interativa minima, deterministica e orientada a contrato.
+Este repositorio fechou as Metas 1 e 2 e ja possui um slice V1 Small 2D funcional para gameplay basico, export HTML simples e templates copiar-e-adaptar.
 
 A simulacao canonica continua headless. A camada visual atual transforma cenas validadas em snapshots e demos HTML autocontidas para inspecao, smoke e automacao com Codex.
 
@@ -44,13 +44,14 @@ A engine agora avancou para a fundacao de gameplay 2D:
 - blocking opt-in no `run-loop` e na Browser Playable Demo;
 - Playable Save/Load Lite browser-local opt-in na Browser Playable Demo;
 - Simple HTML Export v1 para gerar um arquivo HTML jogavel autocontido;
+- Game Templates v1 com exemplos copiar-e-adaptar para top-down e side-view blocking;
 - cena consolidada `v1-small-2d` para readiness da V1;
 - CLI/MCP para inspecao de colisao, overlap, tile collision e blocking;
 - testes cross-interface para os reports principais.
 
 Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-loop` e a Browser Demo preservam o comportamento antigo quando a flag/opcao `movementBlocking` nao e fornecida.
 
-## O que esta dentro da Meta 2
+## O que a Meta 2 fechou
 
 - `engine/runtime/`: runtime, contratos internos e CLI;
 - `tools/mcp-server/`: servidor MCP local via stdio;
@@ -60,7 +61,7 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 - `docs/`: handoff, status, contratos e matrizes da Meta 2;
 - paridade principal entre runtime, CLI e MCP para fluxos visuais automatizaveis.
 
-## O que nao esta dentro da Meta 2
+## O que a Meta 2 nao cobria
 
 - Pixi, Three, WebGL ou renderer real do engine;
 - editor visual;
@@ -72,6 +73,8 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 - animacao avancada;
 - multiplayer real;
 - captura/input runtime completo fora da Browser Playable Demo local.
+
+A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1 e Game Templates v1.
 
 ## Comandos CLI principais
 
@@ -189,6 +192,7 @@ npm run smoke
 - `docs/V1_SMALL_2D_TEST_MATRIX.md`: matriz runtime/CLI/MCP/testes da cena consolidada
 - `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`: formato local do Playable Save/Load Lite
 - `docs/SIMPLE_HTML_EXPORT_V1.md`: contrato do export HTML jogavel simples
+- `docs/GAME_TEMPLATES_V1.md`: templates V1 Small 2D copiar-e-adaptar
 
 ## Primeira leitura recomendada
 
