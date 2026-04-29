@@ -23,6 +23,8 @@
 - `render-snapshot`
 - `render-browser-demo`
 - `render-browser-demo --movement-blocking`
+- `render-browser-demo --gameplay-hud`
+- `render-browser-demo --gameplay-hud --movement-blocking`
 - `inspect-collision-bounds`
 - `inspect-collision-overlaps`
 - `inspect-tile-collision`
@@ -35,6 +37,8 @@
 - `render_snapshot`
 - `render_browser_demo`
 - `render_browser_demo` com `movementBlocking: true`
+- `render_browser_demo` com `gameplayHud: true`
+- `render_browser_demo` com `gameplayHud: true` e `movementBlocking: true`
 - `inspect_collision_bounds`
 - `inspect_collision_overlaps`
 - `inspect_tile_collision`

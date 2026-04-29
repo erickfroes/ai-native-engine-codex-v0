@@ -13,6 +13,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Tile Collision v1: concluido como relatorio diagnostico de tiles solidos.
 - Movement Blocking opt-in no `run-loop` e na Browser Playable Demo: concluido.
 - V1 Small 2D readiness gate: concluido com cena consolidada.
+- Browser Gameplay HUD Lite v1: concluido como HUD local opt-in da Browser Playable Demo.
 
 ## O que o Codex recebe
 
@@ -26,6 +27,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - MovementBlockingReport v1;
 - TileCollisionReport v1;
 - Browser Playable Demo com blocking local opt-in;
+- Browser Playable Demo com HUD Lite local opt-in;
 - cena `scenes/v1-small-2d.scene.json` para readiness V1;
 - `docs/V1_SMALL_2D_READINESS.md`;
 - `docs/V1_SMALL_2D_TEST_MATRIX.md`;
@@ -61,9 +63,9 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Browser Gameplay HUD Lite v1.
-2. Hardening de exemplos jogaveis pequenos.
-3. UI/audio/animation basicos para V2.
+1. Hardening de exemplos jogaveis pequenos.
+2. UI/audio/animation basicos para V2.
+3. Evitar transformar HUD Lite em UI system completo antes do pacote apropriado.
 4. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Uso de subagentes

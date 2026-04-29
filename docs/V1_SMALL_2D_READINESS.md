@@ -48,6 +48,8 @@ O gate passa quando:
 - `run-loop` sem `movementBlocking` preserva o comportamento padrao.
 - `run-loop --movement-blocking` bloqueia apenas quando a tentativa seria solida.
 - runtime, CLI e MCP permanecem alinhados.
+- `render-browser-demo --gameplay-hud` expoe HUD Lite local sem alterar o comportamento padrao.
+- `render-browser-demo --gameplay-hud --movement-blocking` expoe contadores locais de blocking no HTML.
 
 ## Fora De Escopo
 
@@ -57,13 +59,13 @@ O gate passa quando:
 - editor;
 - audio;
 - animation;
-- UI/HUD jogavel;
+- UI system completo;
 - servidor;
 - Pixi, Three ou WebGL;
 - mudanca em contratos v1 existentes.
 
-## Proximo Passo Recomendado
+## Seguimento
 
-O proximo pacote recomendado e `Browser Gameplay HUD Lite v1`.
+`Browser Gameplay HUD Lite v1` complementa este gate expondo estado minimo de gameplay na Browser Playable Demo.
 
-Esse pacote deve expor estado minimo de gameplay na Browser Playable Demo sem transformar a Browser Demo no runtime canonico do engine.
+Esse HUD Lite continua opt-in, local ao HTML e nao transforma a Browser Demo no runtime canonico do engine.

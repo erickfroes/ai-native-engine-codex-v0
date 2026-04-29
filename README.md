@@ -89,7 +89,7 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 - `render-svg`: gera SVG textual deterministico
 - `render-svg-demo`: gera HTML estatico com SVG inline
 - `render-canvas-demo`: gera HTML estatico com Canvas 2D
-- `render-browser-demo`: gera HTML interativo minimo com Canvas 2D, teclado local, fallback de sprites e blocking local opt-in
+- `render-browser-demo`: gera HTML interativo minimo com Canvas 2D, teclado local, fallback de sprites, blocking local opt-in e HUD Lite opt-in
 
 ## Tools MCP principais
 
@@ -155,8 +155,8 @@ node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/tutorial.scene.js
 # gerar Browser Playable Demo com blocking local opt-in
 node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/movement-blocking-tile-blocked.scene.json --movement-blocking --out ./tmp/tile-blocking-browser-demo.html --json
 
-# gerar Browser Playable Demo da cena consolidada V1 small 2D
-node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene.json --movement-blocking --out ./tmp/v1-small-2d.html --json
+# gerar Browser Playable Demo da cena consolidada V1 small 2D com HUD Lite opt-in
+node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene.json --gameplay-hud --movement-blocking --out ./tmp/v1-small-2d.html --json
 ```
 
 ## Validacao obrigatoria

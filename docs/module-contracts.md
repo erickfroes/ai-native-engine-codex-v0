@@ -229,9 +229,10 @@ Compatibilidade:
 - sem `movementBlocking`, não há alteração no resultado atual de `run-loop`;
 - `run-loop` aplica apenas bloqueio de movimento (sem física completa);
 - Browser Playable Demo pode aplicar blocking local opt-in com `render-browser-demo --movement-blocking` ou `render_browser_demo({ movementBlocking: true })`;
-- sem essa flag/opcao, Browser Playable Demo permanece igual;
+- Browser Playable Demo pode expor HUD Lite local opt-in com `render-browser-demo --gameplay-hud` ou `render_browser_demo({ gameplayHud: true })`;
+- sem essas flags/opcoes, Browser Playable Demo permanece igual;
 - `InputIntent v1`, `KeyboardInputScript v1`, RenderSnapshot v1, Save/Load v1 e renderers permanecem inalterados;
-- nao adiciona fisica completa, resolucao complexa, tile collision, pathfinding, editor ou servidor.
+- nao adiciona UI system completo, fisica completa, resolucao complexa, pathfinding, editor ou servidor.
 
 ## Input Intent v1 (input headless opt-in no loop)
 

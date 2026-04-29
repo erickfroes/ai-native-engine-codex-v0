@@ -50,7 +50,8 @@ Capacidades alvo:
 - movimento bloqueado opt-in no `run-loop`;
 - Browser Demo com blocking real;
 - V1 Small 2D readiness gate com cena consolidada;
-- UI/HUD simples;
+- Browser Gameplay HUD Lite opt-in;
+- UI system simples futuro;
 - audio-lite;
 - save/load jogavel;
 - export HTML simples;
@@ -204,6 +205,6 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Browser Gameplay HUD Lite v1.
-2. Hardening de exemplos jogaveis pequenos.
-3. UI/audio/animation basicos para V2.
+1. Hardening de exemplos jogaveis pequenos.
+2. UI/audio/animation basicos para V2.
+3. Preservar HUD Lite como diagnostico local ate existir UI system formal.
