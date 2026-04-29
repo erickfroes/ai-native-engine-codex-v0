@@ -18,6 +18,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - V1 Small 2D playable example hardening: concluido com matriz Browser Demo/runtime/CLI/MCP reforcada.
 - Simple HTML Export v1: concluido como export de arquivo HTML jogavel simples.
 - Game Templates v1: concluido como exemplos copiar-e-adaptar para V1 Small 2D.
+- V1 Small 2D Game Creation Guide / Codex package: concluido como workflow Codex-first para criar jogos pequenos a partir dos templates.
 
 ## O que o Codex recebe
 
@@ -39,6 +40,10 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`;
 - `docs/SIMPLE_HTML_EXPORT_V1.md`;
 - `docs/GAME_TEMPLATES_V1.md`;
+- `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`;
+- `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`;
+- `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md`;
+- `docs/examples/V1_SMALL_2D_GAME_PLAN_EXAMPLE.md`;
 - `docs/V1_SMALL_2D_READINESS.md`;
 - `docs/V1_SMALL_2D_TEST_MATRIX.md`;
 - suites cross-interface;
@@ -60,11 +65,14 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 11. `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`
 12. `docs/SIMPLE_HTML_EXPORT_V1.md`
 13. `docs/GAME_TEMPLATES_V1.md`
-14. `templates/top-down-basic/README.md`
-15. `templates/side-view-blocking-basic/README.md`
-16. `docs/V1_SMALL_2D_READINESS.md`
-17. `docs/V1_SMALL_2D_TEST_MATRIX.md`
-18. `AGENTS.md`
+14. `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`
+15. `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`
+16. `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md`
+17. `templates/top-down-basic/README.md`
+18. `templates/side-view-blocking-basic/README.md`
+19. `docs/V1_SMALL_2D_READINESS.md`
+20. `docs/V1_SMALL_2D_TEST_MATRIX.md`
+21. `AGENTS.md`
 
 ## Baseline obrigatorio
 
@@ -79,7 +87,7 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. V1 Small 2D Game Creation Guide / Codex package usando os templates e o export HTML simples.
+1. `codex/v1-small-2d-release-checkpoint`.
 2. Export/save V1 mais formal para exemplo jogavel pequeno, se ainda necessario apos o HTML export.
 3. UI/audio/animation basicos para V2.
 4. Evitar transformar HUD Lite em UI system completo antes do pacote apropriado.
@@ -109,6 +117,7 @@ Subagentes adicionais recomendados estao em `.codex/agents/` e descritos em `doc
 - fisica completa antes de movement blocking opt-in;
 - transformar Simple HTML Export v1 em bundler, servidor ou build pipeline V2;
 - transformar Game Templates v1 em template engine, prefab system ou editor;
+- transformar o Game Creation Guide em template engine, prefab system, scaffolder obrigatorio ou editor;
 - savegame avancado antes de validar templates pequenos;
 - 3D antes de consolidar V1/V2.
 

@@ -45,6 +45,7 @@ A engine agora avancou para a fundacao de gameplay 2D:
 - Playable Save/Load Lite browser-local opt-in na Browser Playable Demo;
 - Simple HTML Export v1 para gerar um arquivo HTML jogavel autocontido;
 - Game Templates v1 com exemplos copiar-e-adaptar para top-down e side-view blocking;
+- V1 Small 2D Game Creation Guide / Codex package para criar jogos pequenos por copia/adaptacao;
 - cena consolidada `v1-small-2d` para readiness da V1;
 - CLI/MCP para inspecao de colisao, overlap, tile collision e blocking;
 - testes cross-interface para os reports principais.
@@ -74,7 +75,9 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 - multiplayer real;
 - captura/input runtime completo fora da Browser Playable Demo local.
 
-A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1 e Game Templates v1.
+A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1 e o V1 Small 2D Game Creation Guide / Codex package.
+
+O proximo pacote recomendado e `codex/v1-small-2d-release-checkpoint`.
 
 ## Comandos CLI principais
 
@@ -185,7 +188,7 @@ npm run smoke
 
 - `README.md`: panorama atual da Meta 2 visual/interativa
 - `docs/CODEX_HANDOFF.md`: orientacao curta para abrir e continuar no Codex
-- `docs/STATUS.md`: status consolidado da Meta 2
+- `docs/STATUS.md`: status consolidado da Meta 3 / V1 Small 2D
 - `docs/META2_VISUAL_TEST_MATRIX.md`: matriz runtime/CLI/MCP/testes visuais
 - `docs/META2_VISUAL_INTERACTIVE_CHECKLIST.md`: checklist final da Meta 2
 - `docs/V1_SMALL_2D_READINESS.md`: gate consolidado da V1 Small 2D
@@ -193,6 +196,9 @@ npm run smoke
 - `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`: formato local do Playable Save/Load Lite
 - `docs/SIMPLE_HTML_EXPORT_V1.md`: contrato do export HTML jogavel simples
 - `docs/GAME_TEMPLATES_V1.md`: templates V1 Small 2D copiar-e-adaptar
+- `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`: fluxo Codex-first para criar um jogo pequeno 2D
+- `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`: checklist de validacao para jogos criados a partir dos templates
+- `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md`: pacote de prompt para Codex
 
 ## Primeira leitura recomendada
 

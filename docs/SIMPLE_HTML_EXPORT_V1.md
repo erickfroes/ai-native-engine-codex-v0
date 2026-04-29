@@ -103,4 +103,6 @@ O MCP valida `scenePath` e `outputPath` dentro do repo, escreve o arquivo HTML e
 
 ## Proximo pacote recomendado
 
-`Game Templates v1`, usando a cena consolidada e o export HTML simples como base de exemplo.
+`Game Templates v1` e `V1 Small 2D Game Creation Guide / Codex package` ja foram concluidos sobre este export simples.
+
+O proximo pacote recomendado e `codex/v1-small-2d-release-checkpoint`.
