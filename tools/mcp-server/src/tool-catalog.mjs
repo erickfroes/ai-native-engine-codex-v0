@@ -483,6 +483,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_audio_lite',
+    title: 'Inspect Audio Lite',
+    description: 'Build AudioLiteReport v1 from declarative audio.clip components without playback side effects.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'inspect_movement_blocking',
     title: 'Inspect Movement Blocking',
     description: 'Build MovementBlockingReport v1 from solid collision.bounds, solid tile.layer tiles, and an Input Intent v1 without mutating the run loop.',

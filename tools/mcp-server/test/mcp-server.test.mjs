@@ -191,6 +191,11 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     );
     assert.ok(inspectTileCollisionTool);
     assert.deepEqual(inspectTileCollisionTool.inputSchema.required, ['path']);
+    const inspectAudioLiteTool = toolsResponse.result.tools.find(
+      (tool) => tool.name === 'inspect_audio_lite'
+    );
+    assert.ok(inspectAudioLiteTool);
+    assert.deepEqual(inspectAudioLiteTool.inputSchema.required, ['path']);
     const inspectMovementBlockingTool = toolsResponse.result.tools.find(
       (tool) => tool.name === 'inspect_movement_blocking'
     );
@@ -1846,6 +1851,94 @@ test('mcp inspect_tile_collision returns deterministic solid tiles and empty rep
       scene: 'tile-collision-empty-fixture',
       tiles: []
     });
+  } finally {
+    await client.close();
+  }
+});
+
+test('mcp inspect_audio_lite returns deterministic clips and empty reports', async () => {
+  const client = createClient();
+
+  try {
+    const initResponse = await client.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: {
+        name: 'node-test',
+        version: '1.0.0'
+      }
+    });
+
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    client.notify('notifications/initialized');
+
+    const sfxResponse = await client.request('tools/call', {
+      name: 'inspect_audio_lite',
+      arguments: {
+        path: './engine/runtime/test/fixtures/audio-lite-sfx.scene.json'
+      }
+    });
+
+    assert.equal(sfxResponse.result.isError, false);
+    assert.deepEqual(sfxResponse.result.structuredContent, {
+      audioLiteReportVersion: 1,
+      scene: 'audio-lite-sfx-fixture',
+      clips: [
+        {
+          entityId: 'audio.step',
+          clipId: 'sfx.step',
+          kind: 'sfx',
+          trigger: 'onMove',
+          volume: 0.75,
+          loop: false,
+          src: null
+        }
+      ],
+      triggers: [
+        {
+          trigger: 'onMove',
+          clipIds: ['sfx.step']
+        }
+      ],
+      warnings: [
+        {
+          code: 'AUDIO_CLIP_SRC_MISSING',
+          entityId: 'audio.step',
+          clipId: 'sfx.step',
+          message: 'audio.clip src is missing; browser playback will use silent diagnostic fallback'
+        }
+      ],
+      invalidRefs: []
+    });
+
+    const emptyResponse = await client.request('tools/call', {
+      name: 'inspect_audio_lite',
+      arguments: {
+        path: './engine/runtime/test/fixtures/audio-lite-empty.scene.json'
+      }
+    });
+
+    assert.equal(emptyResponse.result.isError, false);
+    assert.deepEqual(emptyResponse.result.structuredContent, {
+      audioLiteReportVersion: 1,
+      scene: 'audio-lite-empty-fixture',
+      clips: [],
+      triggers: [],
+      warnings: [],
+      invalidRefs: []
+    });
+
+    const invalidResponse = await client.request('tools/call', {
+      name: 'inspect_audio_lite',
+      arguments: {
+        path: './engine/runtime/test/fixtures/invalid_audio_lite_trigger.scene.json'
+      }
+    });
+
+    assert.equal(invalidResponse.result.isError, true);
+    assert.equal(invalidResponse.result.structuredContent.ok, false);
+    assert.equal(invalidResponse.result.structuredContent.errorName, 'SceneValidationError');
+    assert.match(invalidResponse.result.structuredContent.errorMessage, /invalid_audio_lite_trigger\.scene\.json/);
   } finally {
     await client.close();
   }

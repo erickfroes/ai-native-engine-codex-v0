@@ -38,7 +38,8 @@ import {
   buildCollisionBoundsReportV1,
   buildCollisionOverlapReportV1,
   buildMovementBlockingReportV1,
-  buildTileCollisionReportV1
+  buildTileCollisionReportV1,
+  buildAudioLiteReportV1
 } from '../../../engine/runtime/src/index.mjs';
 import { toolCatalog } from './tool-catalog.mjs';
 
@@ -131,6 +132,7 @@ async function handleToolCall(params) {
     params.name !== 'inspect_collision_bounds' &&
     params.name !== 'inspect_collision_overlaps' &&
     params.name !== 'inspect_tile_collision' &&
+    params.name !== 'inspect_audio_lite' &&
     params.name !== 'inspect_movement_blocking' &&
     params.name !== 'simulate_state'
   ) {
@@ -521,6 +523,17 @@ async function handleToolCall(params) {
       return {
         content: toTextContent(
           `Tile collision report built for ${report.scene} with ${report.tiles.length} solid tile(s).`
+        ),
+        structuredContent: report,
+        isError: false
+      };
+    }
+
+    if (params.name === 'inspect_audio_lite') {
+      const report = await buildAudioLiteReportV1(targetPath);
+      return {
+        content: toTextContent(
+          `Audio Lite report built for ${report.scene} with ${report.clips.length} clip(s).`
         ),
         structuredContent: report,
         isError: false
@@ -920,7 +933,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, export_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, export_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_audio_lite, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }
