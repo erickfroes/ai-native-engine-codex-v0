@@ -78,6 +78,7 @@
 - `engine/runtime/test/simple-html-export-v1.test.mjs`
 - `engine/runtime/test/game-templates-v1.test.mjs`
 - `tools/mcp-server/test/mcp-server.test.mjs`
+- `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`
 
 ## Validacao Obrigatoria
 
@@ -86,6 +87,8 @@ npm test
 npm run validate:scenes
 npm run smoke
 ```
+
+Para jogos criados fora de `./scenes`, rode tambem o gate explicito do jogo: `validate-scene`, `validate-input-intent` para os intents locais, `inspect-movement-blocking` para caminho bloqueado/livre, `render-snapshot`, `render-browser-demo` e `export-html-game` apontando para o diretorio do prototipo.
 
 ## Hardening Browser Demo
 
@@ -99,8 +102,10 @@ npm run smoke
 - `export_html_game` cobre escrita MCP segura dentro do repo e paridade minima com CLI.
 - Game Templates v1 cobre validate-scene, render-snapshot, render-browser-demo, export-html-game e MCP para os dois templates.
 - Game Templates v1 tambem fixa budgets pequenos de drawCalls e tamanho de export HTML.
+- V1 Small 2D Game Creation Guide / Codex package esta concluido e cobre o workflow humano/Codex para copiar, adaptar, validar, testar blocking, gerar Browser Demo e exportar HTML sem criar runtime novo.
+- O guia separa baseline do repositorio de gate do jogo criado; `npm run validate:scenes` nao descobre prototipos fora de `./scenes`.
 
 ## Proximo Pacote Recomendado
 
-- `V1 Small 2D Game Creation Guide / Codex package` usando os templates e o export HTML simples.
+- `codex/v1-small-2d-release-checkpoint`.
 - Manter fora deste pacote: editor, servidor, build system amplo, UI system completo e savegame avancado.
