@@ -115,10 +115,13 @@ node ./engine/runtime/src/cli.mjs inspect-movement-blocking ./templates/top-down
 
 ## Budgets v1
 
-- `top-down-basic`: ate 64 drawCalls, ate 32 tiles solidos/blockers e ate 32 KB no export HTML com todos os opt-ins.
-- `side-view-blocking-basic`: ate 32 drawCalls, ate 16 tiles solidos/blockers e ate 32 KB no export HTML com todos os opt-ins.
+- `top-down-basic` baseline atual: 50 drawCalls, 25 tiles solidos/blockers e 30597 B no export HTML com todos os opt-ins.
+- `top-down-basic` hard ceiling: ate 64 drawCalls, ate 32 tiles solidos/blockers e ate 32000 B no export HTML com todos os opt-ins.
+- `side-view-blocking-basic` baseline atual: 15 drawCalls, 11 tiles solidos/blockers e 26774 B no export HTML com todos os opt-ins.
+- `side-view-blocking-basic` hard ceiling: ate 32 drawCalls, ate 16 tiles solidos/blockers e ate 32000 B no export HTML com todos os opt-ins.
 - Os templates usam fallback visual deterministico; sprite real continua dependendo dos fluxos opt-in de Asset Manifest ja existentes e fica fora deste pacote.
 - A Browser Demo ainda redesenha via `requestAnimationFrame`; por isso os mapas devem permanecer pequenos em V1.
+- Cada tile nao vazio vira 1 drawCall. Cada tile `solid: true` tambem vira blocker serializado para o input local da Browser Demo.
 
 ## Fora de escopo
 
@@ -136,6 +139,14 @@ node ./engine/runtime/src/cli.mjs inspect-movement-blocking ./templates/top-down
 - pipeline pesado de assets;
 - bundler, servidor ou build pipeline V2.
 
+## Guia de criacao
+
+O V1 Small 2D Game Creation Guide / Codex package esta concluido como fluxo Codex-first para criar jogos pequenos a partir destes templates:
+
+- `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`
+- `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`
+- `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md`
+
 ## Proximo pacote recomendado
 
-`V1 Small 2D Game Creation Guide / Codex package`, usando estes templates como base copiar-e-adaptar.
+`codex/v1-small-2d-release-checkpoint`.

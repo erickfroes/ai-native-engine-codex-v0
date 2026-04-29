@@ -92,4 +92,6 @@ Playable Save/Load Lite tambem continua opt-in, local ao HTML e nao substitui `s
 
 `Game Templates v1` tambem fica concluido como exemplos copiar-e-adaptar, sem prefab system, template engine, editor ou platformer real.
 
-O proximo pacote recomendado e `V1 Small 2D Game Creation Guide / Codex package`, usando estes templates e o export HTML simples como base.
+`V1 Small 2D Game Creation Guide / Codex package` tambem fica concluido como workflow Codex-first para criar jogos pequenos a partir dos templates e do export HTML simples.
+
+O proximo pacote recomendado e `codex/v1-small-2d-release-checkpoint`.
