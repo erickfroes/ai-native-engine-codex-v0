@@ -14,6 +14,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Movement Blocking opt-in no `run-loop` e na Browser Playable Demo: concluido.
 - V1 Small 2D readiness gate: concluido com cena consolidada.
 - Browser Gameplay HUD Lite v1: concluido como HUD local opt-in da Browser Playable Demo.
+- V1 Small 2D playable example hardening: concluido com matriz Browser Demo/runtime/CLI/MCP reforcada.
 
 ## O que o Codex recebe
 
@@ -63,10 +64,11 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Hardening de exemplos jogaveis pequenos.
-2. UI/audio/animation basicos para V2.
-3. Evitar transformar HUD Lite em UI system completo antes do pacote apropriado.
-4. 3D indie apenas depois de V1/V2 demonstradas.
+1. Playable Save/Load Lite para a cena canônica V1 Small 2D.
+2. Export/save V1 para exemplo jogavel pequeno.
+3. UI/audio/animation basicos para V2.
+4. Evitar transformar HUD Lite em UI system completo antes do pacote apropriado.
+5. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Uso de subagentes
 

@@ -1,13 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
 import {
   renderBrowserPlayableDemoHtmlV1,
   createBrowserPlayableDemoMetadataV1,
+  loadSceneFile,
+  buildRenderSnapshotV1,
   BROWSER_PLAYABLE_DEMO_VERSION,
   DEFAULT_BROWSER_PLAYABLE_STEP_PX
 } from '../src/index.mjs';
+
+const testDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(testDir, '../../..');
+const v1Small2dScenePath = path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json');
 
 function extractInlineJson(html) {
   const match = html.match(/<script id="browser-playable-demo-data" type="application\/json">([\s\S]*?)<\/script>/);
@@ -1255,6 +1263,105 @@ test('renderBrowserPlayableDemoHtmlV1 increments Browser Gameplay HUD Lite block
   assert.equal(harness.gameplayHudElements.blockedMoves.textContent, '1');
   assert.equal(harness.gameplayHudElements.lastInput.textContent, 'ArrowRight');
   assert.equal(harness.gameplayHudElements.lastResult.textContent, 'blocked');
+});
+
+test('renderBrowserPlayableDemoHtmlV1 preserves all canonical V1 small 2D browser modes', async () => {
+  const scene = await loadSceneFile(v1Small2dScenePath);
+  const snapshot = await buildRenderSnapshotV1(scene);
+  const renderCanonicalDemo = (overrides = {}) =>
+    renderBrowserPlayableDemoHtmlV1({
+      title: 'v1-small-2d Browser Playable Demo',
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, overrides)
+    });
+  const createKeydownEvent = (code) => ({ code, preventDefault() {} });
+
+  const defaultHtml = renderCanonicalDemo();
+  const defaultHarness = createCanvasHarness(defaultHtml);
+  const defaultKeydown = defaultHarness.canvasListeners.get('keydown');
+
+  assertNoForbiddenBrowserDemoHtmlSurface(defaultHtml);
+  assert.doesNotMatch(defaultHtml, /"gameplayHud":/);
+  assert.doesNotMatch(defaultHtml, /"movementBlocking":/);
+
+  defaultKeydown(createKeydownEvent('ArrowRight'));
+
+  assert.equal(defaultHarness.positionElement.textContent, 'Position: x 4, y 8');
+  assert.match(defaultHarness.statusElement.textContent, /Inputs 1/);
+
+  const blockingHtml = renderCanonicalDemo({ movementBlocking: true });
+  const blockingHarness = createCanvasHarness(blockingHtml);
+  const blockingKeydown = blockingHarness.canvasListeners.get('keydown');
+
+  assertNoForbiddenBrowserDemoHtmlSurface(blockingHtml);
+  assert.match(
+    blockingHtml,
+    /"movementBlocking":\{"blockers":\[\{"height":4,"id":"map\.ground\.tile\.2\.3","width":4,"x":8,"y":8\},\{"height":8,"id":"wall\.block","width":8,"x":20,"y":8\}\],"controllableBounds":\{"height":8,"offsetX":0,"offsetY":0,"width":8\},"enabled":true\}/
+  );
+
+  blockingKeydown(createKeydownEvent('ArrowRight'));
+  assert.equal(blockingHarness.positionElement.textContent, 'Position: x 0, y 8');
+  assert.match(blockingHarness.statusElement.textContent, /Inputs 0/);
+
+  blockingKeydown(createKeydownEvent('ArrowDown'));
+  assert.equal(blockingHarness.positionElement.textContent, 'Position: x 0, y 12');
+  assert.match(blockingHarness.statusElement.textContent, /Inputs 1/);
+
+  const hudHtml = renderCanonicalDemo({ gameplayHud: true });
+  const hudHarness = createCanvasHarness(hudHtml);
+  const hudKeydown = hudHarness.canvasListeners.get('keydown');
+
+  assertNoForbiddenBrowserDemoHtmlSurface(hudHtml);
+  assert.match(hudHtml, /id="browser-gameplay-hud"/);
+  assert.doesNotMatch(hudHtml, /"movementBlocking":/);
+  assert.equal(hudHarness.gameplayHudElements.position.textContent, 'x 0, y 8');
+  assert.equal(hudHarness.gameplayHudElements.movementBlocking.textContent, 'disabled');
+
+  hudKeydown(createKeydownEvent('ArrowRight'));
+
+  assert.equal(hudHarness.gameplayHudElements.position.textContent, 'x 4, y 8');
+  assert.equal(hudHarness.gameplayHudElements.inputs.textContent, '1');
+  assert.equal(hudHarness.gameplayHudElements.blockedMoves.textContent, '0');
+  assert.equal(hudHarness.gameplayHudElements.lastResult.textContent, 'moved');
+
+  const blockingHudHtml = renderCanonicalDemo({ movementBlocking: true, gameplayHud: true });
+  const blockingHudHarness = createCanvasHarness(blockingHudHtml);
+  const blockingHudKeydown = blockingHudHarness.canvasListeners.get('keydown');
+
+  assertNoForbiddenBrowserDemoHtmlSurface(blockingHudHtml);
+  assert.match(blockingHudHtml, /id="browser-gameplay-hud"/);
+  assert.match(blockingHudHtml, /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":true,"snapshotTick":0\}/);
+  assert.match(blockingHudHtml, /"movementBlocking":/);
+  assert.equal(blockingHudHarness.gameplayHudElements.position.textContent, 'x 0, y 8');
+  assert.equal(blockingHudHarness.gameplayHudElements.inputs.textContent, '0');
+  assert.equal(blockingHudHarness.gameplayHudElements.blockedMoves.textContent, '0');
+  assert.equal(blockingHudHarness.gameplayHudElements.movementBlocking.textContent, 'enabled');
+
+  blockingHudKeydown(createKeydownEvent('ArrowRight'));
+
+  assert.equal(blockingHudHarness.positionElement.textContent, 'Position: x 0, y 8');
+  assert.equal(blockingHudHarness.gameplayHudElements.position.textContent, 'x 0, y 8');
+  assert.equal(blockingHudHarness.gameplayHudElements.inputs.textContent, '0');
+  assert.equal(blockingHudHarness.gameplayHudElements.blockedMoves.textContent, '1');
+  assert.equal(blockingHudHarness.gameplayHudElements.lastInput.textContent, 'ArrowRight');
+  assert.equal(blockingHudHarness.gameplayHudElements.lastResult.textContent, 'blocked');
+
+  blockingHudKeydown(createKeydownEvent('ArrowDown'));
+
+  assert.equal(blockingHudHarness.positionElement.textContent, 'Position: x 0, y 12');
+  assert.equal(blockingHudHarness.gameplayHudElements.position.textContent, 'x 0, y 12');
+  assert.equal(blockingHudHarness.gameplayHudElements.inputs.textContent, '1');
+  assert.equal(blockingHudHarness.gameplayHudElements.blockedMoves.textContent, '1');
+  assert.equal(blockingHudHarness.gameplayHudElements.lastInput.textContent, 'ArrowDown');
+  assert.equal(blockingHudHarness.gameplayHudElements.lastResult.textContent, 'moved');
+
+  blockingHudHarness.resetButton.click();
+
+  assert.equal(blockingHudHarness.positionElement.textContent, 'Position: x 0, y 8');
+  assert.equal(blockingHudHarness.gameplayHudElements.position.textContent, 'x 0, y 8');
+  assert.equal(blockingHudHarness.gameplayHudElements.inputs.textContent, '0');
+  assert.equal(blockingHudHarness.gameplayHudElements.blockedMoves.textContent, '0');
+  assert.equal(blockingHudHarness.gameplayHudElements.lastResult.textContent, 'reset');
 });
 
 test('renderBrowserPlayableDemoHtmlV1 allows open movement when movementBlocking is enabled', () => {

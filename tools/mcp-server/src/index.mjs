@@ -97,6 +97,10 @@ function resolveRepoPath(inputPath) {
   return absolutePath;
 }
 
+function findUnexpectedArgument(args, allowedKeys) {
+  return Object.keys(args).find((key) => !allowedKeys.has(key));
+}
+
 async function handleToolCall(params) {
   if (!params || typeof params !== 'object') {
     return {
@@ -682,6 +686,17 @@ async function handleToolCall(params) {
     }
 
     if (params.name === 'render_browser_demo') {
+      const unexpectedArgument = findUnexpectedArgument(
+        args,
+        new Set(['path', 'tick', 'width', 'height', 'assetManifestPath', 'movementBlocking', 'gameplayHud'])
+      );
+      if (unexpectedArgument !== undefined) {
+        return {
+          content: toTextContent(`render_browser_demo: unexpected argument \`${unexpectedArgument}\`.`),
+          isError: true
+        };
+      }
+
       if (args.tick !== undefined && (!Number.isInteger(args.tick) || args.tick < 0)) {
         return {
           content: toTextContent('render_browser_demo: `tick` must be an integer >= 0 when provided.'),

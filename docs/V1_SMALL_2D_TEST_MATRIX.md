@@ -58,3 +58,16 @@ npm test
 npm run validate:scenes
 npm run smoke
 ```
+
+## Hardening Browser Demo
+
+- cena canônica coberta sem flags, com `movementBlocking`, com `gameplayHud` e com ambos.
+- HTML canônico permanece sem `fetch`, `localStorage`, `Date.now`, `new Date`, `performance.now`, scripts externos, `import(` ou `link href`.
+- envelopes CLI/MCP preservam `browserDemoVersion`, `scene`, `tick` e `html`.
+- `outputPath` aparece apenas no CLI quando `--out` e usado.
+- `npm run smoke` valida essa cobertura por meio de `npm test`; ele nao tem comando dedicado separado para gerar o HTML V1.
+
+## Proximo Pacote Recomendado
+
+- `Playable Save/Load Lite` para a cena canônica V1 Small 2D.
+- Alternativa equivalente: pacote de export/save V1 para exemplo jogavel pequeno.
