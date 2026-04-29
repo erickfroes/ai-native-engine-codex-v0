@@ -100,13 +100,14 @@ Entregas alvo:
 - Browser Gameplay HUD Lite opt-in concluido;
 - hardening de exemplos jogaveis pequenos concluido;
 - Playable Save/Load Lite browser-local opt-in concluido;
+- Simple HTML Export v1 concluido;
 - UI system declarativo minimo como bloco futuro;
 - audio-lite opcional;
-- export de demo jogavel HTML;
+- templates de jogos pequenos;
 - matriz de regressao visual/headless;
 - pacote Codex com prompts/skills/subagentes para criar um jogo 2D pequeno.
 
-Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1 e hardening de exemplos jogaveis pequenos ja estao implementados. O proximo bloco recomendado e Simple HTML Export v1, sem editor, servidor, fisica completa ou pathfinding.
+Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos e Simple HTML Export v1 ja estao implementados. O proximo bloco recomendado e Game Templates v1, sem editor, servidor, fisica completa ou pathfinding.
 
 Criterio de conclusao:
 
@@ -123,7 +124,7 @@ Subagentes recomendados:
 
 Linha de trabalho atual recomendada:
 
-1. Simple HTML Export v1.
+1. Game Templates v1.
 2. Export/save V1 mais formal para exemplo jogavel pequeno, se ainda necessario apos o HTML export.
 3. UI/audio/animation basicos para V2, preservando HUD Lite como diagnostico local ate existir UI system formal.
 

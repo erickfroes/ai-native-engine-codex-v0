@@ -60,6 +60,7 @@ O gate passa quando:
 - `render-browser-demo --gameplay-hud --movement-blocking` expoe contadores locais de blocking no HTML.
 - `render-browser-demo --playable-save-load` expoe export/import manual local sem alterar o comportamento padrao.
 - `render-browser-demo --gameplay-hud --movement-blocking --playable-save-load` prova que HUD, blocking e save/load local coexistem.
+- `export-html-game --gameplay-hud --movement-blocking --playable-save-load` escreve um HTML jogavel simples da cena consolidada.
 - a cobertura atual tambem inclui `playableSaveLoad` isolado e combinado com `gameplayHud` e `movementBlocking`.
 - a Browser Demo da cena canônica cobre as combinacoes sem flags, `movementBlocking`, `gameplayHud` e `gameplayHud + movementBlocking`.
 - o HTML gerado permanece autocontido e sem APIs proibidas como `fetch`, `localStorage`, timers de relogio, scripts externos ou imports dinamicos.
@@ -86,4 +87,6 @@ Esse HUD Lite continua opt-in, local ao HTML e nao transforma a Browser Demo no 
 
 Playable Save/Load Lite tambem continua opt-in, local ao HTML e nao substitui `savegame v1`, `State Snapshot v1`, `save-state` ou `load-save`.
 
-O proximo pacote recomendado e `Simple HTML Export v1` para empacotar a demo jogavel pequena sem criar editor, servidor ou sistema de build amplo.
+`Simple HTML Export v1` tambem fica concluido como wrapper fino da Browser Playable Demo v1, sem editor, servidor ou sistema de build amplo.
+
+O proximo pacote recomendado e `Game Templates v1`, usando esta cena consolidada e o export HTML simples como base.

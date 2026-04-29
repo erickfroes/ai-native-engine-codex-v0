@@ -271,6 +271,38 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'export_html_game',
+    title: 'Export HTML Game',
+    description: 'Write a deterministic Simple HTML Export v1 file by reusing Browser Playable Demo v1 HTML.',
+    inputSchema: {
+      type: 'object',
+      required: ['scenePath', 'outputPath'],
+      properties: {
+        scenePath: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root for the scene to export.'
+        },
+        outputPath: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root where the HTML file will be written.'
+        },
+        movementBlocking: {
+          type: 'boolean',
+          description: 'When true, embed local Browser Demo movement blocking data.'
+        },
+        gameplayHud: {
+          type: 'boolean',
+          description: 'When true, embed Browser Gameplay HUD Lite v1 local diagnostic state.'
+        },
+        playableSaveLoad: {
+          type: 'boolean',
+          description: 'When true, embed Playable Save/Load Lite v1 local export/import controls.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'run_replay',
     title: 'Run Replay',
     description: 'Run deterministic replay for a scene and return the final snapshot.',
