@@ -206,6 +206,16 @@ function validateMetadata(metadata) {
   if (metadata.movementBlocking !== undefined) {
     validateMovementBlockingMetadata(metadata.movementBlocking);
   }
+
+  if (metadata.gameplayHud !== undefined) {
+    validateGameplayHudMetadata(metadata.gameplayHud);
+    const movementBlockingEnabled = metadata.movementBlocking?.enabled === true;
+    if (metadata.gameplayHud.movementBlockingEnabled !== movementBlockingEnabled) {
+      throw new Error(
+        'renderBrowserPlayableDemoHtmlV1: `metadata.gameplayHud.movementBlockingEnabled` must match `metadata.movementBlocking.enabled`'
+      );
+    }
+  }
 }
 
 function validateMetadataOverrides(overrides) {
@@ -221,6 +231,10 @@ function validateMetadataOverrides(overrides) {
 
   if (overrides.movementBlocking !== undefined && typeof overrides.movementBlocking !== 'boolean') {
     throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.movementBlocking` override must be a boolean');
+  }
+
+  if (overrides.gameplayHud !== undefined && typeof overrides.gameplayHud !== 'boolean') {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.gameplayHud` override must be a boolean');
   }
 }
 
@@ -262,6 +276,20 @@ function validateMovementBlockingMetadata(movementBlocking) {
   movementBlocking.blockers.forEach((blocker, index) => {
     validateBoundsRect(blocker, `metadata.movementBlocking.blockers[${index}]`);
   });
+}
+
+function validateGameplayHudMetadata(gameplayHud) {
+  assertObject(gameplayHud, 'metadata.gameplayHud');
+
+  if (gameplayHud.enabled !== true) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.gameplayHud.enabled` must be exactly true');
+  }
+
+  assertInteger('metadata.gameplayHud.snapshotTick', gameplayHud.snapshotTick, 0);
+
+  if (typeof gameplayHud.movementBlockingEnabled !== 'boolean') {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.gameplayHud.movementBlockingEnabled` must be a boolean');
+  }
 }
 
 function normalizeMetadataEntries(metadata) {
@@ -321,6 +349,70 @@ function createInitialPositionText(drawCalls, controllableEntityId) {
   return `Position: x ${controllableDrawCall.x}, y ${controllableDrawCall.y}`;
 }
 
+function createInitialGameplayHudRows(renderSnapshot, drawCalls, controllableEntityId, metadata) {
+  const controllableDrawCall = drawCalls.find((drawCall) => drawCall.id === controllableEntityId);
+  const movementBlockingEnabled = metadata.gameplayHud?.movementBlockingEnabled === true;
+
+  return {
+    entity: controllableDrawCall?.id ?? 'none',
+    tick: renderSnapshot.tick,
+    position: controllableDrawCall ? `x ${controllableDrawCall.x}, y ${controllableDrawCall.y}` : 'none',
+    inputs: 0,
+    blockedMoves: 0,
+    lastInput: 'none',
+    lastResult: 'idle',
+    rendering: 'running',
+    movementBlocking: movementBlockingEnabled ? 'enabled' : 'disabled'
+  };
+}
+
+function renderGameplayHudBlock(rows) {
+  if (!rows) {
+    return '';
+  }
+
+  return [
+    '      <dl id="browser-gameplay-hud" class="gameplay-hud" aria-label="Browser gameplay HUD lite">',
+    '        <div>',
+    '          <dt>Controlled entity</dt>',
+    `          <dd id="browser-gameplay-hud-entity">${escapeHtml(rows.entity)}</dd>`,
+    '        </div>',
+    '        <div>',
+    '          <dt>Snapshot tick</dt>',
+    `          <dd id="browser-gameplay-hud-tick">${rows.tick}</dd>`,
+    '        </div>',
+    '        <div>',
+    '          <dt>Position</dt>',
+    `          <dd id="browser-gameplay-hud-position">${escapeHtml(rows.position)}</dd>`,
+    '        </div>',
+    '        <div>',
+    '          <dt>Inputs local</dt>',
+    `          <dd id="browser-gameplay-hud-inputs">${rows.inputs}</dd>`,
+    '        </div>',
+    '        <div>',
+    '          <dt>Blocked moves</dt>',
+    `          <dd id="browser-gameplay-hud-blocked-moves">${rows.blockedMoves}</dd>`,
+    '        </div>',
+    '        <div>',
+    '          <dt>Last input</dt>',
+    `          <dd id="browser-gameplay-hud-last-input">${escapeHtml(rows.lastInput)}</dd>`,
+    '        </div>',
+    '        <div>',
+    '          <dt>Last result</dt>',
+    `          <dd id="browser-gameplay-hud-last-result">${escapeHtml(rows.lastResult)}</dd>`,
+    '        </div>',
+    '        <div>',
+    '          <dt>Rendering</dt>',
+    `          <dd id="browser-gameplay-hud-rendering">${escapeHtml(rows.rendering)}</dd>`,
+    '        </div>',
+    '        <div>',
+    '          <dt>Movement blocking</dt>',
+    `          <dd id="browser-gameplay-hud-movement-blocking">${escapeHtml(rows.movementBlocking)}</dd>`,
+    '        </div>',
+    '      </dl>'
+  ].join('\n');
+}
+
 function createMovementBlockingMetadata(scene, renderSnapshot, controllableEntityId) {
   const cameraPosition = resolveCameraPosition(scene);
   const controllableDrawCall = renderSnapshot.drawCalls.find((drawCall) => drawCall.id === controllableEntityId);
@@ -362,6 +454,14 @@ function createMovementBlockingMetadata(scene, renderSnapshot, controllableEntit
   };
 }
 
+function createGameplayHudMetadata(renderSnapshot, movementBlockingEnabled) {
+  return {
+    enabled: true,
+    movementBlockingEnabled,
+    snapshotTick: renderSnapshot.tick
+  };
+}
+
 export function createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overrides = {}) {
   assertObject(scene, 'scene');
   validateRenderSnapshot(renderSnapshot);
@@ -383,6 +483,9 @@ export function createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overr
     stepPx: overrides.stepPx ?? DEFAULT_BROWSER_PLAYABLE_STEP_PX,
     ...(overrides.movementBlocking === true
       ? { movementBlocking: createMovementBlockingMetadata(scene, renderSnapshot, controllableEntityId) }
+      : {}),
+    ...(overrides.gameplayHud === true
+      ? { gameplayHud: createGameplayHudMetadata(renderSnapshot, overrides.movementBlocking === true) }
       : {})
   };
 }
@@ -398,7 +501,8 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
   const normalizedMetadata = {
     ...(controllableEntityId ? { controllableEntityId } : {}),
     stepPx,
-    ...(metadata.movementBlocking ? { movementBlocking: metadata.movementBlocking } : {})
+    ...(metadata.movementBlocking ? { movementBlocking: metadata.movementBlocking } : {}),
+    ...(metadata.gameplayHud ? { gameplayHud: metadata.gameplayHud } : {})
   };
   const metadataEntries = normalizeMetadataEntries({
     ...(controllableEntityId ? { controllableEntityId } : {}),
@@ -412,6 +516,10 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     stepPx
   );
   const initialPositionText = createInitialPositionText(renderSnapshot.drawCalls, controllableEntityId);
+  const gameplayHudRows = metadata.gameplayHud
+    ? createInitialGameplayHudRows(renderSnapshot, renderSnapshot.drawCalls, controllableEntityId, metadata)
+    : null;
+  const gameplayHudBlock = renderGameplayHudBlock(gameplayHudRows);
   const inlineData = escapeInlineJson({
     metadata: normalizedMetadata,
     renderSnapshot,
@@ -436,6 +544,14 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '    .controls-list { display: grid; gap: 4px; margin: 0; padding-left: 20px; }',
     '    .hint { margin: 0 0 12px; }',
     '    .hud { margin: 0 0 12px; font-weight: 700; }',
+    ...(metadata.gameplayHud
+      ? [
+          '    .gameplay-hud { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 0 0 12px; padding: 12px; border: 1px dashed #9d8f7e; background: #fff8ec; }',
+          '    .gameplay-hud div { display: grid; gap: 2px; }',
+          '    .gameplay-hud dt { font-weight: 700; }',
+          '    .gameplay-hud dd { margin: 0; }'
+        ]
+      : []),
     '    canvas { display: block; width: min(100%, 640px); height: auto; border: 1px solid #d7cfc2; background: #fffdf8; image-rendering: pixelated; }',
     '    canvas:focus { outline: 2px solid #201a13; outline-offset: 3px; }',
     '    .actions { display: flex; gap: 12px; margin-top: 12px; }',
@@ -466,6 +582,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '      </div>',
     `      <p class="hint">Click the canvas, then use Arrow Keys or WASD to move the highlighted rectangle by ${stepPx} px per keydown. Pause rendering stops the local redraw loop. Reset restores the snapshot position.</p>`,
     `      <p id="browser-playable-demo-position" class="hud" aria-live="polite">${escapeHtml(initialPositionText)}</p>`,
+    gameplayHudBlock,
     '      <noscript>This demo needs JavaScript enabled to capture keyboard input.</noscript>',
     `      <canvas id="browser-playable-demo-canvas" data-browser-demo-version="${BROWSER_PLAYABLE_DEMO_VERSION}" data-scene="${escapeHtml(renderSnapshot.scene)}" data-tick="${renderSnapshot.tick}" data-controllable-entity="${escapeHtml(controllableEntityId ?? '')}" width="${renderSnapshot.viewport.width}" height="${renderSnapshot.viewport.height}" tabindex="0" aria-label="Browser playable demo canvas" aria-describedby="browser-playable-demo-instructions browser-playable-demo-status"></canvas>`,
     '      <div class="actions">',
@@ -488,6 +605,27 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '      const resetButton = document.getElementById("browser-playable-demo-reset");',
     '      const statusElement = document.getElementById("browser-playable-demo-status");',
     '      const payload = JSON.parse(dataElement.textContent);',
+    ...(metadata.gameplayHud
+      ? [
+          '      const gameplayHudEnabled = payload.metadata.gameplayHud?.enabled === true;',
+          '      const gameplayHudElements = gameplayHudEnabled',
+          '        ? {',
+          '            entity: document.getElementById("browser-gameplay-hud-entity"),',
+          '            tick: document.getElementById("browser-gameplay-hud-tick"),',
+          '            position: document.getElementById("browser-gameplay-hud-position"),',
+          '            inputs: document.getElementById("browser-gameplay-hud-inputs"),',
+          '            blockedMoves: document.getElementById("browser-gameplay-hud-blocked-moves"),',
+          '            lastInput: document.getElementById("browser-gameplay-hud-last-input"),',
+          '            lastResult: document.getElementById("browser-gameplay-hud-last-result"),',
+          '            rendering: document.getElementById("browser-gameplay-hud-rendering"),',
+          '            movementBlocking: document.getElementById("browser-gameplay-hud-movement-blocking")',
+          '          }',
+          '        : null;'
+        ]
+      : [
+          '      const gameplayHudEnabled = false;',
+          '      const gameplayHudElements = null;'
+        ]),
     '      const context = canvas.getContext("2d");',
     '      if (!context) {',
     '        if (resetButton) {',
@@ -541,6 +679,9 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '      const stepPx = payload.metadata.stepPx;',
     '      const snapshotTick = payload.renderSnapshot.tick;',
     '      let inputCount = 0;',
+    '      let blockedMoveCount = 0;',
+    '      let lastInput = "none";',
+    '      let lastResult = "idle";',
     '      let animationFrameHandle = null;',
     '      let redrawLoopPaused = false;',
     '      if (resetButton && controllableIndex === -1) {',
@@ -575,6 +716,25 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '          stepPx +',
     '          " px.";',
     '      }',
+    '      function updateGameplayHud() {',
+    '        if (!gameplayHudElements) {',
+    '          return;',
+    '        }',
+    '        const controlled = controllableIndex === -1 ? null : drawCalls[controllableIndex];',
+    '        gameplayHudElements.entity.textContent = controlled ? controlled.id : "none";',
+    '        gameplayHudElements.tick.textContent = String(snapshotTick);',
+    '        gameplayHudElements.position.textContent = controlled',
+    '          ? "x " + controlled.x + ", y " + controlled.y',
+    '          : "none";',
+    '        gameplayHudElements.inputs.textContent = String(inputCount);',
+    '        gameplayHudElements.blockedMoves.textContent = String(blockedMoveCount);',
+    '        gameplayHudElements.lastInput.textContent = lastInput;',
+    '        gameplayHudElements.lastResult.textContent = lastResult;',
+    '        gameplayHudElements.rendering.textContent = redrawLoopPaused ? "paused" : "running";',
+    '        gameplayHudElements.movementBlocking.textContent = payload.metadata.gameplayHud?.movementBlockingEnabled === true',
+    '          ? "enabled"',
+    '          : "disabled";',
+    '      }',
     '      function updatePauseButton() {',
     '        pauseButton.textContent = redrawLoopPaused ? "Resume rendering" : "Pause rendering";',
     '      }',
@@ -584,6 +744,9 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '          drawCalls.push({ ...initialDrawCalls[index] });',
     '        }',
     '        inputCount = 0;',
+    '        blockedMoveCount = 0;',
+    '        lastInput = "none";',
+    '        lastResult = "reset";',
     '      }',
     '      function resetControlledPosition() {',
     '        if (controllableIndex === -1 || initialControlledPosition === null) {',
@@ -591,6 +754,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '        }',
     '        resetDrawCalls();',
     '        redraw();',
+    '        updateGameplayHud();',
     '        canvas.focus();',
     '      }',
     '      function redraw() {',
@@ -654,6 +818,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '          scheduleRedrawLoop();',
     '        }',
     '        updatePauseButton();',
+    '        updateGameplayHud();',
     '      }',
     '      function getMovementDelta(code) {',
     '        if (code === "ArrowRight" || code === "KeyD") {',
@@ -702,24 +867,40 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '      });',
     '      canvas.addEventListener("keydown", (event) => {',
     '        const delta = getMovementDelta(event.code);',
-    '        if (!delta || controllableIndex === -1) {',
+    '        if (!delta) {',
+    '          lastInput = event.code || "unknown";',
+    '          lastResult = "ignored";',
+    '          updateGameplayHud();',
+    '          return;',
+    '        }',
+    '        if (controllableIndex === -1) {',
+    '          lastInput = event.code || "unknown";',
+    '          lastResult = "ignored";',
+    '          updateGameplayHud();',
     '          return;',
     '        }',
     '        event.preventDefault();',
     '        const controlled = drawCalls[controllableIndex];',
     '        const candidateX = controlled.x + delta.x * stepPx;',
     '        const candidateY = controlled.y + delta.y * stepPx;',
+    '        lastInput = event.code || "unknown";',
     '        if (movementWouldBeBlocked(candidateX, candidateY)) {',
+    '          blockedMoveCount += 1;',
+    '          lastResult = "blocked";',
     '          redraw();',
+    '          updateGameplayHud();',
     '          return;',
     '        }',
     '        controlled.x = candidateX;',
     '        controlled.y = candidateY;',
     '        inputCount += 1;',
+    '        lastResult = "moved";',
     '        redraw();',
+    '        updateGameplayHud();',
     '      });',
     '      updatePauseButton();',
     '      redraw();',
+    '      updateGameplayHud();',
     '      scheduleRedrawLoop();',
     '      canvas.focus();',
     '    })();',
