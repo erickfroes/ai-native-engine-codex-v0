@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "browser.playable-demo.local-state",
+  "sceneId": "other-scene",
+  "tick": 0,
+  "controlledEntityId": "player.hero",
+  "positions": [
+    {
+      "entityId": "player.hero",
+      "x": 0,
+      "y": 8
+    }
+  ],
+  "options": {
+    "movementBlocking": true,
+    "gameplayHud": true,
+    "playableSaveLoad": true
+  }
+}

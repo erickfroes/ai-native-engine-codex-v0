@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
@@ -16,6 +17,12 @@ import {
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const v1Small2dScenePath = path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json');
+const playableLocalStateFixturePath = path.join(
+  repoRoot,
+  'fixtures',
+  'browser-demo',
+  'playable-local-state-hud-blocking.v1.json'
+);
 
 function extractInlineJson(html) {
   const match = html.match(/<script id="browser-playable-demo-data" type="application\/json">([\s\S]*?)<\/script>/);
@@ -29,8 +36,8 @@ function extractInlineScript(html) {
   return match[1];
 }
 
-function createTrackedTextElement() {
-  let value = '';
+function createTrackedTextElement(initialValue = '') {
+  let value = initialValue;
   return {
     writeCount: 0,
     get textContent() {
@@ -54,11 +61,15 @@ function createCanvasHarness(html) {
   const canvasListeners = new Map();
   const pauseButtonListeners = new Map();
   const resetButtonListeners = new Map();
+  const exportStateButtonListeners = new Map();
+  const importStateButtonListeners = new Map();
   const animationFrames = [];
   const cancelledAnimationFrames = new Set();
   let nextAnimationFrameHandle = 1;
   const statusElement = { textContent: '' };
   const positionElement = { textContent: '' };
+  const localStateTextArea = { value: '' };
+  const saveLoadStatusElement = createTrackedTextElement('No local state exported.');
   const gameplayHudElements = {
     entity: createTrackedTextElement(),
     tick: createTrackedTextElement(),
@@ -89,6 +100,28 @@ function createCanvasHarness(html) {
     },
     click() {
       const handler = resetButtonListeners.get('click');
+      if (handler) {
+        handler({ preventDefault() {} });
+      }
+    }
+  };
+  const exportStateButton = {
+    addEventListener(eventName, handler) {
+      exportStateButtonListeners.set(eventName, handler);
+    },
+    click() {
+      const handler = exportStateButtonListeners.get('click');
+      if (handler) {
+        handler({ preventDefault() {} });
+      }
+    }
+  };
+  const importStateButton = {
+    addEventListener(eventName, handler) {
+      importStateButtonListeners.set(eventName, handler);
+    },
+    click() {
+      const handler = importStateButtonListeners.get('click');
       if (handler) {
         handler({ preventDefault() {} });
       }
@@ -202,6 +235,18 @@ function createCanvasHarness(html) {
         if (id === 'browser-playable-demo-position') {
           return positionElement;
         }
+        if (id === 'browser-playable-demo-export-state') {
+          return exportStateButton;
+        }
+        if (id === 'browser-playable-demo-import-state') {
+          return importStateButton;
+        }
+        if (id === 'browser-playable-demo-local-state') {
+          return localStateTextArea;
+        }
+        if (id === 'browser-playable-demo-save-load-status') {
+          return saveLoadStatusElement;
+        }
         if (id === 'browser-gameplay-hud-entity') {
           return gameplayHudElements.entity;
         }
@@ -249,10 +294,14 @@ function createCanvasHarness(html) {
     },
     operations,
     gameplayHudElements,
+    importStateButton,
     imageInstances,
+    localStateTextArea,
     pauseButton,
     positionElement,
     resetButton,
+    saveLoadStatusElement,
+    exportStateButton,
     statusElement
   };
 }
@@ -607,7 +656,7 @@ function createMultiSpriteSnapshotWithEscapedAssetSources() {
 function assertNoForbiddenBrowserDemoHtmlSurface(html) {
   assert.doesNotMatch(
     html,
-    /<script[^>]+src=|<link[^>]+href=|fetch\(|XMLHttpRequest|WebSocket|import\(|Date\.now|new Date|performance\.now|toISOString|localStorage/
+    /<script[^>]+src=|<link[^>]+href=|fetch\(|XMLHttpRequest|WebSocket|import\(|setTimeout|setInterval|Date\.now|new Date|performance\.now|toISOString|localStorage|sessionStorage|IndexedDB/
   );
 }
 
@@ -1188,6 +1237,207 @@ test('renderBrowserPlayableDemoHtmlV1 embeds Browser Gameplay HUD Lite only when
   assert.equal(harness.gameplayHudElements.blockedMoves.textContent, '0');
   assert.equal(harness.gameplayHudElements.lastInput.textContent, 'none');
   assert.equal(harness.gameplayHudElements.lastResult.textContent, 'reset');
+});
+
+test('renderBrowserPlayableDemoHtmlV1 embeds Playable Save/Load Lite only when metadata is enabled', () => {
+  const snapshot = createTutorialSnapshot();
+  const scene = {
+    entities: [
+      { id: 'player.hero' },
+      { id: 'camera.main' }
+    ]
+  };
+  const defaultMetadata = createBrowserPlayableDemoMetadataV1(scene, snapshot);
+  const defaultHtml = renderBrowserPlayableDemoHtmlV1({
+    title: 'tutorial Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: defaultMetadata
+  });
+  const saveLoadMetadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, { playableSaveLoad: true });
+  const saveLoadHtml = renderBrowserPlayableDemoHtmlV1({
+    title: 'tutorial Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: saveLoadMetadata
+  });
+
+  assert.equal('playableSaveLoad' in defaultMetadata, false);
+  assert.doesNotMatch(defaultHtml, /"playableSaveLoad":/);
+  assert.doesNotMatch(defaultHtml, /browser-playable-save-load/);
+  assert.deepEqual(saveLoadMetadata.playableSaveLoad, {
+    enabled: true,
+    kind: 'browser.playable-demo.local-state',
+    version: 1
+  });
+  assert.match(saveLoadHtml, /id="browser-playable-save-load"/);
+  assert.match(saveLoadHtml, /id="browser-playable-demo-export-state"/);
+  assert.match(saveLoadHtml, /id="browser-playable-demo-import-state"/);
+  assert.match(saveLoadHtml, /id="browser-playable-demo-local-state"/);
+  assert.match(
+    saveLoadHtml,
+    /"playableSaveLoad":\{"enabled":true,"kind":"browser\.playable-demo\.local-state","version":1\}/
+  );
+  assertNoForbiddenBrowserDemoHtmlSurface(saveLoadHtml);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 omits Playable Save/Load Lite controls without a controllable entity', () => {
+  const renderSnapshot = {
+    renderSnapshotVersion: 1,
+    scene: 'empty-scene',
+    tick: 0,
+    viewport: {
+      width: 32,
+      height: 24
+    },
+    drawCalls: []
+  };
+  const metadata = createBrowserPlayableDemoMetadataV1(
+    {
+      entities: []
+    },
+    renderSnapshot,
+    { playableSaveLoad: true }
+  );
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'empty-scene Browser Playable Demo',
+    renderSnapshot,
+    metadata
+  });
+
+  assert.equal(metadata.playableSaveLoad.enabled, true);
+  assert.doesNotMatch(html, /"playableSaveLoad":/);
+  assert.doesNotMatch(html, /browser-playable-save-load/);
+  assertNoForbiddenBrowserDemoHtmlSurface(html);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 exports and imports Playable Save/Load Lite local state', async () => {
+  const scene = await loadSceneFile(v1Small2dScenePath);
+  const snapshot = await buildRenderSnapshotV1(scene);
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'v1-small-2d Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+      movementBlocking: true,
+      gameplayHud: true,
+      playableSaveLoad: true
+    })
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+  const keydownEvent = (code) => ({ code, preventDefault() {} });
+
+  assertNoForbiddenBrowserDemoHtmlSurface(html);
+  assert.match(html, /id="browser-gameplay-hud"/);
+  assert.match(html, /id="browser-playable-save-load"/);
+  assert.equal(harness.saveLoadStatusElement.textContent, 'No local state exported.');
+
+  harness.exportStateButton.click();
+  const initialState = JSON.parse(harness.localStateTextArea.value);
+
+  assert.deepEqual(initialState, {
+    version: 1,
+    kind: 'browser.playable-demo.local-state',
+    sceneId: 'v1-small-2d',
+    tick: 0,
+    controlledEntityId: 'player.hero',
+    positions: [{ entityId: 'player.hero', x: 0, y: 8 }],
+    options: {
+      movementBlocking: true,
+      gameplayHud: true,
+      playableSaveLoad: true
+    },
+    gameplayHud: {
+      inputs: 0,
+      blockedMoves: 0,
+      lastInput: 'none',
+      lastResult: 'idle'
+    }
+  });
+  assert.equal(harness.saveLoadStatusElement.textContent, 'Local state exported.');
+
+  keydown(keydownEvent('ArrowDown'));
+  harness.exportStateButton.click();
+  const movedState = JSON.parse(harness.localStateTextArea.value);
+
+  assert.deepEqual(movedState.positions, [{ entityId: 'player.hero', x: 0, y: 12 }]);
+  assert.deepEqual(movedState.gameplayHud, {
+    inputs: 1,
+    blockedMoves: 0,
+    lastInput: 'ArrowDown',
+    lastResult: 'moved'
+  });
+
+  keydown(keydownEvent('ArrowDown'));
+  assert.equal(harness.positionElement.textContent, 'Position: x 0, y 16');
+  assert.equal(harness.gameplayHudElements.inputs.textContent, '2');
+
+  const fixtureState = JSON.parse(await readFile(playableLocalStateFixturePath, 'utf8'));
+  harness.localStateTextArea.value = JSON.stringify(fixtureState, null, 2);
+  harness.importStateButton.click();
+
+  assert.equal(harness.positionElement.textContent, 'Position: x 0, y 8');
+  assert.equal(harness.gameplayHudElements.position.textContent, 'x 0, y 8');
+  assert.equal(harness.gameplayHudElements.inputs.textContent, '1');
+  assert.equal(harness.gameplayHudElements.blockedMoves.textContent, '0');
+  assert.equal(harness.gameplayHudElements.lastInput.textContent, 'ArrowDown');
+  assert.equal(harness.gameplayHudElements.lastResult.textContent, 'moved');
+  assert.equal(harness.saveLoadStatusElement.textContent, 'Local state imported.');
+
+  const partialState = {
+    ...movedState,
+    gameplayHud: undefined,
+    positions: [{ entityId: 'player.hero', x: 0, y: 16 }]
+  };
+  delete partialState.gameplayHud;
+  harness.localStateTextArea.value = JSON.stringify(partialState, null, 2);
+  harness.importStateButton.click();
+
+  assert.equal(harness.positionElement.textContent, 'Position: x 0, y 16');
+  assert.equal(harness.gameplayHudElements.position.textContent, 'x 0, y 16');
+  assert.equal(harness.gameplayHudElements.inputs.textContent, '0');
+  assert.equal(harness.gameplayHudElements.blockedMoves.textContent, '0');
+  assert.equal(harness.gameplayHudElements.lastInput.textContent, 'none');
+  assert.equal(harness.gameplayHudElements.lastResult.textContent, 'loaded');
+
+  harness.localStateTextArea.value = '{';
+  harness.importStateButton.click();
+  assert.match(harness.saveLoadStatusElement.textContent, /^Import failed:/);
+  assert.equal(harness.positionElement.textContent, 'Position: x 0, y 16');
+
+  const importGuardCases = [
+    [{ ...movedState, version: 2 }, 'version must be 1'],
+    [{ ...movedState, kind: 'savegame' }, 'kind is unsupported'],
+    [{ ...movedState, sceneId: 'other-scene' }, 'sceneId does not match this demo'],
+    [{ ...movedState, tick: 1 }, 'tick does not match this demo'],
+    [{ ...movedState, controlledEntityId: 'npc.other' }, 'controlledEntityId does not match this demo'],
+    [
+      {
+        ...movedState,
+        options: {
+          movementBlocking: true,
+          gameplayHud: false,
+          playableSaveLoad: true
+        }
+      },
+      'options.gameplayHud does not match this demo'
+    ]
+  ];
+
+  for (const [state, expectedError] of importGuardCases) {
+    harness.localStateTextArea.value = JSON.stringify(state, null, 2);
+    harness.importStateButton.click();
+    assert.equal(harness.saveLoadStatusElement.textContent, `Import failed: ${expectedError}`);
+    assert.equal(harness.positionElement.textContent, 'Position: x 0, y 16');
+  }
+
+  const blockedState = {
+    ...movedState,
+    positions: [{ entityId: 'player.hero', x: 8, y: 8 }]
+  };
+  harness.localStateTextArea.value = JSON.stringify(blockedState, null, 2);
+  harness.importStateButton.click();
+
+  assert.equal(harness.saveLoadStatusElement.textContent, 'Import failed: position is blocked in this demo');
+  assert.equal(harness.positionElement.textContent, 'Position: x 0, y 16');
 });
 
 test('renderBrowserPlayableDemoHtmlV1 rejects gameplay HUD metadata when movementBlocking state drifts', () => {
