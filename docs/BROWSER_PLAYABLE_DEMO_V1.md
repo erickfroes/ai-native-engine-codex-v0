@@ -14,6 +14,7 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - `metadata.movementBlocking` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede blocking local.
 - `metadata.gameplayHud` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede HUD Lite local.
 - `metadata.playableSaveLoad` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede Playable Save/Load Lite local.
+- `metadata.audioLite` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede Audio Lite v1 diagnostico.
 - o loop visual local usa `requestAnimationFrame` apenas para redraw continuo do estado atual.
 
 ## Comportamento
@@ -44,6 +45,8 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - com `playableSaveLoad` opt-in, exibe controles locais `Export State`, `Import State`, textarea JSON e mensagem curta de erro/importacao;
 - o formato exportado e browser-local: `kind: "browser.playable-demo.local-state"`, `version: 1`, `sceneId`, `tick`, `controlledEntityId`, `positions`, `options` e, quando HUD esta ativo, `gameplayHud`;
 - import restaura a posicao local do controlavel e atualiza o HUD quando ele esta ativo; se o JSON for invalido ou incompatível com a cena atual, a demo mostra erro curto e preserva o estado atual;
+- com `audioLite` opt-in, embute metadata de `audio.clip` e controles diagnosticos locais `Enable Audio Lite` e `Trigger manual cue`;
+- Audio Lite no browser nao forca autoplay; triggers so tentam emitir cue diagnostico apos gesto do usuario e usam fallback silencioso quando necessario;
 - `Pause rendering`, `Resume rendering` e `Reset` sao controles locais do HTML autocontido e nao alteram contratos v1 publicados;
 - se a entidade controlavel configurada nao existir, faz fallback deterministico para o primeiro rect do snapshot; se nao houver rect, a demo permanece sem alvo controlavel;
 - nao importa o runtime Node no browser;
@@ -53,8 +56,8 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 
 ## CLI e MCP
 
-- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--out <path>] [--json]`
-- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?, movementBlocking?, gameplayHud?, playableSaveLoad?)`
+- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--out <path>] [--json]`
+- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?, movementBlocking?, gameplayHud?, playableSaveLoad?, audioLite?)`
 
 Exemplo para gerar um arquivo HTML:
 
@@ -78,6 +81,12 @@ Exemplo com Playable Save/Load Lite local opt-in:
 
 ```bash
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene.json --gameplay-hud --movement-blocking --playable-save-load --out ./tmp/v1-small-2d-save-load.html --json
+```
+
+Exemplo com Audio Lite diagnostico opt-in:
+
+```bash
+node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --audio-lite --out ./tmp/audio-lite-browser-demo.html --json
 ```
 
 Depois de gerar com `--out`, abra o arquivo HTML diretamente no navegador. A demo sem `--asset-manifest` e autocontida: nao precisa de servidor local, assets reais ou runtime Node no cliente. Quando `--asset-manifest` e usado, o HTML continua single-file e deterministico, mas nao e portavel sozinho porque referencia imagens locais por `file:///...`; se o arquivo for movido sem os assets, o fallback `rect` preserva funcionamento basico.
@@ -128,6 +137,16 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 - se nao houver entidade controlavel no snapshot, a demo nao renderiza os controles de Playable Save/Load Lite.
 - nao usa `localStorage`, `sessionStorage`, `IndexedDB`, rede, disco, autosave, `save-state`, `load-save` ou `State Snapshot v1`.
 - nao substitui Save/Load v1 existente; e apenas uma conveniencia jogavel e manual da Browser Playable Demo.
+
+### Audio Lite Local
+
+- `--audio-lite` no CLI e `audioLite: true` no MCP embutem metadata e controles diagnosticos de Audio Lite v1.
+- o HTML lista clips/triggers declarados por `audio.clip` e expoe contadores locais de cues.
+- o browser nao inicia audio no load; `onDemoStart` so e registrado apos o botao `Enable Audio Lite`.
+- `onMove` e `onBlockedMove` sao registrados em keydowns locais quando ha clips declarados para esses triggers.
+- `manual` pode ser acionado por `Trigger manual cue`.
+- se `AudioContext` nao estiver disponivel ou for bloqueado, o HTML preserva fallback silencioso e o contador diagnostico.
+- nao usa `fetch`, rede, storage, scripts externos, imports dinamicos ou autoplay forcado.
 
 ### Asset Manifest Local
 

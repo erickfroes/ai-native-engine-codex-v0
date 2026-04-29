@@ -155,4 +155,4 @@ O V1 Small 2D Release Checkpoint tambem esta concluido:
 
 ## Proximo pacote recomendado
 
-`codex/audio-lite-v1`.
+Audio Lite v1 foi entregue como incremento pos-checkpoint. Proximo pacote recomendado: `codex/sprite-animation-v1`.

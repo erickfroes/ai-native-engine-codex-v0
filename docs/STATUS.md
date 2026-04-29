@@ -47,6 +47,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - Game Templates v1 com `top-down-basic` e `side-view-blocking-basic`;
 - V1 Small 2D Game Creation Guide / Codex package;
 - V1 Small 2D Release Checkpoint;
+- Audio Lite v1 como primeiro incremento pos-checkpoint;
 - V1 Small 2D Capability Matrix;
 - V1 Small 2D Release Validation;
 - V1 Small 2D readiness gate com cena consolidada (`docs/V1_SMALL_2D_READINESS.md`);
@@ -56,9 +57,8 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. `codex/audio-lite-v1`.
-2. `codex/sprite-animation-v1`.
-3. UI system/prefab system V2 conforme roadmap, sem transformar HUD Lite em UI system completo antes do pacote apropriado.
+1. `codex/sprite-animation-v1`.
+2. UI system/prefab system V2 conforme roadmap, sem transformar HUD Lite em UI system completo antes do pacote apropriado.
 
 ## Versoes de produto
 

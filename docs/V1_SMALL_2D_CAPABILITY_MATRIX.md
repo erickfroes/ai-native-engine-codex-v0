@@ -2,6 +2,8 @@
 
 Esta matriz liga capacidades V1 Small 2D a evidencia de docs, CLI/MCP e testes. Ela e uma matriz de release, nao um contrato runtime novo.
 
+Audio Lite v1 e incremento pos-checkpoint e possui matriz propria em `docs/AUDIO_LITE_TEST_MATRIX.md`.
+
 | Capacidade | Status | Docs | CLI | MCP | Testes | Observacoes |
 | --- | --- | --- | --- | --- | --- | --- |
 | Scene Document v1 | stable | `docs/SCENE_DOCUMENT_V1.md`, `docs/module-contracts.md` | `validate-scene`, `validate-all-scenes` | `validate_scene` | `scene-document-v1`, `scene-validation`, `scene-validation-report-cross-interface` | Entrada canonica de cenas pequenas. |

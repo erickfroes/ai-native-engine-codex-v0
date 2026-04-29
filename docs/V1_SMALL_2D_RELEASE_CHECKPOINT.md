@@ -139,7 +139,7 @@ V2 pode iniciar de forma incremental quando:
 Proxima branch recomendada:
 
 ```text
-codex/audio-lite-v1
+codex/sprite-animation-v1
 ```
 
-Audio Lite v1 deve iniciar a evolucao incremental pos-checkpoint sem reabrir contratos V1 ja estabilizados.
+Audio Lite v1 iniciou a evolucao incremental pos-checkpoint sem reabrir contratos V1 ja estabilizados.

@@ -231,6 +231,7 @@ Compatibilidade:
 - Browser Playable Demo pode aplicar blocking local opt-in com `render-browser-demo --movement-blocking` ou `render_browser_demo({ movementBlocking: true })`;
 - Browser Playable Demo pode expor HUD Lite local opt-in com `render-browser-demo --gameplay-hud` ou `render_browser_demo({ gameplayHud: true })`;
 - Browser Playable Demo pode expor Playable Save/Load Lite local opt-in com `render-browser-demo --playable-save-load` ou `render_browser_demo({ playableSaveLoad: true })`;
+- Browser Playable Demo pode expor Audio Lite v1 diagnostico local opt-in com `render-browser-demo --audio-lite` ou `render_browser_demo({ audioLite: true })`;
 - sem essas flags/opcoes, Browser Playable Demo permanece igual;
 - `InputIntent v1`, `KeyboardInputScript v1`, RenderSnapshot v1, Save/Load v1 e renderers permanecem inalterados;
 - nao adiciona UI system completo, fisica completa, resolucao complexa, pathfinding, editor ou servidor.
@@ -327,6 +328,23 @@ Compatibilidade:
 - sem entidade controlavel, os controles de Playable Save/Load Lite nao sao renderizados;
 - com `movementBlocking` ativo, import de posicao bloqueada e rejeitado de forma previsivel.
 
+## Audio Lite v1
+
+Contrato declarativo minimo para audio simples em cenas pequenas:
+
+- ver `docs/AUDIO_LITE_V1.md`.
+- componente: `audio.clip` v1.
+- runtime: `buildAudioLiteReportV1(sceneOrPath)`.
+- CLI: `inspect-audio-lite <scene> [--json]`.
+- MCP: `inspect_audio_lite({ path })`.
+- Browser Demo: `render-browser-demo --audio-lite` ou `render_browser_demo({ audioLite: true })`.
+- Simple HTML Export: `export-html-game --audio-lite` ou `export_html_game({ audioLite: true })`.
+- sem opt-in, Browser Demo e export nao embutem metadata/controles de audio.
+- o runtime headless gera apenas report deterministico; nao toca audio.
+- no browser/export, audio diagnostico so inicia apos gesto do usuario e cai para fallback silencioso quando necessario.
+- nao altera `RenderSnapshot v1`, `run-loop`, `InputIntent v1`, Movement Blocking, Tile Collision ou Browser Demo Local State v1.
+- nao e mixer completo, audio graph, spatial audio, streaming, timeline, editor, UI system completo ou runtime canonico de audio.
+
 ## State Model v1 (interno)
 
 Representação estruturada de estado inicial derivada do Scene Document v1:
@@ -368,6 +386,8 @@ Componentes iniciais:
 - `visual.sprite` v1.
 - `tile.layer` v1.
 - `camera.viewport` v1.
+- `collision.bounds` v1.
+- `audio.clip` v1.
 
 ## State Processor Registry v1 (interno, opt-in)
 
@@ -514,8 +534,8 @@ Regra de compatibilidade:
 Contrato de export simples para escrever uma cena jogavel pequena como arquivo HTML autocontido:
 
 - ver `docs/SIMPLE_HTML_EXPORT_V1.md`.
-- CLI: `export-html-game <scene> --out <file> [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--json]`.
-- MCP: `export_html_game({ scenePath, outputPath, movementBlocking?, gameplayHud?, playableSaveLoad? })`.
+- CLI: `export-html-game <scene> --out <file> [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--json]`.
+- MCP: `export_html_game({ scenePath, outputPath, movementBlocking?, gameplayHud?, playableSaveLoad?, audioLite? })`.
 - Runtime: `buildHtmlGameExportV1(sceneOrPath, options)` e `exportHtmlGameV1(sceneOrPath, options)`.
 - reutiliza Browser Playable Demo v1, `RenderSnapshot v1` e os envelopes internos ja existentes de blocking/HUD/save-load local.
 - retorna envelope `exportVersion`, `scene`, `outputPath`, `options`, `sizeBytes` e `htmlHash`.
@@ -561,4 +581,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- proximo pacote recomendado: `codex/audio-lite-v1`.
+- Audio Lite v1 e o primeiro incremento pos-checkpoint; proximo pacote recomendado: `codex/sprite-animation-v1`.

@@ -99,7 +99,7 @@ Regras:
 ## CLI
 
 ```bash
-node ./engine/runtime/src/cli.mjs inspect-audio-lite ./scenes/v1-small-2d.scene.json --json
+node ./engine/runtime/src/cli.mjs inspect-audio-lite ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --json
 ```
 
 O CLI retorna `AudioLiteReport v1`. Sem `--json`, imprime resumo legivel e estavel.
@@ -112,7 +112,7 @@ Input:
 
 ```json
 {
-  "path": "./scenes/v1-small-2d.scene.json"
+  "path": "./engine/runtime/test/fixtures/audio-lite-sfx.scene.json"
 }
 ```
 
@@ -150,3 +150,7 @@ No browser, Audio Lite v1:
 ## Proximo pacote recomendado
 
 `codex/sprite-animation-v1`.
+
+## Test Matrix
+
+Ver `docs/AUDIO_LITE_TEST_MATRIX.md`.

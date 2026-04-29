@@ -100,4 +100,4 @@ Playable Save/Load Lite tambem continua opt-in, local ao HTML e nao substitui `s
 - `docs/V1_SMALL_2D_CAPABILITY_MATRIX.md`
 - `docs/V1_SMALL_2D_RELEASE_VALIDATION.md`
 
-O proximo pacote recomendado e `codex/audio-lite-v1`.
+Audio Lite v1 foi entregue como incremento pos-checkpoint. O proximo pacote recomendado e `codex/sprite-animation-v1`.

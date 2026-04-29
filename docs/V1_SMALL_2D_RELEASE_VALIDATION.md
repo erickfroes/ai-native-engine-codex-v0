@@ -2,6 +2,8 @@
 
 Este documento define a sequencia canonica para validar o checkpoint V1 Small 2D.
 
+Audio Lite v1 e pos-checkpoint; use `docs/AUDIO_LITE_TEST_MATRIX.md` para a validacao especifica de audio.
+
 ## Baseline Do Repositorio
 
 ```bash

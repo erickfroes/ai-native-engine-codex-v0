@@ -58,7 +58,7 @@ Capacidades alvo:
 - V1 Small 2D Game Creation Guide / Codex package;
 - V1 Small 2D Release Checkpoint;
 - UI system simples futuro de V2;
-- audio-lite como proximo pacote incremental;
+- Audio Lite v1 como primeiro pacote incremental pos-checkpoint;
 - save/load jogavel formal futuro, se ainda necessario;
 - release checkpoint V1 Small 2D concluido como gate de fechamento.
 
@@ -211,6 +211,5 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. `codex/audio-lite-v1`.
-2. `codex/sprite-animation-v1`.
-3. UI system/prefab system V2 conforme roadmap, preservando HUD Lite como diagnostico local ate existir UI system formal.
+1. `codex/sprite-animation-v1`.
+2. UI system/prefab system V2 conforme roadmap, preservando HUD Lite como diagnostico local ate existir UI system formal.
