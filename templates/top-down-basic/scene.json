@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "template-top-down-basic",
+    "tags": ["template", "v1-small-2d", "top-down"]
+  },
+  "systems": ["core.loop", "input.keyboard"],
+  "entities": [
+    {
+      "id": "camera.main",
+      "name": "Camera",
+      "components": [
+        {
+          "kind": "camera.viewport",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 0,
+            "y": 0,
+            "width": 40,
+            "height": 28
+          }
+        }
+      ]
+    },
+    {
+      "id": "map.room",
+      "name": "Room Tile Layer",
+      "components": [
+        {
+          "kind": "tile.layer",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "tileWidth": 4,
+            "tileHeight": 4,
+            "columns": 8,
+            "rows": 6,
+            "layer": -10,
+            "tiles": [
+              [2, 2, 2, 2, 2, 2, 2, 2],
+              [2, 1, 1, 1, 1, 1, 1, 2],
+              [2, 1, 1, 2, 1, 1, 1, 2],
+              [2, 1, 1, 1, 1, 1, 1, 2],
+              [2, 1, 1, 1, 1, 1, 1, 2],
+              [2, 2, 2, 2, 2, 2, 2, 2]
+            ],
+            "palette": {
+              "1": {
+                "kind": "rect"
+              },
+              "2": {
+                "kind": "rect",
+                "solid": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "player.hero",
+      "name": "Player",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 4,
+            "y": 8
+          }
+        },
+        {
+          "kind": "visual.sprite",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "assetId": "player.hero.sprite",
+            "width": 8,
+            "height": 8,
+            "layer": 5
+          }
+        },
+        {
+          "kind": "collision.bounds",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "width": 8,
+            "height": 8,
+            "solid": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "goal.marker",
+      "name": "Goal Marker",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 20,
+            "y": 12
+          }
+        },
+        {
+          "kind": "visual.sprite",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "assetId": "goal.marker.sprite",
+            "width": 4,
+            "height": 4,
+            "layer": 4
+          }
+        },
+        {
+          "kind": "collision.bounds",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "width": 4,
+            "height": 4,
+            "solid": false
+          }
+        }
+      ]
+    }
+  ],
+  "assetRefs": []
+}

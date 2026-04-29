@@ -101,17 +101,18 @@ Entregas alvo:
 - hardening de exemplos jogaveis pequenos concluido;
 - Playable Save/Load Lite browser-local opt-in concluido;
 - Simple HTML Export v1 concluido;
+- Game Templates v1 concluido com exemplos copiar-e-adaptar;
 - UI system declarativo minimo como bloco futuro;
 - audio-lite opcional;
-- templates de jogos pequenos;
+- V1 Small 2D Game Creation Guide / Codex package como camada de criacao sobre os templates ja implementados;
 - matriz de regressao visual/headless;
 - pacote Codex com prompts/skills/subagentes para criar um jogo 2D pequeno.
 
-Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos e Simple HTML Export v1 ja estao implementados. O proximo bloco recomendado e Game Templates v1, sem editor, servidor, fisica completa ou pathfinding.
+Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1 e Game Templates v1 ja estao implementados. O proximo bloco recomendado e V1 Small 2D Game Creation Guide / Codex package, sem editor, servidor, fisica completa ou pathfinding.
 
 Criterio de conclusao:
 
-- uma demo 2D pequena com player, mapa, colisao, input, save/load e render browser;
+- uma demo 2D pequena com player, mapa, colisao, input, save/load minimo existente, Playable Save/Load Lite opt-in e render browser;
 - runtime/CLI/MCP conseguem validar, simular, salvar, carregar, renderizar e diagnosticar;
 - Codex consegue adicionar uma mecanica pequena usando workflow padronizado sem quebrar contratos.
 
@@ -124,7 +125,7 @@ Subagentes recomendados:
 
 Linha de trabalho atual recomendada:
 
-1. Game Templates v1.
+1. V1 Small 2D Game Creation Guide / Codex package.
 2. Export/save V1 mais formal para exemplo jogavel pequeno, se ainda necessario apos o HTML export.
 3. UI/audio/animation basicos para V2, preservando HUD Lite como diagnostico local ate existir UI system formal.
 
