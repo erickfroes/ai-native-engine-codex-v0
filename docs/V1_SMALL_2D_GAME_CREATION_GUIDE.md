@@ -196,4 +196,4 @@ Ao fim, o jogo V1 pequeno deve ter:
 
 ## Proximo pacote recomendado
 
-Depois deste guia, o proximo pacote recomendado e `codex/v1-small-2d-release-checkpoint`.
+Depois deste guia e do V1 Small 2D Release Checkpoint, o proximo pacote recomendado e `codex/audio-lite-v1`.

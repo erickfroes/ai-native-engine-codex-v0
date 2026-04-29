@@ -550,3 +550,15 @@ Contrato operacional de workflow para criar jogos pequenos 2D a partir de Game T
 - `entity.prefab` permanece reservado/fora deste workflow; o guia nao define semantica de prefab.
 - HUD Lite e Playable Save/Load Lite continuam opt-ins locais do HTML, nao UI system ou savegame canonico.
 - nao e template engine, prefab system, scaffolder obrigatorio, editor, UI system completo, fisica, gravidade, jump, pathfinding, combate, inventario, audio, animation, servidor, bundler ou build pipeline V2.
+
+## V1 Small 2D Release Checkpoint
+
+Contrato operacional de release para declarar a V1 Small 2D como release-checkpointed:
+
+- ver `docs/V1_SMALL_2D_RELEASE_CHECKPOINT.md`.
+- matriz de evidencias: `docs/V1_SMALL_2D_CAPABILITY_MATRIX.md`.
+- validacao canonica: `docs/V1_SMALL_2D_RELEASE_VALIDATION.md`.
+- nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
+- nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
+- registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
+- proximo pacote recomendado: `codex/audio-lite-v1`.

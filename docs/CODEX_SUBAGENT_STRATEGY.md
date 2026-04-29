@@ -86,11 +86,12 @@ Exemplos:
 
 - `create-gameplay-system`
 - `import-asset-pack`
-- `author-ui-screen`
-- `add-collision-system`
+- usar apenas workflows que preservem Scene Document v1, Browser Demo, templates e release checkpoint;
+- nao usar skill de UI system, audio, animation, prefab, editor ou pathfinding nesta fase release-checkpointed.
 
 ### V2 indie 2D/2.5D
 
+- `author-ui-screen`
 - `create-prefab`
 - `create-scene-transition`
 - `create-animation-clip`

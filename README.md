@@ -1,6 +1,6 @@
 # AI-Native Engine for Codex - V1 Small 2D
 
-Este repositorio fechou as Metas 1 e 2 e ja possui um slice V1 Small 2D funcional para gameplay basico, export HTML simples e templates copiar-e-adaptar.
+Este repositorio fechou as Metas 1 e 2 e possui um slice V1 Small 2D release-checkpointed para gameplay basico, export HTML simples e templates copiar-e-adaptar.
 
 A simulacao canonica continua headless. A camada visual atual transforma cenas validadas em snapshots e demos HTML autocontidas para inspecao, smoke e automacao com Codex.
 
@@ -32,7 +32,7 @@ Leia:
 - usar `tile.layer` para mapas declarativos pequenos expandidos em drawCalls;
 - usar `camera.viewport` para aplicar offset `world - camera` nos drawCalls.
 
-## Meta 3 - Gameplay Foundation em andamento
+## Meta 3 - Gameplay Foundation release-checkpointed
 
 A engine agora avancou para a fundacao de gameplay 2D:
 
@@ -46,6 +46,7 @@ A engine agora avancou para a fundacao de gameplay 2D:
 - Simple HTML Export v1 para gerar um arquivo HTML jogavel autocontido;
 - Game Templates v1 com exemplos copiar-e-adaptar para top-down e side-view blocking;
 - V1 Small 2D Game Creation Guide / Codex package para criar jogos pequenos por copia/adaptacao;
+- V1 Small 2D Release Checkpoint para registrar capacidades, evidencias e validacao canonica;
 - cena consolidada `v1-small-2d` para readiness da V1;
 - CLI/MCP para inspecao de colisao, overlap, tile collision e blocking;
 - testes cross-interface para os reports principais.
@@ -75,9 +76,9 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 - multiplayer real;
 - captura/input runtime completo fora da Browser Playable Demo local.
 
-A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1 e o V1 Small 2D Game Creation Guide / Codex package.
+A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint.
 
-O proximo pacote recomendado e `codex/v1-small-2d-release-checkpoint`.
+O proximo pacote recomendado e `codex/audio-lite-v1`.
 
 ## Comandos CLI principais
 
@@ -199,6 +200,9 @@ npm run smoke
 - `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`: fluxo Codex-first para criar um jogo pequeno 2D
 - `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`: checklist de validacao para jogos criados a partir dos templates
 - `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md`: pacote de prompt para Codex
+- `docs/V1_SMALL_2D_RELEASE_CHECKPOINT.md`: checkpoint de release da V1 Small 2D
+- `docs/V1_SMALL_2D_CAPABILITY_MATRIX.md`: matriz de capacidades e evidencias da V1 Small 2D
+- `docs/V1_SMALL_2D_RELEASE_VALIDATION.md`: sequencia canonica de validacao de release
 
 ## Primeira leitura recomendada
 

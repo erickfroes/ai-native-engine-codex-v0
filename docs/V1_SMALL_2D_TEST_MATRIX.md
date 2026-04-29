@@ -104,8 +104,9 @@ Para jogos criados fora de `./scenes`, rode tambem o gate explicito do jogo: `va
 - Game Templates v1 tambem fixa budgets pequenos de drawCalls e tamanho de export HTML.
 - V1 Small 2D Game Creation Guide / Codex package esta concluido e cobre o workflow humano/Codex para copiar, adaptar, validar, testar blocking, gerar Browser Demo e exportar HTML sem criar runtime novo.
 - O guia separa baseline do repositorio de gate do jogo criado; `npm run validate:scenes` nao descobre prototipos fora de `./scenes`.
+- V1 Small 2D Release Checkpoint esta concluido e registra a matriz de capacidades, evidencia de release e sequencia canonica de validacao.
 
 ## Proximo Pacote Recomendado
 
-- `codex/v1-small-2d-release-checkpoint`.
+- `codex/audio-lite-v1`.
 - Manter fora deste pacote: editor, servidor, build system amplo, UI system completo e savegame avancado.
