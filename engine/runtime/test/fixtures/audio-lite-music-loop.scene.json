@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "audio-lite-music-loop-fixture"
+  },
+  "systems": ["core.loop"],
+  "entities": [
+    {
+      "id": "audio.music",
+      "components": [
+        {
+          "kind": "audio.clip",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "clipId": "music.theme",
+            "kind": "music",
+            "src": "audio/missing-theme.ogg",
+            "volume": 0.5,
+            "loop": true,
+            "trigger": "onDemoStart"
+          }
+        }
+      ]
+    }
+  ]
+}
