@@ -35,7 +35,7 @@ function loadJson(filePath) {
 function assertNoForbiddenBrowserSurface(html) {
   assert.doesNotMatch(
     html,
-    /<script[^>]+src=|<link[^>]+href=|fetch\(|XMLHttpRequest|WebSocket|EventSource|localStorage|sessionStorage/
+    /<script[^>]+src=|<link[^>]+href=|fetch\(|XMLHttpRequest|WebSocket|EventSource|localStorage|sessionStorage|Date\.now|new Date|performance\.now|import\(/
   );
 }
 
@@ -122,6 +122,8 @@ test('v1 small 2d Browser Demo keeps default movement free and embeds blocking o
   assert.equal(blockingHudEnvelope.browserDemoVersion, 1);
   assert.match(defaultEnvelope.html, /data-controllable-entity="player\.hero"/);
   assert.match(defaultEnvelope.html, /"id":"map\.ground\.tile\.2\.3"/);
+  assert.doesNotMatch(defaultEnvelope.html, /"metadata":\{[^}]*"gameplayHud"/);
+  assert.doesNotMatch(defaultEnvelope.html, /"metadata":\{[^}]*"movementBlocking"/);
   assert.doesNotMatch(defaultEnvelope.html, /"gameplayHud":/);
   assert.doesNotMatch(defaultEnvelope.html, /id="browser-gameplay-hud"/);
   assert.doesNotMatch(defaultEnvelope.html, /"movementBlocking":/);
