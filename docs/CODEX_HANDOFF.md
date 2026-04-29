@@ -1,12 +1,12 @@
 # Handoff para Codex - Estado atual e continuidade
 
-Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e Meta 2 fechadas, e Meta 3 em andamento.
+Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e Meta 2 fechadas, e Meta 3 em estado V1 Small 2D release-checkpointed.
 
 ## Estado atual
 
 - Meta 1 Headless: concluida.
 - Meta 2 Visual/Interativa minima: concluida.
-- Meta 3 Gameplay Foundation: em andamento.
+- Meta 3 Gameplay Foundation: V1 Small 2D release-checkpointed.
 - `collision.bounds` e CollisionBoundsReport v1: concluidos.
 - CollisionOverlapReport v1: concluido.
 - MovementBlockingReport v1: concluido e endurecido.
@@ -57,29 +57,32 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 ## Leitura obrigatoria antes de editar
 
 1. `README.md`
-2. `ROADMAP.md`
-3. `docs/ENGINE_VERSION_ROADMAP.md`
-4. `docs/CODEX_SUBAGENT_STRATEGY.md`
-5. `docs/module-contracts.md`
-6. `docs/COLLISION_BOUNDS_V1.md`
-7. `docs/COLLISION_OVERLAP_V1.md`
-8. `docs/MOVEMENT_BLOCKING_V1.md`
-9. `docs/TILE_COLLISION_V1.md`
-10. `docs/BROWSER_PLAYABLE_DEMO_V1.md`
-11. `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`
-12. `docs/SIMPLE_HTML_EXPORT_V1.md`
-13. `docs/GAME_TEMPLATES_V1.md`
-14. `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`
-15. `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`
-16. `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md`
-17. `templates/top-down-basic/README.md`
-18. `templates/side-view-blocking-basic/README.md`
-19. `docs/V1_SMALL_2D_RELEASE_CHECKPOINT.md`
-20. `docs/V1_SMALL_2D_CAPABILITY_MATRIX.md`
-21. `docs/V1_SMALL_2D_RELEASE_VALIDATION.md`
-22. `docs/V1_SMALL_2D_READINESS.md`
-23. `docs/V1_SMALL_2D_TEST_MATRIX.md`
-24. `AGENTS.md`
+2. `docs/CODEX_HANDOFF.md`
+3. `SPEC.md`
+4. `docs/module-contracts.md`
+5. `schemas/`
+6. `AGENTS.md`
+7. `ROADMAP.md`
+8. `docs/ENGINE_VERSION_ROADMAP.md`
+9. `docs/CODEX_SUBAGENT_STRATEGY.md`
+10. `docs/COLLISION_BOUNDS_V1.md`
+11. `docs/COLLISION_OVERLAP_V1.md`
+12. `docs/MOVEMENT_BLOCKING_V1.md`
+13. `docs/TILE_COLLISION_V1.md`
+14. `docs/BROWSER_PLAYABLE_DEMO_V1.md`
+15. `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`
+16. `docs/SIMPLE_HTML_EXPORT_V1.md`
+17. `docs/GAME_TEMPLATES_V1.md`
+18. `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`
+19. `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`
+20. `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md`
+21. `templates/top-down-basic/README.md`
+22. `templates/side-view-blocking-basic/README.md`
+23. `docs/V1_SMALL_2D_RELEASE_CHECKPOINT.md`
+24. `docs/V1_SMALL_2D_CAPABILITY_MATRIX.md`
+25. `docs/V1_SMALL_2D_RELEASE_VALIDATION.md`
+26. `docs/V1_SMALL_2D_READINESS.md`
+27. `docs/V1_SMALL_2D_TEST_MATRIX.md`
 
 ## Baseline obrigatorio
 
