@@ -265,6 +265,10 @@ export const toolCatalog = [
         playableSaveLoad: {
           type: 'boolean',
           description: 'When true, embed Playable Save/Load Lite v1 local export/import controls in the generated HTML.'
+        },
+        audioLite: {
+          type: 'boolean',
+          description: 'When true, embed Audio Lite v1 diagnostic metadata and user-gesture controls in the generated HTML.'
         }
       },
       additionalProperties: false
@@ -297,6 +301,10 @@ export const toolCatalog = [
         playableSaveLoad: {
           type: 'boolean',
           description: 'When true, embed Playable Save/Load Lite v1 local export/import controls.'
+        },
+        audioLite: {
+          type: 'boolean',
+          description: 'When true, embed Audio Lite v1 diagnostic metadata and user-gesture controls.'
         }
       },
       additionalProperties: false

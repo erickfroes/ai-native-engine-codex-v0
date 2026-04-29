@@ -161,6 +161,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'movementBlocking'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'gameplayHud'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'playableSaveLoad'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'audioLite'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
     assert.ok(
       Object.prototype.hasOwnProperty.call(
@@ -787,13 +788,33 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.doesNotMatch(renderBrowserDemoWithPlayableSaveLoadResponse.result.structuredContent.html, /"gameplayHud":/);
     assert.doesNotMatch(renderBrowserDemoWithPlayableSaveLoadResponse.result.structuredContent.html, /"movementBlocking":/);
 
+    const renderBrowserDemoWithAudioLiteResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './engine/runtime/test/fixtures/audio-lite-sfx.scene.json',
+        audioLite: true
+      }
+    });
+
+    assert.equal(renderBrowserDemoWithAudioLiteResponse.result.isError, false);
+    assertBrowserDemoStructuredContent(renderBrowserDemoWithAudioLiteResponse.result.structuredContent, {
+      scene: 'audio-lite-sfx-fixture',
+      tick: 0,
+      controllableEntityId: ''
+    });
+    assert.match(renderBrowserDemoWithAudioLiteResponse.result.structuredContent.html, /"audioLite":/);
+    assert.match(renderBrowserDemoWithAudioLiteResponse.result.structuredContent.html, /id="browser-audio-lite"/);
+    assert.match(renderBrowserDemoWithAudioLiteResponse.result.structuredContent.html, /"clipId":"sfx\.step"/);
+    assert.doesNotMatch(renderBrowserDemoWithAudioLiteResponse.result.structuredContent.html, /"movementBlocking":/);
+
     const renderBrowserDemoWithHudBlockingSaveLoadResponse = await client.request('tools/call', {
       name: 'render_browser_demo',
       arguments: {
         path: './scenes/v1-small-2d.scene.json',
         movementBlocking: true,
         gameplayHud: true,
-        playableSaveLoad: true
+        playableSaveLoad: true,
+        audioLite: true
       }
     });
 
@@ -808,9 +829,14 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html, /"movementBlocking":/);
     assert.match(renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html, /"gameplayHud":/);
     assert.match(renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html, /"playableSaveLoad":/);
+    assert.match(renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html, /"audioLite":/);
     assert.match(
       renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html,
       /id="browser-playable-save-load"/
+    );
+    assert.match(
+      renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html,
+      /id="browser-audio-lite"/
     );
 
     const renderBrowserDemoWithManifestResponseA = await client.request('tools/call', {
@@ -976,6 +1002,20 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(
       renderBrowserDemoInvalidPlayableSaveLoadResponse.result.content[0].text,
       /render_browser_demo: `playableSaveLoad` must be a boolean when provided\./
+    );
+
+    const renderBrowserDemoInvalidAudioLiteResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        audioLite: 'yes'
+      }
+    });
+
+    assert.equal(renderBrowserDemoInvalidAudioLiteResponse.result.isError, true);
+    assert.match(
+      renderBrowserDemoInvalidAudioLiteResponse.result.content[0].text,
+      /render_browser_demo: `audioLite` must be a boolean when provided\./
     );
 
     const renderBrowserDemoUnexpectedArgumentResponse = await client.request('tools/call', {

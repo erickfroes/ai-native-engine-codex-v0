@@ -7,6 +7,10 @@ import { validateSceneInvariants } from '../scene/invariants.mjs';
 const AUDIO_CLIP_COMPONENT_KIND = 'audio.clip';
 const AUDIO_LITE_TRIGGERS = ['onDemoStart', 'onMove', 'onBlockedMove', 'manual'];
 
+function compareStableString(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
 function pushSceneStructureError(errors, errorPath, message) {
   errors.push(`${errorPath}: ${message}`);
 }
@@ -117,8 +121,8 @@ function getAudioClipComponents(scene) {
   }
 
   return clips.sort((left, right) => {
-    const clipOrder = left.clipId.localeCompare(right.clipId);
-    return clipOrder !== 0 ? clipOrder : left.entityId.localeCompare(right.entityId);
+    const clipOrder = compareStableString(left.clipId, right.clipId);
+    return clipOrder !== 0 ? clipOrder : compareStableString(left.entityId, right.entityId);
   });
 }
 
@@ -137,6 +141,7 @@ async function fileExists(absolutePath) {
 async function collectAudioWarnings(clips, sceneDir) {
   const warnings = [];
   const invalidRefs = [];
+  const fileExistsByPath = new Map();
 
   for (const clip of clips) {
     if (clip.src === null) {
@@ -151,7 +156,10 @@ async function collectAudioWarnings(clips, sceneDir) {
 
     if (sceneDir !== undefined) {
       const absoluteSrcPath = path.resolve(sceneDir, clip.src);
-      if (!await fileExists(absoluteSrcPath)) {
+      if (!fileExistsByPath.has(absoluteSrcPath)) {
+        fileExistsByPath.set(absoluteSrcPath, await fileExists(absoluteSrcPath));
+      }
+      if (!fileExistsByPath.get(absoluteSrcPath)) {
         const invalidRef = {
           entityId: clip.entityId,
           clipId: clip.clipId,
@@ -180,9 +188,9 @@ function buildTriggers(clips) {
     .map((trigger) => ({
       trigger,
       clipIds: clips
-        .filter((clip) => clip.trigger === trigger)
-        .map((clip) => clip.clipId)
-        .sort()
+      .filter((clip) => clip.trigger === trigger)
+      .map((clip) => clip.clipId)
+      .sort(compareStableString)
     }))
     .filter((entry) => entry.clipIds.length > 0);
 }

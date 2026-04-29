@@ -56,8 +56,8 @@ function printUsage() {
   node engine/runtime/src/cli.mjs render-svg <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-svg-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-canvas-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
-  node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--out <path>] [--json]
-  node engine/runtime/src/cli.mjs export-html-game <path> --out <path> [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--json]
+  node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--out <path>] [--json]
+  node engine/runtime/src/cli.mjs export-html-game <path> --out <path> [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--json]
   node engine/runtime/src/cli.mjs save-state <path> --ticks <n> [--seed <n>] --out <dir> [--json]
   node engine/runtime/src/cli.mjs load-save <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
@@ -514,6 +514,7 @@ async function run() {
     const movementBlocking = hasFlag('--movement-blocking');
     const gameplayHud = hasFlag('--gameplay-hud');
     const playableSaveLoad = hasFlag('--playable-save-load');
+    const audioLite = hasFlag('--audio-lite');
     const scene = await loadSceneFile(maybePath);
     const rawSnapshot = await buildRenderSnapshotV1(scene, {
       tick,
@@ -526,7 +527,8 @@ async function run() {
     const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, {
       movementBlocking,
       gameplayHud,
-      playableSaveLoad
+      playableSaveLoad,
+      audioLite
     });
     const html = renderBrowserPlayableDemoHtmlV1({
       title,
@@ -574,11 +576,13 @@ async function run() {
     const movementBlocking = hasFlag('--movement-blocking');
     const gameplayHud = hasFlag('--gameplay-hud');
     const playableSaveLoad = hasFlag('--playable-save-load');
+    const audioLite = hasFlag('--audio-lite');
     const envelope = await exportHtmlGameV1(maybePath, {
       outputPath: requestedOutPath,
       movementBlocking,
       gameplayHud,
-      playableSaveLoad
+      playableSaveLoad,
+      audioLite
     });
 
     if (asJson) {

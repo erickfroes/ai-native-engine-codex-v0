@@ -205,7 +205,7 @@ async function handleToolCall(params) {
     if (params.name === 'export_html_game') {
       const unexpectedArgument = findUnexpectedArgument(
         args,
-        new Set(['scenePath', 'outputPath', 'movementBlocking', 'gameplayHud', 'playableSaveLoad'])
+        new Set(['scenePath', 'outputPath', 'movementBlocking', 'gameplayHud', 'playableSaveLoad', 'audioLite'])
       );
       if (unexpectedArgument !== undefined) {
         return {
@@ -249,11 +249,19 @@ async function handleToolCall(params) {
         };
       }
 
+      if (args.audioLite !== undefined && typeof args.audioLite !== 'boolean') {
+        return {
+          content: toTextContent('export_html_game: `audioLite` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
       const exportEnvelope = await exportHtmlGameV1(resolveRepoPath(args.scenePath), {
         outputPath: resolveRepoPath(args.outputPath),
         movementBlocking: args.movementBlocking === true,
         gameplayHud: args.gameplayHud === true,
-        playableSaveLoad: args.playableSaveLoad === true
+        playableSaveLoad: args.playableSaveLoad === true,
+        audioLite: args.audioLite === true
       });
 
       return {
@@ -773,7 +781,8 @@ async function handleToolCall(params) {
           'assetManifestPath',
           'movementBlocking',
           'gameplayHud',
-          'playableSaveLoad'
+          'playableSaveLoad',
+          'audioLite'
         ])
       );
       if (unexpectedArgument !== undefined) {
@@ -837,6 +846,13 @@ async function handleToolCall(params) {
         };
       }
 
+      if (args.audioLite !== undefined && typeof args.audioLite !== 'boolean') {
+        return {
+          content: toTextContent('render_browser_demo: `audioLite` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
       const scene = await loadSceneFile(targetPath);
       const resolvedAssetManifestPath = args.assetManifestPath === undefined
         ? undefined
@@ -852,7 +868,8 @@ async function handleToolCall(params) {
       const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, {
         movementBlocking: args.movementBlocking === true,
         gameplayHud: args.gameplayHud === true,
-        playableSaveLoad: args.playableSaveLoad === true
+        playableSaveLoad: args.playableSaveLoad === true,
+        audioLite: args.audioLite === true
       });
       const html = renderBrowserPlayableDemoHtmlV1({
         title,

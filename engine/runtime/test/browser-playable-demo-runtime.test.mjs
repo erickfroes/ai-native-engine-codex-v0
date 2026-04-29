@@ -63,6 +63,8 @@ function createCanvasHarness(html) {
   const resetButtonListeners = new Map();
   const exportStateButtonListeners = new Map();
   const importStateButtonListeners = new Map();
+  const audioLiteEnableButtonListeners = new Map();
+  const audioLiteTestButtonListeners = new Map();
   const animationFrames = [];
   const cancelledAnimationFrames = new Set();
   let nextAnimationFrameHandle = 1;
@@ -70,6 +72,8 @@ function createCanvasHarness(html) {
   const positionElement = { textContent: '' };
   const localStateTextArea = { value: '' };
   const saveLoadStatusElement = createTrackedTextElement('No local state exported.');
+  const audioLiteStatusElement = createTrackedTextElement('Audio Lite disabled until user gesture.');
+  const audioLiteEventCountElement = createTrackedTextElement('Audio events: 0');
   const gameplayHudElements = {
     entity: createTrackedTextElement(),
     tick: createTrackedTextElement(),
@@ -122,6 +126,28 @@ function createCanvasHarness(html) {
     },
     click() {
       const handler = importStateButtonListeners.get('click');
+      if (handler) {
+        handler({ preventDefault() {} });
+      }
+    }
+  };
+  const audioLiteEnableButton = {
+    addEventListener(eventName, handler) {
+      audioLiteEnableButtonListeners.set(eventName, handler);
+    },
+    click() {
+      const handler = audioLiteEnableButtonListeners.get('click');
+      if (handler) {
+        handler({ preventDefault() {} });
+      }
+    }
+  };
+  const audioLiteTestButton = {
+    addEventListener(eventName, handler) {
+      audioLiteTestButtonListeners.set(eventName, handler);
+    },
+    click() {
+      const handler = audioLiteTestButtonListeners.get('click');
       if (handler) {
         handler({ preventDefault() {} });
       }
@@ -274,6 +300,18 @@ function createCanvasHarness(html) {
         if (id === 'browser-gameplay-hud-movement-blocking') {
           return gameplayHudElements.movementBlocking;
         }
+        if (id === 'browser-audio-lite-enable') {
+          return audioLiteEnableButton;
+        }
+        if (id === 'browser-audio-lite-test') {
+          return audioLiteTestButton;
+        }
+        if (id === 'browser-audio-lite-status') {
+          return audioLiteStatusElement;
+        }
+        if (id === 'browser-audio-lite-event-count') {
+          return audioLiteEventCountElement;
+        }
         throw new Error(`unexpected element lookup: ${id}`);
       }
     }
@@ -294,6 +332,10 @@ function createCanvasHarness(html) {
     },
     operations,
     gameplayHudElements,
+    audioLiteEnableButton,
+    audioLiteEventCountElement,
+    audioLiteStatusElement,
+    audioLiteTestButton,
     importStateButton,
     imageInstances,
     localStateTextArea,
@@ -377,6 +419,76 @@ function createMovementOpenScene() {
   const scene = createMovementBlockedScene();
   scene.metadata.name = 'movement-blocking-open-fixture';
   scene.entities[1].components[0].fields.x = 20;
+  return scene;
+}
+
+function createAudioLiteScene() {
+  const scene = createMovementBlockedScene();
+  scene.metadata.name = 'audio-lite-browser-fixture';
+  scene.entities.push(
+    {
+      id: 'audio.step',
+      components: [
+        {
+          kind: 'audio.clip',
+          version: 1,
+          replicated: false,
+          fields: {
+            clipId: 'sfx.step',
+            kind: 'sfx',
+            volume: 0.75,
+            trigger: 'onMove'
+          }
+        }
+      ]
+    },
+    {
+      id: 'audio.bump',
+      components: [
+        {
+          kind: 'audio.clip',
+          version: 1,
+          replicated: false,
+          fields: {
+            clipId: 'sfx.bump',
+            kind: 'sfx',
+            trigger: 'onBlockedMove'
+          }
+        }
+      ]
+    },
+    {
+      id: 'audio.start',
+      components: [
+        {
+          kind: 'audio.clip',
+          version: 1,
+          replicated: false,
+          fields: {
+            clipId: 'music.start',
+            kind: 'music',
+            loop: true,
+            trigger: 'onDemoStart'
+          }
+        }
+      ]
+    },
+    {
+      id: 'audio.manual',
+      components: [
+        {
+          kind: 'audio.clip',
+          version: 1,
+          replicated: false,
+          fields: {
+            clipId: 'sfx.manual',
+            kind: 'sfx',
+            trigger: 'manual'
+          }
+        }
+      ]
+    }
+  );
   return scene;
 }
 
@@ -1513,6 +1625,80 @@ test('renderBrowserPlayableDemoHtmlV1 increments Browser Gameplay HUD Lite block
   assert.equal(harness.gameplayHudElements.blockedMoves.textContent, '1');
   assert.equal(harness.gameplayHudElements.lastInput.textContent, 'ArrowRight');
   assert.equal(harness.gameplayHudElements.lastResult.textContent, 'blocked');
+});
+
+test('renderBrowserPlayableDemoHtmlV1 embeds Audio Lite only when audioLite metadata is enabled', () => {
+  const scene = createAudioLiteScene();
+  const snapshot = createMovementBlockingSnapshot('audio-lite-browser-fixture');
+  const defaultHtml = renderBrowserPlayableDemoHtmlV1({
+    title: 'audio-lite-browser-fixture Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot)
+  });
+  const audioHtml = renderBrowserPlayableDemoHtmlV1({
+    title: 'audio-lite-browser-fixture Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+      audioLite: true,
+      movementBlocking: true
+    })
+  });
+
+  assertNoForbiddenBrowserDemoHtmlSurface(defaultHtml);
+  assert.doesNotMatch(defaultHtml, /"audioLite":/);
+  assert.doesNotMatch(defaultHtml, /browser-audio-lite/);
+
+  assertNoForbiddenBrowserDemoHtmlSurface(audioHtml);
+  assert.match(audioHtml, /id="browser-audio-lite"/);
+  assert.match(audioHtml, /"audioLite":\{"clips":\[/);
+  assert.match(audioHtml, /"clipId":"sfx\.step"/);
+  assert.match(audioHtml, /"trigger":"onBlockedMove"/);
+  assert.match(audioHtml, /Audio Lite disabled until user gesture/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 records Audio Lite diagnostic cues for manual, moved and blocked events', () => {
+  const scene = createAudioLiteScene();
+  const snapshot = createMovementBlockingSnapshot('audio-lite-browser-fixture');
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'audio-lite-browser-fixture Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+      audioLite: true,
+      movementBlocking: true
+    })
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+
+  assert.equal(harness.audioLiteEventCountElement.textContent, 'Audio events: 0');
+  assert.equal(harness.audioLiteStatusElement.textContent, 'Audio Lite disabled until user gesture.');
+
+  harness.audioLiteEnableButton.click();
+
+  assert.equal(harness.audioLiteEventCountElement.textContent, 'Audio events: 1');
+  assert.match(harness.audioLiteStatusElement.textContent, /onDemoStart/);
+
+  harness.audioLiteTestButton.click();
+  assert.equal(harness.audioLiteEventCountElement.textContent, 'Audio events: 2');
+  assert.match(harness.audioLiteStatusElement.textContent, /manual/);
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+
+  assert.equal(harness.positionElement.textContent, 'Position: x 0, y 0');
+  assert.equal(harness.audioLiteEventCountElement.textContent, 'Audio events: 3');
+  assert.match(harness.audioLiteStatusElement.textContent, /onBlockedMove/);
+
+  keydown({
+    code: 'ArrowDown',
+    preventDefault() {}
+  });
+
+  assert.equal(harness.positionElement.textContent, 'Position: x 0, y 4');
+  assert.equal(harness.audioLiteEventCountElement.textContent, 'Audio events: 4');
+  assert.match(harness.audioLiteStatusElement.textContent, /onMove/);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 preserves all canonical V1 small 2D browser modes', async () => {
