@@ -36,6 +36,12 @@ const COMPONENT_REGISTRY_V1 = Object.freeze({
       version: 1,
       deterministic: true,
       description: 'Declarative collision bounds component'
+    }),
+    Object.freeze({
+      name: 'audio.clip',
+      version: 1,
+      deterministic: true,
+      description: 'Declarative Audio Lite clip component'
     })
   ])
 });

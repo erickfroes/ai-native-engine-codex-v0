@@ -10,6 +10,21 @@ function isValidTileId(value) {
   return Number.isInteger(value) || (typeof value === 'string' && value.trim().length > 0);
 }
 
+function isSafeRelativePath(value) {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    return false;
+  }
+
+  const trimmed = value.trim();
+  return (
+    !trimmed.includes('://') &&
+    !trimmed.startsWith('/') &&
+    !trimmed.startsWith('\\') &&
+    !/^[A-Za-z]:[\\/]/.test(trimmed) &&
+    !trimmed.split(/[\\/]+/).includes('..')
+  );
+}
+
 function validateVisualSpriteComponent(component, componentPath, errors) {
   const fields = component.fields;
   const allowedFieldNames = new Set(['assetId', 'width', 'height', 'layer']);
@@ -291,6 +306,60 @@ function validateCollisionBoundsComponent(component, componentPath, errors) {
   }
 }
 
+function validateAudioClipComponent(component, componentPath, errors) {
+  const fields = component.fields;
+  const allowedFieldNames = new Set(['clipId', 'src', 'kind', 'volume', 'loop', 'trigger']);
+  const allowedKinds = new Set(['sfx', 'music']);
+  const allowedTriggers = new Set(['onDemoStart', 'onMove', 'onBlockedMove', 'manual']);
+
+  if (component.version !== 1) {
+    pushMessage(errors, `${componentPath}.version`, 'audio.clip version must be exactly 1');
+  }
+
+  if (component.replicated !== false) {
+    pushMessage(errors, `${componentPath}.replicated`, 'audio.clip must not be replicated');
+  }
+
+  if (!isPlainObject(fields)) {
+    pushMessage(errors, `${componentPath}.fields`, 'audio.clip fields must be an object');
+    return;
+  }
+
+  for (const fieldName of Object.keys(fields)) {
+    if (!allowedFieldNames.has(fieldName)) {
+      pushMessage(errors, `${componentPath}.fields.${fieldName}`, 'is not allowed for audio.clip');
+    }
+  }
+
+  if (typeof fields.clipId !== 'string' || fields.clipId.trim().length === 0) {
+    pushMessage(errors, `${componentPath}.fields.clipId`, 'audio.clip clipId must be a non-empty string');
+  }
+
+  if (fields.src !== undefined && !isSafeRelativePath(fields.src)) {
+    pushMessage(errors, `${componentPath}.fields.src`, 'audio.clip src must be a safe relative path when provided');
+  }
+
+  if (!allowedKinds.has(fields.kind)) {
+    pushMessage(errors, `${componentPath}.fields.kind`, 'audio.clip kind must be `sfx` or `music`');
+  }
+
+  if (fields.volume !== undefined && (typeof fields.volume !== 'number' || fields.volume < 0 || fields.volume > 1)) {
+    pushMessage(errors, `${componentPath}.fields.volume`, 'audio.clip volume must be a number between 0 and 1 when provided');
+  }
+
+  if (fields.loop !== undefined && typeof fields.loop !== 'boolean') {
+    pushMessage(errors, `${componentPath}.fields.loop`, 'audio.clip loop must be a boolean when provided');
+  }
+
+  if (fields.trigger !== undefined && !allowedTriggers.has(fields.trigger)) {
+    pushMessage(
+      errors,
+      `${componentPath}.fields.trigger`,
+      'audio.clip trigger must be onDemoStart, onMove, onBlockedMove or manual when provided'
+    );
+  }
+}
+
 export function validateSceneInvariants(scene) {
   const errors = [];
   const warnings = [];
@@ -357,6 +426,10 @@ export function validateSceneInvariants(scene) {
 
       if (component.kind === 'collision.bounds') {
         validateCollisionBoundsComponent(component, componentPath, errors);
+      }
+
+      if (component.kind === 'audio.clip') {
+        validateAudioClipComponent(component, componentPath, errors);
       }
     }
 

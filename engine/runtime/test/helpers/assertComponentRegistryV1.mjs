@@ -13,7 +13,8 @@ export function assertComponentRegistryV1(registry) {
     'visual.sprite',
     'tile.layer',
     'camera.viewport',
-    'collision.bounds'
+    'collision.bounds',
+    'audio.clip'
   ]);
 
   const uniqueNames = new Set(names);
