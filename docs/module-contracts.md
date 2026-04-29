@@ -230,6 +230,7 @@ Compatibilidade:
 - `run-loop` aplica apenas bloqueio de movimento (sem física completa);
 - Browser Playable Demo pode aplicar blocking local opt-in com `render-browser-demo --movement-blocking` ou `render_browser_demo({ movementBlocking: true })`;
 - Browser Playable Demo pode expor HUD Lite local opt-in com `render-browser-demo --gameplay-hud` ou `render_browser_demo({ gameplayHud: true })`;
+- Browser Playable Demo pode expor Playable Save/Load Lite local opt-in com `render-browser-demo --playable-save-load` ou `render_browser_demo({ playableSaveLoad: true })`;
 - sem essas flags/opcoes, Browser Playable Demo permanece igual;
 - `InputIntent v1`, `KeyboardInputScript v1`, RenderSnapshot v1, Save/Load v1 e renderers permanecem inalterados;
 - nao adiciona UI system completo, fisica completa, resolucao complexa, pathfinding, editor ou servidor.
@@ -309,6 +310,22 @@ Compatibilidade:
 - se o `RenderSnapshot` inclui `assetSrc` e a browser demo recebeu `assetManifestPath`, o HTML resolve `assetSrc` para `file:///...` local e tenta `new Image()` / `drawImage`, com fallback para `rect` em erro.
 - o loop visual do browser e local ao HTML e nao avanca simulacao sozinho.
 - foco do canvas e controles locais de pause/reset pertencem ao HTML autocontido, nao ao loop headless.
+
+## Browser Playable Demo Local State v1
+
+Contrato local e manual para export/import dentro do HTML da Browser Playable Demo:
+
+- ver `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`.
+
+Compatibilidade:
+
+- nao altera `RenderSnapshot v1`;
+- nao altera `State Snapshot v1`;
+- nao altera Save/Load v1, `savegame v1`, `save-state` ou `load-save`;
+- nao usa `localStorage`, `sessionStorage`, `IndexedDB`, rede ou disco;
+- existe apenas quando `--playable-save-load` ou `playableSaveLoad: true` sao usados;
+- sem entidade controlavel, os controles de Playable Save/Load Lite nao sao renderizados;
+- com `movementBlocking` ativo, import de posicao bloqueada e rejeitado de forma previsivel.
 
 ## State Model v1 (interno)
 

@@ -58,6 +58,9 @@ O gate passa quando:
 - runtime, CLI e MCP permanecem alinhados.
 - `render-browser-demo --gameplay-hud` expoe HUD Lite local sem alterar o comportamento padrao.
 - `render-browser-demo --gameplay-hud --movement-blocking` expoe contadores locais de blocking no HTML.
+- `render-browser-demo --playable-save-load` expoe export/import manual local sem alterar o comportamento padrao.
+- `render-browser-demo --gameplay-hud --movement-blocking --playable-save-load` prova que HUD, blocking e save/load local coexistem.
+- a cobertura atual tambem inclui `playableSaveLoad` isolado e combinado com `gameplayHud` e `movementBlocking`.
 - a Browser Demo da cena canônica cobre as combinacoes sem flags, `movementBlocking`, `gameplayHud` e `gameplayHud + movementBlocking`.
 - o HTML gerado permanece autocontido e sem APIs proibidas como `fetch`, `localStorage`, timers de relogio, scripts externos ou imports dinamicos.
 - os envelopes CLI/MCP preservam `browserDemoVersion`, `scene`, `tick` e `html`; `outputPath` aparece apenas no CLI quando `--out` e usado.
@@ -77,8 +80,10 @@ O gate passa quando:
 
 ## Seguimento
 
-`Browser Gameplay HUD Lite v1` e o hardening dos exemplos jogaveis pequenos ja complementam este gate expondo estado minimo de gameplay na Browser Playable Demo.
+`Browser Gameplay HUD Lite v1`, Playable Save/Load Lite v1 e o hardening dos exemplos jogaveis pequenos ja complementam este gate expondo estado minimo de gameplay na Browser Playable Demo.
 
 Esse HUD Lite continua opt-in, local ao HTML e nao transforma a Browser Demo no runtime canonico do engine.
 
-O proximo pacote recomendado e `Playable Save/Load Lite`, ou um pacote equivalente de export/save V1 para o exemplo jogavel pequeno.
+Playable Save/Load Lite tambem continua opt-in, local ao HTML e nao substitui `savegame v1`, `State Snapshot v1`, `save-state` ou `load-save`.
+
+O proximo pacote recomendado e `Simple HTML Export v1` para empacotar a demo jogavel pequena sem criar editor, servidor ou sistema de build amplo.

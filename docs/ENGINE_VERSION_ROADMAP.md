@@ -52,9 +52,10 @@ Capacidades alvo:
 - V1 Small 2D readiness gate com cena consolidada;
 - Browser Gameplay HUD Lite opt-in;
 - hardening de exemplos jogaveis pequenos;
+- Playable Save/Load Lite browser-local opt-in;
 - UI system simples futuro;
 - audio-lite;
-- save/load jogavel;
+- save/load jogavel browser-local;
 - export HTML simples;
 - templates de jogo top-down/platformer.
 
@@ -206,6 +207,6 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Playable Save/Load Lite.
-2. Export/save V1 para exemplo jogavel pequeno.
+1. Simple HTML Export v1.
+2. Export/save V1 mais formal para exemplo jogavel pequeno, se ainda necessario apos o HTML export.
 3. UI/audio/animation basicos para V2, preservando HUD Lite como diagnostico local ate existir UI system formal.
