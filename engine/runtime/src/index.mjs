@@ -40,6 +40,11 @@ export {
 } from './render/render-browser-playable-demo-html-v1.mjs';
 export { materializeBrowserDemoAssetSrcV1 } from './render/materialize-browser-demo-asset-src-v1.mjs';
 export {
+  buildHtmlGameExportV1,
+  exportHtmlGameV1,
+  SIMPLE_HTML_EXPORT_VERSION
+} from './export/export-html-game-v1.mjs';
+export {
   createStateModelV1FromScene,
   createInitialStateFromScene,
   snapshotStateV1

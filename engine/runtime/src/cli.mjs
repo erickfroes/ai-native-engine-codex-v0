@@ -26,6 +26,7 @@ import {
   createBrowserPlayableDemoMetadataV1,
   BROWSER_PLAYABLE_DEMO_VERSION,
   materializeBrowserDemoAssetSrcV1,
+  exportHtmlGameV1,
   runDeterministicReplay,
   buildReplayArtifact,
   createLoopExecutionPlan,
@@ -55,6 +56,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs render-svg-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-canvas-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--out <path>] [--json]
+  node engine/runtime/src/cli.mjs export-html-game <path> --out <path> [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--json]
   node engine/runtime/src/cli.mjs save-state <path> --ticks <n> [--seed <n>] --out <dir> [--json]
   node engine/runtime/src/cli.mjs load-save <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
@@ -550,6 +552,37 @@ async function run() {
       console.log(outputPath);
     } else {
       process.stdout.write(html);
+    }
+
+    return;
+  }
+
+  if (command === 'export-html-game') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    if (!hasFlag('--out')) {
+      throw new Error('export-html-game: --out is required');
+    }
+
+    const requestedOutPath = readStringFlag('export-html-game', '--out', undefined);
+    const movementBlocking = hasFlag('--movement-blocking');
+    const gameplayHud = hasFlag('--gameplay-hud');
+    const playableSaveLoad = hasFlag('--playable-save-load');
+    const envelope = await exportHtmlGameV1(maybePath, {
+      outputPath: requestedOutPath,
+      movementBlocking,
+      gameplayHud,
+      playableSaveLoad
+    });
+
+    if (asJson) {
+      console.log(JSON.stringify(envelope, null, 2));
+    } else {
+      console.log(envelope.outputPath);
     }
 
     return;
