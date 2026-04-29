@@ -535,3 +535,18 @@ Contrato leve de conteudo para exemplos V1 Small 2D copiar-e-adaptar:
 - nao usa `entity.prefab` como semantica de runtime.
 - nao altera RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Save/Load v1.
 - nao e template engine, prefab system, editor, UI system, fisica, pathfinding, audio, animation ou platformer real.
+
+## V1 Small 2D Game Creation Guide
+
+Contrato operacional de workflow para criar jogos pequenos 2D a partir de Game Templates v1:
+
+- ver `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`.
+- pacote de prompt: `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md`.
+- checklist: `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`.
+- exemplo documental: `docs/examples/V1_SMALL_2D_GAME_PLAN_EXAMPLE.md`.
+- reutiliza `templates/top-down-basic` e `templates/side-view-blocking-basic`.
+- reutiliza Scene Document v1, InputIntent v1, Browser Playable Demo v1, Browser Demo Local State v1 e Simple HTML Export v1.
+- nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
+- `entity.prefab` permanece reservado/fora deste workflow; o guia nao define semantica de prefab.
+- HUD Lite e Playable Save/Load Lite continuam opt-ins locais do HTML, nao UI system ou savegame canonico.
+- nao e template engine, prefab system, scaffolder obrigatorio, editor, UI system completo, fisica, gravidade, jump, pathfinding, combate, inventario, audio, animation, servidor, bundler ou build pipeline V2.
