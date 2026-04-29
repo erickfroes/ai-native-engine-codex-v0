@@ -10,6 +10,7 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const v1Small2dScenePath = path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json');
 const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const movementBlockingTileBlockedScenePath = path.join(
@@ -345,6 +346,64 @@ test('render-browser-demo leaves movement blocking data out without --movement-b
   assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
   assert.equal(payload.scene, 'movement-blocking-tile-blocked-fixture');
   assert.doesNotMatch(payload.html, /"movementBlocking":/);
+});
+
+test('render-browser-demo leaves Browser Gameplay HUD Lite out without --gameplay-hud', () => {
+  const result = runCli([
+    'render-browser-demo',
+    v1Small2dScenePath,
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'v1-small-2d');
+  assert.doesNotMatch(payload.html, /"gameplayHud":/);
+  assert.doesNotMatch(payload.html, /browser-gameplay-hud/);
+});
+
+test('render-browser-demo --gameplay-hud embeds Browser Gameplay HUD Lite for the V1 small 2D scene', () => {
+  const result = runCli([
+    'render-browser-demo',
+    v1Small2dScenePath,
+    '--gameplay-hud',
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.browserDemoVersion, 1);
+  assert.equal(payload.scene, 'v1-small-2d');
+  assert.match(payload.html, /id="browser-gameplay-hud"/);
+  assert.match(payload.html, /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":false,"snapshotTick":0\}/);
+  assert.match(payload.html, /<dd id="browser-gameplay-hud-entity">player\.hero<\/dd>/);
+  assert.match(payload.html, /<dd id="browser-gameplay-hud-movement-blocking">disabled<\/dd>/);
+  assert.doesNotMatch(payload.html, /"movementBlocking":/);
+});
+
+test('render-browser-demo --gameplay-hud --movement-blocking embeds HUD and blocking metadata together', () => {
+  const result = runCli([
+    'render-browser-demo',
+    v1Small2dScenePath,
+    '--gameplay-hud',
+    '--movement-blocking',
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'v1-small-2d');
+  assert.match(payload.html, /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":true,"snapshotTick":0\}/);
+  assert.match(payload.html, /"movementBlocking":/);
+  assert.match(payload.html, /"id":"map\.ground\.tile\.2\.3"/);
+  assert.match(payload.html, /id="browser-gameplay-hud-blocked-moves"/);
+  assert.match(payload.html, /<dd id="browser-gameplay-hud-movement-blocking">enabled<\/dd>/);
 });
 
 test('render-browser-demo --movement-blocking is deterministic for blocked and open tile scenes', () => {

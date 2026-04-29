@@ -89,27 +89,58 @@ test('v1 small 2d readiness scene renders a deterministic camera-shifted snapsho
 test('v1 small 2d Browser Demo keeps default movement free and embeds blocking only with the opt-in flag', () => {
   const defaultResult = runCli(['render-browser-demo', scenePath, '--json']);
   const blockingResult = runCli(['render-browser-demo', scenePath, '--movement-blocking', '--json']);
+  const hudResult = runCli(['render-browser-demo', scenePath, '--gameplay-hud', '--json']);
+  const blockingHudResult = runCli([
+    'render-browser-demo',
+    scenePath,
+    '--movement-blocking',
+    '--gameplay-hud',
+    '--json'
+  ]);
 
   assert.equal(defaultResult.status, 0, defaultResult.stderr);
   assert.equal(blockingResult.status, 0, blockingResult.stderr);
+  assert.equal(hudResult.status, 0, hudResult.stderr);
+  assert.equal(blockingHudResult.status, 0, blockingHudResult.stderr);
 
   const defaultEnvelope = JSON.parse(defaultResult.stdout);
   const blockingEnvelope = JSON.parse(blockingResult.stdout);
+  const hudEnvelope = JSON.parse(hudResult.stdout);
+  const blockingHudEnvelope = JSON.parse(blockingHudResult.stdout);
 
   assert.deepEqual(Object.keys(defaultEnvelope).sort(), ['browserDemoVersion', 'html', 'scene', 'tick']);
   assert.deepEqual(Object.keys(blockingEnvelope).sort(), ['browserDemoVersion', 'html', 'scene', 'tick']);
+  assert.deepEqual(Object.keys(hudEnvelope).sort(), ['browserDemoVersion', 'html', 'scene', 'tick']);
+  assert.deepEqual(Object.keys(blockingHudEnvelope).sort(), ['browserDemoVersion', 'html', 'scene', 'tick']);
   assert.equal(defaultEnvelope.scene, 'v1-small-2d');
   assert.equal(blockingEnvelope.scene, 'v1-small-2d');
+  assert.equal(hudEnvelope.scene, 'v1-small-2d');
+  assert.equal(blockingHudEnvelope.scene, 'v1-small-2d');
   assert.equal(defaultEnvelope.browserDemoVersion, 1);
   assert.equal(blockingEnvelope.browserDemoVersion, 1);
+  assert.equal(hudEnvelope.browserDemoVersion, 1);
+  assert.equal(blockingHudEnvelope.browserDemoVersion, 1);
   assert.match(defaultEnvelope.html, /data-controllable-entity="player\.hero"/);
   assert.match(defaultEnvelope.html, /"id":"map\.ground\.tile\.2\.3"/);
+  assert.doesNotMatch(defaultEnvelope.html, /"gameplayHud":/);
+  assert.doesNotMatch(defaultEnvelope.html, /id="browser-gameplay-hud"/);
   assert.doesNotMatch(defaultEnvelope.html, /"movementBlocking":/);
   assert.match(blockingEnvelope.html, /"movementBlocking":/);
   assert.match(blockingEnvelope.html, /"id":"map\.ground\.tile\.2\.3"/);
   assert.match(blockingEnvelope.html, /"id":"wall\.block"/);
+  assert.match(hudEnvelope.html, /id="browser-gameplay-hud"/);
+  assert.match(hudEnvelope.html, /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":false,"snapshotTick":0\}/);
+  assert.doesNotMatch(hudEnvelope.html, /"movementBlocking":/);
+  assert.match(blockingHudEnvelope.html, /id="browser-gameplay-hud"/);
+  assert.match(
+    blockingHudEnvelope.html,
+    /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":true,"snapshotTick":0\}/
+  );
+  assert.match(blockingHudEnvelope.html, /"movementBlocking":/);
   assertNoForbiddenBrowserSurface(defaultEnvelope.html);
   assertNoForbiddenBrowserSurface(blockingEnvelope.html);
+  assertNoForbiddenBrowserSurface(hudEnvelope.html);
+  assertNoForbiddenBrowserSurface(blockingHudEnvelope.html);
 });
 
 test('v1 small 2d readiness diagnostics stay deterministic through runtime and CLI', async () => {

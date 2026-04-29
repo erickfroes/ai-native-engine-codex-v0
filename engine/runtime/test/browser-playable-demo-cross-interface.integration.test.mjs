@@ -18,6 +18,7 @@ const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const v1Small2dScenePath = path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json');
 const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
@@ -533,6 +534,94 @@ test('browser playable demo movementBlocking stays aligned across runtime, CLI a
       assert.match(runtimeEnvelope.html, /"movementBlocking":/);
       assert.match(runtimeEnvelope.html, new RegExp(`"id":"${testCase.expectedTileId.replaceAll('.', '\\.')}"`));
     }
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('browser gameplay HUD lite stays opt-in and aligned across runtime, CLI and MCP', async () => {
+  const scene = await loadSceneFile(v1Small2dScenePath);
+  const snapshot = await buildRenderSnapshotV1(scene);
+  const runtimeEnvelope = {
+    browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderBrowserPlayableDemoHtmlV1({
+      title: `${snapshot.scene} Browser Playable Demo`,
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+        gameplayHud: true,
+        movementBlocking: true
+      })
+    })
+  };
+
+  const cliResult = runCli([
+    'render-browser-demo',
+    v1Small2dScenePath,
+    '--gameplay-hud',
+    '--movement-blocking',
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+
+  const defaultCliResult = runCli([
+    'render-browser-demo',
+    v1Small2dScenePath,
+    '--json'
+  ]);
+
+  assert.equal(defaultCliResult.status, 0, defaultCliResult.stderr);
+  const defaultCliEnvelope = JSON.parse(defaultCliResult.stdout);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/v1-small-2d.scene.json',
+        gameplayHud: true,
+        movementBlocking: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+
+    assertBrowserDemoEnvelope(runtimeEnvelope, {
+      expectedScene: 'v1-small-2d',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(cliEnvelope, {
+      expectedScene: 'v1-small-2d',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(mcpEnvelope, {
+      expectedScene: 'v1-small-2d',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(defaultCliEnvelope, {
+      expectedScene: 'v1-small-2d',
+      expectedTick: 0
+    });
+    assert.deepEqual(runtimeEnvelope, cliEnvelope);
+    assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+    assert.match(runtimeEnvelope.html, /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":true,"snapshotTick":0\}/);
+    assert.match(runtimeEnvelope.html, /id="browser-gameplay-hud"/);
+    assert.match(runtimeEnvelope.html, /"movementBlocking":/);
+    assert.match(runtimeEnvelope.html, /"id":"map\.ground\.tile\.2\.3"/);
+    assert.doesNotMatch(defaultCliEnvelope.html, /"gameplayHud":/);
+    assert.doesNotMatch(defaultCliEnvelope.html, /browser-gameplay-hud/);
   } finally {
     await mcp.close();
   }

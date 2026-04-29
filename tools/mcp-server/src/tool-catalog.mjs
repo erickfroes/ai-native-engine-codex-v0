@@ -257,6 +257,10 @@ export const toolCatalog = [
         movementBlocking: {
           type: 'boolean',
           description: 'When true, embed local Browser Demo movement blocking data from collision.bounds and solid tile.layer tiles.'
+        },
+        gameplayHud: {
+          type: 'boolean',
+          description: 'When true, embed Browser Gameplay HUD Lite v1 local diagnostic state in the generated HTML.'
         }
       },
       additionalProperties: false

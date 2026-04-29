@@ -12,6 +12,7 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - `metadata.controllableEntityId` pode fixar o rect controlavel quando necessario.
 - `metadata.stepPx` define o passo fixo por input; o default atual e `4`.
 - `metadata.movementBlocking` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede blocking local.
+- `metadata.gameplayHud` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede HUD Lite local.
 - o loop visual local usa `requestAnimationFrame` apenas para redraw continuo do estado atual.
 
 ## Comportamento
@@ -35,6 +36,10 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - faz redraw continuo e tambem logo apos cada input valido;
 - expoe controle local `Pause rendering` / `Resume rendering` para pausar ou retomar apenas o redraw loop;
 - o botao `Reset` restaura a posicao inicial do snapshot e zera o contador local de inputs;
+- com `gameplayHud` opt-in, exibe Browser Gameplay HUD Lite com entidade controlada, tick do snapshot, posicao atual, inputs locais, movimentos bloqueados, ultimo input, ultimo resultado, rendering `running/paused` e movement blocking `enabled/disabled`;
+- sem `gameplayHud`, o HTML nao embute o bloco `browser-gameplay-hud` nem o payload `metadata.gameplayHud`;
+- com `gameplayHud` e sem `movementBlocking`, `blocked moves` permanece `0` e o HUD mostra movement blocking `disabled`;
+- com `gameplayHud` e `movementBlocking`, movimentos bloqueados incrementam `blocked moves` e mostram ultimo resultado `blocked`;
 - `Pause rendering`, `Resume rendering` e `Reset` sao controles locais do HTML autocontido e nao alteram contratos v1 publicados;
 - se a entidade controlavel configurada nao existir, faz fallback deterministico para o primeiro rect do snapshot; se nao houver rect, a demo permanece sem alvo controlavel;
 - nao importa o runtime Node no browser;
@@ -44,8 +49,8 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 
 ## CLI e MCP
 
-- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--out <path>] [--json]`
-- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?, movementBlocking?)`
+- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--out <path>] [--json]`
+- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?, movementBlocking?, gameplayHud?)`
 
 Exemplo para gerar um arquivo HTML:
 
@@ -57,6 +62,12 @@ Exemplo com blocking local opt-in:
 
 ```bash
 node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/movement-blocking-tile-blocked.scene.json --movement-blocking --out ./tmp/tile-blocking-browser-demo.html --json
+```
+
+Exemplo com HUD Lite local opt-in na cena V1 Small 2D:
+
+```bash
+node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene.json --gameplay-hud --movement-blocking --out ./tmp/v1-small-2d-hud.html --json
 ```
 
 Depois de gerar com `--out`, abra o arquivo HTML diretamente no navegador. A demo e autocontida: nao precisa de servidor local, assets reais ou runtime Node no cliente.
@@ -83,6 +94,16 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 - `camera.viewport` e respeitado porque os bounds embutidos usam a mesma coordenada de tela dos drawCalls renderizados.
 - o resultado e deterministico para a mesma cena, snapshot, manifesto e opcoes.
 
+### Browser Gameplay HUD Lite Local
+
+- `--gameplay-hud` no CLI e `gameplayHud: true` no MCP embutem HUD Lite local no HTML.
+- o HUD e diagnostico e browser-local; ele nao e um sistema de UI completo do engine.
+- o HUD deriva apenas do snapshot, da entidade controlavel, do estado local de input e do metadata interno de blocking quando presente.
+- `inputs local` conta movimentos aplicados; movimentos bloqueados ficam em `blocked moves`.
+- `last result` usa valores simples: `idle`, `moved`, `blocked`, `ignored` ou `reset`.
+- `rendering` mostra apenas o estado do redraw loop local (`running` ou `paused`), nao um tick de simulacao do engine.
+- o HUD nao altera `RenderSnapshot v1`, `InputIntent v1`, `MovementBlockingReport v1`, `TileCollisionReport v1`, `run-loop` ou o envelope publico `browserDemoVersion`.
+
 ### Asset Manifest Local
 
 - `render-browser-demo --asset-manifest <path>` e `render_browser_demo(assetManifestPath)` materializam `assetSrc` para `file:///...` local a partir do diretorio do manifesto.
@@ -104,3 +125,4 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 - nao usa rede;
 - nao cria/transforma pipeline de assets reais no runtime;
 - nao cria servidor web.
+- nao cria UI system completo, widgets declarativos, menus, layout engine ou HUD canonico de jogo.

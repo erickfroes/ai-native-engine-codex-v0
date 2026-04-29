@@ -21,6 +21,24 @@ function extractInlineScript(html) {
   return match[1];
 }
 
+function createTrackedTextElement() {
+  let value = '';
+  return {
+    writeCount: 0,
+    get textContent() {
+      return value;
+    },
+    set textContent(nextValue) {
+      value = String(nextValue);
+      this.writeCount += 1;
+    }
+  };
+}
+
+function getTextElementWriteCounts(elements) {
+  return Object.fromEntries(Object.entries(elements).map(([key, element]) => [key, element.writeCount]));
+}
+
 function createCanvasHarness(html) {
   const script = extractInlineScript(html);
   const operations = [];
@@ -33,6 +51,17 @@ function createCanvasHarness(html) {
   let nextAnimationFrameHandle = 1;
   const statusElement = { textContent: '' };
   const positionElement = { textContent: '' };
+  const gameplayHudElements = {
+    entity: createTrackedTextElement(),
+    tick: createTrackedTextElement(),
+    position: createTrackedTextElement(),
+    inputs: createTrackedTextElement(),
+    blockedMoves: createTrackedTextElement(),
+    lastInput: createTrackedTextElement(),
+    lastResult: createTrackedTextElement(),
+    rendering: createTrackedTextElement(),
+    movementBlocking: createTrackedTextElement()
+  };
   const dataElement = { textContent: extractInlineJson(html) };
   const pauseButton = {
     textContent: '',
@@ -165,6 +194,33 @@ function createCanvasHarness(html) {
         if (id === 'browser-playable-demo-position') {
           return positionElement;
         }
+        if (id === 'browser-gameplay-hud-entity') {
+          return gameplayHudElements.entity;
+        }
+        if (id === 'browser-gameplay-hud-tick') {
+          return gameplayHudElements.tick;
+        }
+        if (id === 'browser-gameplay-hud-position') {
+          return gameplayHudElements.position;
+        }
+        if (id === 'browser-gameplay-hud-inputs') {
+          return gameplayHudElements.inputs;
+        }
+        if (id === 'browser-gameplay-hud-blocked-moves') {
+          return gameplayHudElements.blockedMoves;
+        }
+        if (id === 'browser-gameplay-hud-last-input') {
+          return gameplayHudElements.lastInput;
+        }
+        if (id === 'browser-gameplay-hud-last-result') {
+          return gameplayHudElements.lastResult;
+        }
+        if (id === 'browser-gameplay-hud-rendering') {
+          return gameplayHudElements.rendering;
+        }
+        if (id === 'browser-gameplay-hud-movement-blocking') {
+          return gameplayHudElements.movementBlocking;
+        }
         throw new Error(`unexpected element lookup: ${id}`);
       }
     }
@@ -184,6 +240,7 @@ function createCanvasHarness(html) {
       }
     },
     operations,
+    gameplayHudElements,
     imageInstances,
     pauseButton,
     positionElement,
@@ -1032,6 +1089,8 @@ test('renderBrowserPlayableDemoHtmlV1 keeps blocked scenes freely movable withou
   const keydown = harness.canvasListeners.get('keydown');
 
   assert.doesNotMatch(html, /"movementBlocking"/);
+  assert.doesNotMatch(html, /"gameplayHud"/);
+  assert.doesNotMatch(html, /browser-gameplay-hud/);
 
   keydown({
     code: 'ArrowRight',
@@ -1041,6 +1100,108 @@ test('renderBrowserPlayableDemoHtmlV1 keeps blocked scenes freely movable withou
   assert.equal(harness.positionElement.textContent, 'Position: x 4, y 0');
   assert.match(harness.statusElement.textContent, /Inputs 1/);
   assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(4, 0\)/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 embeds Browser Gameplay HUD Lite only when gameplayHud metadata is enabled', () => {
+  const snapshot = createTutorialSnapshot();
+  const metadata = createBrowserPlayableDemoMetadataV1(
+    {
+      entities: [
+        { id: 'player.hero' },
+        { id: 'camera.main' }
+      ]
+    },
+    snapshot,
+    { gameplayHud: true }
+  );
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'tutorial Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+
+  assert.deepEqual(metadata, {
+    controllableEntityId: 'player.hero',
+    stepPx: 4,
+    gameplayHud: {
+      enabled: true,
+      movementBlockingEnabled: false,
+      snapshotTick: 4
+    }
+  });
+  assert.match(html, /id="browser-gameplay-hud"/);
+  assert.match(html, /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":false,"snapshotTick":4\}/);
+  assert.equal(harness.gameplayHudElements.entity.textContent, 'player.hero');
+  assert.equal(harness.gameplayHudElements.tick.textContent, '4');
+  assert.equal(harness.gameplayHudElements.position.textContent, 'x 0, y 0');
+  assert.equal(harness.gameplayHudElements.inputs.textContent, '0');
+  assert.equal(harness.gameplayHudElements.blockedMoves.textContent, '0');
+  assert.equal(harness.gameplayHudElements.lastInput.textContent, 'none');
+  assert.equal(harness.gameplayHudElements.lastResult.textContent, 'idle');
+  assert.equal(harness.gameplayHudElements.rendering.textContent, 'running');
+  assert.equal(harness.gameplayHudElements.movementBlocking.textContent, 'disabled');
+
+  const hudWriteCountsAfterInitialRender = getTextElementWriteCounts(harness.gameplayHudElements);
+  harness.flushAnimationFrames(3);
+  assert.deepEqual(getTextElementWriteCounts(harness.gameplayHudElements), hudWriteCountsAfterInitialRender);
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+
+  assert.equal(harness.gameplayHudElements.position.textContent, 'x 4, y 0');
+  assert.equal(harness.gameplayHudElements.inputs.textContent, '1');
+  assert.equal(harness.gameplayHudElements.blockedMoves.textContent, '0');
+  assert.equal(harness.gameplayHudElements.lastInput.textContent, 'ArrowRight');
+  assert.equal(harness.gameplayHudElements.lastResult.textContent, 'moved');
+
+  keydown({
+    code: 'KeyQ',
+    preventDefault() {
+      assert.fail('invalid local inputs must not call preventDefault');
+    }
+  });
+
+  assert.equal(harness.gameplayHudElements.inputs.textContent, '1');
+  assert.equal(harness.gameplayHudElements.lastInput.textContent, 'KeyQ');
+  assert.equal(harness.gameplayHudElements.lastResult.textContent, 'ignored');
+
+  harness.pauseButton.click();
+  assert.equal(harness.gameplayHudElements.rendering.textContent, 'paused');
+  harness.pauseButton.click();
+  assert.equal(harness.gameplayHudElements.rendering.textContent, 'running');
+
+  harness.resetButton.click();
+  assert.equal(harness.gameplayHudElements.position.textContent, 'x 0, y 0');
+  assert.equal(harness.gameplayHudElements.inputs.textContent, '0');
+  assert.equal(harness.gameplayHudElements.blockedMoves.textContent, '0');
+  assert.equal(harness.gameplayHudElements.lastInput.textContent, 'none');
+  assert.equal(harness.gameplayHudElements.lastResult.textContent, 'reset');
+});
+
+test('renderBrowserPlayableDemoHtmlV1 rejects gameplay HUD metadata when movementBlocking state drifts', () => {
+  const snapshot = createTutorialSnapshot();
+
+  assert.throws(
+    () =>
+      renderBrowserPlayableDemoHtmlV1({
+        title: 'tutorial Browser Playable Demo',
+        renderSnapshot: snapshot,
+        metadata: {
+          controllableEntityId: 'player.hero',
+          stepPx: DEFAULT_BROWSER_PLAYABLE_STEP_PX,
+          gameplayHud: {
+            enabled: true,
+            movementBlockingEnabled: true,
+            snapshotTick: snapshot.tick
+          }
+        }
+      }),
+    /metadata\.gameplayHud\.movementBlockingEnabled.*metadata\.movementBlocking\.enabled/
+  );
 });
 
 test('renderBrowserPlayableDemoHtmlV1 blocks movement against solid entity bounds when movementBlocking is enabled', () => {
@@ -1064,6 +1225,36 @@ test('renderBrowserPlayableDemoHtmlV1 blocks movement against solid entity bound
   assert.equal(harness.positionElement.textContent, 'Position: x 0, y 0');
   assert.match(harness.statusElement.textContent, /Inputs 0/);
   assert.match(harness.statusElement.textContent, /Controlled rect player\.hero at \(0, 0\)/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 increments Browser Gameplay HUD Lite blocked moves with movementBlocking enabled', () => {
+  const scene = createMovementBlockedScene();
+  const snapshot = createMovementBlockingSnapshot();
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'movement-blocking-blocked-fixture Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+      movementBlocking: true,
+      gameplayHud: true
+    })
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+
+  assert.match(html, /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":true,"snapshotTick":0\}/);
+  assert.equal(harness.gameplayHudElements.movementBlocking.textContent, 'enabled');
+
+  keydown({
+    code: 'ArrowRight',
+    preventDefault() {}
+  });
+
+  assert.equal(harness.positionElement.textContent, 'Position: x 0, y 0');
+  assert.equal(harness.gameplayHudElements.position.textContent, 'x 0, y 0');
+  assert.equal(harness.gameplayHudElements.inputs.textContent, '0');
+  assert.equal(harness.gameplayHudElements.blockedMoves.textContent, '1');
+  assert.equal(harness.gameplayHudElements.lastInput.textContent, 'ArrowRight');
+  assert.equal(harness.gameplayHudElements.lastResult.textContent, 'blocked');
 });
 
 test('renderBrowserPlayableDemoHtmlV1 allows open movement when movementBlocking is enabled', () => {

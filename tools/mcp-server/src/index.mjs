@@ -722,6 +722,13 @@ async function handleToolCall(params) {
         };
       }
 
+      if (args.gameplayHud !== undefined && typeof args.gameplayHud !== 'boolean') {
+        return {
+          content: toTextContent('render_browser_demo: `gameplayHud` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
       const scene = await loadSceneFile(targetPath);
       const resolvedAssetManifestPath = args.assetManifestPath === undefined
         ? undefined
@@ -735,7 +742,8 @@ async function handleToolCall(params) {
       const snapshot = materializeBrowserDemoAssetSrcV1(rawSnapshot, resolvedAssetManifestPath);
       const title = `${snapshot.scene} Browser Playable Demo`;
       const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, {
-        movementBlocking: args.movementBlocking === true
+        movementBlocking: args.movementBlocking === true,
+        gameplayHud: args.gameplayHud === true
       });
       const html = renderBrowserPlayableDemoHtmlV1({
         title,

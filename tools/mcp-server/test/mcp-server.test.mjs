@@ -157,6 +157,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'height'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'assetManifestPath'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'movementBlocking'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'gameplayHud'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
     assert.ok(
       Object.prototype.hasOwnProperty.call(
@@ -736,6 +737,24 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       /"id":"map\.walls\.tile\.0\.1"/
     );
 
+    const renderBrowserDemoWithGameplayHudResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        tick: 4,
+        gameplayHud: true
+      }
+    });
+
+    assert.equal(renderBrowserDemoWithGameplayHudResponse.result.isError, false);
+    assertBrowserDemoStructuredContent(renderBrowserDemoWithGameplayHudResponse.result.structuredContent);
+    assert.match(renderBrowserDemoWithGameplayHudResponse.result.structuredContent.html, /"gameplayHud":/);
+    assert.match(
+      renderBrowserDemoWithGameplayHudResponse.result.structuredContent.html,
+      /id="browser-gameplay-hud"/
+    );
+    assert.doesNotMatch(renderBrowserDemoWithGameplayHudResponse.result.structuredContent.html, /"movementBlocking":/);
+
     const renderBrowserDemoWithManifestResponseA = await client.request('tools/call', {
       name: 'render_browser_demo',
       arguments: {
@@ -871,6 +890,20 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(
       renderBrowserDemoInvalidMovementBlockingResponse.result.content[0].text,
       /render_browser_demo: `movementBlocking` must be a boolean when provided\./
+    );
+
+    const renderBrowserDemoInvalidGameplayHudResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        gameplayHud: 'yes'
+      }
+    });
+
+    assert.equal(renderBrowserDemoInvalidGameplayHudResponse.result.isError, true);
+    assert.match(
+      renderBrowserDemoInvalidGameplayHudResponse.result.content[0].text,
+      /render_browser_demo: `gameplayHud` must be a boolean when provided\./
     );
 
     const renderBrowserDemoMissingPathResponse = await client.request('tools/call', {

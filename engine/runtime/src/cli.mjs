@@ -54,7 +54,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs render-svg <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-svg-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-canvas-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
-  node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--out <path>] [--json]
+  node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs save-state <path> --ticks <n> [--seed <n>] --out <dir> [--json]
   node engine/runtime/src/cli.mjs load-save <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
@@ -508,6 +508,7 @@ async function run() {
     const assetManifestPath = readStringFlag('render-browser-demo', '--asset-manifest', undefined);
     const requestedOutPath = readStringFlag('render-browser-demo', '--out', undefined);
     const movementBlocking = hasFlag('--movement-blocking');
+    const gameplayHud = hasFlag('--gameplay-hud');
     const scene = await loadSceneFile(maybePath);
     const rawSnapshot = await buildRenderSnapshotV1(scene, {
       tick,
@@ -517,7 +518,7 @@ async function run() {
     });
     const snapshot = materializeBrowserDemoAssetSrcV1(rawSnapshot, assetManifestPath);
     const title = `${snapshot.scene} Browser Playable Demo`;
-    const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, { movementBlocking });
+    const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, { movementBlocking, gameplayHud });
     const html = renderBrowserPlayableDemoHtmlV1({
       title,
       renderSnapshot: snapshot,
