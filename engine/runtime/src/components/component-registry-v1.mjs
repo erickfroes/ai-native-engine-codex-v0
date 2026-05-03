@@ -38,6 +38,12 @@ const COMPONENT_REGISTRY_V1 = Object.freeze({
       description: 'Declarative collision bounds component'
     }),
     Object.freeze({
+      name: 'visual.sprite.animation',
+      version: 1,
+      deterministic: true,
+      description: 'Declarative Sprite Animation v1 component'
+    }),
+    Object.freeze({
       name: 'audio.clip',
       version: 1,
       deterministic: true,

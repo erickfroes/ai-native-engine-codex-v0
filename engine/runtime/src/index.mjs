@@ -78,3 +78,5 @@ export {
   assertSystemHasPhase,
   assertPhaseRegistryIntegrity
 } from './systems/system-phase-registry.mjs';
+
+export { buildSpriteAnimationReportV1 } from './render/build-sprite-animation-report-v1.mjs';
