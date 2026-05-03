@@ -41,7 +41,8 @@ import {
   buildCollisionOverlapReportV1,
   buildMovementBlockingReportV1,
   buildTileCollisionReportV1,
-  buildAudioLiteReportV1
+  buildAudioLiteReportV1,
+  buildSpriteAnimationReportV1
 } from './index.mjs';
 
 function printUsage() {
@@ -68,6 +69,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-tile-collision <path> [--json]
   node engine/runtime/src/cli.mjs inspect-movement-blocking <path> --input-intent <path> [--json]
   node engine/runtime/src/cli.mjs inspect-audio-lite <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-sprite-animation <path> [--json]
   node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--input-intent <path>] [--keyboard-script <path>] [--movement-blocking] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
@@ -875,6 +877,26 @@ async function run() {
     return;
   }
 
+
+  if (command === 'inspect-sprite-animation') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildSpriteAnimationReportV1(maybePath);
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Sprite Animation report version: ${report.spriteAnimationReportVersion}`);
+      console.log(`Scene: ${report.scene ?? '(unknown)'}`);
+      console.log(`Animations: ${report.animations.length}`);
+      console.log(`Warnings: ${report.warnings.length}`);
+      console.log(`Invalid refs: ${report.invalidRefs.length}`);
+    }
+    return;
+  }
   if (command === 'inspect-audio-lite') {
     if (!maybePath) {
       printUsage();

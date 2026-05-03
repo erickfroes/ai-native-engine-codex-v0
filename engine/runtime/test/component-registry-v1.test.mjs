@@ -20,6 +20,7 @@ test('Component Registry v1 has stable known components and lookup APIs', () => 
     'tile.layer',
     'camera.viewport',
     'collision.bounds',
+    'visual.sprite.animation',
     'audio.clip'
   ]);
   assert.equal(isKnownComponent('transform'), true);

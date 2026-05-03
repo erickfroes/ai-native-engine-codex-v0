@@ -490,6 +490,23 @@ export const toolCatalog = [
       additionalProperties: false
     }
   },
+
+  {
+    name: 'inspect_sprite_animation',
+    title: 'Inspect Sprite Animation',
+    description: 'Build SpriteAnimationReport v1 from visual.sprite.animation components.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
   {
     name: 'inspect_audio_lite',
     title: 'Inspect Audio Lite',
