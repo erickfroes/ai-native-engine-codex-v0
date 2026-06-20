@@ -21,7 +21,9 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - V1 Small 2D Game Creation Guide / Codex package: concluido como workflow Codex-first para criar jogos pequenos a partir dos templates.
 - V1 Small 2D Release Checkpoint: concluido como fechamento documental, matriz de capacidade e validacao canonica.
 - Audio Lite v1: concluido como diagnostico declarativo e opt-in browser/export.
+- UI System v1: concluido como contrato declarativo de `ui.screen` com arvore de widgets e report runtime/CLI/MCP.
 - Sprite Animation v1: concluido como diagnostico declarativo runtime/CLI/MCP.
+- Prefab System v1: concluido como resolucao declarativa minima por arquivo e report diagnostico runtime/CLI/MCP.
 
 ## O que o Codex recebe
 
@@ -37,6 +39,9 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Browser Playable Demo com blocking local opt-in;
 - Browser Playable Demo com HUD Lite local opt-in;
 - Browser Playable Demo com Playable Save/Load Lite local opt-in;
+- `ui.screen` declarativo com widget tree serializavel e `inspect-ui-system` / `inspect_ui_system`;
+- `entity.prefab` resolvido por arquivo local seguro em `loadSceneFile` e consumidores por path;
+- `inspect-prefab-usage` / `inspect_prefab_usage`;
 - `export-html-game` / `export_html_game` para escrever HTML jogavel autocontido;
 - `templates/top-down-basic` e `templates/side-view-blocking-basic`;
 - cena `scenes/v1-small-2d.scene.json` para readiness V1;
@@ -53,7 +58,9 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `docs/V1_SMALL_2D_READINESS.md`;
 - `docs/V1_SMALL_2D_TEST_MATRIX.md`;
 - `docs/AUDIO_LITE_V1.md`;
+- `docs/UI_SYSTEM_V1.md`;
 - `docs/SPRITE_ANIMATION_V1.md`;
+- `docs/PREFAB_SYSTEM_V1.md`;
 - suites cross-interface;
 - roadmap progressivo ate 3D AAA;
 - estrategia de subagentes e skills.
@@ -88,7 +95,9 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 26. `docs/V1_SMALL_2D_READINESS.md`
 27. `docs/V1_SMALL_2D_TEST_MATRIX.md`
 28. `docs/AUDIO_LITE_V1.md`
-29. `docs/SPRITE_ANIMATION_V1.md`
+29. `docs/UI_SYSTEM_V1.md`
+30. `docs/SPRITE_ANIMATION_V1.md`
+31. `docs/PREFAB_SYSTEM_V1.md`
 
 ## Baseline obrigatorio
 
@@ -103,9 +112,9 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. UI system/prefab system V2 conforme roadmap.
-2. Manter Sprite Animation v1 como diagnostico declarativo ate existir runtime visual V2 formal.
-3. Evitar transformar HUD Lite em UI system completo antes do pacote apropriado.
+1. Fazer o runtime visual V2 consumir UI System v1 de forma incremental, sem acoplar HUD Lite ao runtime canonico.
+2. Expandir o prefab system alem do slice minimo atual sem perder seguranca por path e diff pequeno.
+3. Manter Sprite Animation v1 como diagnostico declarativo ate existir consumo visual V2 formal.
 4. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Uso de subagentes
@@ -139,3 +148,12 @@ Subagentes adicionais recomendados estao em `.codex/agents/` e descritos em `doc
 ## Regra pratica de continuidade
 
 Se houver duvida, preserve contratos v1 existentes, adicione fixture/teste primeiro e so depois implemente comportamento.
+
+## Formato de entrega ao usuario
+
+Ao concluir cada passo relevante ou tarefa completa, responder sempre com:
+
+- `Resumo`: o que mudou, foi validado ou ficou decidido.
+- `Checklist`: contratos, testes, docs e riscos pendentes em lista curta.
+
+Nao depender de o usuario pedir esse formato novamente.

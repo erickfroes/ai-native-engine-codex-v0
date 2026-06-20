@@ -62,7 +62,8 @@
             "type": "string"
           },
           "prefab": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "components": {
             "type": "array",

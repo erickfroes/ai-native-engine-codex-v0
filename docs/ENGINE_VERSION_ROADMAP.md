@@ -57,7 +57,7 @@ Capacidades alvo:
 - Game Templates v1;
 - V1 Small 2D Game Creation Guide / Codex package;
 - V1 Small 2D Release Checkpoint;
-- UI system simples futuro de V2;
+- UI System v1 entregue como primeiro contrato declarativo/report de V2;
 - Audio Lite v1 como primeiro pacote incremental pos-checkpoint;
 - Sprite Animation v1 concluido como diagnostico declarativo runtime/CLI/MCP;
 - save/load jogavel formal futuro, se ainda necessario;
@@ -212,5 +212,5 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. UI system/prefab system V2 conforme roadmap, preservando HUD Lite como diagnostico local ate existir UI system formal.
-2. Runtime visual V2 consumir Sprite Animation v1 apenas depois de contrato/fixture/report permanecerem estaveis.
+1. Runtime visual V2 consumir UI System v1 e Sprite Animation v1 de forma incremental, preservando HUD Lite como diagnostico local.
+2. Expandir o prefab system minimo sem perder seguranca por path, contratos curtos e diff pequeno.

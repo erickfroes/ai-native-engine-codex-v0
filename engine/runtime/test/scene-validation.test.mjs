@@ -140,6 +140,28 @@ function validateAudioClipFields(fields, componentOverrides = {}) {
   });
 }
 
+function validateUiScreenFields(fields, componentOverrides = {}) {
+  return validateSceneInvariants({
+    version: 1,
+    metadata: { name: 'ui-screen-negative' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'ui.main',
+        components: [
+          {
+            kind: 'ui.screen',
+            version: 1,
+            replicated: false,
+            fields,
+            ...componentOverrides
+          }
+        ]
+      }
+    ]
+  });
+}
+
 test('validates tutorial scene successfully', async () => {
   const report = await validateSceneFile(scenePath('tutorial.scene.json'));
 
@@ -175,6 +197,15 @@ test('validates collision bounds fixture successfully', async () => {
   assert.equal(report.ok, true);
   assert.equal(report.errors.length, 0);
   assert.equal(report.summary.entityCount, 2);
+  assert.equal(report.summary.replicatedComponentCount, 0);
+});
+
+test('validates ui.screen prefab fixture successfully', async () => {
+  const report = await validateSceneFile(fixturePath('ui-screen-prefab.scene.json'));
+
+  assert.equal(report.ok, true);
+  assert.equal(report.errors.length, 0);
+  assert.equal(report.summary.entityCount, 1);
   assert.equal(report.summary.replicatedComponentCount, 0);
 });
 
@@ -1042,4 +1073,173 @@ test('audio.clip rejects missing fields and non-object fields predictably', () =
   assert.equal(missingFields.errors.some((error) => error.path.endsWith('.fields.clipId')), false);
   assert.ok(nonObjectFields.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
   assert.equal(nonObjectFields.errors.some((error) => error.path.endsWith('.fields.clipId')), false);
+});
+
+test('ui.screen component invariants are validated predictably', () => {
+  const report = validateUiScreenFields(
+    {
+      screenId: ' ',
+      active: 'yes',
+      layer: 1.5,
+      theme: 'retro',
+      widgets: [
+        {
+          id: 'hud.root',
+          kind: 'button',
+          x: '0',
+          width: 0,
+          children: 'oops'
+        },
+        {
+          id: 'hud.root',
+          kind: 'label',
+          text: ' '
+        }
+      ]
+    },
+    {
+      version: 2,
+      replicated: true
+    }
+  );
+
+  assert.ok(report.errors.some((error) => error.path.endsWith('.version') && error.message.includes('version')));
+  assert.ok(report.errors.some((error) => error.path.endsWith('.replicated') && error.message.includes('must not be replicated')));
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.screenId' &&
+        error.message === 'ui.screen screenId must be a non-empty string'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.active' &&
+        error.message === 'ui.screen active must be a boolean when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.layer' &&
+        error.message === 'ui.screen layer must be an integer when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.theme' &&
+        error.message === 'is not allowed for ui.screen'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.widgets[0].kind' &&
+        error.message === 'ui.screen widget kind must be `panel` or `label`'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.widgets[0].x' &&
+        error.message === 'ui.screen widget x must be an integer when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.widgets[0].width' &&
+        error.message === 'ui.screen widget width must be an integer >= 1 when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.widgets[0].children' &&
+        error.message === 'ui.screen widget children must be an array when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.widgets[1].id' &&
+        error.message === 'duplicate ui.screen widget id: hud.root'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.widgets[1].text' &&
+        error.message === 'ui.screen label text must be a non-empty string'
+    )
+  );
+});
+
+test('ui.screen rejects missing widgets and non-object fields predictably', () => {
+  const missingFields = validateUiScreenFields(undefined);
+  const nonObjectFields = validateUiScreenFields('invalid');
+  const missingWidgets = validateUiScreenFields({
+    screenId: 'hud.main'
+  });
+
+  assert.ok(missingFields.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
+  assert.equal(missingFields.errors.some((error) => error.path.endsWith('.fields.screenId')), false);
+  assert.ok(nonObjectFields.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
+  assert.equal(nonObjectFields.errors.some((error) => error.path.endsWith('.fields.screenId')), false);
+  assert.ok(
+    missingWidgets.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[0].fields.widgets' &&
+        error.message === 'ui.screen widgets must be a non-empty array'
+    )
+  );
+});
+
+test('ui.screen screenId must be unique per scene', () => {
+  const report = validateSceneInvariants({
+    version: 1,
+    metadata: { name: 'ui-screen-duplicate' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'ui.primary',
+        components: [
+          {
+            kind: 'ui.screen',
+            version: 1,
+            replicated: false,
+            fields: {
+              screenId: 'hud.main',
+              widgets: [{ id: 'hud.root', kind: 'panel' }]
+            }
+          }
+        ]
+      },
+      {
+        id: 'ui.secondary',
+        components: [
+          {
+            kind: 'ui.screen',
+            version: 1,
+            replicated: false,
+            fields: {
+              screenId: 'hud.main',
+              widgets: [{ id: 'menu.root', kind: 'panel' }]
+            }
+          }
+        ]
+      }
+    ]
+  });
+
+  assert.equal(
+    report.errors.filter(
+      (error) =>
+        error.message ===
+        'ui.screen screenId must be unique per scene; found multiple owners for `hud.main`: ui.primary, ui.secondary'
+    ).length,
+    2
+  );
 });

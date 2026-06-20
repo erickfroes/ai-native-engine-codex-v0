@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "invalid-prefab-duplicate-component-fixture"
+  },
+  "systems": [
+    "core.loop",
+    "input.keyboard"
+  ],
+  "entities": [
+    {
+      "id": "player.hero",
+      "name": "Player Hero",
+      "prefab": "./prefabs/invalid-duplicate-component.prefab.json",
+      "components": []
+    }
+  ]
+}

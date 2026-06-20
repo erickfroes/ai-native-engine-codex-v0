@@ -1,0 +1,30 @@
+{
+  "prefabVersion": 1,
+  "metadata": {
+    "name": "invalid.duplicate.component"
+  },
+  "components": [
+    {
+      "kind": "visual.sprite",
+      "version": 1,
+      "replicated": false,
+      "fields": {
+        "assetId": "player.sprite",
+        "width": 16,
+        "height": 16,
+        "layer": 1
+      }
+    },
+    {
+      "kind": "visual.sprite",
+      "version": 1,
+      "replicated": false,
+      "fields": {
+        "assetId": "player.sprite.alt",
+        "width": 20,
+        "height": 20,
+        "layer": 2
+      }
+    }
+  ]
+}

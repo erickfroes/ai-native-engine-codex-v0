@@ -113,4 +113,4 @@ O MCP valida `scenePath` e `outputPath` dentro do repo, escreve o arquivo HTML e
 
 Audio Lite v1 e Sprite Animation v1 foram entregues como incrementos diagnosticos pos-checkpoint sobre este export simples.
 
-O proximo pacote recomendado e UI system/prefab system V2 conforme roadmap.
+O proximo pacote recomendado e consumo visual V2 para UI System v1 e expansao incremental do prefab system conforme roadmap.

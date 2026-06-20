@@ -149,7 +149,7 @@ No browser, Audio Lite v1:
 
 ## Proximo pacote recomendado
 
-Sprite Animation v1 foi entregue como diagnostico declarativo. Proximo pacote recomendado: UI system/prefab system V2 conforme roadmap.
+Sprite Animation v1 foi entregue como diagnostico declarativo. Proximo pacote recomendado: consumo visual V2 para UI System v1 e expansao incremental do prefab system conforme roadmap.
 
 ## Test Matrix
 

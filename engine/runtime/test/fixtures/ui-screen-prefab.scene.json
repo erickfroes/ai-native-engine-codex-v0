@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "ui-screen-prefab-fixture"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "ui.hud",
+      "prefab": "prefabs/ui-hud.prefab.json",
+      "components": []
+    }
+  ]
+}

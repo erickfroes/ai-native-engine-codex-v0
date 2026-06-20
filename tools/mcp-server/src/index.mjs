@@ -40,7 +40,9 @@ import {
   buildMovementBlockingReportV1,
   buildTileCollisionReportV1,
   buildAudioLiteReportV1,
-  buildSpriteAnimationReportV1
+  buildUiSystemReportV1,
+  buildSpriteAnimationReportV1,
+  buildPrefabUsageReportV1
 } from '../../../engine/runtime/src/index.mjs';
 import { toolCatalog } from './tool-catalog.mjs';
 
@@ -134,7 +136,9 @@ async function handleToolCall(params) {
     params.name !== 'inspect_collision_overlaps' &&
     params.name !== 'inspect_tile_collision' &&
     params.name !== 'inspect_audio_lite' &&
+    params.name !== 'inspect_ui_system' &&
     params.name !== 'inspect_sprite_animation' &&
+    params.name !== 'inspect_prefab_usage' &&
     params.name !== 'inspect_movement_blocking' &&
     params.name !== 'simulate_state'
   ) {
@@ -539,9 +543,29 @@ async function handleToolCall(params) {
       };
     }
 
+    if (params.name === 'inspect_ui_system') {
+      const report = await buildUiSystemReportV1(targetPath);
+      return {
+        content: toTextContent(
+          `UI system report built for ${report.scene} with ${report.screens.length} screen(s).`
+        ),
+        structuredContent: report,
+        isError: false
+      };
+    }
+
     if (params.name === 'inspect_sprite_animation') {
       const report = await buildSpriteAnimationReportV1(resolveRepoPath(args.path));
       return { content: toTextContent('Sprite Animation report generated.'), structuredContent: report, isError: false };
+    }
+
+    if (params.name === 'inspect_prefab_usage') {
+      const report = await buildPrefabUsageReportV1(targetPath);
+      return {
+        content: toTextContent(`Prefab usage report built for ${report.scene} with ${report.prefabs.length} prefab entity(ies).`),
+        structuredContent: report,
+        isError: false
+      };
     }
 
     if (params.name === 'inspect_audio_lite') {
@@ -957,7 +981,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, export_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_audio_lite, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, export_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_prefab_usage, inspect_audio_lite, inspect_ui_system, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }

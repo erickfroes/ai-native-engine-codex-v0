@@ -48,7 +48,9 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - V1 Small 2D Game Creation Guide / Codex package;
 - V1 Small 2D Release Checkpoint;
 - Audio Lite v1 como primeiro incremento pos-checkpoint;
+- UI System v1 como contrato declarativo/report para screens e widget tree;
 - Sprite Animation v1 como diagnostico declarativo runtime/CLI/MCP;
+- Prefab System v1 como resolucao declarativa minima e report diagnostico runtime/CLI/MCP;
 - V1 Small 2D Capability Matrix;
 - V1 Small 2D Release Validation;
 - V1 Small 2D readiness gate com cena consolidada (`docs/V1_SMALL_2D_READINESS.md`);
@@ -58,8 +60,8 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. UI system/prefab system V2 conforme roadmap, sem transformar HUD Lite em UI system completo antes do pacote apropriado.
-2. Manter Sprite Animation v1 como report diagnostico ate uma camada visual V2 formal consumir animacoes.
+1. Fazer a camada visual V2 consumir UI System v1 e Sprite Animation v1 sem transformar HUD Lite em UI system completo.
+2. Expandir o prefab system minimo sem perder a seguranca por path e o diff pequeno.
 
 ## Versoes de produto
 

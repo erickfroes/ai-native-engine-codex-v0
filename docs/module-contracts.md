@@ -345,6 +345,25 @@ Contrato declarativo minimo para audio simples em cenas pequenas:
 - nao altera `RenderSnapshot v1`, `run-loop`, `InputIntent v1`, Movement Blocking, Tile Collision ou Browser Demo Local State v1.
 - nao e mixer completo, audio graph, spatial audio, streaming, timeline, editor, UI system completo ou runtime canonico de audio.
 
+## UI System v1
+
+Contrato declarativo minimo para screens de UI com arvore serializavel de widgets:
+
+- ver `docs/UI_SYSTEM_V1.md`.
+- schema formal do report: `docs/schemas/ui-system-report-v1.schema.json`.
+- componente: `ui.screen` v1.
+- runtime: `buildUiSystemReportV1(sceneOrPath)`.
+- CLI: `inspect-ui-system <scene> [--json]`.
+- MCP: `inspect_ui_system({ path })`.
+- `fields.screenId` deve ser string nao vazia e unica por cena.
+- `fields.widgets` deve ser array nao vazio de widgets `panel`/`label`.
+- widgets usam `id` unico por screen; `label` exige `text`; `panel` nao aceita `text`.
+- caminhos de cena passam por `validateSceneFile`, entao `entity.prefab` por path ja chega resolvido ao report.
+- o report expoe `screens[]`, lista flat `widgets[]` em pre-ordem e `widgetTree[]`.
+- cena sem `ui.screen` retorna `screens: []` e `warnings: []`.
+- nao altera `RenderSnapshot v1`, Browser Demo, Simple HTML Export, HUD Lite, Audio Lite, Sprite Animation, InputIntent ou Save/Load.
+- nao e layout engine completo, binding, navegacao, renderer formal de UI, editor de UI ou HUD canonico de jogo.
+
 ## Sprite Animation v1
 
 Contrato declarativo minimo para animacao sprite inspecionavel:
@@ -403,6 +422,7 @@ Componentes iniciais:
 - `tile.layer` v1.
 - `camera.viewport` v1.
 - `collision.bounds` v1.
+- `ui.screen` v1.
 - `audio.clip` v1.
 
 ## State Processor Registry v1 (interno, opt-in)
@@ -568,9 +588,26 @@ Contrato leve de conteudo para exemplos V1 Small 2D copiar-e-adaptar:
 - cada template contem `scene.json`, `README.md` e intents de exemplo em `input/`.
 - reutiliza Scene Document v1, InputIntent v1, Browser Playable Demo v1 e Simple HTML Export v1.
 - nao adiciona schema novo, runtime novo, comando novo ou tool MCP nova.
-- nao usa `entity.prefab` como semantica de runtime.
+- nao exige `entity.prefab`; os templates continuam validos mesmo com o Prefab System v1 opcional.
 - nao altera RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Save/Load v1.
 - nao e template engine, prefab system, editor, UI system, fisica, pathfinding, audio, animation ou platformer real.
+
+## Prefab System v1
+
+Contrato minimo para resolver `entity.prefab` a partir de um arquivo declarativo local:
+
+- ver `docs/PREFAB_SYSTEM_V1.md`.
+- schema formal do prefab: `schemas/prefab.schema.json`.
+- schema formal do report: `docs/schemas/prefab-usage-report-v1.schema.json`.
+- runtime: `loadSceneFile(path)` resolve prefabs em chamadas por path.
+- runtime: `buildPrefabUsageReportV1(path)`.
+- CLI: `inspect-prefab-usage <scene> [--json]`.
+- MCP: `inspect_prefab_usage({ path })`.
+- merge: componentes do prefab entram primeiro, componentes da entidade sobrescrevem por `kind`, extras da entidade entram ao final.
+- `validateSceneFile`, `RenderSnapshot v1`, reports de colisao, Browser Demo e demais fluxos por path passam a consumir a cena resolvida.
+- cenas sem `entity.prefab` permanecem iguais.
+- objetos de cena em memoria continuam sem resolucao automatica de prefab neste slice.
+- nao e nested prefab, prefab hierarchy, hot reload, editor, template engine, UI system formal ou pipeline de authoring.
 
 ## V1 Small 2D Game Creation Guide
 
@@ -583,7 +620,7 @@ Contrato operacional de workflow para criar jogos pequenos 2D a partir de Game T
 - reutiliza `templates/top-down-basic` e `templates/side-view-blocking-basic`.
 - reutiliza Scene Document v1, InputIntent v1, Browser Playable Demo v1, Browser Demo Local State v1 e Simple HTML Export v1.
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
-- `entity.prefab` permanece reservado/fora deste workflow; o guia nao define semantica de prefab.
+- `entity.prefab` permanece opcional neste workflow; o guia nao exige prefab para criar jogos pequenos.
 - HUD Lite e Playable Save/Load Lite continuam opt-ins locais do HTML, nao UI system ou savegame canonico.
 - nao e template engine, prefab system, scaffolder obrigatorio, editor, UI system completo, fisica, gravidade, jump, pathfinding, combate, inventario, audio, animation, servidor, bundler ou build pipeline V2.
 
@@ -597,4 +634,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1 e Sprite Animation v1 ja foram entregues como incrementos diagnosticos pos-checkpoint; proximo pacote recomendado: UI system/prefab system V2 conforme roadmap.
+- Audio Lite v1, UI System v1, Sprite Animation v1 e Prefab System v1 ja foram entregues como incrementos pequenos pos-checkpoint; proximo pacote recomendado: consumo visual V2 para UI System v1 e expansao incremental do prefab system conforme roadmap.

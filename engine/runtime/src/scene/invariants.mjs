@@ -25,6 +25,10 @@ function isSafeRelativePath(value) {
   );
 }
 
+function hasSafePrefabReference(entity) {
+  return typeof entity?.prefab === 'string' && entity.prefab.trim().length > 0;
+}
+
 function validateVisualSpriteComponent(component, componentPath, errors) {
   const fields = component.fields;
   const allowedFieldNames = new Set(['assetId', 'width', 'height', 'layer']);
@@ -449,6 +453,111 @@ function validateAudioClipComponent(component, componentPath, errors) {
   }
 }
 
+function validateUiScreenWidget(widget, widgetPath, errors, seenWidgetIds) {
+  const allowedFieldNames = new Set(['id', 'kind', 'text', 'x', 'y', 'width', 'height', 'children']);
+  const allowedKinds = new Set(['panel', 'label']);
+
+  if (!isPlainObject(widget)) {
+    pushMessage(errors, widgetPath, 'ui.screen widget must be an object');
+    return;
+  }
+
+  for (const fieldName of Object.keys(widget)) {
+    if (!allowedFieldNames.has(fieldName)) {
+      pushMessage(errors, `${widgetPath}.${fieldName}`, 'is not allowed for ui.screen widget');
+    }
+  }
+
+  if (typeof widget.id !== 'string' || widget.id.trim().length === 0) {
+    pushMessage(errors, `${widgetPath}.id`, 'ui.screen widget id must be a non-empty string');
+  } else if (seenWidgetIds.has(widget.id)) {
+    pushMessage(errors, `${widgetPath}.id`, `duplicate ui.screen widget id: ${widget.id}`);
+  } else {
+    seenWidgetIds.add(widget.id);
+  }
+
+  if (!allowedKinds.has(widget.kind)) {
+    pushMessage(errors, `${widgetPath}.kind`, 'ui.screen widget kind must be `panel` or `label`');
+  }
+
+  if (widget.kind === 'label') {
+    if (typeof widget.text !== 'string' || widget.text.trim().length === 0) {
+      pushMessage(errors, `${widgetPath}.text`, 'ui.screen label text must be a non-empty string');
+    }
+  } else if (widget.text !== undefined) {
+    pushMessage(errors, `${widgetPath}.text`, 'ui.screen widget text is only allowed for `label` widgets');
+  }
+
+  for (const coordinateName of ['x', 'y']) {
+    if (widget[coordinateName] !== undefined && !Number.isInteger(widget[coordinateName])) {
+      pushMessage(errors, `${widgetPath}.${coordinateName}`, `ui.screen widget ${coordinateName} must be an integer when provided`);
+    }
+  }
+
+  for (const dimensionName of ['width', 'height']) {
+    if (widget[dimensionName] !== undefined && (!Number.isInteger(widget[dimensionName]) || widget[dimensionName] < 1)) {
+      pushMessage(errors, `${widgetPath}.${dimensionName}`, `ui.screen widget ${dimensionName} must be an integer >= 1 when provided`);
+    }
+  }
+
+  if (widget.children !== undefined) {
+    if (!Array.isArray(widget.children)) {
+      pushMessage(errors, `${widgetPath}.children`, 'ui.screen widget children must be an array when provided');
+      return;
+    }
+
+    for (const [childIndex, child] of widget.children.entries()) {
+      validateUiScreenWidget(child, `${widgetPath}.children[${childIndex}]`, errors, seenWidgetIds);
+    }
+  }
+}
+
+function validateUiScreenComponent(component, componentPath, errors) {
+  const fields = component.fields;
+  const allowedFieldNames = new Set(['screenId', 'active', 'layer', 'widgets']);
+
+  if (component.version !== 1) {
+    pushMessage(errors, `${componentPath}.version`, 'ui.screen version must be exactly 1');
+  }
+
+  if (component.replicated !== false) {
+    pushMessage(errors, `${componentPath}.replicated`, 'ui.screen must not be replicated');
+  }
+
+  if (!isPlainObject(fields)) {
+    pushMessage(errors, `${componentPath}.fields`, 'ui.screen fields must be an object');
+    return;
+  }
+
+  for (const fieldName of Object.keys(fields)) {
+    if (!allowedFieldNames.has(fieldName)) {
+      pushMessage(errors, `${componentPath}.fields.${fieldName}`, 'is not allowed for ui.screen');
+    }
+  }
+
+  if (typeof fields.screenId !== 'string' || fields.screenId.trim().length === 0) {
+    pushMessage(errors, `${componentPath}.fields.screenId`, 'ui.screen screenId must be a non-empty string');
+  }
+
+  if (fields.active !== undefined && typeof fields.active !== 'boolean') {
+    pushMessage(errors, `${componentPath}.fields.active`, 'ui.screen active must be a boolean when provided');
+  }
+
+  if (fields.layer !== undefined && !Number.isInteger(fields.layer)) {
+    pushMessage(errors, `${componentPath}.fields.layer`, 'ui.screen layer must be an integer when provided');
+  }
+
+  if (!Array.isArray(fields.widgets) || fields.widgets.length === 0) {
+    pushMessage(errors, `${componentPath}.fields.widgets`, 'ui.screen widgets must be a non-empty array');
+    return;
+  }
+
+  const seenWidgetIds = new Set();
+  for (const [widgetIndex, widget] of fields.widgets.entries()) {
+    validateUiScreenWidget(widget, `${componentPath}.fields.widgets[${widgetIndex}]`, errors, seenWidgetIds);
+  }
+}
+
 export function validateSceneInvariants(scene) {
   const errors = [];
   const warnings = [];
@@ -457,6 +566,7 @@ export function validateSceneInvariants(scene) {
   const entityNames = new Set();
   let hasReplicatedComponent = false;
   const cameraViewportOwners = [];
+  const uiScreenIds = new Map();
 
   for (const [entityIndex, entity] of scene.entities.entries()) {
     const entityPath = `$.entities[${entityIndex}]`;
@@ -477,7 +587,11 @@ export function validateSceneInvariants(scene) {
       pushMessage(warnings, `${entityPath}.name`, 'entity has no human-readable name');
     }
 
-    if (!Array.isArray(entity.components) || entity.components.length === 0) {
+    if (hasSafePrefabReference(entity) && !isSafeRelativePath(entity.prefab)) {
+      pushMessage(errors, `${entityPath}.prefab`, 'prefab must be a safe relative path');
+    }
+
+    if (!Array.isArray(entity.components) || (entity.components.length === 0 && !hasSafePrefabReference(entity))) {
       pushMessage(errors, `${entityPath}.components`, 'entity must contain at least one component');
       continue;
     }
@@ -517,6 +631,20 @@ export function validateSceneInvariants(scene) {
         validateCollisionBoundsComponent(component, componentPath, errors);
       }
 
+      if (component.kind === 'ui.screen') {
+        if (typeof component.fields?.screenId === 'string' && component.fields.screenId.trim().length > 0) {
+          if (!uiScreenIds.has(component.fields.screenId)) {
+            uiScreenIds.set(component.fields.screenId, []);
+          }
+          uiScreenIds.get(component.fields.screenId).push({
+            componentPath,
+            entityId: entity.id
+          });
+        }
+
+        validateUiScreenComponent(component, componentPath, errors);
+      }
+
       if (component.kind === 'visual.sprite.animation') {
         validateSpriteAnimationComponent(component, componentPath, errors);
       }
@@ -537,6 +665,19 @@ export function validateSceneInvariants(scene) {
           .map((entry) => entry.entityId)
           .join(', ')}`
       );
+    }
+  }
+
+  for (const [screenId, owners] of uiScreenIds.entries()) {
+    if (owners.length < 2) {
+      continue;
+    }
+
+    const message =
+      `ui.screen screenId must be unique per scene; found multiple owners for \`${screenId}\`: ` +
+      owners.map((owner) => owner.entityId).join(', ');
+    for (const owner of owners) {
+      pushMessage(errors, `${owner.componentPath}.fields.screenId`, message);
     }
   }
 

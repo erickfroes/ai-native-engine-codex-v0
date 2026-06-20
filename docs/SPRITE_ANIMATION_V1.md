@@ -142,4 +142,4 @@ npm run smoke
 
 ## Continuidade
 
-Sprite Animation v1 esta fechado como diagnostico declarativo. O proximo pacote recomendado e UI system/prefab system V2 conforme roadmap.
+Sprite Animation v1 esta fechado como diagnostico declarativo. O proximo pacote recomendado e consumo visual V2 para UI System v1 e expansao incremental do prefab system conforme roadmap.

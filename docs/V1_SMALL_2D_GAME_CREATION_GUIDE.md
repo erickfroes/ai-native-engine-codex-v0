@@ -196,4 +196,4 @@ Ao fim, o jogo V1 pequeno deve ter:
 
 ## Proximo pacote recomendado
 
-Depois deste guia, do V1 Small 2D Release Checkpoint, de Audio Lite v1 e de Sprite Animation v1, o proximo pacote recomendado e UI system/prefab system V2 conforme roadmap.
+Depois deste guia, do V1 Small 2D Release Checkpoint, de Audio Lite v1, de UI System v1 e de Sprite Animation v1, o proximo pacote recomendado e consumo visual V2 para UI System v1 e expansao incremental do prefab system conforme roadmap.

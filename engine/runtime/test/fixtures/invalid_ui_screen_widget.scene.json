@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "invalid-ui-screen-widget-fixture"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "ui.menu",
+      "components": [
+        {
+          "kind": "ui.screen",
+          "version": 2,
+          "replicated": true,
+          "fields": {
+            "screenId": " ",
+            "active": "yes",
+            "layer": 1.5,
+            "theme": "retro",
+            "widgets": [
+              {
+                "id": "hud.root",
+                "kind": "button",
+                "x": "0",
+                "width": 0,
+                "children": "oops"
+              },
+              {
+                "id": "hud.root",
+                "kind": "label",
+                "text": " "
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

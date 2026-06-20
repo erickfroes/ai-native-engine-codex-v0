@@ -118,3 +118,12 @@ Uma tarefa só está pronta quando, se aplicável:
 Se a tarefa envolver validação de cena, use a tool MCP `validate_scene` antes de editar arquivos.
 Se a tarefa for grande, quebre em plano, contrato, implementação, validação e revisão.
 Se surgir incerteza sobre comportamento, preserve compatibilidade com a V0 e adicione fixture de teste.
+
+## Formato padrao de resposta do Codex
+
+Ao concluir cada passo relevante ou tarefa concluida, o Codex deve sempre apresentar ao usuario:
+
+- `Resumo`: linhas curtas com o que foi feito, alterado ou validado.
+- `Checklist`: lista curta com contratos, testes, cenas e docs afetados, marcando o que ficou concluido ou pendente.
+
+Nao esperar o usuario pedir esse formato novamente.

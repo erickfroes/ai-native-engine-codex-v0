@@ -42,7 +42,9 @@ import {
   buildMovementBlockingReportV1,
   buildTileCollisionReportV1,
   buildAudioLiteReportV1,
-  buildSpriteAnimationReportV1
+  buildUiSystemReportV1,
+  buildSpriteAnimationReportV1,
+  buildPrefabUsageReportV1
 } from './index.mjs';
 
 function printUsage() {
@@ -69,7 +71,9 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-tile-collision <path> [--json]
   node engine/runtime/src/cli.mjs inspect-movement-blocking <path> --input-intent <path> [--json]
   node engine/runtime/src/cli.mjs inspect-audio-lite <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-ui-system <path> [--json]
   node engine/runtime/src/cli.mjs inspect-sprite-animation <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-prefab-usage <path> [--json]
   node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--input-intent <path>] [--keyboard-script <path>] [--movement-blocking] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
@@ -877,6 +881,32 @@ async function run() {
     return;
   }
 
+  if (command === 'inspect-ui-system') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildUiSystemReportV1(maybePath);
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`UI system report version: ${report.uiSystemReportVersion}`);
+      console.log(`Screens: ${report.screens.length}`);
+      for (const screen of report.screens) {
+        console.log(
+          `- ${screen.screenId}: entity=${screen.entityId} active=${screen.active} layer=${screen.layer} widgets=${screen.widgets.length}`
+        );
+      }
+      console.log(`Warnings: ${report.warnings.length}`);
+    }
+
+    return;
+  }
+
 
   if (command === 'inspect-sprite-animation') {
     if (!maybePath) {
@@ -895,6 +925,35 @@ async function run() {
       console.log(`Warnings: ${report.warnings.length}`);
       console.log(`Invalid refs: ${report.invalidRefs.length}`);
     }
+    return;
+  }
+
+  if (command === 'inspect-prefab-usage') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildPrefabUsageReportV1(maybePath);
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`Prefab usage report version: ${report.prefabUsageReportVersion}`);
+      console.log(`Prefab entities: ${report.prefabs.length}`);
+      for (const prefab of report.prefabs) {
+        const components = prefab.components
+          .map((component) => `${component.kind}(${component.source})`)
+          .join(', ');
+        const overrides = prefab.overriddenComponents.join(', ') || '(none)';
+        console.log(`- ${prefab.entityId}: ${prefab.prefab} (${prefab.prefabName})`);
+        console.log(`  components: ${components}`);
+        console.log(`  overridden: ${overrides}`);
+      }
+    }
+
     return;
   }
   if (command === 'inspect-audio-lite') {

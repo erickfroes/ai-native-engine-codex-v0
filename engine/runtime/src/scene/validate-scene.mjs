@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { loadSchemaRegistry } from '../schema/registry.mjs';
 import { validateWithSchema } from '../schema/mini-json-schema.mjs';
 import { validateSceneInvariants } from './invariants.mjs';
+import { resolveScenePrefabsV1 } from './prefab-v1.mjs';
 import { summarizeScene } from './summary.mjs';
 
 export async function validateSceneFile(scenePath) {
@@ -13,19 +14,36 @@ export async function validateSceneFile(scenePath) {
 
   const registry = await loadSchemaRegistry();
   const shapeErrors = validateWithSchema(scene, registry['scene.schema.json'].schema, registry, '$', []);
-  const invariantReport = validateSceneInvariants(scene);
+  const rawInvariantReport = validateSceneInvariants(scene);
 
-  const errors = [...shapeErrors, ...invariantReport.errors];
-  const warnings = [...invariantReport.warnings];
-  const summary = summarizeScene(scene);
+  let resolvedScene = scene;
+  let prefabErrors = [];
+  let prefabUsage = [];
+  let resolvedInvariantReport = { errors: [], warnings: [] };
+
+  if (shapeErrors.length === 0 && rawInvariantReport.errors.length === 0) {
+    const prefabResolution = await resolveScenePrefabsV1(scene, absolutePath);
+    prefabErrors = prefabResolution.errors;
+    prefabUsage = prefabResolution.prefabUsage;
+
+    if (prefabErrors.length === 0) {
+      resolvedScene = prefabResolution.scene;
+      resolvedInvariantReport = validateSceneInvariants(resolvedScene);
+    }
+  }
+
+  const errors = [...shapeErrors, ...rawInvariantReport.errors, ...prefabErrors, ...resolvedInvariantReport.errors];
+  const warnings = [...rawInvariantReport.warnings, ...resolvedInvariantReport.warnings];
+  const summary = summarizeScene(resolvedScene);
 
   return {
     ok: errors.length === 0,
     absolutePath,
-    scene,
+    scene: resolvedScene,
     summary,
     errors,
-    warnings
+    warnings,
+    prefabUsage
   };
 }
 

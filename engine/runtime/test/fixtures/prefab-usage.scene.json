@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "prefab-usage-fixture"
+  },
+  "systems": [
+    "core.loop",
+    "input.keyboard"
+  ],
+  "entities": [
+    {
+      "id": "player.hero",
+      "name": "Player Hero",
+      "prefab": "./prefabs/player-actor.prefab.json",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 24,
+            "y": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "camera.main",
+      "name": "Camera Main",
+      "components": [
+        {
+          "kind": "camera.viewport",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 0,
+            "y": 0,
+            "width": 160,
+            "height": 90
+          }
+        }
+      ]
+    }
+  ]
+}

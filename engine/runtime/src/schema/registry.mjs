@@ -23,6 +23,7 @@ export async function loadSchemaRegistry() {
   const files = [
     'scene.schema.json',
     'component.schema.json',
+    'prefab.schema.json',
     'net_message.schema.json',
     'savegame.schema.json',
     'save_validation_report.schema.json'

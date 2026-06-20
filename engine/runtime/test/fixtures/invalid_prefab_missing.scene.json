@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "invalid-prefab-missing-fixture"
+  },
+  "systems": [
+    "core.loop",
+    "input.keyboard"
+  ],
+  "entities": [
+    {
+      "id": "player.hero",
+      "name": "Player Hero",
+      "prefab": "./prefabs/missing.prefab.json",
+      "components": []
+    }
+  ]
+}

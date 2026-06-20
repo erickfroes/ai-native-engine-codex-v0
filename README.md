@@ -79,7 +79,7 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 
 A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1 e Sprite Animation v1 diagnostico.
 
-O proximo pacote recomendado e UI system/prefab system V2 conforme roadmap, preservando HUD Lite como diagnostico local ate existir UI formal.
+Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local e report diagnostico cross-interface. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets e report cross-interface, preservando HUD Lite como diagnostico local ate existir consumo visual formal.
 
 ## Comandos CLI principais
 
@@ -94,7 +94,9 @@ O proximo pacote recomendado e UI system/prefab system V2 conforme roadmap, pres
 - `inspect-collision-overlaps`: detecta overlaps AABB
 - `inspect-tile-collision`: inspeciona tiles solidos declarados em `tile.layer`
 - `inspect-movement-blocking`: avalia tentativa de movimento contra colisao solida
+- `inspect-prefab-usage`: inspeciona composicao declarativa de `entity.prefab`
 - `inspect-audio-lite`: inspeciona clips e triggers declarativos de Audio Lite v1
+- `inspect-ui-system`: inspeciona screens declarativas e arvores de widgets de UI System v1
 - `inspect-sprite-animation`: inspeciona animacoes declarativas de Sprite Animation v1
 - `save-state` e `load-save`: persistencia minima de State Snapshot v1
 - `render-snapshot`: gera RenderSnapshot v1
@@ -128,7 +130,9 @@ O proximo pacote recomendado e UI system/prefab system V2 conforme roadmap, pres
 - `inspect_collision_overlaps`
 - `inspect_tile_collision`
 - `inspect_movement_blocking`
+- `inspect_prefab_usage`
 - `inspect_audio_lite`
+- `inspect_ui_system`
 - `inspect_sprite_animation`
 
 Observacao: `render-svg-demo` e um fluxo de CLI/runtime. A Meta 2 nao define uma tool MCP dedicada para a demo HTML de SVG.
@@ -181,6 +185,9 @@ node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene
 # gerar Browser Playable Demo com Audio Lite diagnostico opt-in
 node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --audio-lite --out ./tmp/audio-lite-browser-demo.html --json
 
+# inspecionar UI System v1 declarativo
+node ./engine/runtime/src/cli.mjs inspect-ui-system ./engine/runtime/test/fixtures/ui-screen-prefab.scene.json --json
+
 # inspecionar Sprite Animation v1 declarativo
 node ./engine/runtime/src/cli.mjs inspect-sprite-animation ./engine/runtime/test/fixtures/sprite-animation-idle.scene.json --json
 
@@ -207,6 +214,8 @@ npm run smoke
 - `docs/V1_SMALL_2D_TEST_MATRIX.md`: matriz runtime/CLI/MCP/testes da cena consolidada
 - `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`: formato local do Playable Save/Load Lite
 - `docs/SIMPLE_HTML_EXPORT_V1.md`: contrato do export HTML jogavel simples
+- `docs/PREFAB_SYSTEM_V1.md`: contrato do Prefab System v1
+- `docs/UI_SYSTEM_V1.md`: contrato do UI System v1
 - `docs/GAME_TEMPLATES_V1.md`: templates V1 Small 2D copiar-e-adaptar
 - `docs/AUDIO_LITE_V1.md`: contrato de Audio Lite v1 diagnostico
 - `docs/SPRITE_ANIMATION_V1.md`: contrato de Sprite Animation v1 diagnostico

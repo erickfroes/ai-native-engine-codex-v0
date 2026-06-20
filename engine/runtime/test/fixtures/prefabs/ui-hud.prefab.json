@@ -1,0 +1,43 @@
+{
+  "prefabVersion": 1,
+  "metadata": {
+    "name": "ui-hud-screen"
+  },
+  "components": [
+    {
+      "kind": "ui.screen",
+      "version": 1,
+      "replicated": false,
+      "fields": {
+        "screenId": "hud.main",
+        "layer": 100,
+        "widgets": [
+          {
+            "id": "hud.root",
+            "kind": "panel",
+            "x": 0,
+            "y": 0,
+            "width": 320,
+            "height": 48,
+            "children": [
+              {
+                "id": "score.label",
+                "kind": "label",
+                "text": "Score: 000",
+                "x": 8,
+                "y": 8
+              },
+              {
+                "id": "lives.label",
+                "kind": "label",
+                "text": "Lives: 3",
+                "x": 240,
+                "y": 8
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

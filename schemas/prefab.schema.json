@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "prefab.schema.json",
+  "title": "PrefabDocument",
+  "type": "object",
+  "required": [
+    "prefabVersion",
+    "metadata",
+    "components"
+  ],
+  "properties": {
+    "prefabVersion": {
+      "const": 1
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "$ref": "component.schema.json"
+      }
+    }
+  },
+  "additionalProperties": false
+}

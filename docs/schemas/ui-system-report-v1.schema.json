@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ui-system-report-v1.schema.json",
+  "title": "UiSystemReportV1",
+  "type": "object",
+  "required": [
+    "uiSystemReportVersion",
+    "scene",
+    "screens",
+    "warnings"
+  ],
+  "properties": {
+    "uiSystemReportVersion": {
+      "const": 1
+    },
+    "scene": {
+      "type": "string",
+      "minLength": 1
+    },
+    "screens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "screenId",
+          "entityId",
+          "active",
+          "layer",
+          "widgets",
+          "widgetTree"
+        ],
+        "properties": {
+          "screenId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "entityId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "layer": {
+            "type": "integer"
+          },
+          "widgets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/widgetFlat"
+            }
+          },
+          "widgetTree": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/widgetTreeNode"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "$defs": {
+    "widgetFlat": {
+      "type": "object",
+      "required": [
+        "widgetId",
+        "kind",
+        "text",
+        "x",
+        "y",
+        "width",
+        "height",
+        "parentWidgetId",
+        "depth"
+      ],
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "panel",
+            "label"
+          ]
+        },
+        "text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "width": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "height": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "parentWidgetId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "widgetTreeNode": {
+      "type": "object",
+      "required": [
+        "widgetId",
+        "kind",
+        "text",
+        "x",
+        "y",
+        "width",
+        "height",
+        "children"
+      ],
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "panel",
+            "label"
+          ]
+        },
+        "text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "width": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "height": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/widgetTreeNode"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

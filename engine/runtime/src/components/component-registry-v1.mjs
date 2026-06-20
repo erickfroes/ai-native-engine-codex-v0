@@ -38,6 +38,12 @@ const COMPONENT_REGISTRY_V1 = Object.freeze({
       description: 'Declarative collision bounds component'
     }),
     Object.freeze({
+      name: 'ui.screen',
+      version: 1,
+      deterministic: true,
+      description: 'Declarative UI screen component with widget tree data'
+    }),
+    Object.freeze({
       name: 'visual.sprite.animation',
       version: 1,
       deterministic: true,

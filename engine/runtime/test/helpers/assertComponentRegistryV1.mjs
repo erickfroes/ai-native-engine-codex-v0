@@ -14,6 +14,7 @@ export function assertComponentRegistryV1(registry) {
     'tile.layer',
     'camera.viewport',
     'collision.bounds',
+    'ui.screen',
     'visual.sprite.animation',
     'audio.clip'
   ]);

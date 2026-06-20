@@ -492,9 +492,41 @@ export const toolCatalog = [
   },
 
   {
+    name: 'inspect_ui_system',
+    title: 'Inspect UI System',
+    description: 'Build UiSystemReport v1 from declarative ui.screen components and their widget trees.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'inspect_sprite_animation',
     title: 'Inspect Sprite Animation',
     description: 'Build SpriteAnimationReport v1 from visual.sprite.animation components.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
+    name: 'inspect_prefab_usage',
+    title: 'Inspect Prefab Usage',
+    description: 'Build PrefabUsageReport v1 from scene entities that reference declarative prefab files.',
     inputSchema: {
       type: 'object',
       required: ['path'],

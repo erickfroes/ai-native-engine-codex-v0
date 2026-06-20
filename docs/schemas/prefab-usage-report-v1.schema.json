@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "prefab-usage-report-v1.schema.json",
+  "title": "PrefabUsageReportV1",
+  "type": "object",
+  "required": [
+    "prefabUsageReportVersion",
+    "scene",
+    "prefabs"
+  ],
+  "properties": {
+    "prefabUsageReportVersion": {
+      "const": 1
+    },
+    "scene": {
+      "type": "string",
+      "minLength": 1
+    },
+    "prefabs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "entityId",
+          "prefab",
+          "prefabName",
+          "prefabVersion",
+          "components",
+          "overriddenComponents"
+        ],
+        "properties": {
+          "entityId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "prefab": {
+            "type": "string",
+            "minLength": 1
+          },
+          "prefabName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "prefabVersion": {
+            "const": 1
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "kind",
+                "source"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source": {
+                  "enum": [
+                    "prefab",
+                    "entity"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "overriddenComponents": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
