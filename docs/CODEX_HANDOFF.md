@@ -45,6 +45,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `export-portable-html-game` / `export_portable_html_game` com `--asset-manifest` e `--sprite-animation` para HTML portatil com assets inline;
 - `ui.screen` declarativo com widget tree serializavel, `inspect-ui-system` / `inspect_ui_system` e `render-browser-demo --ui-system` / `export-html-game --ui-system`;
 - `entity.prefab` resolvido por arquivo local seguro em `loadSceneFile` e consumidores por path;
+- entidade prefab-backed pode omitir `components` quando nao ha override local;
 - `validate-prefab` / `validate_prefab` para validar prefab sem depender de uma cena;
 - `inspect-prefab-usage` / `inspect_prefab_usage`;
 - `export-html-game` / `export_html_game` para escrever HTML jogavel autocontido;

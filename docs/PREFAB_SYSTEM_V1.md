@@ -11,6 +11,7 @@ Prefab System v1 inicia o slice de V2 com uma semantica pequena, deterministica 
 
 ## Merge minimo
 
+- Entidade prefab-backed pode omitir `components` quando nao precisa sobrescrever nada localmente.
 - Componentes do prefab entram primeiro.
 - Componentes declarados na entidade sobrepoem componentes do prefab com o mesmo `kind`.
 - Componentes extras da entidade sao anexados ao final.

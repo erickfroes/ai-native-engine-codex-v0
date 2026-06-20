@@ -22,6 +22,7 @@ const emptySystemsPath = path.join(repoRoot, 'scenes', 'invalid', 'empty-systems
 const unknownSystemPath = path.join(repoRoot, 'scenes', 'invalid', 'unknown-system.scene.json');
 const visualSpriteFixturePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const tileLayerFixturePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
+const prefabOnlyFixturePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'prefab-usage-prefab-only.scene.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -107,6 +108,25 @@ test('scene document v1: tile layer fixture stays valid and opt-in', async () =>
   assert.equal(scene.metadata.name, 'tile-layer-fixture');
 
   const report = await validateLoopScene(tileLayerFixturePath);
+  assertSceneValidationReportV1(report);
+  assert.equal(report.valid, true);
+});
+
+test('scene document v1: prefab-backed entity may omit components when prefab is present', async () => {
+  const prefabOnlyScene = JSON.parse(await readFile(prefabOnlyFixturePath, 'utf8'));
+  assertSceneDocumentV1(prefabOnlyScene);
+
+  const scene = await loadSceneFile(prefabOnlyFixturePath);
+  assert.equal(scene.metadata.name, 'prefab-usage-prefab-only-fixture');
+
+  const player = scene.entities.find((entity) => entity.id === 'player.hero');
+  assert.deepEqual(player.components.map((component) => component.kind), [
+    'transform',
+    'visual.sprite',
+    'collision.bounds'
+  ]);
+
+  const report = await validateLoopScene(prefabOnlyFixturePath);
   assertSceneValidationReportV1(report);
   assert.equal(report.valid, true);
 });

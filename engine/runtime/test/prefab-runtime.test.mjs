@@ -14,6 +14,7 @@ import {
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const fixtureDir = path.join(testDir, 'fixtures');
 const prefabScenePath = path.join(fixtureDir, 'prefab-usage.scene.json');
+const prefabOnlyScenePath = path.join(fixtureDir, 'prefab-usage-prefab-only.scene.json');
 const missingPrefabScenePath = path.join(fixtureDir, 'invalid_prefab_missing.scene.json');
 const duplicatePrefabScenePath = path.join(fixtureDir, 'invalid_prefab_duplicate_component.scene.json');
 
@@ -63,6 +64,49 @@ test('validateSceneFile exposes prefab usage and merged summary for valid prefab
         }
       ],
       overriddenComponents: ['transform']
+    }
+  ]);
+});
+
+test('loadSceneFile and validateSceneFile accept prefab-backed entities without explicit components', async () => {
+  const scene = await loadSceneFile(prefabOnlyScenePath);
+  const report = await validateSceneFile(prefabOnlyScenePath);
+
+  const player = scene.entities.find((entity) => entity.id === 'player.hero');
+  assert.deepEqual(player.components.map((component) => component.kind), [
+    'transform',
+    'visual.sprite',
+    'collision.bounds'
+  ]);
+  assert.deepEqual(player.components[0].fields, {
+    x: 4,
+    y: 3
+  });
+
+  assert.equal(report.ok, true);
+  assert.equal(report.summary.entityCount, 2);
+  assert.equal(report.summary.componentCount, 4);
+  assert.deepEqual(report.prefabUsage, [
+    {
+      entityId: 'player.hero',
+      prefab: './prefabs/player-actor.prefab.json',
+      prefabName: 'player.actor',
+      prefabVersion: 1,
+      components: [
+        {
+          kind: 'transform',
+          source: 'prefab'
+        },
+        {
+          kind: 'visual.sprite',
+          source: 'prefab'
+        },
+        {
+          kind: 'collision.bounds',
+          source: 'prefab'
+        }
+      ],
+      overriddenComponents: []
     }
   ]);
 });

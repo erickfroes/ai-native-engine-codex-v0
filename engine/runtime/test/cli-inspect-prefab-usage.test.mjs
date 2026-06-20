@@ -9,6 +9,7 @@ const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const fixtureDir = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures');
 const prefabScenePath = path.join(fixtureDir, 'prefab-usage.scene.json');
+const prefabOnlyScenePath = path.join(fixtureDir, 'prefab-usage-prefab-only.scene.json');
 const missingPrefabScenePath = path.join(fixtureDir, 'invalid_prefab_missing.scene.json');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 
@@ -64,6 +65,39 @@ test('inspect-prefab-usage returns empty reports for scenes without prefab refer
     prefabUsageReportVersion: 1,
     scene: 'tutorial',
     prefabs: []
+  });
+});
+
+test('inspect-prefab-usage supports prefab-backed entities without explicit components', () => {
+  const result = runCli(['inspect-prefab-usage', prefabOnlyScenePath, '--json']);
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(JSON.parse(result.stdout), {
+    prefabUsageReportVersion: 1,
+    scene: 'prefab-usage-prefab-only-fixture',
+    prefabs: [
+      {
+        entityId: 'player.hero',
+        prefab: './prefabs/player-actor.prefab.json',
+        prefabName: 'player.actor',
+        prefabVersion: 1,
+        components: [
+          {
+            kind: 'transform',
+            source: 'prefab'
+          },
+          {
+            kind: 'visual.sprite',
+            source: 'prefab'
+          },
+          {
+            kind: 'collision.bounds',
+            source: 'prefab'
+          }
+        ],
+        overriddenComponents: []
+      }
+    ]
   });
 });
 

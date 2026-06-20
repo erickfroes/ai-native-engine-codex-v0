@@ -31,7 +31,12 @@ export function assertSceneDocumentV1(sceneDocument) {
     const entityKeys = Object.keys(entity).sort();
     assert.deepEqual(entityKeys, ENTITY_KEYS.filter((key) => entityKeys.includes(key)));
     assert.equal(typeof entity.id, 'string');
-    assert.equal(Array.isArray(entity.components), true);
+    if (entity.components === undefined) {
+      assert.equal(typeof entity.prefab, 'string');
+      assert.equal(entity.prefab.trim().length > 0, true);
+    } else {
+      assert.equal(Array.isArray(entity.components), true);
+    }
   }
 
   if (sceneDocument.assetRefs !== undefined) {

@@ -591,14 +591,19 @@ export function validateSceneInvariants(scene) {
       pushMessage(errors, `${entityPath}.prefab`, 'prefab must be a safe relative path');
     }
 
-    if (!Array.isArray(entity.components) || (entity.components.length === 0 && !hasSafePrefabReference(entity))) {
+    if (entity.components === undefined) {
+      if (!hasSafePrefabReference(entity)) {
+        pushMessage(errors, `${entityPath}.components`, 'entity must contain at least one component');
+        continue;
+      }
+    } else if (!Array.isArray(entity.components) || (entity.components.length === 0 && !hasSafePrefabReference(entity))) {
       pushMessage(errors, `${entityPath}.components`, 'entity must contain at least one component');
       continue;
     }
 
     const componentKinds = new Set();
 
-    for (const [componentIndex, component] of entity.components.entries()) {
+    for (const [componentIndex, component] of (entity.components ?? []).entries()) {
       const componentPath = `${entityPath}.components[${componentIndex}]`;
 
       if (componentKinds.has(component.kind)) {

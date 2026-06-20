@@ -122,6 +122,27 @@ test('PrefabUsageReport v1 stays aligned across runtime, CLI and MCP for prefab-
   assert.deepEqual(report.prefabs[0].overriddenComponents, ['transform']);
 });
 
+test('PrefabUsageReport v1 stays aligned when prefab-backed entities omit explicit components', async () => {
+  const report = await assertPrefabInterfacesAligned('engine/runtime/test/fixtures/prefab-usage-prefab-only.scene.json');
+
+  assert.equal(report.prefabs.length, 1);
+  assert.deepEqual(report.prefabs[0].components, [
+    {
+      kind: 'transform',
+      source: 'prefab'
+    },
+    {
+      kind: 'visual.sprite',
+      source: 'prefab'
+    },
+    {
+      kind: 'collision.bounds',
+      source: 'prefab'
+    }
+  ]);
+  assert.deepEqual(report.prefabs[0].overriddenComponents, []);
+});
+
 test('PrefabUsageReport v1 invalid prefab scenes fail predictably across runtime, CLI and MCP', async () => {
   const relativePath = 'engine/runtime/test/fixtures/invalid_prefab_missing.scene.json';
   const absolutePath = path.join(repoRoot, relativePath);

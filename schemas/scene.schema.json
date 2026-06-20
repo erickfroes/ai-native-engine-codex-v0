@@ -51,8 +51,7 @@
       "items": {
         "type": "object",
         "required": [
-          "id",
-          "components"
+          "id"
         ],
         "properties": {
           "id": {

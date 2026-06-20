@@ -633,6 +633,7 @@ Contrato minimo para resolver `entity.prefab` a partir de um arquivo declarativo
 - runtime: `buildPrefabUsageReportV1(path)`.
 - CLI: `inspect-prefab-usage <scene> [--json]`.
 - MCP: `inspect_prefab_usage({ path })`.
+- entidade com `prefab` pode omitir `components` quando nao precisa override local.
 - merge: componentes do prefab entram primeiro, componentes da entidade sobrescrevem por `kind`, extras da entidade entram ao final.
 - `validateSceneFile`, `RenderSnapshot v1`, reports de colisao, Browser Demo e demais fluxos por path passam a consumir a cena resolvida.
 - cenas sem `entity.prefab` permanecem iguais.

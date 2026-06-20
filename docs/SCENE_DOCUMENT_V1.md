@@ -14,6 +14,13 @@ Shape base (v1):
 - `entities` (array de entidades)
 - `assetRefs` (array de string, opcional)
 
+## Entidades prefab-backed
+
+- `entities[].id` continua obrigatorio.
+- `entities[].components` continua aceito normalmente.
+- quando a entidade declara `prefab`, `components` pode ser omitido se nao houver override local.
+- sem `prefab`, a validacao por invariantes continua exigindo pelo menos um componente na entidade.
+
 ## Declaração de systems
 
 - `systems` é um array de nomes de system em ordem declarada na cena.
