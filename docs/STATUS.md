@@ -53,6 +53,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - Portable HTML Export v2 com assets inline e Sprite Animation v1 opt-in no caminho portatil;
 - Prefab System v1 como resolucao declarativa minima e report diagnostico runtime/CLI/MCP;
 - Prefab Validation Report v1 como validacao direta de `.prefab.json` em runtime/CLI/MCP;
+- Prefab follow-up baseline sem `components` explicitos em entidade prefab-backed;
 - V1 Small 2D Capability Matrix;
 - V1 Small 2D Release Validation;
 - V1 Small 2D readiness gate com cena consolidada (`docs/V1_SMALL_2D_READINESS.md`);
@@ -62,8 +63,10 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. Expandir o prefab system minimo sem perder a seguranca por path e o diff pequeno.
-2. Harden `Portable HTML Export v2` apenas em slices pequenos de assets/UX, sem transformar diagnosticos declarativos em runtime canonico amplo.
+1. Fechar o hardening do slice atual de prefab sem `components`, validando arquivo isolado, cena resolvida e pelo menos um consumidor downstream real.
+2. Adotar esse comportamento em 1 cena ou template pequeno com 2-3 entidades reutilizando o mesmo prefab, sem semantica nova.
+3. Expandir o diagnostico de prefab com rastreabilidade por path/origem/override, sem nested prefab e sem resolucao em memoria.
+4. So depois retomar o hardening incremental de `Portable HTML Export v2`, preservando `RenderSnapshot v1`.
 
 ## Versoes de produto
 

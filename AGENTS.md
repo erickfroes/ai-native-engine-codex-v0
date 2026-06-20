@@ -35,8 +35,10 @@ Para pacotes medios ou grandes, use subagentes de forma explicita:
 - `netcode_architect` para networking/authority;
 - `qa_contract_auditor` para schemas, fixtures, CLI/MCP e cross-interface;
 - `perf_auditor` para performance, determinismo e regressao.
+- `docs_handoff_auditor` para README, STATUS, ROADMAP, handoff e checklists.
 
 Subagentes devem reduzir risco, nao aumentar escopo. Se um subagente sugerir mudanca fora da meta, registre como backlog.
+Atualizacao de `docs/CODEX_HANDOFF.md`, roadmap ou estrategia de continuidade tambem conta como pacote que exige subagentes.
 
 ## Antes de editar qualquer coisa
 
@@ -85,6 +87,7 @@ Se a tool existir, não replique manualmente por edição cega de arquivos.
 - `render_architect`: pipeline de render, materiais, frame graph, métricas visuais.
 - `gameplay_worker`: implementação direta de sistemas e integrações.
 - `perf_auditor`: benchmark, replay e regressões.
+- `docs_handoff_auditor`: alinhamento de `CODEX_HANDOFF`, roadmap, status e linha de continuidade.
 
 ## Definição de pronto
 
@@ -118,6 +121,9 @@ Uma tarefa só está pronta quando, se aplicável:
 Se a tarefa envolver validação de cena, use a tool MCP `validate_scene` antes de editar arquivos.
 Se a tarefa for grande, quebre em plano, contrato, implementação, validação e revisão.
 Se surgir incerteza sobre comportamento, preserve compatibilidade com a V0 e adicione fixture de teste.
+Ao concluir um slice validado, atualize `docs/CODEX_HANDOFF.md` no mesmo pacote, registrando o que fechou e reescrevendo a `Linha de seguimento recomendada` para o menor próximo passo seguro.
+Antes de qualquer pacote medio ou grande, use subagentes explicitos; se a tarefa tocar continuidade documental, inclua `docs_handoff_auditor`.
+Salvo redirecionamento explicito do usuario, siga a `Linha de seguimento recomendada` vigente em `docs/CODEX_HANDOFF.md`.
 
 ## Formato padrao de resposta do Codex
 

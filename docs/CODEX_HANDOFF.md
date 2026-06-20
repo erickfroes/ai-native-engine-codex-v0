@@ -26,6 +26,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Portable HTML Export v2: concluido como export portatil com assets inline e consumo visual opt-in de Sprite Animation v1, preservando `RenderSnapshot v1` e mantendo `Simple HTML Export v1` fechado.
 - Prefab System v1: concluido como resolucao declarativa minima por arquivo e report diagnostico runtime/CLI/MCP.
 - Prefab Validation Report v1: concluido como validacao direta de `.prefab.json` via runtime/CLI/MCP.
+- Prefab follow-up baseline sem `components` explicitos em entidade prefab-backed: concluido e promovido para a linha viva de continuidade.
 
 ## O que o Codex recebe
 
@@ -121,14 +122,22 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Expandir o prefab system alem do slice minimo atual sem perder seguranca por path e diff pequeno.
-2. Evoluir UI System v1 apenas por opt-ins pequenos, mantendo HUD Lite como diagnostico local ate existir HUD canonico.
-3. Harden `Portable HTML Export v2` apenas com casos incrementais de assets, sem mutar `RenderSnapshot v1`.
-4. 3D indie apenas depois de V1/V2 demonstradas.
+1. Fechar o hardening do slice atual de prefab sem `components`, validando arquivo isolado, cena resolvida e pelo menos um consumidor downstream real.
+2. Adotar esse comportamento em 1 cena ou template pequeno com 2-3 entidades reutilizando o mesmo prefab, sem semantica nova.
+3. Expandir o diagnostico de prefab com rastreabilidade por path/origem/override, sem nested prefab e sem resolucao em memoria.
+4. So depois retomar o hardening incremental de `Portable HTML Export v2`, preservando `RenderSnapshot v1`.
+5. 3D indie apenas depois de V1/V2 demonstradas.
+
+## Regra de manutencao da linha de seguimento
+
+- Ao concluir um slice validado, atualizar este arquivo no mesmo pacote.
+- Registrar o que acabou de ficar pronto e remover da linha o que ja foi fechado.
+- Reescrever a linha de seguimento para apontar o menor proximo passo seguro do estado atual.
+- Antes de iniciar feature nova, seguir esta linha viva salvo bloqueio documentado ou redirecionamento explicito do usuario.
 
 ## Uso de subagentes
 
-Pacotes medios devem usar:
+Pacotes medios e grandes devem usar:
 
 - `explorer` para mapear arquivos;
 - `engine_architect` ou agente de dominio para design;
@@ -138,6 +147,7 @@ Pacotes medios devem usar:
 - `docs_handoff_auditor` para fechamento documental.
 
 Subagentes adicionais recomendados estao em `.codex/agents/` e descritos em `docs/CODEX_SUBAGENT_STRATEGY.md`.
+Se a tarefa tocar handoff, roadmap ou continuidade, incluir `docs_handoff_auditor`.
 
 ## Fora de escopo imediato
 

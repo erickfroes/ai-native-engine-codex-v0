@@ -19,6 +19,8 @@ Cada pacote medio deve usar pelo menos:
 3. `gameplay_worker` ou worker equivalente para implementar;
 4. `perf_auditor` ou `qa_contract_auditor` para revisar testes, determinismo e regressao.
 
+Se o pacote tocar handoff, roadmap, status ou continuidade, incluir tambem `docs_handoff_auditor`.
+
 ## Papeis atuais
 
 - `gameplay_worker`: implementacao de sistemas, integracoes e features de gameplay.
@@ -65,8 +67,9 @@ Nao usar um unico commit gigante para runtime + CLI + MCP + docs + hardening.
 4. Implementar pacote.
 5. Rodar testes focados.
 6. Rodar validacao final.
-7. Abrir PR.
-8. Merge somente com permissao explicita.
+7. Atualizar `docs/CODEX_HANDOFF.md` no mesmo pacote, removendo passos concluidos e reescrevendo a linha de seguimento com base no ultimo slice validado.
+8. Abrir PR.
+9. Merge somente com permissao explicita.
 
 ## MCP como ferramenta de agentes
 
@@ -122,4 +125,5 @@ Uma feature so esta bem integrada ao Codex quando:
 - CLI/MCP existem quando a feature precisa ser operavel por agentes;
 - cross-interface existe para fluxos criticos;
 - docs/handoff refletem a mudanca;
+- a linha de seguimento do handoff foi atualizada para o menor proximo passo seguro;
 - subagentes revisaram riscos de dominio.
