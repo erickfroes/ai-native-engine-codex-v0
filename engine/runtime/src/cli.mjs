@@ -27,6 +27,7 @@ import {
   BROWSER_PLAYABLE_DEMO_VERSION,
   materializeBrowserDemoAssetSrcV1,
   exportHtmlGameV1,
+  exportPortableHtmlGameV2,
   runDeterministicReplay,
   buildReplayArtifact,
   createLoopExecutionPlan,
@@ -61,6 +62,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs render-canvas-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs export-html-game <path> --out <path> [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--ui-system] [--json]
+  node engine/runtime/src/cli.mjs export-portable-html-game <path> --out <path> [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--json]
   node engine/runtime/src/cli.mjs save-state <path> --ticks <n> [--seed <n>] --out <dir> [--json]
   node engine/runtime/src/cli.mjs load-save <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
@@ -882,6 +884,45 @@ async function run() {
       console.log(`Final: ${report.final.x},${report.final.y}`);
       console.log(`Blocked: ${report.blocked}`);
       console.log(`Blocking entities: ${report.blockingEntities.length === 0 ? '(none)' : report.blockingEntities.join(', ')}`);
+    }
+
+    return;
+  }
+
+  if (command === 'export-portable-html-game') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    if (!hasFlag('--out')) {
+      throw new Error('export-portable-html-game: --out is required');
+    }
+
+    const requestedOutPath = readStringFlag('export-portable-html-game', '--out', undefined);
+    const assetManifestPath = readStringFlag('export-portable-html-game', '--asset-manifest', undefined);
+    const movementBlocking = hasFlag('--movement-blocking');
+    const gameplayHud = hasFlag('--gameplay-hud');
+    const playableSaveLoad = hasFlag('--playable-save-load');
+    const audioLite = hasFlag('--audio-lite');
+    const spriteAnimation = hasFlag('--sprite-animation');
+    const uiSystem = hasFlag('--ui-system');
+    const envelope = await exportPortableHtmlGameV2(maybePath, {
+      outputPath: requestedOutPath,
+      assetManifestPath,
+      movementBlocking,
+      gameplayHud,
+      playableSaveLoad,
+      audioLite,
+      spriteAnimation,
+      uiSystem
+    });
+
+    if (asJson) {
+      console.log(JSON.stringify(envelope, null, 2));
+    } else {
+      console.log(envelope.outputPath);
     }
 
     return;

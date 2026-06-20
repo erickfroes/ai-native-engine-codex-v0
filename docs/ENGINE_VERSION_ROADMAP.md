@@ -212,5 +212,5 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Runtime visual V2 consumir Sprite Animation v1 de forma incremental, preservando HUD Lite e UI System visual como opt-ins locais.
-2. Expandir o prefab system minimo sem perder seguranca por path, contratos curtos e diff pequeno.
+1. Expandir o prefab system minimo sem perder seguranca por path, contratos curtos e diff pequeno.
+2. Harden `Portable HTML Export v2` em slices pequenos, preservando `RenderSnapshot v1`, HUD Lite e UI System visual sem reabrir `Simple HTML Export v1`.

@@ -385,7 +385,7 @@ Contrato declarativo minimo para animacao sprite inspecionavel:
 - sem opt-in, a Browser Demo nao embute `metadata.spriteAnimation`.
 - sem `assetManifestPath` ou sem drawCalls `sprite` asset-backed, a Browser Demo preserva o fallback visual atual mesmo com metadata embutida.
 - nao altera `RenderSnapshot v1`, Simple HTML Export, Audio Lite, Movement Blocking, Tile Collision, InputIntent ou Save/Load.
-- Simple HTML Export v1 continua sem consumo visual de Sprite Animation neste slice.
+- Simple HTML Export v1 continua sem consumo visual de Sprite Animation neste slice; esse consumo agora vive no contrato separado `Portable HTML Export v2`.
 - nao e animation graph, timeline, skeletal animation, blending, atlas pipeline, editor ou renderer sprite completo.
 
 ## State Model v1 (interno)
@@ -588,6 +588,22 @@ Contrato de export simples para escrever uma cena jogavel pequena como arquivo H
 - nao altera Browser Demo Local State v1, Save/Load v1, RenderSnapshot v1, InputIntent v1 ou reports de colisao.
 - nao e bundler, servidor, editor, build pipeline V2, asset copier ou runtime canonico de gameplay.
 
+## Portable HTML Export v2
+
+Contrato versionado para escrever HTML jogavel portatil com assets inline e consumo visual de Sprite Animation v1:
+
+- ver `docs/PORTABLE_HTML_EXPORT_V2.md`.
+- schema formal do envelope escrito: `docs/schemas/portable-html-export-v2.schema.json`.
+- CLI: `export-portable-html-game <scene> --out <file> [--asset-manifest <file>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--json]`.
+- MCP: `export_portable_html_game({ scenePath, outputPath, assetManifestPath?, movementBlocking?, gameplayHud?, playableSaveLoad?, audioLite?, spriteAnimation?, uiSystem? })`.
+- Runtime: `buildPortableHtmlGameExportV2(sceneOrPath, options)` e `exportPortableHtmlGameV2(sceneOrPath, options)`.
+- reutiliza `RenderSnapshot v1`, Browser Playable Demo v1 e `Sprite Animation v1` sem alterar os contratos v1.
+- com `assetManifestPath`, drawCalls `sprite` recebem `assetSrc` inline como `data:` URL.
+- com `spriteAnimation`, o HTML exportado pode animar sprite-sheets embutidos localmente.
+- sem `assetManifestPath`, o fallback visual atual permanece.
+- `Simple HTML Export v1` continua sem consumo visual de Sprite Animation neste slice; a evolucao acontece no contrato v2 separado.
+- nao e bundler, servidor, atlas pipeline, editor ou runtime canonico amplo de gameplay.
+
 ## Game Templates v1
 
 Contrato leve de conteudo para exemplos V1 Small 2D copiar-e-adaptar:
@@ -643,4 +659,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1 e Prefab System v1 ja foram entregues como incrementos pequenos pos-checkpoint; proximo pacote recomendado: consumo visual V2 para Sprite Animation v1 e expansao incremental do prefab system conforme roadmap.
+- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2 e Prefab System v1 ja foram entregues como incrementos pequenos pos-checkpoint; proximo pacote recomendado: expandir o prefab system de forma incremental conforme roadmap.

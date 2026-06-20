@@ -136,6 +136,6 @@ V2 pode iniciar de forma incremental quando:
 
 ## Proximo Pacote Recomendado
 
-Proximo pacote recomendado: consumo visual V2 para Sprite Animation v1 e expansao incremental do prefab system conforme roadmap.
+Portable HTML Export v2 agora cobre `Sprite Animation v1` no caminho portatil, preservando `RenderSnapshot v1`.
 
-Audio Lite v1 e Sprite Animation v1 iniciaram a evolucao incremental pos-checkpoint sem reabrir contratos V1 ja estabilizados.
+Audio Lite v1, Sprite Animation v1 e Portable HTML Export v2 iniciaram a evolucao incremental pos-checkpoint sem reabrir contratos V1 ja estabilizados.

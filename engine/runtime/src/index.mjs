@@ -46,6 +46,12 @@ export {
   SIMPLE_HTML_EXPORT_VERSION
 } from './export/export-html-game-v1.mjs';
 export {
+  buildPortableHtmlGameExportV2,
+  exportPortableHtmlGameV2,
+  PORTABLE_HTML_EXPORT_VERSION
+} from './export/portable-html-export-v2.mjs';
+export { materializePortableExportAssetSrcV2 } from './render/materialize-portable-export-asset-src-v2.mjs';
+export {
   createStateModelV1FromScene,
   createInitialStateFromScene,
   snapshotStateV1

@@ -197,4 +197,4 @@ npm run smoke
 
 ## Continuidade
 
-UI System v1 esta fechado como contrato declarativo/report e agora possui consumo visual opt-in incremental na Browser Demo/export. Proximos pacotes recomendados: consumo visual V2 para Sprite Animation v1 e expansao incremental do prefab system.
+UI System v1 esta fechado como contrato declarativo/report e agora possui consumo visual opt-in incremental na Browser Demo/export. Portable HTML Export v2 ja cobre assets inline com Sprite Animation v1 no caminho portatil. Proximo pacote recomendado: expandir o prefab system de forma incremental.

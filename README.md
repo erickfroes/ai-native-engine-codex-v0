@@ -77,7 +77,7 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 - multiplayer real;
 - captura/input runtime completo fora da Browser Playable Demo local.
 
-A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1 e Sprite Animation v1 diagnostico, agora tambem consumido de forma visual opt-in na Browser Demo para sprites asset-backed.
+A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1, Sprite Animation v1 diagnostico consumido de forma visual opt-in na Browser Demo para sprites asset-backed e Portable HTML Export v2 com assets inline e `Sprite Animation v1` no export portatil.
 
 Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local e report diagnostico cross-interface. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface e consumo visual opt-in na Browser Demo/export por overlay passivo, preservando HUD Lite como diagnostico local.
 
@@ -98,6 +98,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `inspect-audio-lite`: inspeciona clips e triggers declarativos de Audio Lite v1
 - `inspect-ui-system`: inspeciona screens declarativas e arvores de widgets de UI System v1
 - `inspect-sprite-animation`: inspeciona animacoes declarativas de Sprite Animation v1
+- `export-portable-html-game`: escreve HTML jogavel portatil com assets inline e Sprite Animation opt-in
 - `save-state` e `load-save`: persistencia minima de State Snapshot v1
 - `render-snapshot`: gera RenderSnapshot v1
 - `render-svg`: gera SVG textual deterministico
@@ -120,6 +121,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `render_canvas_demo`
 - `render_browser_demo`
 - `export_html_game`
+- `export_portable_html_game`
 - `plan_loop`
 - `run_loop`
 - `run_replay`
@@ -197,6 +199,9 @@ node ./engine/runtime/src/cli.mjs inspect-sprite-animation ./engine/runtime/test
 # gerar Browser Playable Demo consumindo Sprite Animation v1 em sprites asset-backed
 node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/sprite-animation-idle.scene.json --asset-manifest ./fixtures/assets/valid.asset-manifest.json --sprite-animation --out ./tmp/sprite-animation-browser-demo.html --json
 
+# exportar HTML portatil com assets inline e Sprite Animation v1
+node ./engine/runtime/src/cli.mjs export-portable-html-game ./engine/runtime/test/fixtures/sprite-animation-idle.scene.json --asset-manifest ./fixtures/assets/valid.asset-manifest.json --sprite-animation --out ./tmp/sprite-animation-portable-export.html --json
+
 # exportar um HTML jogavel simples da cena consolidada V1 small 2D
 node ./engine/runtime/src/cli.mjs export-html-game ./scenes/v1-small-2d.scene.json --movement-blocking --gameplay-hud --playable-save-load --audio-lite --ui-system --out ./tmp/v1-small-2d-export.html --json
 ```
@@ -225,6 +230,7 @@ npm run smoke
 - `docs/GAME_TEMPLATES_V1.md`: templates V1 Small 2D copiar-e-adaptar
 - `docs/AUDIO_LITE_V1.md`: contrato de Audio Lite v1 diagnostico
 - `docs/SPRITE_ANIMATION_V1.md`: contrato de Sprite Animation v1 diagnostico e consumo visual opt-in na Browser Demo
+- `docs/PORTABLE_HTML_EXPORT_V2.md`: contrato do export portatil v2 com assets inline e Sprite Animation opt-in
 - `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`: fluxo Codex-first para criar um jogo pequeno 2D
 - `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`: checklist de validacao para jogos criados a partir dos templates
 - `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md`: pacote de prompt para Codex

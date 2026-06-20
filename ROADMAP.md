@@ -110,7 +110,7 @@ Entregas alvo:
 - matriz de regressao visual/headless;
 - pacote Codex com prompts/skills/subagentes para criar um jogo 2D pequeno.
 
-Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. Audio Lite v1 e Sprite Animation v1 iniciam V2 de forma incremental, sem editor, servidor, fisica completa ou pathfinding.
+Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. Audio Lite v1, Sprite Animation v1 e Portable HTML Export v2 ja iniciam V2 de forma incremental, sem editor, servidor, fisica completa ou pathfinding.
 
 Criterio de conclusao:
 
@@ -127,8 +127,8 @@ Subagentes recomendados:
 
 Linha de trabalho atual recomendada:
 
-1. Runtime visual V2 consumir Sprite Animation v1 de forma incremental, preservando HUD Lite e UI System visual como opt-ins locais.
-2. Expandir o prefab system minimo sem perder seguranca por path, contratos curtos e diff pequeno.
+1. Expandir o prefab system minimo sem perder seguranca por path, contratos curtos e diff pequeno.
+2. Harden `Portable HTML Export v2` apenas em slices pequenos, preservando `RenderSnapshot v1`, HUD Lite e UI System visual.
 
 ---
 

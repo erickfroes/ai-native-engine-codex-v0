@@ -30,6 +30,7 @@ import {
   BROWSER_PLAYABLE_DEMO_VERSION,
   materializeBrowserDemoAssetSrcV1,
   exportHtmlGameV1,
+  exportPortableHtmlGameV2,
   runDeterministicReplay,
   buildReplayArtifact,
   snapshotStateV1,
@@ -127,6 +128,7 @@ async function handleToolCall(params) {
     params.name !== 'render_canvas_demo' &&
     params.name !== 'render_browser_demo' &&
     params.name !== 'export_html_game' &&
+    params.name !== 'export_portable_html_game' &&
     params.name !== 'plan_loop' &&
     params.name !== 'run_loop' &&
     params.name !== 'run_replay' &&
@@ -149,6 +151,7 @@ async function handleToolCall(params) {
   if (
     params.name !== 'keyboard_to_input_intent' &&
     params.name !== 'export_html_game' &&
+    params.name !== 'export_portable_html_game' &&
     (typeof args.path !== 'string' || args.path.trim().length === 0)
   ) {
     return {
@@ -280,6 +283,116 @@ async function handleToolCall(params) {
 
       return {
         content: toTextContent(`HTML game export written for ${exportEnvelope.scene}.`),
+        structuredContent: exportEnvelope,
+        isError: false
+      };
+    }
+
+    if (params.name === 'export_portable_html_game') {
+      const unexpectedArgument = findUnexpectedArgument(
+        args,
+        new Set([
+          'scenePath',
+          'outputPath',
+          'assetManifestPath',
+          'movementBlocking',
+          'gameplayHud',
+          'playableSaveLoad',
+          'audioLite',
+          'spriteAnimation',
+          'uiSystem'
+        ])
+      );
+      if (unexpectedArgument !== undefined) {
+        return {
+          content: toTextContent(`export_portable_html_game: unexpected argument \`${unexpectedArgument}\`.`),
+          isError: true
+        };
+      }
+
+      if (typeof args.scenePath !== 'string' || args.scenePath.trim().length === 0) {
+        return {
+          content: toTextContent('export_portable_html_game: `scenePath` is required and must be a non-empty string.'),
+          isError: true
+        };
+      }
+
+      if (typeof args.outputPath !== 'string' || args.outputPath.trim().length === 0) {
+        return {
+          content: toTextContent('export_portable_html_game: `outputPath` is required and must be a non-empty string.'),
+          isError: true
+        };
+      }
+
+      if (
+        args.assetManifestPath !== undefined &&
+        (typeof args.assetManifestPath !== 'string' || args.assetManifestPath.trim().length === 0)
+      ) {
+        return {
+          content: toTextContent(
+            'export_portable_html_game: `assetManifestPath` must be a non-empty string when provided.'
+          ),
+          isError: true
+        };
+      }
+
+      if (args.movementBlocking !== undefined && typeof args.movementBlocking !== 'boolean') {
+        return {
+          content: toTextContent('export_portable_html_game: `movementBlocking` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.gameplayHud !== undefined && typeof args.gameplayHud !== 'boolean') {
+        return {
+          content: toTextContent('export_portable_html_game: `gameplayHud` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.playableSaveLoad !== undefined && typeof args.playableSaveLoad !== 'boolean') {
+        return {
+          content: toTextContent('export_portable_html_game: `playableSaveLoad` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.audioLite !== undefined && typeof args.audioLite !== 'boolean') {
+        return {
+          content: toTextContent('export_portable_html_game: `audioLite` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.spriteAnimation !== undefined && typeof args.spriteAnimation !== 'boolean') {
+        return {
+          content: toTextContent('export_portable_html_game: `spriteAnimation` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.uiSystem !== undefined && typeof args.uiSystem !== 'boolean') {
+        return {
+          content: toTextContent('export_portable_html_game: `uiSystem` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
+      const exportEnvelope = await exportPortableHtmlGameV2(resolveRepoPath(args.scenePath), {
+        outputPath: resolveRepoPath(args.outputPath),
+        assetManifestPath: args.assetManifestPath === undefined
+          ? undefined
+          : resolveRepoPath(args.assetManifestPath),
+        movementBlocking: args.movementBlocking === true,
+        gameplayHud: args.gameplayHud === true,
+        playableSaveLoad: args.playableSaveLoad === true,
+        audioLite: args.audioLite === true,
+        spriteAnimation: args.spriteAnimation === true,
+        uiSystem: args.uiSystem === true
+      });
+
+      return {
+        content: toTextContent(`Portable HTML game export written for ${exportEnvelope.scene}.`),
         structuredContent: exportEnvelope,
         isError: false
       };
@@ -1007,7 +1120,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, export_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_prefab_usage, inspect_audio_lite, inspect_ui_system, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_input_intent, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_prefab_usage, inspect_audio_lite, inspect_ui_system, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }

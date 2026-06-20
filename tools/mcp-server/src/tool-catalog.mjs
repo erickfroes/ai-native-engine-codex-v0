@@ -323,6 +323,54 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'export_portable_html_game',
+    title: 'Export Portable HTML Game',
+    description: 'Write a deterministic Portable HTML Export v2 file with inline sprite assets for portable local playback.',
+    inputSchema: {
+      type: 'object',
+      required: ['scenePath', 'outputPath'],
+      properties: {
+        scenePath: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root for the scene to export.'
+        },
+        outputPath: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root where the HTML file will be written.'
+        },
+        assetManifestPath: {
+          type: 'string',
+          description: 'Optional repository-relative or absolute path to an Asset Manifest v1 JSON file whose image assets will be embedded as data URLs.'
+        },
+        movementBlocking: {
+          type: 'boolean',
+          description: 'When true, embed local Browser Demo movement blocking data.'
+        },
+        gameplayHud: {
+          type: 'boolean',
+          description: 'When true, embed Browser Gameplay HUD Lite v1 local diagnostic state.'
+        },
+        playableSaveLoad: {
+          type: 'boolean',
+          description: 'When true, embed Playable Save/Load Lite v1 local export/import controls.'
+        },
+        audioLite: {
+          type: 'boolean',
+          description: 'When true, embed Audio Lite v1 diagnostic metadata and user-gesture controls.'
+        },
+        spriteAnimation: {
+          type: 'boolean',
+          description: 'When true, embed Sprite Animation v1 metadata and animate embedded sprite-sheet assets locally in the exported HTML.'
+        },
+        uiSystem: {
+          type: 'boolean',
+          description: 'When true, embed UI System v1 declarative screens as a passive screen-space overlay.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'run_replay',
     title: 'Run Replay',
     description: 'Run deterministic replay for a scene and return the final snapshot.',

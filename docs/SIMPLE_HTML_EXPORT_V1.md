@@ -4,7 +4,7 @@
 
 Empacotar uma cena jogavel pequena em um unico arquivo HTML autocontido, reutilizando a Browser Playable Demo v1 e seus opt-ins locais.
 
-Na V1, o export canonico usa fallback visual deterministico e nao empacota Asset Manifest. Fluxos com asset manifest continuam sendo preview local da Browser Demo, nao export portavel de assets.
+Na V1, o export canonico usa fallback visual deterministico e nao empacota Asset Manifest. Fluxos com asset manifest continuam sendo preview local da Browser Demo, nao export portavel de assets. `Portable HTML Export v2` agora cobre o caso de assets inline e `Sprite Animation v1` sem retroagir neste contrato v1.
 
 Este pacote e um export simples para V1 Small 2D. Ele nao e bundler, nao e build pipeline V2, nao cria servidor e nao transforma a Browser Demo no runtime canonico do engine.
 
@@ -118,6 +118,4 @@ O MCP valida `scenePath` e `outputPath` dentro do repo, escreve o arquivo HTML e
 
 Audio Lite v1 e UI System v1 visual opt-in foram entregues como incrementos diagnosticos/visuais pos-checkpoint sobre este export simples.
 
-Sprite Animation v1 segue entregue apenas como opt-in visual da Browser Demo neste slice, sem consumo visual no `export-html-game`.
-
-O proximo pacote recomendado e consumo visual V2 para Sprite Animation v1 e expansao incremental do prefab system conforme roadmap.
+`Portable HTML Export v2` agora cobre assets inline e `Sprite Animation v1` no caminho portatil, preservando `RenderSnapshot v1` e mantendo `export-html-game` como contrato v1 estavel.

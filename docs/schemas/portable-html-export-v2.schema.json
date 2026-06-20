@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "portable-html-export-v2.schema.json",
+  "title": "PortableHtmlExportV2Envelope",
+  "type": "object",
+  "required": [
+    "exportVersion",
+    "scene",
+    "outputPath",
+    "options",
+    "embeddedAssetCount",
+    "sizeBytes",
+    "htmlHash"
+  ],
+  "properties": {
+    "exportVersion": {
+      "type": "integer",
+      "const": 2
+    },
+    "scene": {
+      "type": "string",
+      "minLength": 1
+    },
+    "outputPath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "options": {
+      "type": "object",
+      "required": [
+        "assetManifest",
+        "movementBlocking",
+        "gameplayHud",
+        "playableSaveLoad",
+        "audioLite",
+        "spriteAnimation",
+        "uiSystem"
+      ],
+      "properties": {
+        "assetManifest": { "type": "boolean" },
+        "movementBlocking": { "type": "boolean" },
+        "gameplayHud": { "type": "boolean" },
+        "playableSaveLoad": { "type": "boolean" },
+        "audioLite": { "type": "boolean" },
+        "spriteAnimation": { "type": "boolean" },
+        "uiSystem": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "embeddedAssetCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "sizeBytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "htmlHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

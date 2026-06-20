@@ -50,6 +50,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - Audio Lite v1 como primeiro incremento pos-checkpoint;
 - UI System v1 como contrato declarativo/report para screens e widget tree, com consumo visual opt-in na Browser Demo/export;
 - Sprite Animation v1 como diagnostico declarativo runtime/CLI/MCP, com consumo visual opt-in na Browser Demo para sprites asset-backed;
+- Portable HTML Export v2 com assets inline e Sprite Animation v1 opt-in no caminho portatil;
 - Prefab System v1 como resolucao declarativa minima e report diagnostico runtime/CLI/MCP;
 - V1 Small 2D Capability Matrix;
 - V1 Small 2D Release Validation;
@@ -60,8 +61,8 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. Fazer a camada visual V2 consumir Sprite Animation v1 sem transformar diagnosticos declarativos em runtime canonico amplo.
-2. Expandir o prefab system minimo sem perder a seguranca por path e o diff pequeno.
+1. Expandir o prefab system minimo sem perder a seguranca por path e o diff pequeno.
+2. Harden `Portable HTML Export v2` apenas em slices pequenos de assets/UX, sem transformar diagnosticos declarativos em runtime canonico amplo.
 
 ## Versoes de produto
 

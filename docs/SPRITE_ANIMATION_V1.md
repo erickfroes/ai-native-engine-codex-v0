@@ -162,4 +162,4 @@ npm run smoke
 
 ## Continuidade
 
-Sprite Animation v1 esta fechado como diagnostico declarativo e agora possui consumo visual opt-in na Browser Demo para sprites asset-backed. O proximo pacote recomendado continua sendo ampliar o consumo visual V2 sem reabrir `RenderSnapshot v1`, junto da expansao incremental do prefab system conforme roadmap.
+Sprite Animation v1 esta fechado como diagnostico declarativo e agora possui consumo visual opt-in na Browser Demo para sprites asset-backed. `Portable HTML Export v2` passa a consumir esse contrato no caminho portatil com assets inline, preservando `RenderSnapshot v1` e mantendo `Simple HTML Export v1` inalterado. Proxima continuidade recomendada: expansao incremental do prefab system conforme roadmap.
