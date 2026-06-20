@@ -45,12 +45,14 @@ import {
   buildAudioLiteReportV1,
   buildUiSystemReportV1,
   buildSpriteAnimationReportV1,
+  buildPrefabValidationReportV1,
   buildPrefabUsageReportV1
 } from './index.mjs';
 
 function printUsage() {
   console.log(`Usage:
   node engine/runtime/src/cli.mjs validate-scene <path> [--json]
+  node engine/runtime/src/cli.mjs validate-prefab <path> [--json]
   node engine/runtime/src/cli.mjs validate-save <path> [--json]
   node engine/runtime/src/cli.mjs validate-input-intent <path> [--json]
   node engine/runtime/src/cli.mjs keyboard-to-input-intent --tick <n> --entity <id> --keys <comma-list> [--json]
@@ -886,6 +888,36 @@ async function run() {
       console.log(`Blocking entities: ${report.blockingEntities.length === 0 ? '(none)' : report.blockingEntities.join(', ')}`);
     }
 
+    return;
+  }
+
+  if (command === 'validate-prefab') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildPrefabValidationReportV1(maybePath);
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Prefab: ${report.absolutePath}`);
+      console.log(`Prefab validation report version: ${report.prefabValidationReportVersion}`);
+      console.log(`Prefab version: ${report.prefab?.prefabVersion ?? '(missing)'}`);
+      console.log(`Name: ${report.prefab?.metadata?.name ?? '(missing)'}`);
+      console.log(`Components: ${Array.isArray(report.prefab?.components) ? report.prefab.components.length : '(missing)'}`);
+      console.log('');
+      console.log(report.ok ? 'Status: OK' : 'Status: INVALID');
+      if (report.errors.length > 0) {
+        console.log('');
+        console.log('Errors:');
+        for (const error of report.errors) {
+          console.log(`- ${error.path}: ${error.message}`);
+        }
+      }
+    }
+    process.exitCode = report.ok ? 0 : 1;
     return;
   }
 

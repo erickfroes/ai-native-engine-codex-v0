@@ -94,6 +94,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `inspect-collision-overlaps`: detecta overlaps AABB
 - `inspect-tile-collision`: inspeciona tiles solidos declarados em `tile.layer`
 - `inspect-movement-blocking`: avalia tentativa de movimento contra colisao solida
+- `validate-prefab`: valida um arquivo `.prefab.json` diretamente
 - `inspect-prefab-usage`: inspeciona composicao declarativa de `entity.prefab`
 - `inspect-audio-lite`: inspeciona clips e triggers declarativos de Audio Lite v1
 - `inspect-ui-system`: inspeciona screens declarativas e arvores de widgets de UI System v1
@@ -111,6 +112,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 
 - `validate_scene`
 - `validate_input_intent`
+- `validate_prefab`
 - `keyboard_to_input_intent`
 - `validate_save`
 - `save_state_snapshot`
@@ -226,6 +228,7 @@ npm run smoke
 - `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`: formato local do Playable Save/Load Lite
 - `docs/SIMPLE_HTML_EXPORT_V1.md`: contrato do export HTML jogavel simples
 - `docs/PREFAB_SYSTEM_V1.md`: contrato do Prefab System v1
+- `docs/PREFAB_VALIDATION_REPORT_V1.md`: contrato do report de validacao direta de prefab
 - `docs/UI_SYSTEM_V1.md`: contrato do UI System v1
 - `docs/GAME_TEMPLATES_V1.md`: templates V1 Small 2D copiar-e-adaptar
 - `docs/AUDIO_LITE_V1.md`: contrato de Audio Lite v1 diagnostico

@@ -622,8 +622,13 @@ Contrato leve de conteudo para exemplos V1 Small 2D copiar-e-adaptar:
 Contrato minimo para resolver `entity.prefab` a partir de um arquivo declarativo local:
 
 - ver `docs/PREFAB_SYSTEM_V1.md`.
+- ver `docs/PREFAB_VALIDATION_REPORT_V1.md`.
 - schema formal do prefab: `schemas/prefab.schema.json`.
+- schema formal do report de validacao: `docs/schemas/prefab-validation-report-v1.schema.json`.
 - schema formal do report: `docs/schemas/prefab-usage-report-v1.schema.json`.
+- runtime: `buildPrefabValidationReportV1(path)`.
+- CLI: `validate-prefab <path> [--json]`.
+- MCP: `validate_prefab({ path })`.
 - runtime: `loadSceneFile(path)` resolve prefabs em chamadas por path.
 - runtime: `buildPrefabUsageReportV1(path)`.
 - CLI: `inspect-prefab-usage <scene> [--json]`.

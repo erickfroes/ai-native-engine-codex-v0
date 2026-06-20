@@ -18,6 +18,9 @@ Prefab System v1 inicia o slice de V2 com uma semantica pequena, deterministica 
 
 ## Runtime, CLI e MCP
 
+- Runtime: `buildPrefabValidationReportV1(path)` valida um prefab isoladamente.
+- CLI: `validate-prefab <path> [--json]`.
+- MCP: `validate_prefab({ path })`.
 - Runtime: `loadSceneFile(path)` passa a devolver a cena com prefabs resolvidos.
 - Runtime: `buildPrefabUsageReportV1(path)` gera `PrefabUsageReport v1`.
 - CLI: `inspect-prefab-usage <scene> [--json]`.
@@ -33,6 +36,11 @@ Prefab System v1 inicia o slice de V2 com uma semantica pequena, deterministica 
 - quais componentes do prefab foram sobrescritos pela entidade.
 
 Schema formal: `docs/schemas/prefab-usage-report-v1.schema.json`.
+
+Validacao direta de arquivo:
+
+- `PrefabValidationReport v1` documenta a validacao isolada do `.prefab.json`.
+- Schema formal: `docs/schemas/prefab-validation-report-v1.schema.json`.
 
 ## Compatibilidade
 

@@ -52,6 +52,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - Sprite Animation v1 como diagnostico declarativo runtime/CLI/MCP, com consumo visual opt-in na Browser Demo para sprites asset-backed;
 - Portable HTML Export v2 com assets inline e Sprite Animation v1 opt-in no caminho portatil;
 - Prefab System v1 como resolucao declarativa minima e report diagnostico runtime/CLI/MCP;
+- Prefab Validation Report v1 como validacao direta de `.prefab.json` em runtime/CLI/MCP;
 - V1 Small 2D Capability Matrix;
 - V1 Small 2D Release Validation;
 - V1 Small 2D readiness gate com cena consolidada (`docs/V1_SMALL_2D_READINESS.md`);

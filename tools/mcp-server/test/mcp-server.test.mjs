@@ -132,6 +132,10 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(validateInputIntentTool);
     assert.equal(validateInputIntentTool.title, 'Validate Input Intent');
     assert.deepEqual(validateInputIntentTool.inputSchema.required, ['path']);
+    const validatePrefabTool = toolsResponse.result.tools.find((tool) => tool.name === 'validate_prefab');
+    assert.ok(validatePrefabTool);
+    assert.equal(validatePrefabTool.title, 'Validate Prefab');
+    assert.deepEqual(validatePrefabTool.inputSchema.required, ['path']);
     const keyboardToInputIntentTool = toolsResponse.result.tools.find((tool) => tool.name === 'keyboard_to_input_intent');
     assert.ok(keyboardToInputIntentTool);
     assert.equal(keyboardToInputIntentTool.title, 'Keyboard To Input Intent');
@@ -302,6 +306,37 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
         (error) => error.path === '$.entityId' && error.message === 'is required'
       )
     );
+
+    const validPrefabResponse = await client.request('tools/call', {
+      name: 'validate_prefab',
+      arguments: {
+        path: './engine/runtime/test/fixtures/prefabs/player-actor.prefab.json'
+      }
+    });
+
+    assert.equal(validPrefabResponse.result.isError, false);
+    assert.equal(validPrefabResponse.result.structuredContent.prefabValidationReportVersion, 1);
+    assert.equal(validPrefabResponse.result.structuredContent.ok, true);
+    assert.equal(validPrefabResponse.result.structuredContent.prefab.metadata.name, 'player.actor');
+    assert.equal(validPrefabResponse.result.structuredContent.errors.length, 0);
+
+    const malformedPrefabResponse = await client.request('tools/call', {
+      name: 'validate_prefab',
+      arguments: {
+        path: './engine/runtime/test/fixtures/prefabs/invalid-malformed.prefab.json'
+      }
+    });
+
+    assert.equal(malformedPrefabResponse.result.isError, true);
+    assert.equal(malformedPrefabResponse.result.structuredContent.prefabValidationReportVersion, 1);
+    assert.equal(malformedPrefabResponse.result.structuredContent.ok, false);
+    assert.equal(malformedPrefabResponse.result.structuredContent.prefab, null);
+    assert.deepEqual(malformedPrefabResponse.result.structuredContent.errors, [
+      {
+        path: '$',
+        message: 'prefab JSON is malformed'
+      }
+    ]);
 
     const keyboardInputIntentResponse = await client.request('tools/call', {
       name: 'keyboard_to_input_intent',

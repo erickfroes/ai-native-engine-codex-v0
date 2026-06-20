@@ -32,6 +32,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'validate_prefab',
+    title: 'Validate Prefab',
+    description: 'Validate a declarative prefab JSON file against the prefab schema and prefab invariants.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'keyboard_to_input_intent',
     title: 'Keyboard To Input Intent',
     description: 'Translate declared keyboard keys into a deterministic Input Intent v1 payload.',

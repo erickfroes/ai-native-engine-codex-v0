@@ -1,6 +1,7 @@
 export { loadSchemaRegistry, getRepoRoot } from './schema/registry.mjs';
 export { validateSceneFile, formatValidationReport } from './scene/validate-scene.mjs';
 export { validateLoopScene, formatSceneValidationReportV1 } from './scene/validate-loop-scene.mjs';
+export { buildPrefabValidationReportV1 } from './scene/build-prefab-validation-report-v1.mjs';
 export { buildPrefabUsageReportV1 } from './scene/build-prefab-usage-report-v1.mjs';
 export { validateSaveFile } from './save/validate-save.mjs';
 export { canonicalJSONStringify, sha256Hex, createSha256Checksum } from './save/canonical-json.mjs';

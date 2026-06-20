@@ -25,6 +25,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Sprite Animation v1: concluido como diagnostico declarativo runtime/CLI/MCP e consumo visual opt-in na Browser Demo para sprites asset-backed.
 - Portable HTML Export v2: concluido como export portatil com assets inline e consumo visual opt-in de Sprite Animation v1, preservando `RenderSnapshot v1` e mantendo `Simple HTML Export v1` fechado.
 - Prefab System v1: concluido como resolucao declarativa minima por arquivo e report diagnostico runtime/CLI/MCP.
+- Prefab Validation Report v1: concluido como validacao direta de `.prefab.json` via runtime/CLI/MCP.
 
 ## O que o Codex recebe
 
@@ -44,6 +45,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `export-portable-html-game` / `export_portable_html_game` com `--asset-manifest` e `--sprite-animation` para HTML portatil com assets inline;
 - `ui.screen` declarativo com widget tree serializavel, `inspect-ui-system` / `inspect_ui_system` e `render-browser-demo --ui-system` / `export-html-game --ui-system`;
 - `entity.prefab` resolvido por arquivo local seguro em `loadSceneFile` e consumidores por path;
+- `validate-prefab` / `validate_prefab` para validar prefab sem depender de uma cena;
 - `inspect-prefab-usage` / `inspect_prefab_usage`;
 - `export-html-game` / `export_html_game` para escrever HTML jogavel autocontido;
 - `templates/top-down-basic` e `templates/side-view-blocking-basic`;
@@ -65,6 +67,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `docs/SPRITE_ANIMATION_V1.md`;
 - `docs/PORTABLE_HTML_EXPORT_V2.md`;
 - `docs/PREFAB_SYSTEM_V1.md`;
+- `docs/PREFAB_VALIDATION_REPORT_V1.md`;
 - suites cross-interface;
 - roadmap progressivo ate 3D AAA;
 - estrategia de subagentes e skills.
@@ -102,6 +105,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 29. `docs/UI_SYSTEM_V1.md`
 30. `docs/SPRITE_ANIMATION_V1.md`
 31. `docs/PREFAB_SYSTEM_V1.md`
+32. `docs/PREFAB_VALIDATION_REPORT_V1.md`
 
 ## Baseline obrigatorio
 
