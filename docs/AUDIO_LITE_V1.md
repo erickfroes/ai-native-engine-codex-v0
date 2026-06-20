@@ -149,7 +149,7 @@ No browser, Audio Lite v1:
 
 ## Proximo pacote recomendado
 
-`codex/sprite-animation-v1`.
+Sprite Animation v1 foi entregue como diagnostico declarativo. Proximo pacote recomendado: UI system/prefab system V2 conforme roadmap.
 
 ## Test Matrix
 

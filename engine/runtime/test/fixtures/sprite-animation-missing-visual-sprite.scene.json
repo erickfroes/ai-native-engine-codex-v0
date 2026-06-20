@@ -1,7 +1,7 @@
 {
   "version": 1,
   "metadata": {
-    "name": "sprite-animation-idle-fixture"
+    "name": "sprite-animation-missing-visual-sprite-fixture"
   },
   "entities": [
     {
@@ -17,37 +17,21 @@
           }
         },
         {
-          "kind": "visual.sprite",
-          "version": 1,
-          "replicated": false,
-          "fields": {
-            "assetId": "player.sprite",
-            "width": 16,
-            "height": 16
-          }
-        },
-        {
           "kind": "visual.sprite.animation",
           "version": 1,
           "replicated": false,
           "fields": {
             "animationId": "player.idle",
-            "assetId": "player.sprite",
+            "assetId": "player.missing",
             "frameWidth": 16,
             "frameHeight": 16,
             "frames": [
               {
                 "x": 0,
                 "y": 0
-              },
-              {
-                "x": 16,
-                "y": 0
               }
             ],
-            "fps": 8,
-            "loop": true,
-            "state": "idle"
+            "fps": 8
           }
         }
       ]

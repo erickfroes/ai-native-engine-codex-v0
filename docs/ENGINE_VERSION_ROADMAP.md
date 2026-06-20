@@ -59,6 +59,7 @@ Capacidades alvo:
 - V1 Small 2D Release Checkpoint;
 - UI system simples futuro de V2;
 - Audio Lite v1 como primeiro pacote incremental pos-checkpoint;
+- Sprite Animation v1 concluido como diagnostico declarativo runtime/CLI/MCP;
 - save/load jogavel formal futuro, se ainda necessario;
 - release checkpoint V1 Small 2D concluido como gate de fechamento.
 
@@ -211,5 +212,5 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. `codex/sprite-animation-v1`.
-2. UI system/prefab system V2 conforme roadmap, preservando HUD Lite como diagnostico local ate existir UI system formal.
+1. UI system/prefab system V2 conforme roadmap, preservando HUD Lite como diagnostico local ate existir UI system formal.
+2. Runtime visual V2 consumir Sprite Animation v1 apenas depois de contrato/fixture/report permanecerem estaveis.

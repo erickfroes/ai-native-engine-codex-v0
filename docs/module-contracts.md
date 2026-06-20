@@ -345,6 +345,21 @@ Contrato declarativo minimo para audio simples em cenas pequenas:
 - nao altera `RenderSnapshot v1`, `run-loop`, `InputIntent v1`, Movement Blocking, Tile Collision ou Browser Demo Local State v1.
 - nao e mixer completo, audio graph, spatial audio, streaming, timeline, editor, UI system completo ou runtime canonico de audio.
 
+## Sprite Animation v1
+
+Contrato declarativo minimo para animacao sprite inspecionavel:
+
+- ver `docs/SPRITE_ANIMATION_V1.md`.
+- componente: `visual.sprite.animation` v1.
+- runtime: `buildSpriteAnimationReportV1(sceneOrPath)`.
+- CLI: `inspect-sprite-animation <scene> [--json]`.
+- MCP: `inspect_sprite_animation({ path })`.
+- report: `SpriteAnimationReport v1`.
+- o runtime headless gera apenas report deterministico; nao avanca frame, nao altera drawCalls e nao toca o `run-loop`.
+- `assetId` de animacao deve apontar para asset usado por algum `visual.sprite` da cena; referencias ausentes entram em `warnings` e `invalidRefs`.
+- nao altera `RenderSnapshot v1`, Browser Demo, Simple HTML Export, Audio Lite, Movement Blocking, Tile Collision, InputIntent ou Save/Load.
+- nao e animation graph, timeline, skeletal animation, blending, atlas pipeline, editor ou renderer sprite completo.
+
 ## State Model v1 (interno)
 
 Representação estruturada de estado inicial derivada do Scene Document v1:
@@ -384,6 +399,7 @@ Componentes iniciais:
 - `transform` v1;
 - `velocity` v1.
 - `visual.sprite` v1.
+- `visual.sprite.animation` v1.
 - `tile.layer` v1.
 - `camera.viewport` v1.
 - `collision.bounds` v1.
@@ -581,4 +597,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1 e o primeiro incremento pos-checkpoint; proximo pacote recomendado: `codex/sprite-animation-v1`.
+- Audio Lite v1 e Sprite Animation v1 ja foram entregues como incrementos diagnosticos pos-checkpoint; proximo pacote recomendado: UI system/prefab system V2 conforme roadmap.

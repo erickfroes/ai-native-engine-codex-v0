@@ -108,5 +108,5 @@ Para jogos criados fora de `./scenes`, rode tambem o gate explicito do jogo: `va
 
 ## Proximo Pacote Recomendado
 
-- Audio Lite v1 foi entregue como incremento pos-checkpoint; proximo pacote recomendado: `codex/sprite-animation-v1`.
+- Audio Lite v1 e Sprite Animation v1 foram entregues como incrementos diagnosticos pos-checkpoint; proximo pacote recomendado: UI system/prefab system V2 conforme roadmap.
 - Manter fora deste pacote: editor, servidor, build system amplo, UI system completo e savegame avancado.

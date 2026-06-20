@@ -197,6 +197,11 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     );
     assert.ok(inspectAudioLiteTool);
     assert.deepEqual(inspectAudioLiteTool.inputSchema.required, ['path']);
+    const inspectSpriteAnimationTool = toolsResponse.result.tools.find(
+      (tool) => tool.name === 'inspect_sprite_animation'
+    );
+    assert.ok(inspectSpriteAnimationTool);
+    assert.deepEqual(inspectSpriteAnimationTool.inputSchema.required, ['path']);
     const inspectMovementBlockingTool = toolsResponse.result.tools.find(
       (tool) => tool.name === 'inspect_movement_blocking'
     );
@@ -1979,6 +1984,94 @@ test('mcp inspect_audio_lite returns deterministic clips and empty reports', asy
     assert.equal(invalidResponse.result.structuredContent.ok, false);
     assert.equal(invalidResponse.result.structuredContent.errorName, 'SceneValidationError');
     assert.match(invalidResponse.result.structuredContent.errorMessage, /invalid_audio_lite_trigger\.scene\.json/);
+  } finally {
+    await client.close();
+  }
+});
+
+test('mcp inspect_sprite_animation returns deterministic animations and invalid refs', async () => {
+  const client = createClient();
+
+  try {
+    const initResponse = await client.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: {
+        name: 'node-test',
+        version: '1.0.0'
+      }
+    });
+
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    client.notify('notifications/initialized');
+
+    const idleResponse = await client.request('tools/call', {
+      name: 'inspect_sprite_animation',
+      arguments: {
+        path: './engine/runtime/test/fixtures/sprite-animation-idle.scene.json'
+      }
+    });
+
+    assert.equal(idleResponse.result.isError, false);
+    assert.deepEqual(idleResponse.result.structuredContent, {
+      spriteAnimationReportVersion: 1,
+      scene: 'sprite-animation-idle-fixture',
+      animations: [
+        {
+          entityId: 'player.hero',
+          animationId: 'player.idle',
+          assetId: 'player.sprite',
+          frameWidth: 16,
+          frameHeight: 16,
+          fps: 8,
+          loop: true,
+          state: 'idle',
+          frames: [
+            {
+              x: 0,
+              y: 0,
+              index: 0
+            },
+            {
+              x: 16,
+              y: 0,
+              index: 1
+            }
+          ]
+        }
+      ],
+      warnings: [],
+      invalidRefs: []
+    });
+
+    const missingSpriteResponse = await client.request('tools/call', {
+      name: 'inspect_sprite_animation',
+      arguments: {
+        path: './engine/runtime/test/fixtures/sprite-animation-missing-visual-sprite.scene.json'
+      }
+    });
+
+    assert.equal(missingSpriteResponse.result.isError, false);
+    assert.deepEqual(missingSpriteResponse.result.structuredContent.invalidRefs, [
+      {
+        entityId: 'player.hero',
+        animationId: 'player.idle',
+        assetId: 'player.missing',
+        reason: 'SPRITE_ANIMATION_ASSET_NOT_IN_VISUAL_SPRITE'
+      }
+    ]);
+
+    const invalidResponse = await client.request('tools/call', {
+      name: 'inspect_sprite_animation',
+      arguments: {
+        path: './engine/runtime/test/fixtures/invalid_sprite_animation_frame.scene.json'
+      }
+    });
+
+    assert.equal(invalidResponse.result.isError, true);
+    assert.equal(invalidResponse.result.structuredContent.ok, false);
+    assert.equal(invalidResponse.result.structuredContent.errorName, 'SceneValidationError');
+    assert.match(invalidResponse.result.structuredContent.errorMessage, /invalid_sprite_animation_frame\.scene\.json/);
   } finally {
     await client.close();
   }

@@ -20,6 +20,8 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Game Templates v1: concluido como exemplos copiar-e-adaptar para V1 Small 2D.
 - V1 Small 2D Game Creation Guide / Codex package: concluido como workflow Codex-first para criar jogos pequenos a partir dos templates.
 - V1 Small 2D Release Checkpoint: concluido como fechamento documental, matriz de capacidade e validacao canonica.
+- Audio Lite v1: concluido como diagnostico declarativo e opt-in browser/export.
+- Sprite Animation v1: concluido como diagnostico declarativo runtime/CLI/MCP.
 
 ## O que o Codex recebe
 
@@ -50,6 +52,8 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `docs/V1_SMALL_2D_RELEASE_VALIDATION.md`;
 - `docs/V1_SMALL_2D_READINESS.md`;
 - `docs/V1_SMALL_2D_TEST_MATRIX.md`;
+- `docs/AUDIO_LITE_V1.md`;
+- `docs/SPRITE_ANIMATION_V1.md`;
 - suites cross-interface;
 - roadmap progressivo ate 3D AAA;
 - estrategia de subagentes e skills.
@@ -83,6 +87,8 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 25. `docs/V1_SMALL_2D_RELEASE_VALIDATION.md`
 26. `docs/V1_SMALL_2D_READINESS.md`
 27. `docs/V1_SMALL_2D_TEST_MATRIX.md`
+28. `docs/AUDIO_LITE_V1.md`
+29. `docs/SPRITE_ANIMATION_V1.md`
 
 ## Baseline obrigatorio
 
@@ -97,8 +103,8 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. `codex/sprite-animation-v1`.
-2. UI system/prefab system V2 conforme roadmap.
+1. UI system/prefab system V2 conforme roadmap.
+2. Manter Sprite Animation v1 como diagnostico declarativo ate existir runtime visual V2 formal.
 3. Evitar transformar HUD Lite em UI system completo antes do pacote apropriado.
 4. 3D indie apenas depois de V1/V2 demonstradas.
 

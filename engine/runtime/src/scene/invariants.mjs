@@ -309,13 +309,90 @@ function validateCollisionBoundsComponent(component, componentPath, errors) {
 
 function validateSpriteAnimationComponent(component, componentPath, errors) {
   const fields = component.fields;
-  const allowedFieldNames = new Set(['animationId','assetId','frameWidth','frameHeight','frames','fps','loop','state']);
-  if (component.version !== 1) pushMessage(errors, `${componentPath}.version`, 'visual.sprite.animation version must be exactly 1');
-  if (component.replicated !== false) pushMessage(errors, `${componentPath}.replicated`, 'visual.sprite.animation must not be replicated');
-  if (!isPlainObject(fields)) { pushMessage(errors, `${componentPath}.fields`, 'visual.sprite.animation fields must be an object'); return; }
-  for (const fieldName of Object.keys(fields)) if (!allowedFieldNames.has(fieldName)) pushMessage(errors, `${componentPath}.fields.${fieldName}`, 'is not allowed for visual.sprite.animation');
-  if (typeof fields.animationId !== 'string' || fields.animationId.trim().length === 0) pushMessage(errors, `${componentPath}.fields.animationId`, 'visual.sprite.animation animationId must be a non-empty string');
-  if (typeof fields.assetId !== 'string' || fields.assetId.trim().length === 0) pushMessage(errors, `${componentPath}.fields.assetId`, 'visual.sprite.animation assetId must be a non-empty string');
+  const allowedFieldNames = new Set([
+    'animationId',
+    'assetId',
+    'frameWidth',
+    'frameHeight',
+    'frames',
+    'fps',
+    'loop',
+    'state'
+  ]);
+
+  if (component.version !== 1) {
+    pushMessage(errors, `${componentPath}.version`, 'visual.sprite.animation version must be exactly 1');
+  }
+
+  if (component.replicated !== false) {
+    pushMessage(errors, `${componentPath}.replicated`, 'visual.sprite.animation must not be replicated');
+  }
+
+  if (!isPlainObject(fields)) {
+    pushMessage(errors, `${componentPath}.fields`, 'visual.sprite.animation fields must be an object');
+    return;
+  }
+
+  for (const fieldName of Object.keys(fields)) {
+    if (!allowedFieldNames.has(fieldName)) {
+      pushMessage(errors, `${componentPath}.fields.${fieldName}`, 'is not allowed for visual.sprite.animation');
+    }
+  }
+
+  if (typeof fields.animationId !== 'string' || fields.animationId.trim().length === 0) {
+    pushMessage(errors, `${componentPath}.fields.animationId`, 'visual.sprite.animation animationId must be a non-empty string');
+  }
+
+  if (typeof fields.assetId !== 'string' || fields.assetId.trim().length === 0) {
+    pushMessage(errors, `${componentPath}.fields.assetId`, 'visual.sprite.animation assetId must be a non-empty string');
+  }
+
+  if (!Number.isInteger(fields.frameWidth) || fields.frameWidth < 1) {
+    pushMessage(errors, `${componentPath}.fields.frameWidth`, 'visual.sprite.animation frameWidth must be an integer >= 1');
+  }
+
+  if (!Number.isInteger(fields.frameHeight) || fields.frameHeight < 1) {
+    pushMessage(errors, `${componentPath}.fields.frameHeight`, 'visual.sprite.animation frameHeight must be an integer >= 1');
+  }
+
+  if (!Number.isInteger(fields.fps) || fields.fps < 1 || fields.fps > 60) {
+    pushMessage(errors, `${componentPath}.fields.fps`, 'visual.sprite.animation fps must be an integer between 1 and 60');
+  }
+
+  if (!Array.isArray(fields.frames) || fields.frames.length === 0) {
+    pushMessage(errors, `${componentPath}.fields.frames`, 'visual.sprite.animation frames must be a non-empty array');
+  } else {
+    for (const [frameIndex, frame] of fields.frames.entries()) {
+      const framePath = `${componentPath}.fields.frames[${frameIndex}]`;
+
+      if (!isPlainObject(frame)) {
+        pushMessage(errors, framePath, 'visual.sprite.animation frame must be an object');
+        continue;
+      }
+
+      for (const fieldName of Object.keys(frame)) {
+        if (fieldName !== 'x' && fieldName !== 'y') {
+          pushMessage(errors, `${framePath}.${fieldName}`, 'is not allowed for visual.sprite.animation frame');
+        }
+      }
+
+      if (!Number.isInteger(frame.x) || frame.x < 0) {
+        pushMessage(errors, `${framePath}.x`, 'visual.sprite.animation frame x must be an integer >= 0');
+      }
+
+      if (!Number.isInteger(frame.y) || frame.y < 0) {
+        pushMessage(errors, `${framePath}.y`, 'visual.sprite.animation frame y must be an integer >= 0');
+      }
+    }
+  }
+
+  if (fields.loop !== undefined && typeof fields.loop !== 'boolean') {
+    pushMessage(errors, `${componentPath}.fields.loop`, 'visual.sprite.animation loop must be a boolean when provided');
+  }
+
+  if (fields.state !== undefined && (typeof fields.state !== 'string' || fields.state.trim().length === 0)) {
+    pushMessage(errors, `${componentPath}.fields.state`, 'visual.sprite.animation state must be a non-empty string when provided');
+  }
 }
 
 function validateAudioClipComponent(component, componentPath, errors) {

@@ -1,9 +1,75 @@
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
+import { validateSceneFile } from '../scene/validate-scene.mjs';
+import { validateSceneInvariants } from '../scene/invariants.mjs';
 
 const KIND = 'visual.sprite.animation';
 
-function cmp(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
+function compareStableString(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function pushSceneStructureError(errors, errorPath, message) {
+  errors.push(`${errorPath}: ${message}`);
+}
+
+function validateSceneObject(scene) {
+  const errors = [];
+
+  if (!scene || typeof scene !== 'object' || Array.isArray(scene)) {
+    throw new Error('buildSpriteAnimationReportV1: `sceneOrPath` must be a scene object or path string');
+  }
+
+  if (!scene.metadata || typeof scene.metadata !== 'object' || Array.isArray(scene.metadata)) {
+    pushSceneStructureError(errors, '$.metadata', 'must be an object');
+  } else if (typeof scene.metadata.name !== 'string' || scene.metadata.name.trim().length === 0) {
+    pushSceneStructureError(errors, '$.metadata.name', 'must be a non-empty string');
+  }
+
+  if (!Array.isArray(scene.entities)) {
+    pushSceneStructureError(errors, '$.entities', 'must be an array');
+  } else {
+    for (const [entityIndex, entity] of scene.entities.entries()) {
+      const entityPath = `$.entities[${entityIndex}]`;
+
+      if (!entity || typeof entity !== 'object' || Array.isArray(entity)) {
+        pushSceneStructureError(errors, entityPath, 'must be an object');
+        continue;
+      }
+
+      if (typeof entity.id !== 'string' || entity.id.trim().length === 0) {
+        pushSceneStructureError(errors, `${entityPath}.id`, 'must be a non-empty string');
+      }
+
+      if (!Array.isArray(entity.components)) {
+        pushSceneStructureError(errors, `${entityPath}.components`, 'must be an array');
+        continue;
+      }
+
+      for (const [componentIndex, component] of entity.components.entries()) {
+        const componentPath = `${entityPath}.components[${componentIndex}]`;
+
+        if (!component || typeof component !== 'object' || Array.isArray(component)) {
+          pushSceneStructureError(errors, componentPath, 'must be an object');
+          continue;
+        }
+
+        if (typeof component.kind !== 'string' || component.kind.trim().length === 0) {
+          pushSceneStructureError(errors, `${componentPath}.kind`, 'must be a non-empty string');
+        }
+      }
+    }
+  }
+
+  if (errors.length === 0) {
+    const invariantReport = validateSceneInvariants(scene);
+    for (const error of invariantReport.errors) {
+      pushSceneStructureError(errors, error.path, error.message);
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`buildSpriteAnimationReportV1: scene object is invalid: ${errors.join('; ')}`);
+  }
+}
 
 function validateFrame(frame, index, context) {
   if (!frame || typeof frame !== 'object' || Array.isArray(frame)) {
@@ -17,18 +83,23 @@ function validateFrame(frame, index, context) {
 
 async function resolveScene(sceneOrPath) {
   if (typeof sceneOrPath === 'string') {
-    const absolutePath = path.resolve(sceneOrPath);
-    const raw = await readFile(absolutePath, 'utf8');
-    return { scene: JSON.parse(raw), scenePath: absolutePath };
+    const report = await validateSceneFile(sceneOrPath);
+    if (!report.ok) {
+      const error = new Error(`Scene validation failed for ${report.absolutePath}`);
+      error.name = 'SceneValidationError';
+      error.report = report;
+      throw error;
+    }
+
+    return { scene: report.scene };
   }
-  if (!sceneOrPath || typeof sceneOrPath !== 'object' || Array.isArray(sceneOrPath)) {
-    throw new Error('buildSpriteAnimationReportV1: `sceneOrPath` must be a scene object or path string');
-  }
-  return { scene: sceneOrPath, scenePath: null };
+
+  validateSceneObject(sceneOrPath);
+  return { scene: sceneOrPath };
 }
 
 export async function buildSpriteAnimationReportV1(sceneOrPath) {
-  const { scene, scenePath } = await resolveScene(sceneOrPath);
+  const { scene } = await resolveScene(sceneOrPath);
   const animations = [];
   const warnings = [];
   const invalidRefs = [];
@@ -69,12 +140,11 @@ export async function buildSpriteAnimationReportV1(sceneOrPath) {
     }
   }
 
-  animations.sort((a, b) => cmp(a.animationId, b.animationId) || cmp(a.entityId, b.entityId));
+  animations.sort((a, b) => compareStableString(a.animationId, b.animationId) || compareStableString(a.entityId, b.entityId));
 
   return {
     spriteAnimationReportVersion: 1,
-    scene: scene.metadata?.name ?? null,
-    scenePath,
+    scene: scene.metadata.name,
     animations,
     warnings,
     invalidRefs

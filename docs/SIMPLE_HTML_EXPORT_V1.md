@@ -111,6 +111,6 @@ O MCP valida `scenePath` e `outputPath` dentro do repo, escreve o arquivo HTML e
 
 `Game Templates v1`, `V1 Small 2D Game Creation Guide / Codex package` e `V1 Small 2D Release Checkpoint` ja foram concluidos sobre este export simples.
 
-Audio Lite v1 e o primeiro incremento pos-checkpoint sobre este export simples.
+Audio Lite v1 e Sprite Animation v1 foram entregues como incrementos diagnosticos pos-checkpoint sobre este export simples.
 
-O proximo pacote recomendado e `codex/sprite-animation-v1`.
+O proximo pacote recomendado e UI system/prefab system V2 conforme roadmap.

@@ -29,6 +29,7 @@ Leia:
 - gerar `Browser Playable Demo v1` autocontida com canvas focavel e input local;
 - carregar imagens locais opcionais via `Asset Manifest v1` na browser demo, com fallback visual deterministico;
 - usar `visual.sprite` para sprite declarativo com fallback `rect`;
+- usar `visual.sprite.animation` para animacao sprite declarativa inspecionavel por report;
 - usar `tile.layer` para mapas declarativos pequenos expandidos em drawCalls;
 - usar `camera.viewport` para aplicar offset `world - camera` nos drawCalls.
 
@@ -76,9 +77,9 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 - multiplayer real;
 - captura/input runtime completo fora da Browser Playable Demo local.
 
-A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. O primeiro incremento pos-checkpoint inicia V2 de forma pequena com Audio Lite v1.
+A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1 e Sprite Animation v1 diagnostico.
 
-O proximo pacote recomendado e `codex/sprite-animation-v1`.
+O proximo pacote recomendado e UI system/prefab system V2 conforme roadmap, preservando HUD Lite como diagnostico local ate existir UI formal.
 
 ## Comandos CLI principais
 
@@ -94,6 +95,7 @@ O proximo pacote recomendado e `codex/sprite-animation-v1`.
 - `inspect-tile-collision`: inspeciona tiles solidos declarados em `tile.layer`
 - `inspect-movement-blocking`: avalia tentativa de movimento contra colisao solida
 - `inspect-audio-lite`: inspeciona clips e triggers declarativos de Audio Lite v1
+- `inspect-sprite-animation`: inspeciona animacoes declarativas de Sprite Animation v1
 - `save-state` e `load-save`: persistencia minima de State Snapshot v1
 - `render-snapshot`: gera RenderSnapshot v1
 - `render-svg`: gera SVG textual deterministico
@@ -126,6 +128,8 @@ O proximo pacote recomendado e `codex/sprite-animation-v1`.
 - `inspect_collision_overlaps`
 - `inspect_tile_collision`
 - `inspect_movement_blocking`
+- `inspect_audio_lite`
+- `inspect_sprite_animation`
 
 Observacao: `render-svg-demo` e um fluxo de CLI/runtime. A Meta 2 nao define uma tool MCP dedicada para a demo HTML de SVG.
 
@@ -177,6 +181,9 @@ node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene
 # gerar Browser Playable Demo com Audio Lite diagnostico opt-in
 node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --audio-lite --out ./tmp/audio-lite-browser-demo.html --json
 
+# inspecionar Sprite Animation v1 declarativo
+node ./engine/runtime/src/cli.mjs inspect-sprite-animation ./engine/runtime/test/fixtures/sprite-animation-idle.scene.json --json
+
 # exportar um HTML jogavel simples da cena consolidada V1 small 2D
 node ./engine/runtime/src/cli.mjs export-html-game ./scenes/v1-small-2d.scene.json --movement-blocking --gameplay-hud --playable-save-load --audio-lite --out ./tmp/v1-small-2d-export.html --json
 ```
@@ -201,6 +208,8 @@ npm run smoke
 - `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`: formato local do Playable Save/Load Lite
 - `docs/SIMPLE_HTML_EXPORT_V1.md`: contrato do export HTML jogavel simples
 - `docs/GAME_TEMPLATES_V1.md`: templates V1 Small 2D copiar-e-adaptar
+- `docs/AUDIO_LITE_V1.md`: contrato de Audio Lite v1 diagnostico
+- `docs/SPRITE_ANIMATION_V1.md`: contrato de Sprite Animation v1 diagnostico
 - `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`: fluxo Codex-first para criar um jogo pequeno 2D
 - `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`: checklist de validacao para jogos criados a partir dos templates
 - `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md`: pacote de prompt para Codex

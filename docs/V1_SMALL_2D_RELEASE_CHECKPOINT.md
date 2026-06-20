@@ -136,10 +136,6 @@ V2 pode iniciar de forma incremental quando:
 
 ## Proximo Pacote Recomendado
 
-Proxima branch recomendada:
+Proximo pacote recomendado: UI system/prefab system V2 conforme roadmap.
 
-```text
-codex/sprite-animation-v1
-```
-
-Audio Lite v1 iniciou a evolucao incremental pos-checkpoint sem reabrir contratos V1 ja estabilizados.
+Audio Lite v1 e Sprite Animation v1 iniciaram a evolucao incremental pos-checkpoint sem reabrir contratos V1 ja estabilizados.
