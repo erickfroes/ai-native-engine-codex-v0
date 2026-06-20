@@ -134,11 +134,34 @@ Input:
 
 Output: o mesmo shape do `UiSystemReport v1` em `structuredContent`.
 
+## Browser Demo e Export
+
+UI System v1 tambem pode ser consumido visualmente de forma opt-in:
+
+- `render-browser-demo --ui-system`
+- `render_browser_demo({ uiSystem: true })`
+- `export-html-game --ui-system`
+- `export_html_game({ uiSystem: true })`
+
+Esse consumo embute `metadata.uiSystem` derivado do `UiSystemReport v1` e renderiza um overlay DOM passivo em screen-space sobre o canvas.
+
+Regras:
+
+- o overlay renderiza apenas screens `active: true`;
+- screens seguem a ordem deterministica do report: `layer`, depois `screenId`, depois `entityId`;
+- widgets seguem `widgetTree`;
+- `panel` vira bloco visual passivo;
+- `label` vira texto passivo;
+- `camera.viewport` nao desloca UI;
+- sem `--ui-system` / `uiSystem: true`, Browser Demo e export nao embutem `metadata.uiSystem` nem overlay;
+- HUD Lite continua separado e nao e substituido por `ui.screen`.
+
 ## Compatibilidade
 
 - `HUD Lite` continua local ao HTML da Browser Demo.
 - `Playable Save/Load Lite` continua local ao HTML.
-- `RenderSnapshot v1`, `render-browser-demo`, `export-html-game`, `run-loop`, `save/load` e reports de colisao permanecem inalterados.
+- `RenderSnapshot v1`, `run-loop`, `save/load` e reports de colisao permanecem inalterados.
+- `render-browser-demo` e `export-html-game` consomem UI System v1 somente com opt-in explicito.
 - `entity.prefab` continua opcional; quando presente por path, `ui.screen` pode vir do prefab.
 
 ## Fora de escopo
@@ -152,6 +175,7 @@ Output: o mesmo shape do `UiSystemReport v1` em `structuredContent`.
 - editor de UI;
 - substituir HUD Lite atual;
 - salvar estado de UI em savegame canonico.
+- aplicar `camera.viewport` na UI.
 
 ## Validacao
 
@@ -161,6 +185,7 @@ Cobertura dedicada:
 - `engine/runtime/test/cli-inspect-ui-system.test.mjs`;
 - `engine/runtime/test/ui-system-cross-interface.integration.test.mjs`;
 - `tools/mcp-server/test/ui-system.test.mjs`.
+- consumo visual opt-in em `engine/runtime/test/browser-playable-demo-runtime.test.mjs`, `engine/runtime/test/cli-render-browser-demo.test.mjs`, `engine/runtime/test/browser-playable-demo-cross-interface.integration.test.mjs`, `engine/runtime/test/simple-html-export-v1.test.mjs` e `tools/mcp-server/test/mcp-server.test.mjs`.
 
 Rodar:
 
@@ -172,4 +197,4 @@ npm run smoke
 
 ## Continuidade
 
-UI System v1 esta fechado como contrato declarativo/report. O proximo pacote recomendado e fazer o runtime visual V2 consumir esse contrato de forma incremental, junto da proxima expansao do prefab system.
+UI System v1 esta fechado como contrato declarativo/report e agora possui consumo visual opt-in incremental na Browser Demo/export. Proximos pacotes recomendados: consumo visual V2 para Sprite Animation v1 e expansao incremental do prefab system.

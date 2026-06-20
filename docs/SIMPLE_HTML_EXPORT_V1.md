@@ -21,6 +21,7 @@ Opcoes:
 - `--gameplay-hud` embute Browser Gameplay HUD Lite.
 - `--playable-save-load` embute Playable Save/Load Lite.
 - `--audio-lite` embute Audio Lite v1 diagnostico com controles por gesto do usuario.
+- `--ui-system` embute UI System v1 como overlay visual passivo.
 - `--json` retorna envelope estavel.
 
 Envelope JSON:
@@ -34,7 +35,8 @@ Envelope JSON:
     "movementBlocking": true,
     "gameplayHud": true,
     "playableSaveLoad": true,
-    "audioLite": true
+    "audioLite": true,
+    "uiSystem": true
   },
   "sizeBytes": 24000,
   "htmlHash": "sha256hex"
@@ -61,7 +63,8 @@ Input:
   "movementBlocking": true,
   "gameplayHud": true,
   "playableSaveLoad": true,
-  "audioLite": true
+  "audioLite": true,
+  "uiSystem": true
 }
 ```
 
@@ -84,12 +87,13 @@ O MCP valida `scenePath` e `outputPath` dentro do repo, escreve o arquivo HTML e
 ## Compatibilidade
 
 - O HTML exportado preserva o comportamento da Browser Playable Demo v1.
-- Sem flags, o export nao embute `movementBlocking`, `gameplayHud`, `playableSaveLoad` ou `audioLite`.
+- Sem flags, o export nao embute `movementBlocking`, `gameplayHud`, `playableSaveLoad`, `audioLite` ou `uiSystem`.
 - Com `--movement-blocking`, o movimento local pode ser bloqueado por `collision.bounds` solido e tiles solidos.
 - Com `--gameplay-hud`, o HUD Lite local aparece no HTML.
 - Com `--playable-save-load`, os controles locais de export/import aparecem no HTML.
 - Com `--audio-lite`, metadata e controles diagnosticos de Audio Lite v1 aparecem no HTML sem autoplay forcado.
-- Com todas as opcoes, blocking, HUD, save/load local e Audio Lite coexistem no mesmo HTML.
+- Com `--ui-system`, metadata e overlay passivo de UI System v1 aparecem no HTML.
+- Com todas as opcoes, blocking, HUD, save/load local, Audio Lite e UI System coexistem no mesmo HTML.
 
 ## Fora de escopo
 
@@ -99,6 +103,7 @@ O MCP valida `scenePath` e `outputPath` dentro do repo, escreve o arquivo HTML e
 - build pipeline V2;
 - asset copier ou empacotamento portavel de assets;
 - UI system completo;
+- binding, navegacao, foco ou widgets interativos de UI;
 - fisica completa;
 - pathfinding;
 - mixer/audio graph completo ou animation;
@@ -111,6 +116,8 @@ O MCP valida `scenePath` e `outputPath` dentro do repo, escreve o arquivo HTML e
 
 `Game Templates v1`, `V1 Small 2D Game Creation Guide / Codex package` e `V1 Small 2D Release Checkpoint` ja foram concluidos sobre este export simples.
 
-Audio Lite v1 e Sprite Animation v1 foram entregues como incrementos diagnosticos pos-checkpoint sobre este export simples.
+Audio Lite v1 e UI System v1 visual opt-in foram entregues como incrementos diagnosticos/visuais pos-checkpoint sobre este export simples.
 
-O proximo pacote recomendado e consumo visual V2 para UI System v1 e expansao incremental do prefab system conforme roadmap.
+Sprite Animation v1 segue entregue apenas como opt-in visual da Browser Demo neste slice, sem consumo visual no `export-html-game`.
+
+O proximo pacote recomendado e consumo visual V2 para Sprite Animation v1 e expansao incremental do prefab system conforme roadmap.

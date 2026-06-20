@@ -100,4 +100,4 @@ Playable Save/Load Lite tambem continua opt-in, local ao HTML e nao substitui `s
 - `docs/V1_SMALL_2D_CAPABILITY_MATRIX.md`
 - `docs/V1_SMALL_2D_RELEASE_VALIDATION.md`
 
-Audio Lite v1, UI System v1 e Sprite Animation v1 foram entregues como incrementos diagnosticos pos-checkpoint. O proximo pacote recomendado e consumo visual V2 para UI System v1 e expansao incremental do prefab system conforme roadmap.
+Audio Lite v1, UI System v1 visual opt-in e Sprite Animation v1 foram entregues como incrementos pos-checkpoint. O proximo pacote recomendado e consumo visual V2 para Sprite Animation v1 e expansao incremental do prefab system conforme roadmap.

@@ -1,4 +1,6 @@
 import { canonicalJSONStringify } from '../save/canonical-json.mjs';
+import { createSpriteAnimationReportV1FromScene } from './build-sprite-animation-report-v1.mjs';
+import { createUiSystemReportV1FromScene } from '../ui/build-ui-system-report-v1.mjs';
 
 export const BROWSER_PLAYABLE_DEMO_VERSION = 1;
 export const DEFAULT_BROWSER_PLAYABLE_STEP_PX = 4;
@@ -226,6 +228,14 @@ function validateMetadata(metadata) {
   if (metadata.audioLite !== undefined) {
     validateAudioLiteMetadata(metadata.audioLite);
   }
+
+  if (metadata.spriteAnimation !== undefined) {
+    validateSpriteAnimationMetadata(metadata.spriteAnimation);
+  }
+
+  if (metadata.uiSystem !== undefined) {
+    validateUiSystemMetadata(metadata.uiSystem);
+  }
 }
 
 function validateMetadataOverrides(overrides) {
@@ -253,6 +263,14 @@ function validateMetadataOverrides(overrides) {
 
   if (overrides.audioLite !== undefined && typeof overrides.audioLite !== 'boolean') {
     throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.audioLite` override must be a boolean');
+  }
+
+  if (overrides.spriteAnimation !== undefined && typeof overrides.spriteAnimation !== 'boolean') {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.spriteAnimation` override must be a boolean');
+  }
+
+  if (overrides.uiSystem !== undefined && typeof overrides.uiSystem !== 'boolean') {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.uiSystem` override must be a boolean');
   }
 }
 
@@ -384,6 +402,144 @@ function validateAudioLiteMetadata(audioLite) {
 
   if (!Array.isArray(audioLite.invalidRefs)) {
     throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.audioLite.invalidRefs` must be an array');
+  }
+}
+
+function validateSpriteAnimationMetadata(spriteAnimation) {
+  assertObject(spriteAnimation, 'metadata.spriteAnimation');
+
+  if (spriteAnimation.enabled !== true) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.spriteAnimation.enabled` must be exactly true');
+  }
+
+  if (spriteAnimation.spriteAnimationReportVersion !== 1) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.spriteAnimation.spriteAnimationReportVersion` must be exactly 1');
+  }
+
+  assertNonEmptyString('metadata.spriteAnimation.scene', spriteAnimation.scene);
+
+  if (!Array.isArray(spriteAnimation.animations)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.spriteAnimation.animations` must be an array');
+  }
+
+  spriteAnimation.animations.forEach((animation, animationIndex) => {
+    const name = `metadata.spriteAnimation.animations[${animationIndex}]`;
+    assertObject(animation, name);
+    assertNonEmptyString(`${name}.entityId`, animation.entityId);
+    assertNonEmptyString(`${name}.animationId`, animation.animationId);
+    assertNonEmptyString(`${name}.assetId`, animation.assetId);
+    assertInteger(`${name}.frameWidth`, animation.frameWidth, 1);
+    assertInteger(`${name}.frameHeight`, animation.frameHeight, 1);
+    assertInteger(`${name}.fps`, animation.fps, 1);
+    if (animation.fps > 60) {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.fps\` must be an integer between 1 and 60`);
+    }
+    if (typeof animation.loop !== 'boolean') {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.loop\` must be a boolean`);
+    }
+    assertNonEmptyString(`${name}.state`, animation.state);
+    if (!Array.isArray(animation.frames) || animation.frames.length === 0) {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.frames\` must be a non-empty array`);
+    }
+    animation.frames.forEach((frame, frameIndex) => {
+      const frameName = `${name}.frames[${frameIndex}]`;
+      assertObject(frame, frameName);
+      assertInteger(`${frameName}.x`, frame.x, 0);
+      assertInteger(`${frameName}.y`, frame.y, 0);
+      assertInteger(`${frameName}.index`, frame.index, 0);
+    });
+  });
+
+  if (!Array.isArray(spriteAnimation.warnings)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.spriteAnimation.warnings` must be an array');
+  }
+
+  if (!Array.isArray(spriteAnimation.invalidRefs)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.spriteAnimation.invalidRefs` must be an array');
+  }
+}
+
+function validateUiSystemWidget(widget, name, { flat = false } = {}) {
+  assertObject(widget, name);
+  assertNonEmptyString(`${name}.widgetId`, widget.widgetId);
+  if (widget.kind !== 'panel' && widget.kind !== 'label') {
+    throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.kind\` must be \`panel\` or \`label\``);
+  }
+
+  if (widget.kind === 'label') {
+    assertNonEmptyString(`${name}.text`, widget.text);
+  } else if (widget.text !== null) {
+    throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.text\` must be null for panel widgets`);
+  }
+
+  assertInteger(`${name}.x`, widget.x);
+  assertInteger(`${name}.y`, widget.y);
+
+  if (widget.width !== null) {
+    assertInteger(`${name}.width`, widget.width, 1);
+  }
+
+  if (widget.height !== null) {
+    assertInteger(`${name}.height`, widget.height, 1);
+  }
+
+  if (flat) {
+    if (widget.parentWidgetId !== null) {
+      assertNonEmptyString(`${name}.parentWidgetId`, widget.parentWidgetId);
+    }
+    assertInteger(`${name}.depth`, widget.depth, 0);
+  } else {
+    if (!Array.isArray(widget.children)) {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.children\` must be an array`);
+    }
+    widget.children.forEach((child, index) => {
+      validateUiSystemWidget(child, `${name}.children[${index}]`);
+    });
+  }
+}
+
+function validateUiSystemMetadata(uiSystem) {
+  assertObject(uiSystem, 'metadata.uiSystem');
+
+  if (uiSystem.enabled !== true) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.uiSystem.enabled` must be exactly true');
+  }
+
+  if (uiSystem.uiSystemReportVersion !== 1) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.uiSystem.uiSystemReportVersion` must be exactly 1');
+  }
+
+  assertNonEmptyString('metadata.uiSystem.scene', uiSystem.scene);
+
+  if (!Array.isArray(uiSystem.screens)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.uiSystem.screens` must be an array');
+  }
+
+  uiSystem.screens.forEach((screen, screenIndex) => {
+    const name = `metadata.uiSystem.screens[${screenIndex}]`;
+    assertObject(screen, name);
+    assertNonEmptyString(`${name}.screenId`, screen.screenId);
+    assertNonEmptyString(`${name}.entityId`, screen.entityId);
+    if (typeof screen.active !== 'boolean') {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.active\` must be a boolean`);
+    }
+    assertInteger(`${name}.layer`, screen.layer);
+    if (!Array.isArray(screen.widgets)) {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.widgets\` must be an array`);
+    }
+    screen.widgets.forEach((widget, widgetIndex) => {
+      validateUiSystemWidget(widget, `${name}.widgets[${widgetIndex}]`, { flat: true });
+    });
+    if (!Array.isArray(screen.widgetTree)) {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.widgetTree\` must be an array`);
+    }
+    screen.widgetTree.forEach((widget, widgetIndex) => {
+      validateUiSystemWidget(widget, `${name}.widgetTree[${widgetIndex}]`);
+    });
+  });
+
+  if (!Array.isArray(uiSystem.warnings)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.uiSystem.warnings` must be an array');
   }
 }
 
@@ -552,6 +708,63 @@ function renderAudioLiteBlock(audioLite) {
   ].join('\n');
 }
 
+function toCssPercent(value, total) {
+  return `${(value / total) * 100}%`;
+}
+
+function renderUiSystemWidget(widget, screenId, parentSize) {
+  const style = [
+    `left:${toCssPercent(widget.x, parentSize.width)}`,
+    `top:${toCssPercent(widget.y, parentSize.height)}`,
+    ...(widget.width === null ? [] : [`width:${toCssPercent(widget.width, parentSize.width)}`]),
+    ...(widget.height === null ? [] : [`height:${toCssPercent(widget.height, parentSize.height)}`])
+  ].join(';');
+  const elementId = `browser-ui-widget-${screenId}-${widget.widgetId}`;
+  const widgetAttributes = `id="${escapeHtml(elementId)}" data-widget-id="${escapeHtml(widget.widgetId)}"`;
+
+  if (widget.kind === 'label') {
+    return `          <div ${widgetAttributes} class="ui-widget ui-label" style="${style}">${escapeHtml(widget.text)}</div>`;
+  }
+
+  const childParentSize = {
+    width: widget.width ?? parentSize.width,
+    height: widget.height ?? parentSize.height
+  };
+  const children = widget.children
+    .map((child) => renderUiSystemWidget(child, screenId, childParentSize))
+    .join('\n');
+
+  return [
+    `          <div ${widgetAttributes} class="ui-widget ui-panel" style="${style}">`,
+    children,
+    '          </div>'
+  ].filter((line) => line !== '').join('\n');
+}
+
+function renderUiSystemBlock(uiSystem, viewport) {
+  const activeScreens = uiSystem?.screens?.filter((screen) => screen.active === true) ?? [];
+  if (activeScreens.length === 0) {
+    return '';
+  }
+
+  const lines = [
+    '        <div id="browser-ui-system" class="ui-system-overlay" aria-label="UI System v1 visual overlay">'
+  ];
+
+  for (const screen of activeScreens) {
+    lines.push(
+      `          <section class="ui-screen" data-screen-id="${escapeHtml(screen.screenId)}" data-layer="${screen.layer}">`
+    );
+    for (const widget of screen.widgetTree) {
+      lines.push(renderUiSystemWidget(widget, screen.screenId, viewport));
+    }
+    lines.push('          </section>');
+  }
+
+  lines.push('        </div>');
+  return lines.join('\n');
+}
+
 function createMovementBlockingMetadata(scene, renderSnapshot, controllableEntityId) {
   const cameraPosition = resolveCameraPosition(scene);
   const controllableDrawCall = renderSnapshot.drawCalls.find((drawCall) => drawCall.id === controllableEntityId);
@@ -671,6 +884,20 @@ function createAudioLiteMetadata(scene) {
   };
 }
 
+function createSpriteAnimationMetadata(scene) {
+  return {
+    enabled: true,
+    ...createSpriteAnimationReportV1FromScene(scene)
+  };
+}
+
+function createUiSystemMetadata(scene) {
+  return {
+    enabled: true,
+    ...createUiSystemReportV1FromScene(scene)
+  };
+}
+
 export function createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overrides = {}) {
   assertObject(scene, 'scene');
   validateRenderSnapshot(renderSnapshot);
@@ -701,6 +928,12 @@ export function createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overr
       : {}),
     ...(overrides.audioLite === true
       ? { audioLite: createAudioLiteMetadata(scene) }
+      : {}),
+    ...(overrides.spriteAnimation === true
+      ? { spriteAnimation: createSpriteAnimationMetadata(scene) }
+      : {}),
+    ...(overrides.uiSystem === true
+      ? { uiSystem: createUiSystemMetadata(scene) }
       : {})
   };
 }
@@ -714,6 +947,8 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
   const controllableEntityId = resolveControllableEntityId(renderSnapshot.drawCalls, metadata.controllableEntityId);
   const playableSaveLoadEnabled = Boolean(metadata.playableSaveLoad && typeof controllableEntityId === 'string');
   const audioLiteEnabled = metadata.audioLite?.enabled === true;
+  const spriteAnimationEnabled = metadata.spriteAnimation?.enabled === true;
+  const uiSystemEnabled = metadata.uiSystem?.enabled === true;
   const stepPx = metadata.stepPx ?? DEFAULT_BROWSER_PLAYABLE_STEP_PX;
   const normalizedMetadata = {
     ...(controllableEntityId ? { controllableEntityId } : {}),
@@ -721,7 +956,9 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     ...(metadata.movementBlocking ? { movementBlocking: metadata.movementBlocking } : {}),
     ...(metadata.gameplayHud ? { gameplayHud: metadata.gameplayHud } : {}),
     ...(playableSaveLoadEnabled ? { playableSaveLoad: metadata.playableSaveLoad } : {}),
-    ...(audioLiteEnabled ? { audioLite: metadata.audioLite } : {})
+    ...(audioLiteEnabled ? { audioLite: metadata.audioLite } : {}),
+    ...(spriteAnimationEnabled ? { spriteAnimation: metadata.spriteAnimation } : {}),
+    ...(uiSystemEnabled ? { uiSystem: metadata.uiSystem } : {})
   };
   const metadataEntries = normalizeMetadataEntries({
     ...(controllableEntityId ? { controllableEntityId } : {}),
@@ -741,6 +978,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
   const gameplayHudBlock = renderGameplayHudBlock(gameplayHudRows);
   const playableSaveLoadBlock = renderPlayableSaveLoadBlock(playableSaveLoadEnabled);
   const audioLiteBlock = renderAudioLiteBlock(audioLiteEnabled ? metadata.audioLite : undefined);
+  const uiSystemBlock = renderUiSystemBlock(uiSystemEnabled ? metadata.uiSystem : undefined, renderSnapshot.viewport);
   const inlineData = escapeInlineJson({
     metadata: normalizedMetadata,
     renderSnapshot,
@@ -792,7 +1030,19 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
           '    .audio-lite-status { font-weight: 700; }'
         ]
       : []),
-    '    canvas { display: block; width: min(100%, 640px); height: auto; border: 1px solid #d7cfc2; background: #fffdf8; image-rendering: pixelated; }',
+    ...(uiSystemEnabled
+      ? [
+          '    .canvas-stage { position: relative; width: min(100%, 640px); }',
+          '    .ui-system-overlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; font-size: 12px; line-height: 1.2; color: #201a13; }',
+          '    .ui-screen { position: absolute; inset: 0; }',
+          '    .ui-widget { position: absolute; box-sizing: border-box; }',
+          '    .ui-panel { border: 1px solid rgba(32, 26, 19, 0.55); background: rgba(255, 248, 236, 0.86); }',
+          '    .ui-label { min-width: max-content; padding: 2px 4px; background: rgba(255, 253, 248, 0.92); border: 1px solid rgba(32, 26, 19, 0.35); font-weight: 700; }'
+        ]
+      : [
+          '    .canvas-stage { width: min(100%, 640px); }'
+        ]),
+    '    canvas { display: block; width: 100%; height: auto; border: 1px solid #d7cfc2; background: #fffdf8; image-rendering: pixelated; }',
     '    canvas:focus { outline: 2px solid #201a13; outline-offset: 3px; }',
     '    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }',
     '    button { font: inherit; padding: 8px 12px; border: 1px solid #201a13; background: #fffdf8; color: #201a13; cursor: pointer; }',
@@ -826,7 +1076,10 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     playableSaveLoadBlock,
     audioLiteBlock,
     '      <noscript>This demo needs JavaScript enabled to capture keyboard input.</noscript>',
-    `      <canvas id="browser-playable-demo-canvas" data-browser-demo-version="${BROWSER_PLAYABLE_DEMO_VERSION}" data-scene="${escapeHtml(renderSnapshot.scene)}" data-tick="${renderSnapshot.tick}" data-controllable-entity="${escapeHtml(controllableEntityId ?? '')}" width="${renderSnapshot.viewport.width}" height="${renderSnapshot.viewport.height}" tabindex="0" aria-label="Browser playable demo canvas" aria-describedby="browser-playable-demo-instructions browser-playable-demo-status"></canvas>`,
+    '      <div class="canvas-stage">',
+    `        <canvas id="browser-playable-demo-canvas" data-browser-demo-version="${BROWSER_PLAYABLE_DEMO_VERSION}" data-scene="${escapeHtml(renderSnapshot.scene)}" data-tick="${renderSnapshot.tick}" data-controllable-entity="${escapeHtml(controllableEntityId ?? '')}" width="${renderSnapshot.viewport.width}" height="${renderSnapshot.viewport.height}" tabindex="0" aria-label="Browser playable demo canvas" aria-describedby="browser-playable-demo-instructions browser-playable-demo-status"></canvas>`,
+    uiSystemBlock,
+    '      </div>',
     '      <div class="actions">',
     '        <button id="browser-playable-demo-pause" type="button">Pause rendering</button>',
     `        <button id="browser-playable-demo-reset" type="button" aria-controls="browser-playable-demo-canvas"${controllableEntityId ? '' : ' disabled'}>Reset position</button>`,
@@ -898,6 +1151,9 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
           '      const audioLiteStatusElement = null;',
           '      const audioLiteEventCountElement = null;'
         ]),
+    ...(spriteAnimationEnabled
+      ? ['      const spriteAnimationEnabled = payload.metadata.spriteAnimation?.enabled === true;']
+      : ['      const spriteAnimationEnabled = false;']),
     '      const context = canvas.getContext("2d");',
     '      if (!context) {',
     '        if (resetButton) {',
@@ -938,6 +1194,40 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '          spriteImageStateById.set(drawCall.id, makeSpriteImageState(drawCall.assetSrc));',
     '        }',
     '      }',
+    ...(spriteAnimationEnabled
+      ? [
+          '      const spriteAnimationByDrawCallId = new Map();',
+          '      let spriteAnimationTimeMs = 0;',
+          '      if (spriteAnimationEnabled) {',
+          '        for (const animation of payload.metadata.spriteAnimation.animations) {',
+          '          const drawCall = drawCalls.find((candidate) =>',
+          '            candidate.kind === "sprite" && candidate.id === animation.entityId && candidate.assetId === animation.assetId',
+          '          );',
+          '          if (drawCall) {',
+          '            spriteAnimationByDrawCallId.set(drawCall.id, animation);',
+          '          }',
+          '        }',
+          '      }',
+          '      function syncSpriteAnimationTime(nextFrameTimeMs) {',
+          '        if (typeof nextFrameTimeMs === "number" && Number.isFinite(nextFrameTimeMs) && nextFrameTimeMs >= 0) {',
+          '          spriteAnimationTimeMs = nextFrameTimeMs;',
+          '          return;',
+          '        }',
+          '        spriteAnimationTimeMs += 1000 / 60;',
+          '      }',
+          '      function resolveSpriteAnimationFrame(animation) {',
+          '        if (!animation || !Array.isArray(animation.frames) || animation.frames.length === 0) {',
+          '          return null;',
+          '        }',
+          '        const frameDurationMs = 1000 / animation.fps;',
+          '        const rawFrameIndex = Math.floor(spriteAnimationTimeMs / frameDurationMs);',
+          '        const frameIndex = animation.loop',
+          '          ? rawFrameIndex % animation.frames.length',
+          '          : Math.min(rawFrameIndex, animation.frames.length - 1);',
+          '        return animation.frames[frameIndex] ?? animation.frames[0] ?? null;',
+          '      }'
+        ]
+      : []),
     '      const controllableEntityId = payload.metadata.controllableEntityId ?? null;',
     '      let controllableIndex = controllableEntityId === null',
     '        ? -1',
@@ -1123,6 +1413,9 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '        for (let index = 0; index < initialDrawCalls.length; index += 1) {',
     '          drawCalls.push({ ...initialDrawCalls[index] });',
     '        }',
+    ...(spriteAnimationEnabled
+      ? ['        spriteAnimationTimeMs = 0;']
+      : []),
     '        inputCount = 0;',
     '        blockedMoveCount = 0;',
     '        lastInput = "none";',
@@ -1228,13 +1521,41 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '          const canDrawImage = spriteImageState !== undefined && spriteImageState.loaded && !spriteImageState.failed;',
     '          if (canDrawImage) {',
     '            try {',
-    '              context.drawImage(',
-    '                spriteImageState.image,',
-    '                drawCall.x,',
-    '                drawCall.y,',
-    '                drawCall.width,',
-    '                drawCall.height',
-    '              );',
+    ...(spriteAnimationEnabled
+      ? [
+          '              const spriteAnimation = drawCall.kind === "sprite" ? spriteAnimationByDrawCallId.get(drawCall.id) : undefined;',
+          '              const spriteAnimationFrame = resolveSpriteAnimationFrame(spriteAnimation);',
+          '              if (spriteAnimationFrame) {',
+          '                context.drawImage(',
+          '                  spriteImageState.image,',
+          '                  spriteAnimationFrame.x,',
+          '                  spriteAnimationFrame.y,',
+          '                  spriteAnimation.frameWidth,',
+          '                  spriteAnimation.frameHeight,',
+          '                  drawCall.x,',
+          '                  drawCall.y,',
+          '                  drawCall.width,',
+          '                  drawCall.height',
+          '                );',
+          '              } else {',
+          '                context.drawImage(',
+          '                  spriteImageState.image,',
+          '                  drawCall.x,',
+          '                  drawCall.y,',
+          '                  drawCall.width,',
+          '                  drawCall.height',
+          '                );',
+          '              }'
+        ]
+      : [
+          '              context.drawImage(',
+          '                spriteImageState.image,',
+          '                drawCall.x,',
+          '                drawCall.y,',
+          '                drawCall.width,',
+          '                drawCall.height',
+          '              );'
+        ]),
     '              context.strokeRect(drawCall.x, drawCall.y, drawCall.width, drawCall.height);',
     '              continue;',
     '            } catch (error) {',
@@ -1254,11 +1575,14 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '        }',
     '        animationFrameHandle = requestAnimationFrame(renderFrame);',
     '      }',
-    '      function renderFrame() {',
+    '      function renderFrame(frameTimeMs) {',
     '        animationFrameHandle = null;',
     '        if (redrawLoopPaused) {',
     '          return;',
     '        }',
+    ...(spriteAnimationEnabled
+      ? ['        syncSpriteAnimationTime(frameTimeMs);']
+      : []),
     '        redraw();',
     '        scheduleRedrawLoop();',
     '      }',

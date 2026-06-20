@@ -232,6 +232,8 @@ Compatibilidade:
 - Browser Playable Demo pode expor HUD Lite local opt-in com `render-browser-demo --gameplay-hud` ou `render_browser_demo({ gameplayHud: true })`;
 - Browser Playable Demo pode expor Playable Save/Load Lite local opt-in com `render-browser-demo --playable-save-load` ou `render_browser_demo({ playableSaveLoad: true })`;
 - Browser Playable Demo pode expor Audio Lite v1 diagnostico local opt-in com `render-browser-demo --audio-lite` ou `render_browser_demo({ audioLite: true })`;
+- Browser Playable Demo pode expor Sprite Animation v1 visual local opt-in com `render-browser-demo --sprite-animation` ou `render_browser_demo({ spriteAnimation: true })`;
+- Browser Playable Demo pode expor UI System v1 visual local opt-in com `render-browser-demo --ui-system` ou `render_browser_demo({ uiSystem: true })`;
 - sem essas flags/opcoes, Browser Playable Demo permanece igual;
 - `InputIntent v1`, `KeyboardInputScript v1`, RenderSnapshot v1, Save/Load v1 e renderers permanecem inalterados;
 - nao adiciona UI system completo, fisica completa, resolucao complexa, pathfinding, editor ou servidor.
@@ -361,7 +363,10 @@ Contrato declarativo minimo para screens de UI com arvore serializavel de widget
 - caminhos de cena passam por `validateSceneFile`, entao `entity.prefab` por path ja chega resolvido ao report.
 - o report expoe `screens[]`, lista flat `widgets[]` em pre-ordem e `widgetTree[]`.
 - cena sem `ui.screen` retorna `screens: []` e `warnings: []`.
-- nao altera `RenderSnapshot v1`, Browser Demo, Simple HTML Export, HUD Lite, Audio Lite, Sprite Animation, InputIntent ou Save/Load.
+- Browser Demo: `render-browser-demo --ui-system` ou `render_browser_demo({ uiSystem: true })` embute `metadata.uiSystem` e um overlay DOM passivo em screen-space.
+- Simple HTML Export: `export-html-game --ui-system` ou `export_html_game({ uiSystem: true })` escreve HTML autocontido com o mesmo overlay passivo.
+- sem opt-in visual, Browser Demo e export nao embutem `metadata.uiSystem`.
+- nao altera `RenderSnapshot v1`, HUD Lite, Audio Lite, Sprite Animation, InputIntent ou Save/Load.
 - nao e layout engine completo, binding, navegacao, renderer formal de UI, editor de UI ou HUD canonico de jogo.
 
 ## Sprite Animation v1
@@ -376,7 +381,11 @@ Contrato declarativo minimo para animacao sprite inspecionavel:
 - report: `SpriteAnimationReport v1`.
 - o runtime headless gera apenas report deterministico; nao avanca frame, nao altera drawCalls e nao toca o `run-loop`.
 - `assetId` de animacao deve apontar para asset usado por algum `visual.sprite` da cena; referencias ausentes entram em `warnings` e `invalidRefs`.
-- nao altera `RenderSnapshot v1`, Browser Demo, Simple HTML Export, Audio Lite, Movement Blocking, Tile Collision, InputIntent ou Save/Load.
+- Browser Demo: `render-browser-demo --asset-manifest <path> --sprite-animation` ou `render_browser_demo({ assetManifestPath, spriteAnimation: true })` embute `metadata.spriteAnimation` e anima drawCalls `sprite` asset-backed por crop local de sprite-sheet.
+- sem opt-in, a Browser Demo nao embute `metadata.spriteAnimation`.
+- sem `assetManifestPath` ou sem drawCalls `sprite` asset-backed, a Browser Demo preserva o fallback visual atual mesmo com metadata embutida.
+- nao altera `RenderSnapshot v1`, Simple HTML Export, Audio Lite, Movement Blocking, Tile Collision, InputIntent ou Save/Load.
+- Simple HTML Export v1 continua sem consumo visual de Sprite Animation neste slice.
 - nao e animation graph, timeline, skeletal animation, blending, atlas pipeline, editor ou renderer sprite completo.
 
 ## State Model v1 (interno)
@@ -570,8 +579,8 @@ Regra de compatibilidade:
 Contrato de export simples para escrever uma cena jogavel pequena como arquivo HTML autocontido:
 
 - ver `docs/SIMPLE_HTML_EXPORT_V1.md`.
-- CLI: `export-html-game <scene> --out <file> [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--json]`.
-- MCP: `export_html_game({ scenePath, outputPath, movementBlocking?, gameplayHud?, playableSaveLoad?, audioLite? })`.
+- CLI: `export-html-game <scene> --out <file> [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--ui-system] [--json]`.
+- MCP: `export_html_game({ scenePath, outputPath, movementBlocking?, gameplayHud?, playableSaveLoad?, audioLite?, uiSystem? })`.
 - Runtime: `buildHtmlGameExportV1(sceneOrPath, options)` e `exportHtmlGameV1(sceneOrPath, options)`.
 - reutiliza Browser Playable Demo v1, `RenderSnapshot v1` e os envelopes internos ja existentes de blocking/HUD/save-load local.
 - retorna envelope `exportVersion`, `scene`, `outputPath`, `options`, `sizeBytes` e `htmlHash`.
@@ -634,4 +643,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1, Sprite Animation v1 e Prefab System v1 ja foram entregues como incrementos pequenos pos-checkpoint; proximo pacote recomendado: consumo visual V2 para UI System v1 e expansao incremental do prefab system conforme roadmap.
+- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1 e Prefab System v1 ja foram entregues como incrementos pequenos pos-checkpoint; proximo pacote recomendado: consumo visual V2 para Sprite Animation v1 e expansao incremental do prefab system conforme roadmap.

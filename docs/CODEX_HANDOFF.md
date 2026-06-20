@@ -21,8 +21,8 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - V1 Small 2D Game Creation Guide / Codex package: concluido como workflow Codex-first para criar jogos pequenos a partir dos templates.
 - V1 Small 2D Release Checkpoint: concluido como fechamento documental, matriz de capacidade e validacao canonica.
 - Audio Lite v1: concluido como diagnostico declarativo e opt-in browser/export.
-- UI System v1: concluido como contrato declarativo de `ui.screen` com arvore de widgets e report runtime/CLI/MCP.
-- Sprite Animation v1: concluido como diagnostico declarativo runtime/CLI/MCP.
+- UI System v1: concluido como contrato declarativo de `ui.screen` com arvore de widgets, report runtime/CLI/MCP e consumo visual opt-in na Browser Demo/export.
+- Sprite Animation v1: concluido como diagnostico declarativo runtime/CLI/MCP e consumo visual opt-in na Browser Demo para sprites asset-backed.
 - Prefab System v1: concluido como resolucao declarativa minima por arquivo e report diagnostico runtime/CLI/MCP.
 
 ## O que o Codex recebe
@@ -39,7 +39,8 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Browser Playable Demo com blocking local opt-in;
 - Browser Playable Demo com HUD Lite local opt-in;
 - Browser Playable Demo com Playable Save/Load Lite local opt-in;
-- `ui.screen` declarativo com widget tree serializavel e `inspect-ui-system` / `inspect_ui_system`;
+- `visual.sprite.animation` com `inspect-sprite-animation` / `inspect_sprite_animation` e `render-browser-demo --sprite-animation` / `render_browser_demo({ spriteAnimation: true })`;
+- `ui.screen` declarativo com widget tree serializavel, `inspect-ui-system` / `inspect_ui_system` e `render-browser-demo --ui-system` / `export-html-game --ui-system`;
 - `entity.prefab` resolvido por arquivo local seguro em `loadSceneFile` e consumidores por path;
 - `inspect-prefab-usage` / `inspect_prefab_usage`;
 - `export-html-game` / `export_html_game` para escrever HTML jogavel autocontido;
@@ -112,9 +113,9 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Fazer o runtime visual V2 consumir UI System v1 de forma incremental, sem acoplar HUD Lite ao runtime canonico.
+1. Fazer o runtime visual V2 consumir Sprite Animation v1 de forma incremental, sem alterar `RenderSnapshot v1` por padrao.
 2. Expandir o prefab system alem do slice minimo atual sem perder seguranca por path e diff pequeno.
-3. Manter Sprite Animation v1 como diagnostico declarativo ate existir consumo visual V2 formal.
+3. Evoluir UI System v1 apenas por opt-ins pequenos, mantendo HUD Lite como diagnostico local ate existir HUD canonico.
 4. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Uso de subagentes

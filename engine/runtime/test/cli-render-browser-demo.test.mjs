@@ -37,6 +37,22 @@ const audioLiteSfxScenePath = path.join(
   'fixtures',
   'audio-lite-sfx.scene.json'
 );
+const spriteAnimationIdleScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'sprite-animation-idle.scene.json'
+);
+const uiScreenPrefabScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'ui-screen-prefab.scene.json'
+);
 const invalidVisualSpriteScenePath = path.join(
   repoRoot,
   'engine',
@@ -498,6 +514,84 @@ test('render-browser-demo --audio-lite embeds Audio Lite metadata and controls',
   assert.match(payload.html, /"clipId":"sfx\.step"/);
   assert.match(payload.html, /"trigger":"onMove"/);
   assert.match(payload.html, /"code":"AUDIO_CLIP_SRC_MISSING"/);
+  assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
+});
+
+test('render-browser-demo leaves Sprite Animation metadata out without --sprite-animation', () => {
+  const result = runCli([
+    'render-browser-demo',
+    spriteAnimationIdleScenePath,
+    '--asset-manifest',
+    validAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'sprite-animation-idle-fixture');
+  assert.doesNotMatch(payload.html, /"spriteAnimation":/);
+  assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
+});
+
+test('render-browser-demo --sprite-animation embeds Sprite Animation metadata for asset-backed sprites', () => {
+  const result = runCli([
+    'render-browser-demo',
+    spriteAnimationIdleScenePath,
+    '--asset-manifest',
+    validAssetManifestPath,
+    '--sprite-animation',
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'sprite-animation-idle-fixture');
+  assert.match(payload.html, /"spriteAnimation":\{/);
+  assert.match(payload.html, /"scene":"sprite-animation-idle-fixture"/);
+  assert.match(payload.html, /"animationId":"player\.idle"/);
+  assert.match(payload.html, /"assetSrc":"file:\/\/\/.*player\.png"/);
+  assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
+});
+
+test('render-browser-demo leaves UI System v1 overlay out without --ui-system', () => {
+  const result = runCli([
+    'render-browser-demo',
+    uiScreenPrefabScenePath,
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'ui-screen-prefab-fixture');
+  assert.doesNotMatch(payload.html, /"uiSystem":/);
+  assert.doesNotMatch(payload.html, /browser-ui-system/);
+  assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
+});
+
+test('render-browser-demo --ui-system embeds UI System v1 metadata and overlay', () => {
+  const result = runCli([
+    'render-browser-demo',
+    uiScreenPrefabScenePath,
+    '--ui-system',
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'ui-screen-prefab-fixture');
+  assert.match(payload.html, /id="browser-ui-system"/);
+  assert.match(payload.html, /"uiSystem":\{"enabled":true,"scene":"ui-screen-prefab-fixture"/);
+  assert.match(payload.html, /data-screen-id="hud\.main"/);
+  assert.match(payload.html, />Score: 000<\/div>/);
+  assert.match(payload.html, />Lives: 3<\/div>/);
   assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
 });
 

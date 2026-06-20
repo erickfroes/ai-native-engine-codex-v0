@@ -321,12 +321,12 @@ function createCanvasHarness(html) {
     animationFrames,
     canvas,
     canvasListeners,
-    flushAnimationFrames(count) {
+    flushAnimationFrames(count, { startTimeMs = 1000 / 60, stepTimeMs = 1000 / 60 } = {}) {
       for (let index = 0; index < count; index += 1) {
         const frame = animationFrames.shift();
         assert.ok(frame, 'expected a scheduled animation frame');
         if (!cancelledAnimationFrames.has(frame.handle)) {
-          frame.callback();
+          frame.callback(startTimeMs + (index * stepTimeMs));
         }
       }
     },
@@ -490,6 +490,169 @@ function createAudioLiteScene() {
     }
   );
   return scene;
+}
+
+function createSpriteAnimationScene() {
+  return {
+    version: 1,
+    metadata: { name: 'sprite-animation-browser-fixture' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'player.hero',
+        components: [
+          {
+            kind: 'transform',
+            version: 1,
+            replicated: false,
+            fields: { x: 0, y: 0 }
+          },
+          {
+            kind: 'visual.sprite',
+            version: 1,
+            replicated: false,
+            fields: {
+              assetId: 'player.sprite',
+              width: 16,
+              height: 16
+            }
+          },
+          {
+            kind: 'visual.sprite.animation',
+            version: 1,
+            replicated: false,
+            fields: {
+              animationId: 'player.idle',
+              assetId: 'player.sprite',
+              frameWidth: 16,
+              frameHeight: 16,
+              frames: [
+                { x: 0, y: 0 },
+                { x: 16, y: 0 }
+              ],
+              fps: 8,
+              loop: true,
+              state: 'idle'
+            }
+          }
+        ]
+      }
+    ],
+    assetRefs: []
+  };
+}
+
+function createUiSystemScene() {
+  return {
+    version: 1,
+    metadata: { name: 'ui-system-browser-fixture' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'camera.main',
+        components: [
+          {
+            kind: 'camera.viewport',
+            version: 1,
+            replicated: false,
+            fields: { x: 4, y: 0, width: 64, height: 48 }
+          }
+        ]
+      },
+      {
+        id: 'player.hero',
+        components: [
+          {
+            kind: 'transform',
+            version: 1,
+            replicated: false,
+            fields: { x: 4, y: 0 }
+          }
+        ]
+      },
+      {
+        id: 'ui.hidden',
+        components: [
+          {
+            kind: 'ui.screen',
+            version: 1,
+            replicated: false,
+            fields: {
+              screenId: 'hud.hidden',
+              active: false,
+              layer: 0,
+              widgets: [
+                {
+                  id: 'hidden.label',
+                  kind: 'label',
+                  text: 'Hidden',
+                  x: 0,
+                  y: 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        id: 'ui.title',
+        components: [
+          {
+            kind: 'ui.screen',
+            version: 1,
+            replicated: false,
+            fields: {
+              screenId: 'hud.title',
+              layer: 1,
+              widgets: [
+                {
+                  id: 'title.label',
+                  kind: 'label',
+                  text: 'Ready',
+                  x: 8,
+                  y: 4
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        id: 'ui.hud',
+        components: [
+          {
+            kind: 'ui.screen',
+            version: 1,
+            replicated: false,
+            fields: {
+              screenId: 'hud.main',
+              layer: 10,
+              widgets: [
+                {
+                  id: 'hud.root',
+                  kind: 'panel',
+                  x: 0,
+                  y: 0,
+                  width: 64,
+                  height: 16,
+                  children: [
+                    {
+                      id: 'score.label',
+                      kind: 'label',
+                      text: 'Score: 000',
+                      x: 4,
+                      y: 4
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    assetRefs: []
+  };
 }
 
 function createMovementTileBlockedScene() {
@@ -1102,6 +1265,41 @@ test('renderBrowserPlayableDemoHtmlV1 creates sprite images and uses drawImage a
   assert.ok(drawImageCallsAfterInput.length > drawImageCalls.length);
 });
 
+test('renderBrowserPlayableDemoHtmlV1 consumes Sprite Animation v1 as an opt-in local sprite-sheet animation', () => {
+  const scene = createSpriteAnimationScene();
+  const snapshot = createSpriteSnapshotWithAssetSources();
+  const defaultHtml = renderBrowserPlayableDemoHtmlV1({
+    title: 'sprite-animation-browser-fixture Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot)
+  });
+  const animatedHtml = renderBrowserPlayableDemoHtmlV1({
+    title: 'sprite-animation-browser-fixture Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { spriteAnimation: true })
+  });
+  const harness = createCanvasHarness(animatedHtml);
+
+  assert.doesNotMatch(defaultHtml, /"spriteAnimation":/);
+  assert.match(animatedHtml, /"spriteAnimation":\{/);
+  assert.match(animatedHtml, /"scene":"sprite-animation-browser-fixture"/);
+
+  harness.operations.length = 0;
+  assert.equal(typeof harness.imageInstances[0].onload, 'function');
+  harness.imageInstances[0].onload();
+
+  const initialDrawImageCalls = harness.operations.filter((entry) => entry.method === 'drawImage');
+  assert.equal(initialDrawImageCalls.length, 1);
+  assert.deepEqual(initialDrawImageCalls[0].args, [harness.imageInstances[0].image, 0, 0, 16, 16, 0, 0, 16, 16]);
+
+  harness.operations.length = 0;
+  harness.flushAnimationFrames(1, { startTimeMs: 125 });
+
+  const animatedDrawImageCalls = harness.operations.filter((entry) => entry.method === 'drawImage');
+  assert.ok(animatedDrawImageCalls.length >= 1);
+  assert.deepEqual(animatedDrawImageCalls[0].args, [harness.imageInstances[0].image, 16, 0, 16, 16, 0, 0, 16, 16]);
+});
+
 test('renderBrowserPlayableDemoHtmlV1 falls back visually when sprite image fails to load', () => {
   const html = renderBrowserPlayableDemoHtmlV1({
     title: 'sprite-fallback Browser Playable Demo',
@@ -1572,6 +1770,48 @@ test('renderBrowserPlayableDemoHtmlV1 rejects gameplay HUD metadata when movemen
       }),
     /metadata\.gameplayHud\.movementBlockingEnabled.*metadata\.movementBlocking\.enabled/
   );
+});
+
+test('renderBrowserPlayableDemoHtmlV1 embeds UI System v1 as an opt-in screen-space overlay', () => {
+  const scene = createUiSystemScene();
+  const snapshot = {
+    renderSnapshotVersion: 1,
+    scene: 'ui-system-browser-fixture',
+    tick: 0,
+    viewport: {
+      width: 64,
+      height: 48
+    },
+    drawCalls: [
+      { kind: 'rect', id: 'player.hero', x: 0, y: 0, width: 8, height: 8, layer: 0 }
+    ]
+  };
+  const defaultHtml = renderBrowserPlayableDemoHtmlV1({
+    title: 'ui-system-browser-fixture Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot)
+  });
+  const uiHtml = renderBrowserPlayableDemoHtmlV1({
+    title: 'ui-system-browser-fixture Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { uiSystem: true })
+  });
+
+  assert.doesNotMatch(defaultHtml, /"uiSystem":/);
+  assert.doesNotMatch(defaultHtml, /id="browser-ui-system"/);
+  assert.match(uiHtml, /"uiSystem":\{"enabled":true,"scene":"ui-system-browser-fixture"/);
+  assert.match(uiHtml, /id="browser-ui-system"/);
+  assert.match(uiHtml, /data-screen-id="hud\.title"/);
+  assert.match(uiHtml, /data-screen-id="hud\.main"/);
+  assert.match(uiHtml, /id="browser-ui-widget-hud\.title-title\.label" data-widget-id="title\.label"/);
+  assert.match(uiHtml, /id="browser-ui-widget-hud\.main-hud\.root" data-widget-id="hud\.root"/);
+  assert.match(uiHtml, /id="browser-ui-widget-hud\.main-score\.label" data-widget-id="score\.label"/);
+  assert.match(uiHtml, />Ready<\/div>/);
+  assert.match(uiHtml, />Score: 000<\/div>/);
+  assert.doesNotMatch(uiHtml, /data-screen-id="hud\.hidden"/);
+  assert.doesNotMatch(uiHtml, /id="browser-ui-widget-hud\.hidden-hidden\.label"/);
+  assert.ok(uiHtml.indexOf('data-screen-id="hud.title"') < uiHtml.indexOf('data-screen-id="hud.main"'));
+  assert.match(uiHtml, /id="browser-ui-widget-hud\.title-title\.label"[^>]+left:12\.5%;top:8\.333333333333332%/);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 blocks movement against solid entity bounds when movementBlocking is enabled', () => {

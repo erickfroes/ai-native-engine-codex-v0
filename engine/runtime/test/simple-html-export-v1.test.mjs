@@ -19,6 +19,7 @@ const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
 const scenePath = path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json');
 const sceneMcpPath = './scenes/v1-small-2d.scene.json';
+const uiScreenPrefabScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'ui-screen-prefab.scene.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -50,7 +51,7 @@ function assertNoForbiddenExportHtmlSurface(html) {
   );
 }
 
-function assertExportEnvelopeShape(envelope) {
+function assertExportEnvelopeShape(envelope, { expectedScene = 'v1-small-2d' } = {}) {
   assert.deepEqual(Object.keys(envelope), [
     'exportVersion',
     'scene',
@@ -60,8 +61,14 @@ function assertExportEnvelopeShape(envelope) {
     'htmlHash'
   ]);
   assert.equal(envelope.exportVersion, SIMPLE_HTML_EXPORT_VERSION);
-  assert.equal(envelope.scene, 'v1-small-2d');
-  assert.deepEqual(Object.keys(envelope.options), ['movementBlocking', 'gameplayHud', 'playableSaveLoad', 'audioLite']);
+  assert.equal(envelope.scene, expectedScene);
+  assert.deepEqual(Object.keys(envelope.options), [
+    'movementBlocking',
+    'gameplayHud',
+    'playableSaveLoad',
+    'audioLite',
+    'uiSystem'
+  ]);
   assert.equal(Number.isInteger(envelope.sizeBytes), true);
   assert.match(envelope.htmlHash, /^[a-f0-9]{64}$/);
 }
@@ -137,7 +144,8 @@ test('Simple HTML Export v1 builds a deterministic Browser Demo artifact without
     movementBlocking: false,
     gameplayHud: false,
     playableSaveLoad: false,
-    audioLite: false
+    audioLite: false,
+    uiSystem: false
   });
   assert.equal(baseline.sizeBytes, Buffer.byteLength(baseline.html, 'utf8'));
   assert.equal(baseline.htmlHash, sha256Hex(baseline.html));
@@ -148,8 +156,10 @@ test('Simple HTML Export v1 builds a deterministic Browser Demo artifact without
   assert.doesNotMatch(baseline.html, /"gameplayHud":/);
   assert.doesNotMatch(baseline.html, /"playableSaveLoad":/);
   assert.doesNotMatch(baseline.html, /"audioLite":/);
+  assert.doesNotMatch(baseline.html, /"uiSystem":/);
   assert.doesNotMatch(baseline.html, /browser-playable-save-load/);
   assert.doesNotMatch(baseline.html, /browser-audio-lite/);
+  assert.doesNotMatch(baseline.html, /browser-ui-system/);
   assertNoForbiddenExportHtmlSurface(baseline.html);
 });
 
@@ -159,43 +169,52 @@ test('export-html-game CLI writes deterministic files for each supported option 
     {
       name: 'default',
       flags: [],
-      options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: false, audioLite: false },
+      options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: false, audioLite: false, uiSystem: false },
       present: [],
-      absent: [/"movementBlocking":/, /"gameplayHud":/, /"playableSaveLoad":/, /"audioLite":/, /browser-playable-save-load/, /browser-audio-lite/]
+      absent: [/"movementBlocking":/, /"gameplayHud":/, /"playableSaveLoad":/, /"audioLite":/, /"uiSystem":/, /browser-playable-save-load/, /browser-audio-lite/, /browser-ui-system/]
     },
     {
       name: 'movement-blocking',
       flags: ['--movement-blocking'],
-      options: { movementBlocking: true, gameplayHud: false, playableSaveLoad: false, audioLite: false },
+      options: { movementBlocking: true, gameplayHud: false, playableSaveLoad: false, audioLite: false, uiSystem: false },
       present: [/"movementBlocking":/],
-      absent: [/"gameplayHud":/, /"playableSaveLoad":/, /"audioLite":/]
+      absent: [/"gameplayHud":/, /"playableSaveLoad":/, /"audioLite":/, /"uiSystem":/]
     },
     {
       name: 'gameplay-hud',
       flags: ['--gameplay-hud'],
-      options: { movementBlocking: false, gameplayHud: true, playableSaveLoad: false, audioLite: false },
+      options: { movementBlocking: false, gameplayHud: true, playableSaveLoad: false, audioLite: false, uiSystem: false },
       present: [/id="browser-gameplay-hud"/, /"gameplayHud":\{"enabled":true,"movementBlockingEnabled":false,"snapshotTick":0\}/],
-      absent: [/"movementBlocking":/, /"playableSaveLoad":/, /"audioLite":/]
+      absent: [/"movementBlocking":/, /"playableSaveLoad":/, /"audioLite":/, /"uiSystem":/]
     },
     {
       name: 'playable-save-load',
       flags: ['--playable-save-load'],
-      options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: true, audioLite: false },
+      options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: true, audioLite: false, uiSystem: false },
       present: [/id="browser-playable-save-load"/, /"playableSaveLoad":/],
-      absent: [/"movementBlocking":/, /"gameplayHud":/, /"audioLite":/]
+      absent: [/"movementBlocking":/, /"gameplayHud":/, /"audioLite":/, /"uiSystem":/]
     },
     {
       name: 'audio-lite',
       flags: ['--audio-lite'],
-      options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: false, audioLite: true },
+      options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: false, audioLite: true, uiSystem: false },
       present: [/id="browser-audio-lite"/, /"audioLite":\{"clips":\[/],
-      absent: [/"movementBlocking":/, /"gameplayHud":/, /"playableSaveLoad":/]
+      absent: [/"movementBlocking":/, /"gameplayHud":/, /"playableSaveLoad":/, /"uiSystem":/]
+    },
+    {
+      name: 'ui-system',
+      flags: ['--ui-system'],
+      scenePath: uiScreenPrefabScenePath,
+      expectedScene: 'ui-screen-prefab-fixture',
+      options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: false, audioLite: false, uiSystem: true },
+      present: [/id="browser-ui-system"/, /"uiSystem":\{"enabled":true,"scene":"ui-screen-prefab-fixture"/, />Score: 000<\/div>/],
+      absent: [/"movementBlocking":/, /"gameplayHud":/, /"playableSaveLoad":/, /"audioLite":/]
     },
     {
       name: 'all-options',
-      flags: ['--movement-blocking', '--gameplay-hud', '--playable-save-load', '--audio-lite'],
-      options: { movementBlocking: true, gameplayHud: true, playableSaveLoad: true, audioLite: true },
-      present: [/"movementBlocking":/, /id="browser-gameplay-hud"/, /id="browser-playable-save-load"/, /id="browser-audio-lite"/],
+      flags: ['--movement-blocking', '--gameplay-hud', '--playable-save-load', '--audio-lite', '--ui-system'],
+      options: { movementBlocking: true, gameplayHud: true, playableSaveLoad: true, audioLite: true, uiSystem: true },
+      present: [/"movementBlocking":/, /id="browser-gameplay-hud"/, /id="browser-playable-save-load"/, /id="browser-audio-lite"/, /"uiSystem":/],
       absent: []
     }
   ];
@@ -204,7 +223,7 @@ test('export-html-game CLI writes deterministic files for each supported option 
     const outPath = path.join(outDir, `${testCase.name}.html`);
     const result = runCli([
       'export-html-game',
-      scenePath,
+      testCase.scenePath ?? scenePath,
       '--out',
       outPath,
       ...testCase.flags,
@@ -213,7 +232,7 @@ test('export-html-game CLI writes deterministic files for each supported option 
 
     assert.equal(result.status, 0, result.stderr);
     const envelope = JSON.parse(result.stdout);
-    assertExportEnvelopeShape(envelope);
+    assertExportEnvelopeShape(envelope, { expectedScene: testCase.expectedScene ?? 'v1-small-2d' });
     assert.equal(envelope.outputPath, path.resolve(outPath));
     assert.deepEqual(envelope.options, testCase.options);
 
@@ -262,6 +281,7 @@ test('export_html_game MCP writes the same all-options HTML export as CLI', asyn
     '--gameplay-hud',
     '--playable-save-load',
     '--audio-lite',
+    '--ui-system',
     '--json'
   ]);
 
@@ -281,6 +301,7 @@ test('export_html_game MCP writes the same all-options HTML export as CLI', asyn
     assert.ok(Object.prototype.hasOwnProperty.call(tool.inputSchema.properties, 'gameplayHud'));
     assert.ok(Object.prototype.hasOwnProperty.call(tool.inputSchema.properties, 'playableSaveLoad'));
     assert.ok(Object.prototype.hasOwnProperty.call(tool.inputSchema.properties, 'audioLite'));
+    assert.ok(Object.prototype.hasOwnProperty.call(tool.inputSchema.properties, 'uiSystem'));
 
     const mcpResponse = await client.request('tools/call', {
       name: 'export_html_game',
@@ -290,7 +311,8 @@ test('export_html_game MCP writes the same all-options HTML export as CLI', asyn
         movementBlocking: true,
         gameplayHud: true,
         playableSaveLoad: true,
-        audioLite: true
+        audioLite: true,
+        uiSystem: true
       }
     });
 
@@ -336,6 +358,14 @@ test('export_html_game MCP rejects invalid arguments and output paths outside th
         audioLite: 'yes'
       }
     });
+    const invalidUiSystemFlag = await client.request('tools/call', {
+      name: 'export_html_game',
+      arguments: {
+        scenePath: sceneMcpPath,
+        outputPath: './tmp/out.html',
+        uiSystem: 'yes'
+      }
+    });
     const outsideOutput = await client.request('tools/call', {
       name: 'export_html_game',
       arguments: {
@@ -350,6 +380,8 @@ test('export_html_game MCP rejects invalid arguments and output paths outside th
     assert.match(invalidFlag.result.content[0].text, /movementBlocking/);
     assert.equal(invalidAudioLiteFlag.result.isError, true);
     assert.match(invalidAudioLiteFlag.result.content[0].text, /audioLite/);
+    assert.equal(invalidUiSystemFlag.result.isError, true);
+    assert.match(invalidUiSystemFlag.result.content[0].text, /uiSystem/);
     assert.equal(outsideOutput.result.isError, true);
     assert.match(outsideOutput.result.content[0].text, /path must stay inside the repository root/);
   } finally {

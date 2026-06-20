@@ -136,6 +136,6 @@ V2 pode iniciar de forma incremental quando:
 
 ## Proximo Pacote Recomendado
 
-Proximo pacote recomendado: consumo visual V2 para UI System v1 e expansao incremental do prefab system conforme roadmap.
+Proximo pacote recomendado: consumo visual V2 para Sprite Animation v1 e expansao incremental do prefab system conforme roadmap.
 
 Audio Lite v1 e Sprite Animation v1 iniciaram a evolucao incremental pos-checkpoint sem reabrir contratos V1 ja estabilizados.

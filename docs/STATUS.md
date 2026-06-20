@@ -48,8 +48,8 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - V1 Small 2D Game Creation Guide / Codex package;
 - V1 Small 2D Release Checkpoint;
 - Audio Lite v1 como primeiro incremento pos-checkpoint;
-- UI System v1 como contrato declarativo/report para screens e widget tree;
-- Sprite Animation v1 como diagnostico declarativo runtime/CLI/MCP;
+- UI System v1 como contrato declarativo/report para screens e widget tree, com consumo visual opt-in na Browser Demo/export;
+- Sprite Animation v1 como diagnostico declarativo runtime/CLI/MCP, com consumo visual opt-in na Browser Demo para sprites asset-backed;
 - Prefab System v1 como resolucao declarativa minima e report diagnostico runtime/CLI/MCP;
 - V1 Small 2D Capability Matrix;
 - V1 Small 2D Release Validation;
@@ -60,7 +60,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. Fazer a camada visual V2 consumir UI System v1 e Sprite Animation v1 sem transformar HUD Lite em UI system completo.
+1. Fazer a camada visual V2 consumir Sprite Animation v1 sem transformar diagnosticos declarativos em runtime canonico amplo.
 2. Expandir o prefab system minimo sem perder a seguranca por path e o diff pequeno.
 
 ## Versoes de produto
@@ -78,6 +78,7 @@ Detalhes: `docs/ENGINE_VERSION_ROADMAP.md`.
 - aplicar blocking real sem contrato opt-in explicito no `run-loop` ou Browser Demo;
 - acoplar Browser Demo ao runtime canonico como se fosse loop oficial;
 - transformar HUD browser lite em sistema de UI completo antes do pacote V2 apropriado;
+- acoplar UI System v1 ao HUD Lite ou aplicar `camera.viewport` em UI screen-space;
 - confundir Playable Save/Load Lite browser-local com `savegame v1` ou `State Snapshot v1`;
 - transformar Simple HTML Export v1 em bundler, servidor ou build pipeline V2;
 - transformar Game Templates v1 em template engine, prefab system ou editor;

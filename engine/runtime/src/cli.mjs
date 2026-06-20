@@ -59,8 +59,8 @@ function printUsage() {
   node engine/runtime/src/cli.mjs render-svg <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-svg-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-canvas-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
-  node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--out <path>] [--json]
-  node engine/runtime/src/cli.mjs export-html-game <path> --out <path> [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--json]
+  node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--out <path>] [--json]
+  node engine/runtime/src/cli.mjs export-html-game <path> --out <path> [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--ui-system] [--json]
   node engine/runtime/src/cli.mjs save-state <path> --ticks <n> [--seed <n>] --out <dir> [--json]
   node engine/runtime/src/cli.mjs load-save <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
@@ -521,6 +521,8 @@ async function run() {
     const gameplayHud = hasFlag('--gameplay-hud');
     const playableSaveLoad = hasFlag('--playable-save-load');
     const audioLite = hasFlag('--audio-lite');
+    const spriteAnimation = hasFlag('--sprite-animation');
+    const uiSystem = hasFlag('--ui-system');
     const scene = await loadSceneFile(maybePath);
     const rawSnapshot = await buildRenderSnapshotV1(scene, {
       tick,
@@ -534,7 +536,9 @@ async function run() {
       movementBlocking,
       gameplayHud,
       playableSaveLoad,
-      audioLite
+      audioLite,
+      spriteAnimation,
+      uiSystem
     });
     const html = renderBrowserPlayableDemoHtmlV1({
       title,
@@ -583,12 +587,14 @@ async function run() {
     const gameplayHud = hasFlag('--gameplay-hud');
     const playableSaveLoad = hasFlag('--playable-save-load');
     const audioLite = hasFlag('--audio-lite');
+    const uiSystem = hasFlag('--ui-system');
     const envelope = await exportHtmlGameV1(maybePath, {
       outputPath: requestedOutPath,
       movementBlocking,
       gameplayHud,
       playableSaveLoad,
-      audioLite
+      audioLite,
+      uiSystem
     });
 
     if (asJson) {

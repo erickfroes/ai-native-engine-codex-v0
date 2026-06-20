@@ -211,7 +211,7 @@ async function handleToolCall(params) {
     if (params.name === 'export_html_game') {
       const unexpectedArgument = findUnexpectedArgument(
         args,
-        new Set(['scenePath', 'outputPath', 'movementBlocking', 'gameplayHud', 'playableSaveLoad', 'audioLite'])
+        new Set(['scenePath', 'outputPath', 'movementBlocking', 'gameplayHud', 'playableSaveLoad', 'audioLite', 'uiSystem'])
       );
       if (unexpectedArgument !== undefined) {
         return {
@@ -262,12 +262,20 @@ async function handleToolCall(params) {
         };
       }
 
+      if (args.uiSystem !== undefined && typeof args.uiSystem !== 'boolean') {
+        return {
+          content: toTextContent('export_html_game: `uiSystem` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
       const exportEnvelope = await exportHtmlGameV1(resolveRepoPath(args.scenePath), {
         outputPath: resolveRepoPath(args.outputPath),
         movementBlocking: args.movementBlocking === true,
         gameplayHud: args.gameplayHud === true,
         playableSaveLoad: args.playableSaveLoad === true,
-        audioLite: args.audioLite === true
+        audioLite: args.audioLite === true,
+        uiSystem: args.uiSystem === true
       });
 
       return {
@@ -813,7 +821,9 @@ async function handleToolCall(params) {
           'movementBlocking',
           'gameplayHud',
           'playableSaveLoad',
-          'audioLite'
+          'audioLite',
+          'spriteAnimation',
+          'uiSystem'
         ])
       );
       if (unexpectedArgument !== undefined) {
@@ -884,6 +894,20 @@ async function handleToolCall(params) {
         };
       }
 
+      if (args.spriteAnimation !== undefined && typeof args.spriteAnimation !== 'boolean') {
+        return {
+          content: toTextContent('render_browser_demo: `spriteAnimation` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.uiSystem !== undefined && typeof args.uiSystem !== 'boolean') {
+        return {
+          content: toTextContent('render_browser_demo: `uiSystem` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
       const scene = await loadSceneFile(targetPath);
       const resolvedAssetManifestPath = args.assetManifestPath === undefined
         ? undefined
@@ -900,7 +924,9 @@ async function handleToolCall(params) {
         movementBlocking: args.movementBlocking === true,
         gameplayHud: args.gameplayHud === true,
         playableSaveLoad: args.playableSaveLoad === true,
-        audioLite: args.audioLite === true
+        audioLite: args.audioLite === true,
+        spriteAnimation: args.spriteAnimation === true,
+        uiSystem: args.uiSystem === true
       });
       const html = renderBrowserPlayableDemoHtmlV1({
         title,

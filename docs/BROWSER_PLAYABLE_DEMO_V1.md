@@ -15,6 +15,8 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - `metadata.gameplayHud` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede HUD Lite local.
 - `metadata.playableSaveLoad` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede Playable Save/Load Lite local.
 - `metadata.audioLite` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede Audio Lite v1 diagnostico.
+- `metadata.spriteAnimation` e um envelope interno opcional do HTML, derivado de `SpriteAnimationReport v1` e gerado apenas quando o fluxo opt-in pede animacao local de sprites asset-backed.
+- `metadata.uiSystem` e um envelope interno opcional do HTML, derivado de `UiSystemReport v1` e gerado apenas quando o fluxo opt-in pede UI System v1 visual.
 - o loop visual local usa `requestAnimationFrame` apenas para redraw continuo do estado atual.
 
 ## Comportamento
@@ -47,6 +49,10 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - import restaura a posicao local do controlavel e atualiza o HUD quando ele esta ativo; se o JSON for invalido ou incompatível com a cena atual, a demo mostra erro curto e preserva o estado atual;
 - com `audioLite` opt-in, embute metadata de `audio.clip` e controles diagnosticos locais `Enable Audio Lite` e `Trigger manual cue`;
 - Audio Lite no browser nao forca autoplay; triggers so tentam emitir cue diagnostico apos gesto do usuario e usam fallback silencioso quando necessario;
+- com `spriteAnimation` opt-in, embute metadata de `visual.sprite.animation` e anima drawCalls `sprite` asset-backed por crop local de sprite-sheet;
+- sem `assetSrc` carregavel ou sem drawCall `sprite` compativel, Sprite Animation preserva o fallback visual atual;
+- com `uiSystem` opt-in, embute metadata de `ui.screen` e renderiza um overlay DOM passivo em screen-space sobre o canvas;
+- UI System no browser renderiza apenas screens ativas, em ordem deterministica, sem input, binding, foco ou substituicao do HUD Lite;
 - `Pause rendering`, `Resume rendering` e `Reset` sao controles locais do HTML autocontido e nao alteram contratos v1 publicados;
 - se a entidade controlavel configurada nao existir, faz fallback deterministico para o primeiro rect do snapshot; se nao houver rect, a demo permanece sem alvo controlavel;
 - nao importa o runtime Node no browser;
@@ -56,8 +62,8 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 
 ## CLI e MCP
 
-- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--out <path>] [--json]`
-- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?, movementBlocking?, gameplayHud?, playableSaveLoad?, audioLite?)`
+- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--out <path>] [--json]`
+- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?, movementBlocking?, gameplayHud?, playableSaveLoad?, audioLite?, spriteAnimation?, uiSystem?)`
 
 Exemplo para gerar um arquivo HTML:
 
@@ -87,6 +93,18 @@ Exemplo com Audio Lite diagnostico opt-in:
 
 ```bash
 node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --audio-lite --out ./tmp/audio-lite-browser-demo.html --json
+```
+
+Exemplo com Sprite Animation v1 visual opt-in:
+
+```bash
+node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/sprite-animation-idle.scene.json --asset-manifest ./fixtures/assets/valid.asset-manifest.json --sprite-animation --out ./tmp/sprite-animation-browser-demo.html --json
+```
+
+Exemplo com UI System v1 visual opt-in:
+
+```bash
+node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/ui-screen-prefab.scene.json --ui-system --out ./tmp/ui-system-browser-demo.html --json
 ```
 
 Depois de gerar com `--out`, abra o arquivo HTML diretamente no navegador. A demo sem `--asset-manifest` e autocontida: nao precisa de servidor local, assets reais ou runtime Node no cliente. Quando `--asset-manifest` e usado, o HTML continua single-file e deterministico, mas nao e portavel sozinho porque referencia imagens locais por `file:///...`; se o arquivo for movido sem os assets, o fallback `rect` preserva funcionamento basico.
@@ -148,6 +166,24 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 - se `AudioContext` nao estiver disponivel ou for bloqueado, o HTML preserva fallback silencioso e o contador diagnostico.
 - nao usa `fetch`, rede, storage, scripts externos, imports dinamicos ou autoplay forcado.
 
+### Sprite Animation Local
+
+- `--sprite-animation` no CLI e `spriteAnimation: true` no MCP embutem metadata e animacao local de `Sprite Animation v1`.
+- o HTML deriva esse metadata de `SpriteAnimationReport v1`.
+- a animacao visual so afeta drawCalls `sprite` com `assetSrc` carregavel, normalmente quando `--asset-manifest` / `assetManifestPath` e fornecido.
+- o browser usa o timestamp do proprio `requestAnimationFrame` para avancar frame localmente, sem tocar no tick do engine.
+- sem opt-in, o HTML nao embute `metadata.spriteAnimation`.
+
+### UI System Local
+
+- `--ui-system` no CLI e `uiSystem: true` no MCP embutem metadata e overlay visual de UI System v1.
+- o overlay deriva de `UiSystemReport v1`, incluindo prefabs resolvidos quando a cena e carregada por path.
+- somente screens `active: true` geram DOM visual.
+- `panel` e `label` sao os unicos widgets renderizados.
+- coordenadas de UI sao screen-space e nao recebem offset de `camera.viewport`.
+- o overlay e passivo (`pointer-events: none`) e nao captura input.
+- sem opt-in, o HTML nao embute `metadata.uiSystem` nem `browser-ui-system`.
+
 ### Asset Manifest Local
 
 - `render-browser-demo --asset-manifest <path>` e `render_browser_demo(assetManifestPath)` materializam `assetSrc` para `file:///...` local a partir do diretorio do manifesto.
@@ -172,4 +208,6 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 - nao substitui `State Snapshot v1`, `savegame v1`, `save-state` ou `load-save`;
 - nao cria/transforma pipeline de assets reais no runtime;
 - nao cria servidor web.
-- nao cria UI system completo, widgets declarativos, menus, layout engine ou HUD canonico de jogo.
+- nao cria UI system completo, menus, layout engine ou HUD canonico de jogo.
+- nao cria binding, navegacao, foco, widgets interativos ou save de estado de UI.
+- nao leva Sprite Animation visual para Simple HTML Export v1 neste slice.

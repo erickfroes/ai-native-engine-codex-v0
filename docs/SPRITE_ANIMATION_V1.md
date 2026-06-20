@@ -1,6 +1,6 @@
 # Sprite Animation v1
 
-Sprite Animation v1 e um contrato declarativo minimo para descrever animacoes de sprites em cenas pequenas sem introduzir runtime visual novo.
+Sprite Animation v1 e um contrato declarativo minimo para descrever animacoes de sprites em cenas pequenas sem introduzir runtime visual canonico novo.
 
 O objetivo deste pacote e fechar o primeiro slice diagnostico:
 
@@ -9,6 +9,8 @@ O objetivo deste pacote e fechar o primeiro slice diagnostico:
 - runtime, CLI e MCP alinhados;
 - fixtures validas e invalidas;
 - testes cross-interface.
+
+Browser Playable Demo v1 agora tambem pode consumir esse contrato de forma visual opt-in, apenas para drawCalls `sprite` asset-backed e sem alterar `RenderSnapshot v1`.
 
 ## Componente
 
@@ -111,6 +113,21 @@ MCP:
 }
 ```
 
+## Browser Demo Opt-In
+
+Browser Playable Demo v1 pode consumir `Sprite Animation v1` localmente:
+
+- CLI: `render-browser-demo <scene> --asset-manifest <path> --sprite-animation`
+- MCP: `render_browser_demo({ path, assetManifestPath, spriteAnimation: true })`
+
+Regras:
+
+- o HTML embute `metadata.spriteAnimation` derivado do `SpriteAnimationReport v1`;
+- a animacao visual so afeta drawCalls `sprite` com `assetSrc` carregavel;
+- o browser usa o timestamp do `requestAnimationFrame` para avancar frame localmente;
+- sem `assetManifestPath` ou sem drawCall `sprite` compativel, o fallback visual atual permanece;
+- sem opt-in, a Browser Demo nao embute `metadata.spriteAnimation`.
+
 ## Fora de escopo
 
 - animation graph;
@@ -121,7 +138,7 @@ MCP:
 - editor;
 - runtime canonico de animacao;
 - alteracao de `RenderSnapshot v1`;
-- autoplay no browser/export.
+- Simple HTML Export v1 com consumo visual de Sprite Animation.
 
 ## Validacao
 
@@ -130,6 +147,9 @@ Cobertura dedicada:
 - `engine/runtime/test/sprite-animation-runtime.test.mjs`;
 - `engine/runtime/test/cli-inspect-sprite-animation.test.mjs`;
 - `engine/runtime/test/sprite-animation-cross-interface.integration.test.mjs`;
+- `engine/runtime/test/browser-playable-demo-runtime.test.mjs`;
+- `engine/runtime/test/cli-render-browser-demo.test.mjs`;
+- `engine/runtime/test/browser-playable-demo-cross-interface.integration.test.mjs`;
 - `tools/mcp-server/test/mcp-server.test.mjs`.
 
 Rodar:
@@ -142,4 +162,4 @@ npm run smoke
 
 ## Continuidade
 
-Sprite Animation v1 esta fechado como diagnostico declarativo. O proximo pacote recomendado e consumo visual V2 para UI System v1 e expansao incremental do prefab system conforme roadmap.
+Sprite Animation v1 esta fechado como diagnostico declarativo e agora possui consumo visual opt-in na Browser Demo para sprites asset-backed. O proximo pacote recomendado continua sendo ampliar o consumo visual V2 sem reabrir `RenderSnapshot v1`, junto da expansao incremental do prefab system conforme roadmap.

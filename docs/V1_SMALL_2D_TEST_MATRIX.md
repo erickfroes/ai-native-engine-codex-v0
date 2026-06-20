@@ -38,10 +38,13 @@
 - `render-browser-demo --gameplay-hud --playable-save-load`
 - `render-browser-demo --gameplay-hud --movement-blocking`
 - `render-browser-demo --gameplay-hud --movement-blocking --playable-save-load`
+- `render-browser-demo --asset-manifest ./fixtures/assets/valid.asset-manifest.json --sprite-animation`
+- `render-browser-demo --ui-system`
 - `export-html-game`
 - `export-html-game --movement-blocking`
 - `export-html-game --gameplay-hud`
 - `export-html-game --playable-save-load`
+- `export-html-game --ui-system`
 - `export-html-game --movement-blocking --gameplay-hud --playable-save-load`
 - `inspect-collision-bounds`
 - `inspect-collision-overlaps`
@@ -60,8 +63,11 @@
 - `render_browser_demo` com `playableSaveLoad: true`
 - `render_browser_demo` com `gameplayHud: true` e `movementBlocking: true`
 - `render_browser_demo` com `gameplayHud: true`, `movementBlocking: true` e `playableSaveLoad: true`
+- `render_browser_demo` com `assetManifestPath` e `spriteAnimation: true`
+- `render_browser_demo` com `uiSystem: true`
 - `export_html_game`
 - `export_html_game` com `movementBlocking: true`, `gameplayHud: true` e `playableSaveLoad: true`
+- `export_html_game` com `uiSystem: true`
 - `inspect_collision_bounds`
 - `inspect_collision_overlaps`
 - `inspect_tile_collision`
@@ -105,8 +111,10 @@ Para jogos criados fora de `./scenes`, rode tambem o gate explicito do jogo: `va
 - V1 Small 2D Game Creation Guide / Codex package esta concluido e cobre o workflow humano/Codex para copiar, adaptar, validar, testar blocking, gerar Browser Demo e exportar HTML sem criar runtime novo.
 - O guia separa baseline do repositorio de gate do jogo criado; `npm run validate:scenes` nao descobre prototipos fora de `./scenes`.
 - V1 Small 2D Release Checkpoint esta concluido e registra a matriz de capacidades, evidencia de release e sequencia canonica de validacao.
+- Sprite Animation v1 visual opt-in cobre `visual.sprite.animation` via Browser Demo com asset-backed sprites, sem alterar `RenderSnapshot v1`.
+- UI System v1 visual opt-in cobre `ui.screen` via fixture prefab-backed em Browser Demo, Simple HTML Export e MCP, sem alterar `RenderSnapshot v1`.
 
 ## Proximo Pacote Recomendado
 
-- Audio Lite v1, UI System v1 e Sprite Animation v1 foram entregues como incrementos diagnosticos pos-checkpoint; proximo pacote recomendado: consumo visual V2 para UI System v1 e expansao incremental do prefab system conforme roadmap.
+- Audio Lite v1, UI System v1 visual opt-in e Sprite Animation v1 foram entregues como incrementos pos-checkpoint; proximo pacote recomendado: consumo visual V2 para Sprite Animation v1 e expansao incremental do prefab system conforme roadmap.
 - Manter fora deste pacote: editor, servidor, build system amplo, UI system completo e savegame avancado.

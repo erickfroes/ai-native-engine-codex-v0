@@ -2,7 +2,7 @@
 
 Esta matriz liga capacidades V1 Small 2D a evidencia de docs, CLI/MCP e testes. Ela e uma matriz de release, nao um contrato runtime novo.
 
-Audio Lite v1 e incremento pos-checkpoint e possui matriz propria em `docs/AUDIO_LITE_TEST_MATRIX.md`.
+Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1 e Prefab System v1 sao incrementos pos-checkpoint. Audio Lite possui matriz propria em `docs/AUDIO_LITE_TEST_MATRIX.md`.
 
 | Capacidade | Status | Docs | CLI | MCP | Testes | Observacoes |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -18,6 +18,8 @@ Audio Lite v1 e incremento pos-checkpoint e possui matriz propria em `docs/AUDIO
 | Tile blocking | opt-in | `docs/TILE_COLLISION_V1.md`, `docs/MOVEMENT_BLOCKING_V1.md` | `inspect-tile-collision`, `run-loop --movement-blocking` | `inspect_tile_collision`, `run_loop` | `tile-collision-*`, `movement-blocking-*` | Tiles solidos podem bloquear apenas quando movementBlocking esta ativo. |
 | HUD Lite | opt-in | `docs/BROWSER_PLAYABLE_DEMO_V1.md` | `render-browser-demo --gameplay-hud` | `render_browser_demo` com `gameplayHud: true` | `browser-playable-demo-runtime`, `cli-render-browser-demo` | HUD browser-local, nao UI system completo. |
 | Playable Save/Load Lite | opt-in | `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md` | `render-browser-demo --playable-save-load` | `render_browser_demo` com `playableSaveLoad: true` | `browser-playable-demo-runtime`, `cli-render-browser-demo` | Export/import manual local no HTML, sem storage. |
+| Sprite Animation v1 visual opt-in | opt-in | `docs/SPRITE_ANIMATION_V1.md`, `docs/BROWSER_PLAYABLE_DEMO_V1.md` | `inspect-sprite-animation`, `render-browser-demo --asset-manifest <path> --sprite-animation` | `inspect_sprite_animation`, `render_browser_demo` com `assetManifestPath` e `spriteAnimation: true` | `sprite-animation-*`, `browser-playable-demo-*`, `mcp-server` | Crop local de sprite-sheet apenas na Browser Demo, sem alterar `RenderSnapshot v1`. |
+| UI System v1 visual opt-in | opt-in | `docs/UI_SYSTEM_V1.md`, `docs/BROWSER_PLAYABLE_DEMO_V1.md`, `docs/SIMPLE_HTML_EXPORT_V1.md` | `inspect-ui-system`, `render-browser-demo --ui-system`, `export-html-game --ui-system` | `inspect_ui_system`, `render_browser_demo` com `uiSystem: true`, `export_html_game` com `uiSystem: true` | `ui-system-*`, `browser-playable-demo-*`, `simple-html-export-v1`, `mcp-server` | Overlay DOM passivo em screen-space, derivado de `UiSystemReport v1`; nao substitui HUD Lite. |
 | Simple HTML Export v1 | stable | `docs/SIMPLE_HTML_EXPORT_V1.md` | `export-html-game` | `export_html_game` | `simple-html-export-v1`, `game-templates-v1` | Escreve HTML jogavel autocontido; nao e bundler. |
 | Game Templates v1 | done | `docs/GAME_TEMPLATES_V1.md`, `templates/*/README.md` | `validate-scene`, `render-browser-demo`, `export-html-game` | `validate_scene`, `render_browser_demo`, `export_html_game` | `game-templates-v1` | Exemplos copiar-e-adaptar, nao template engine. |
 | Game Creation Guide | done | `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`, `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`, `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md` | comandos explicitados no guia | tools MCP equivalentes listadas no guia | cobertura indireta por `game-templates-v1` e `v1-small-2d-readiness-*` | Workflow Codex-first para criar jogos pequenos sem sistema novo. |

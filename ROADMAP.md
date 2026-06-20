@@ -104,7 +104,7 @@ Entregas alvo:
 - Game Templates v1 concluido com exemplos copiar-e-adaptar;
 - V1 Small 2D Game Creation Guide / Codex package concluido;
 - release checkpoint V1 Small 2D concluido;
-- UI System v1 entregue como primeiro contrato declarativo/report de V2;
+- UI System v1 entregue como contrato declarativo/report de V2 e consumo visual opt-in na Browser Demo/export;
 - Audio Lite v1 como primeiro pacote incremental pos-checkpoint;
 - Sprite Animation v1 concluido como diagnostico declarativo runtime/CLI/MCP;
 - matriz de regressao visual/headless;
@@ -127,7 +127,7 @@ Subagentes recomendados:
 
 Linha de trabalho atual recomendada:
 
-1. Runtime visual V2 consumir UI System v1 e Sprite Animation v1 de forma incremental, preservando HUD Lite como diagnostico local.
+1. Runtime visual V2 consumir Sprite Animation v1 de forma incremental, preservando HUD Lite e UI System visual como opt-ins locais.
 2. Expandir o prefab system minimo sem perder seguranca por path, contratos curtos e diff pequeno.
 
 ---

@@ -98,8 +98,7 @@ async function resolveScene(sceneOrPath) {
   return { scene: sceneOrPath };
 }
 
-export async function buildSpriteAnimationReportV1(sceneOrPath) {
-  const { scene } = await resolveScene(sceneOrPath);
+export function createSpriteAnimationReportV1FromScene(scene) {
   const animations = [];
   const warnings = [];
   const invalidRefs = [];
@@ -149,4 +148,9 @@ export async function buildSpriteAnimationReportV1(sceneOrPath) {
     warnings,
     invalidRefs
   };
+}
+
+export async function buildSpriteAnimationReportV1(sceneOrPath) {
+  const { scene } = await resolveScene(sceneOrPath);
+  return createSpriteAnimationReportV1FromScene(scene);
 }

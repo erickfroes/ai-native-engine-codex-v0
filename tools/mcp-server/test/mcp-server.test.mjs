@@ -162,6 +162,8 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'gameplayHud'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'playableSaveLoad'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'audioLite'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'spriteAnimation'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'uiSystem'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
     assert.ok(
       Object.prototype.hasOwnProperty.call(
@@ -817,6 +819,60 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(renderBrowserDemoWithAudioLiteResponse.result.structuredContent.html, /"clipId":"sfx\.step"/);
     assert.doesNotMatch(renderBrowserDemoWithAudioLiteResponse.result.structuredContent.html, /"movementBlocking":/);
 
+    const renderBrowserDemoWithSpriteAnimationResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './engine/runtime/test/fixtures/sprite-animation-idle.scene.json',
+        assetManifestPath: './fixtures/assets/valid.asset-manifest.json',
+        spriteAnimation: true
+      }
+    });
+
+    assert.equal(renderBrowserDemoWithSpriteAnimationResponse.result.isError, false);
+    assert.deepEqual(Object.keys(renderBrowserDemoWithSpriteAnimationResponse.result.structuredContent), [
+      'browserDemoVersion',
+      'scene',
+      'tick',
+      'html'
+    ]);
+    assert.equal(renderBrowserDemoWithSpriteAnimationResponse.result.structuredContent.browserDemoVersion, 1);
+    assert.equal(renderBrowserDemoWithSpriteAnimationResponse.result.structuredContent.scene, 'sprite-animation-idle-fixture');
+    assert.equal(renderBrowserDemoWithSpriteAnimationResponse.result.structuredContent.tick, 0);
+    assert.match(renderBrowserDemoWithSpriteAnimationResponse.result.structuredContent.html, /^<!DOCTYPE html>/);
+    assert.match(renderBrowserDemoWithSpriteAnimationResponse.result.structuredContent.html, /<canvas id="browser-playable-demo-canvas"/);
+    assert.match(renderBrowserDemoWithSpriteAnimationResponse.result.structuredContent.html, /"spriteAnimation":/);
+    assert.match(renderBrowserDemoWithSpriteAnimationResponse.result.structuredContent.html, /"animationId":"player\.idle"/);
+    assert.match(renderBrowserDemoWithSpriteAnimationResponse.result.structuredContent.html, /"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/);
+    assert.doesNotMatch(renderBrowserDemoWithSpriteAnimationResponse.result.structuredContent.html, /"movementBlocking":/);
+
+    const renderBrowserDemoWithUiSystemResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './engine/runtime/test/fixtures/ui-screen-prefab.scene.json',
+        uiSystem: true
+      }
+    });
+
+    assert.equal(renderBrowserDemoWithUiSystemResponse.result.isError, false);
+    assert.deepEqual(Object.keys(renderBrowserDemoWithUiSystemResponse.result.structuredContent), [
+      'browserDemoVersion',
+      'scene',
+      'tick',
+      'html'
+    ]);
+    assert.equal(renderBrowserDemoWithUiSystemResponse.result.structuredContent.browserDemoVersion, 1);
+    assert.equal(renderBrowserDemoWithUiSystemResponse.result.structuredContent.scene, 'ui-screen-prefab-fixture');
+    assert.equal(renderBrowserDemoWithUiSystemResponse.result.structuredContent.tick, 0);
+    assert.match(renderBrowserDemoWithUiSystemResponse.result.structuredContent.html, /^<!DOCTYPE html>/);
+    assert.match(
+      renderBrowserDemoWithUiSystemResponse.result.structuredContent.html,
+      /<canvas id="browser-playable-demo-canvas"/
+    );
+    assert.match(renderBrowserDemoWithUiSystemResponse.result.structuredContent.html, /"uiSystem":/);
+    assert.match(renderBrowserDemoWithUiSystemResponse.result.structuredContent.html, /id="browser-ui-system"/);
+    assert.match(renderBrowserDemoWithUiSystemResponse.result.structuredContent.html, />Score: 000<\/div>/);
+    assert.doesNotMatch(renderBrowserDemoWithUiSystemResponse.result.structuredContent.html, /"movementBlocking":/);
+
     const renderBrowserDemoWithHudBlockingSaveLoadResponse = await client.request('tools/call', {
       name: 'render_browser_demo',
       arguments: {
@@ -824,7 +880,8 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
         movementBlocking: true,
         gameplayHud: true,
         playableSaveLoad: true,
-        audioLite: true
+        audioLite: true,
+        uiSystem: true
       }
     });
 
@@ -840,6 +897,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html, /"gameplayHud":/);
     assert.match(renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html, /"playableSaveLoad":/);
     assert.match(renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html, /"audioLite":/);
+    assert.match(renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html, /"uiSystem":/);
     assert.match(
       renderBrowserDemoWithHudBlockingSaveLoadResponse.result.structuredContent.html,
       /id="browser-playable-save-load"/
@@ -1026,6 +1084,34 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(
       renderBrowserDemoInvalidAudioLiteResponse.result.content[0].text,
       /render_browser_demo: `audioLite` must be a boolean when provided\./
+    );
+
+    const renderBrowserDemoInvalidSpriteAnimationResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        spriteAnimation: 'yes'
+      }
+    });
+
+    assert.equal(renderBrowserDemoInvalidSpriteAnimationResponse.result.isError, true);
+    assert.match(
+      renderBrowserDemoInvalidSpriteAnimationResponse.result.content[0].text,
+      /render_browser_demo: `spriteAnimation` must be a boolean when provided\./
+    );
+
+    const renderBrowserDemoInvalidUiSystemResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/tutorial.scene.json',
+        uiSystem: 'yes'
+      }
+    });
+
+    assert.equal(renderBrowserDemoInvalidUiSystemResponse.result.isError, true);
+    assert.match(
+      renderBrowserDemoInvalidUiSystemResponse.result.content[0].text,
+      /render_browser_demo: `uiSystem` must be a boolean when provided\./
     );
 
     const renderBrowserDemoUnexpectedArgumentResponse = await client.request('tools/call', {

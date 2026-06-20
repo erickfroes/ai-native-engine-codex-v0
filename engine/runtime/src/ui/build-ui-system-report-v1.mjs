@@ -160,13 +160,16 @@ function buildScreens(scene) {
   );
 }
 
-export async function buildUiSystemReportV1(sceneOrPath) {
-  const { scene } = await resolveScene(sceneOrPath);
-
+export function createUiSystemReportV1FromScene(scene) {
   return {
     uiSystemReportVersion: 1,
     scene: scene.metadata.name,
     screens: buildScreens(scene),
     warnings: []
   };
+}
+
+export async function buildUiSystemReportV1(sceneOrPath) {
+  const { scene } = await resolveScene(sceneOrPath);
+  return createUiSystemReportV1FromScene(scene);
 }

@@ -40,6 +40,22 @@ const movementBlockingTileOpenScenePath = path.join(
   'fixtures',
   'movement-blocking-tile-open.scene.json'
 );
+const uiScreenPrefabScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'ui-screen-prefab.scene.json'
+);
+const spriteAnimationIdleScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'sprite-animation-idle.scene.json'
+);
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -534,6 +550,188 @@ test('browser playable demo movementBlocking stays aligned across runtime, CLI a
       assert.match(runtimeEnvelope.html, /"movementBlocking":/);
       assert.match(runtimeEnvelope.html, new RegExp(`"id":"${testCase.expectedTileId.replaceAll('.', '\\.')}"`));
     }
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('browser playable demo UI System v1 stays opt-in and aligned across runtime, CLI and MCP', async () => {
+  const scene = await loadSceneFile(uiScreenPrefabScenePath);
+  const snapshot = await buildRenderSnapshotV1(scene);
+  const runtimeEnvelope = {
+    browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderBrowserPlayableDemoHtmlV1({
+      title: `${snapshot.scene} Browser Playable Demo`,
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { uiSystem: true })
+    })
+  };
+
+  const cliResult = runCli([
+    'render-browser-demo',
+    uiScreenPrefabScenePath,
+    '--ui-system',
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+
+  const defaultCliResult = runCli([
+    'render-browser-demo',
+    uiScreenPrefabScenePath,
+    '--json'
+  ]);
+
+  assert.equal(defaultCliResult.status, 0, defaultCliResult.stderr);
+  const defaultCliEnvelope = JSON.parse(defaultCliResult.stdout);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './engine/runtime/test/fixtures/ui-screen-prefab.scene.json',
+        uiSystem: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+
+    assertBrowserDemoEnvelope(runtimeEnvelope, {
+      expectedScene: 'ui-screen-prefab-fixture',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(cliEnvelope, {
+      expectedScene: 'ui-screen-prefab-fixture',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(mcpEnvelope, {
+      expectedScene: 'ui-screen-prefab-fixture',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(defaultCliEnvelope, {
+      expectedScene: 'ui-screen-prefab-fixture',
+      expectedTick: 0
+    });
+    assert.deepEqual(runtimeEnvelope, cliEnvelope);
+    assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+    assert.match(runtimeEnvelope.html, /"uiSystem":\{"enabled":true,"scene":"ui-screen-prefab-fixture"/);
+    assert.match(runtimeEnvelope.html, /id="browser-ui-system"/);
+    assert.match(runtimeEnvelope.html, /data-screen-id="hud\.main"/);
+    assert.match(runtimeEnvelope.html, />Score: 000<\/div>/);
+    assert.match(runtimeEnvelope.html, />Lives: 3<\/div>/);
+    assert.doesNotMatch(defaultCliEnvelope.html, /"uiSystem":/);
+    assert.doesNotMatch(defaultCliEnvelope.html, /browser-ui-system/);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('browser playable demo Sprite Animation v1 stays opt-in and aligned across runtime, CLI and MCP', async () => {
+  const scene = await loadSceneFile(spriteAnimationIdleScenePath);
+  const snapshot = materializeBrowserDemoAssetSrcV1(
+    await buildRenderSnapshotV1(scene, { assetManifestPath: validAssetManifestPath }),
+    validAssetManifestPath
+  );
+  const runtimeEnvelope = {
+    browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderBrowserPlayableDemoHtmlV1({
+      title: `${snapshot.scene} Browser Playable Demo`,
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { spriteAnimation: true })
+    })
+  };
+
+  const cliResult = runCli([
+    'render-browser-demo',
+    spriteAnimationIdleScenePath,
+    '--asset-manifest',
+    validAssetManifestPath,
+    '--sprite-animation',
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+
+  const defaultCliResult = runCli([
+    'render-browser-demo',
+    spriteAnimationIdleScenePath,
+    '--asset-manifest',
+    validAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(defaultCliResult.status, 0, defaultCliResult.stderr);
+  const defaultCliEnvelope = JSON.parse(defaultCliResult.stdout);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './engine/runtime/test/fixtures/sprite-animation-idle.scene.json',
+        assetManifestPath: './fixtures/assets/valid.asset-manifest.json',
+        spriteAnimation: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+
+    const expectedAssetSrcPatterns = [/"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/];
+    assertBrowserDemoEnvelope(runtimeEnvelope, {
+      expectedScene: 'sprite-animation-idle-fixture',
+      expectedTick: 0,
+      withAssetLoading: true,
+      expectedAssetSrcPatterns
+    });
+    assertBrowserDemoEnvelope(cliEnvelope, {
+      expectedScene: 'sprite-animation-idle-fixture',
+      expectedTick: 0,
+      withAssetLoading: true,
+      expectedAssetSrcPatterns
+    });
+    assertBrowserDemoEnvelope(mcpEnvelope, {
+      expectedScene: 'sprite-animation-idle-fixture',
+      expectedTick: 0,
+      withAssetLoading: true,
+      expectedAssetSrcPatterns
+    });
+    assertBrowserDemoEnvelope(defaultCliEnvelope, {
+      expectedScene: 'sprite-animation-idle-fixture',
+      expectedTick: 0,
+      withAssetLoading: true,
+      expectedAssetSrcPatterns
+    });
+    assert.deepEqual(runtimeEnvelope, cliEnvelope);
+    assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+    assert.match(runtimeEnvelope.html, /"spriteAnimation":\{/);
+    assert.match(runtimeEnvelope.html, /"scene":"sprite-animation-idle-fixture"/);
+    assert.match(runtimeEnvelope.html, /"animationId":"player\.idle"/);
+    assert.doesNotMatch(defaultCliEnvelope.html, /"spriteAnimation":/);
   } finally {
     await mcp.close();
   }

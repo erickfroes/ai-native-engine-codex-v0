@@ -77,9 +77,9 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 - multiplayer real;
 - captura/input runtime completo fora da Browser Playable Demo local.
 
-A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1 e Sprite Animation v1 diagnostico.
+A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1 e Sprite Animation v1 diagnostico, agora tambem consumido de forma visual opt-in na Browser Demo para sprites asset-backed.
 
-Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local e report diagnostico cross-interface. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets e report cross-interface, preservando HUD Lite como diagnostico local ate existir consumo visual formal.
+Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local e report diagnostico cross-interface. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface e consumo visual opt-in na Browser Demo/export por overlay passivo, preservando HUD Lite como diagnostico local.
 
 ## Comandos CLI principais
 
@@ -103,8 +103,8 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `render-svg`: gera SVG textual deterministico
 - `render-svg-demo`: gera HTML estatico com SVG inline
 - `render-canvas-demo`: gera HTML estatico com Canvas 2D
-- `render-browser-demo`: gera HTML interativo minimo com Canvas 2D, teclado local, fallback de sprites, blocking local opt-in, HUD Lite opt-in, Playable Save/Load Lite opt-in e Audio Lite opt-in
-- `export-html-game`: escreve um HTML jogavel autocontido com opcoes da Browser Demo, incluindo Audio Lite opt-in
+- `render-browser-demo`: gera HTML interativo minimo com Canvas 2D, teclado local, fallback de sprites, blocking local opt-in, HUD Lite opt-in, Playable Save/Load Lite opt-in, Audio Lite opt-in, Sprite Animation opt-in e UI System opt-in
+- `export-html-game`: escreve um HTML jogavel autocontido com opcoes da Browser Demo, incluindo Audio Lite e UI System opt-in
 
 ## Tools MCP principais
 
@@ -188,11 +188,17 @@ node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixt
 # inspecionar UI System v1 declarativo
 node ./engine/runtime/src/cli.mjs inspect-ui-system ./engine/runtime/test/fixtures/ui-screen-prefab.scene.json --json
 
+# gerar Browser Playable Demo consumindo UI System v1 como overlay passivo
+node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/ui-screen-prefab.scene.json --ui-system --out ./tmp/ui-system-browser-demo.html --json
+
 # inspecionar Sprite Animation v1 declarativo
 node ./engine/runtime/src/cli.mjs inspect-sprite-animation ./engine/runtime/test/fixtures/sprite-animation-idle.scene.json --json
 
+# gerar Browser Playable Demo consumindo Sprite Animation v1 em sprites asset-backed
+node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/sprite-animation-idle.scene.json --asset-manifest ./fixtures/assets/valid.asset-manifest.json --sprite-animation --out ./tmp/sprite-animation-browser-demo.html --json
+
 # exportar um HTML jogavel simples da cena consolidada V1 small 2D
-node ./engine/runtime/src/cli.mjs export-html-game ./scenes/v1-small-2d.scene.json --movement-blocking --gameplay-hud --playable-save-load --audio-lite --out ./tmp/v1-small-2d-export.html --json
+node ./engine/runtime/src/cli.mjs export-html-game ./scenes/v1-small-2d.scene.json --movement-blocking --gameplay-hud --playable-save-load --audio-lite --ui-system --out ./tmp/v1-small-2d-export.html --json
 ```
 
 ## Validacao obrigatoria
@@ -218,7 +224,7 @@ npm run smoke
 - `docs/UI_SYSTEM_V1.md`: contrato do UI System v1
 - `docs/GAME_TEMPLATES_V1.md`: templates V1 Small 2D copiar-e-adaptar
 - `docs/AUDIO_LITE_V1.md`: contrato de Audio Lite v1 diagnostico
-- `docs/SPRITE_ANIMATION_V1.md`: contrato de Sprite Animation v1 diagnostico
+- `docs/SPRITE_ANIMATION_V1.md`: contrato de Sprite Animation v1 diagnostico e consumo visual opt-in na Browser Demo
 - `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`: fluxo Codex-first para criar um jogo pequeno 2D
 - `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`: checklist de validacao para jogos criados a partir dos templates
 - `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md`: pacote de prompt para Codex

@@ -269,6 +269,14 @@ export const toolCatalog = [
         audioLite: {
           type: 'boolean',
           description: 'When true, embed Audio Lite v1 diagnostic metadata and user-gesture controls in the generated HTML.'
+        },
+        spriteAnimation: {
+          type: 'boolean',
+          description: 'When true, embed Sprite Animation v1 metadata and animate asset-backed sprite drawCalls locally in the generated HTML.'
+        },
+        uiSystem: {
+          type: 'boolean',
+          description: 'When true, embed UI System v1 declarative screens as a passive screen-space overlay in the generated HTML.'
         }
       },
       additionalProperties: false
@@ -305,6 +313,10 @@ export const toolCatalog = [
         audioLite: {
           type: 'boolean',
           description: 'When true, embed Audio Lite v1 diagnostic metadata and user-gesture controls.'
+        },
+        uiSystem: {
+          type: 'boolean',
+          description: 'When true, embed UI System v1 declarative screens as a passive screen-space overlay.'
         }
       },
       additionalProperties: false

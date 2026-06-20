@@ -269,13 +269,15 @@ test('Game Templates v1 export-html-game writes deterministic HTML for default a
       movementBlocking: false,
       gameplayHud: false,
       playableSaveLoad: false,
-      audioLite: false
+      audioLite: false,
+      uiSystem: false
     });
     assertExportEnvelope(fullEnvelope, template.scene, {
       movementBlocking: true,
       gameplayHud: true,
       playableSaveLoad: true,
-      audioLite: false
+      audioLite: false,
+      uiSystem: false
     });
     assert.deepEqual(defaultEnvelope, repeatedDefaultEnvelope);
 
@@ -360,7 +362,8 @@ test('Game Templates v1 stay aligned across MCP render and export tools', async 
         movementBlocking: true,
         gameplayHud: true,
         playableSaveLoad: true,
-        audioLite: false
+        audioLite: false,
+        uiSystem: false
       });
 
       const exportedHtml = await readFile(exportResponse.result.structuredContent.outputPath, 'utf8');
