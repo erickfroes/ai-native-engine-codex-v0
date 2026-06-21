@@ -404,6 +404,43 @@ test('Portable HTML Export v2 keeps empty drawCalls and empty animation metadata
   assertNoForbiddenPortableExportHtmlSurface(baseline.html);
 });
 
+test('Portable HTML Export v2 keeps empty drawCalls and empty animation metadata when spriteAnimation is enabled without assetManifestPath on scenes without any visual components', async () => {
+  const baseline = await buildPortableHtmlGameExportV2(portableEmptyVisualScenePath, {
+    spriteAnimation: true
+  });
+  const repeated = await buildPortableHtmlGameExportV2(portableEmptyVisualScenePath, {
+    spriteAnimation: true
+  });
+
+  assert.deepEqual(baseline, repeated);
+  assert.equal(baseline.exportVersion, PORTABLE_HTML_EXPORT_VERSION);
+  assert.equal(baseline.scene, 'portable-empty-visual-fixture');
+  assert.deepEqual(baseline.options, {
+    assetManifest: false,
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    spriteAnimation: true,
+    uiSystem: false
+  });
+  assert.equal(baseline.embeddedAssetCount, 0);
+  assert.equal(baseline.sizeBytes, Buffer.byteLength(baseline.html, 'utf8'));
+  assert.equal(baseline.htmlHash, sha256Hex(baseline.html));
+  assert.match(baseline.html, /^<!DOCTYPE html>/);
+  assert.match(baseline.html, /portable-empty-visual-fixture Portable HTML Game Export/);
+  assert.match(baseline.html, /"spriteAnimation":\{/);
+  assert.match(baseline.html, /"animations":\[\]/);
+  assert.match(baseline.html, /"warnings":\[\]/);
+  assert.match(baseline.html, /"invalidRefs":\[\]/);
+  assert.match(baseline.html, /"drawCalls":\[\]/);
+  assert.doesNotMatch(baseline.html, /"kind":"rect"/);
+  assert.doesNotMatch(baseline.html, /"kind":"sprite"/);
+  assert.doesNotMatch(baseline.html, /data:image\/png;base64,/);
+  assert.doesNotMatch(baseline.html, /file:\/\/\//);
+  assertNoForbiddenPortableExportHtmlSurface(baseline.html);
+});
+
 test('Portable HTML Export v2 keeps asset-backed sprite rendering and empty animation metadata when spriteAnimation is enabled without visual.sprite.animation', async () => {
   const baseline = await buildPortableHtmlGameExportV2(visualSpriteScenePath, {
     assetManifestPath: visualSpriteAssetManifestPath,
@@ -542,6 +579,24 @@ test('export-portable-html-game CLI writes deterministic files for inline assets
       expectedEmbeddedAssetCount: 0,
       options: {
         assetManifest: true,
+        movementBlocking: false,
+        gameplayHud: false,
+        playableSaveLoad: false,
+        audioLite: false,
+        spriteAnimation: true,
+        uiSystem: false
+      },
+      present: [/"spriteAnimation":\{/, /"animations":\[\]/, /"drawCalls":\[\]/],
+      absent: [/file:\/\/\//, /data:image\/png;base64,/, /"kind":"sprite"/, /"kind":"rect"/, /"uiSystem":/]
+    },
+    {
+      name: 'sprite-animation-empty-draw-calls-no-manifest',
+      scenePath: portableEmptyVisualScenePath,
+      flags: ['--sprite-animation'],
+      expectedScene: 'portable-empty-visual-fixture',
+      expectedEmbeddedAssetCount: 0,
+      options: {
+        assetManifest: false,
         movementBlocking: false,
         gameplayHud: false,
         playableSaveLoad: false,
@@ -1075,6 +1130,71 @@ test('export_portable_html_game MCP keeps empty drawCalls and empty animation me
         scenePath: portableEmptyVisualSceneMcpPath,
         outputPath: path.relative(repoRoot, mcpOutPath),
         assetManifestPath: validAssetManifestMcpPath,
+        spriteAnimation: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+    assertPortableExportEnvelopeShape(mcpEnvelope, { expectedScene: 'portable-empty-visual-fixture' });
+    assert.equal(mcpEnvelope.outputPath, mcpOutPath);
+    assert.deepEqual(
+      { ...mcpEnvelope, outputPath: '<normalized>' },
+      { ...cliEnvelope, outputPath: '<normalized>' }
+    );
+
+    const mcpHtml = await readFile(mcpEnvelope.outputPath, 'utf8');
+    assert.equal(mcpHtml, cliHtml);
+    assertNoForbiddenPortableExportHtmlSurface(mcpHtml);
+  } finally {
+    await client.close();
+  }
+});
+
+test('export_portable_html_game MCP keeps empty drawCalls and empty animation metadata without assetManifestPath on scenes without any visual components', async (t) => {
+  const repoTempDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(repoTempDir, 'cli-portable-sprite-animation-empty-draw-calls-no-manifest.html');
+  const mcpOutPath = path.join(repoTempDir, 'mcp-portable-sprite-animation-empty-draw-calls-no-manifest.html');
+  const cliResult = runCli([
+    'export-portable-html-game',
+    portableEmptyVisualScenePath,
+    '--out',
+    cliOutPath,
+    '--sprite-animation',
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+  assert.deepEqual(cliEnvelope.options, {
+    assetManifest: false,
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    spriteAnimation: true,
+    uiSystem: false
+  });
+  assert.equal(cliEnvelope.embeddedAssetCount, 0);
+  const cliHtml = await readFile(cliEnvelope.outputPath, 'utf8');
+  assert.match(cliHtml, /"spriteAnimation":\{/);
+  assert.match(cliHtml, /"animations":\[\]/);
+  assert.match(cliHtml, /"warnings":\[\]/);
+  assert.match(cliHtml, /"invalidRefs":\[\]/);
+  assert.match(cliHtml, /"drawCalls":\[\]/);
+  assert.doesNotMatch(cliHtml, /"kind":"rect"/);
+  assert.doesNotMatch(cliHtml, /"kind":"sprite"/);
+  assert.doesNotMatch(cliHtml, /data:image\/png;base64,/);
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_portable_html_game',
+      arguments: {
+        scenePath: portableEmptyVisualSceneMcpPath,
+        outputPath: path.relative(repoRoot, mcpOutPath),
         spriteAnimation: true
       }
     });
