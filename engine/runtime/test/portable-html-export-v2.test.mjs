@@ -37,6 +37,13 @@ const uiScreenPrefabScenePath = path.join(
 );
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 const validAssetManifestMcpPath = './fixtures/assets/valid.asset-manifest.json';
+const unsupportedPortableAssetManifestPath = path.join(
+  repoRoot,
+  'fixtures',
+  'assets',
+  'portable-unsupported-extension.asset-manifest.json'
+);
+const unsupportedPortableAssetManifestMcpPath = './fixtures/assets/portable-unsupported-extension.asset-manifest.json';
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -299,6 +306,58 @@ test('export-portable-html-game CLI requires --out and prints outputPath in read
   const html = await readFile(outPath, 'utf8');
   assert.match(html, /^<!DOCTYPE html>/);
   assert.match(html, /data:image\/png;base64,/);
+});
+
+test('Portable HTML Export v2 fails predictably for unsupported inline asset extensions across runtime, CLI and MCP', async (t) => {
+  const outDir = await createTempDir(t);
+  const repoOutDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(outDir, 'portable-unsupported-extension.html');
+  const mcpOutPath = path.join(repoOutDir, 'portable-unsupported-extension.html');
+
+  await assert.rejects(
+    () =>
+      buildPortableHtmlGameExportV2(spriteScenePath, {
+        assetManifestPath: unsupportedPortableAssetManifestPath
+      }),
+    /unsupported image asset extension `\.txt`.*supported extensions: \.png, \.jpg, \.jpeg, \.webp, \.gif, \.bmp, \.svg/
+  );
+
+  const cliResult = runCli([
+    'export-portable-html-game',
+    spriteScenePath,
+    '--out',
+    cliOutPath,
+    '--asset-manifest',
+    unsupportedPortableAssetManifestPath
+  ]);
+
+  assert.notEqual(cliResult.status, 0);
+  assert.match(
+    cliResult.stderr,
+    /unsupported image asset extension `\.txt`.*supported extensions: \.png, \.jpg, \.jpeg, \.webp, \.gif, \.bmp, \.svg/
+  );
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_portable_html_game',
+      arguments: {
+        scenePath: spriteSceneMcpPath,
+        outputPath: path.relative(repoRoot, mcpOutPath),
+        assetManifestPath: unsupportedPortableAssetManifestMcpPath
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, true);
+    assert.match(
+      mcpResponse.result.content[0].text,
+      /unsupported image asset extension `\.txt`.*supported extensions: \.png, \.jpg, \.jpeg, \.webp, \.gif, \.bmp, \.svg/
+    );
+  } finally {
+    await client.close();
+  }
 });
 
 test('export_portable_html_game MCP writes the same sprite-animation portable export as CLI', async (t) => {

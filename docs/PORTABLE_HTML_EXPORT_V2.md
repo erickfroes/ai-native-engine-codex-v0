@@ -80,6 +80,8 @@ O MCP valida `scenePath`, `outputPath` e `assetManifestPath` dentro do repo, esc
 - Nao altera `Simple HTML Export v1`.
 - `assetManifestPath` continua opt-in.
 - Quando `assetManifestPath` esta presente, drawCalls `sprite` recebem `assetSrc` inline como `data:` URL.
+- Extensoes inline suportadas neste slice: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`, `.bmp`, `.svg`.
+- Se um sprite do manifesto apontar para extensao fora dessa lista, runtime/CLI/MCP falham de forma previsivel no contrato v2 sem alterar `Asset Manifest v1`.
 - `embeddedAssetCount` conta drawCalls `sprite` efetivamente embutidos com `data:` URL.
 - `spriteAnimation` continua opt-in e reutiliza `Sprite Animation v1`.
 - Sem `assetManifestPath`, o export v2 preserva o fallback atual da Browser Demo/export simples.

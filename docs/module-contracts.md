@@ -599,6 +599,8 @@ Contrato versionado para escrever HTML jogavel portatil com assets inline e cons
 - Runtime: `buildPortableHtmlGameExportV2(sceneOrPath, options)` e `exportPortableHtmlGameV2(sceneOrPath, options)`.
 - reutiliza `RenderSnapshot v1`, Browser Playable Demo v1 e `Sprite Animation v1` sem alterar os contratos v1.
 - com `assetManifestPath`, drawCalls `sprite` recebem `assetSrc` inline como `data:` URL.
+- extensoes inline suportadas neste slice: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`, `.bmp`, `.svg`.
+- se um sprite do manifesto apontar para extensao fora dessa lista, runtime/CLI/MCP falham de forma previsivel no contrato v2 sem mutar `Asset Manifest v1`.
 - com `spriteAnimation`, o HTML exportado pode animar sprite-sheets embutidos localmente.
 - sem `assetManifestPath`, o fallback visual atual permanece.
 - `Simple HTML Export v1` continua sem consumo visual de Sprite Animation neste slice; a evolucao acontece no contrato v2 separado.

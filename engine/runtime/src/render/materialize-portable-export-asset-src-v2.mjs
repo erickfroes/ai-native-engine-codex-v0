@@ -10,6 +10,7 @@ const IMAGE_MIME_TYPES = new Map([
   ['.bmp', 'image/bmp'],
   ['.svg', 'image/svg+xml']
 ]);
+const SUPPORTED_PORTABLE_EXPORT_IMAGE_EXTENSIONS = [...IMAGE_MIME_TYPES.keys()];
 
 function cloneDrawCall(drawCall) {
   return drawCall && typeof drawCall === 'object' && !Array.isArray(drawCall)
@@ -23,7 +24,7 @@ function resolveImageMimeType(assetSrc) {
 
   if (!mimeType) {
     throw new Error(
-      `materializePortableExportAssetSrcV2: unsupported image asset extension \`${extension || '(none)'}\` for \`${assetSrc}\``
+      `materializePortableExportAssetSrcV2: unsupported image asset extension \`${extension || '(none)'}\` for \`${assetSrc}\`; supported extensions: ${SUPPORTED_PORTABLE_EXPORT_IMAGE_EXTENSIONS.join(', ')}`
     );
   }
 
