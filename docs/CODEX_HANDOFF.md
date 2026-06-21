@@ -28,6 +28,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Portable HTML Export v2 no-manifest spriteAnimation fallback hardening: concluido com cobertura runtime/CLI/MCP para `spriteAnimation` sem `assetManifestPath`, preservando `metadata.spriteAnimation` opt-in quando solicitado e mantendo drawCalls no fallback `rect`, sem `data:` URL inline e sem `file:///`.
 - Portable HTML Export v2 no-op hardening com manifesto: concluido com cobertura runtime/CLI/MCP para `assetManifestPath` + `spriteAnimation` quando a cena nao produz drawCalls `sprite` asset-backed, preservando `metadata.spriteAnimation` opt-in, `embeddedAssetCount = 0` e fallback `rect` sem `data:` URL inline e sem `file:///`.
 - Portable HTML Export v2 no-op hardening sem sprites asset-backed compativeis e sem `visual.sprite.animation`: concluido com cobertura runtime/CLI/MCP para `assetManifestPath` + `spriteAnimation` em cena com `sprite` legado, `animations: []`, `embeddedAssetCount = 0`, fallback `rect` e ausencia de `data:` URL inline / `file:///`.
+- Portable HTML Export v2 no-op hardening em cenas puramente `rect`: concluido com cobertura runtime/CLI/MCP para `assetManifestPath` + `spriteAnimation` em `tile.layer` sem qualquer componente de sprite, preservando `animations: []`, `embeddedAssetCount = 0`, drawCalls apenas `rect` e ausencia de `data:` URL inline / `file:///`.
 - Portable HTML Export v2 no-op hardening sem `visual.sprite.animation`: concluido com cobertura runtime/CLI/MCP para `assetManifestPath` + `spriteAnimation` em cena com `visual.sprite` asset-backed e `animations: []`, preservando sprites inline normais, `embeddedAssetCount > 0` e ausencia de `file:///`.
 - Prefab System v1: concluido como resolucao declarativa minima por arquivo e report diagnostico runtime/CLI/MCP.
 - Prefab Validation Report v1: concluido como validacao direta de `.prefab.json` via runtime/CLI/MCP.
@@ -131,7 +132,7 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Continuar o hardening incremental de `Portable HTML Export v2` cobrindo explicitamente o caminho no-op de `spriteAnimation` em cenas puramente `rect`/sem qualquer componente de sprite, mesmo com `assetManifestPath`, preservando `RenderSnapshot v1`, `Simple HTML Export v1` e o caminho default da Browser Demo.
+1. Continuar o hardening incremental de `Portable HTML Export v2` cobrindo explicitamente o caminho com `drawCalls` vazios/sem qualquer componente visual, mesmo com `assetManifestPath` e `spriteAnimation`, preservando `RenderSnapshot v1`, `Simple HTML Export v1` e o caminho default da Browser Demo.
 2. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Regra de manutencao da linha de seguimento
