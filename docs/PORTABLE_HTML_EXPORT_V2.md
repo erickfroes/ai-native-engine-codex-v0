@@ -87,6 +87,7 @@ O MCP valida `scenePath`, `outputPath` e `assetManifestPath` dentro do repo, esc
 - Sem `assetManifestPath`, o export v2 preserva o fallback atual da Browser Demo/export simples.
 - Sem `assetManifestPath`, `--sprite-animation` pode manter `metadata.spriteAnimation`, mas os drawCalls continuam no fallback atual `rect`, sem `data:` URL inline e sem `file:///`.
 - Mesmo com `assetManifestPath`, se a cena nao produzir drawCalls `sprite` asset-backed compativeis, `--sprite-animation` continua como no-op visual: `metadata.spriteAnimation` pode permanecer, `embeddedAssetCount` fica `0` e o HTML segue em fallback `rect`, sem `data:` URL inline e sem `file:///`.
+- Mesmo com `assetManifestPath`, se a cena nao produzir drawCalls `sprite` asset-backed compativeis e tambem nao declarar `visual.sprite.animation` (ex.: cena com `sprite` legado), `--sprite-animation` continua como no-op completo: `metadata.spriteAnimation` pode existir com `animations: []`, `warnings: []` e `invalidRefs: []`, `embeddedAssetCount` fica `0` e o HTML segue em fallback `rect`, sem `data:` URL inline e sem `file:///`.
 - Mesmo com `assetManifestPath`, se a cena tiver `visual.sprite` asset-backed mas nao declarar `visual.sprite.animation`, `--sprite-animation` continua como no-op de animacao: `metadata.spriteAnimation` pode existir com `animations: []`, `embeddedAssetCount` continua contando os sprites inline e o HTML preserva drawCalls `sprite` normais, sem `file:///`.
 - `sizeBytes` e calculado com `Buffer.byteLength(html, "utf8")`.
 - `htmlHash` e SHA-256 do HTML escrito.

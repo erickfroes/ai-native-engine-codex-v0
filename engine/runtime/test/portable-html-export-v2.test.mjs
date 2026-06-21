@@ -16,6 +16,8 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
+const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const tutorialSceneMcpPath = './scenes/tutorial.scene.json';
 const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
 const spriteSceneMcpPath = './fixtures/assets/sprite.scene.json';
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
@@ -276,6 +278,44 @@ test('Portable HTML Export v2 stays a no-op for asset-backed sprite rendering wh
   assertNoForbiddenPortableExportHtmlSurface(baseline.html);
 });
 
+test('Portable HTML Export v2 keeps rect fallback and empty animation metadata when spriteAnimation is enabled with assetManifestPath but the scene has no compatible asset-backed sprites or visual.sprite.animation', async () => {
+  const baseline = await buildPortableHtmlGameExportV2(tutorialScenePath, {
+    assetManifestPath: validAssetManifestPath,
+    spriteAnimation: true
+  });
+  const repeated = await buildPortableHtmlGameExportV2(tutorialScenePath, {
+    assetManifestPath: validAssetManifestPath,
+    spriteAnimation: true
+  });
+
+  assert.deepEqual(baseline, repeated);
+  assert.equal(baseline.exportVersion, PORTABLE_HTML_EXPORT_VERSION);
+  assert.equal(baseline.scene, 'tutorial');
+  assert.deepEqual(baseline.options, {
+    assetManifest: true,
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    spriteAnimation: true,
+    uiSystem: false
+  });
+  assert.equal(baseline.embeddedAssetCount, 0);
+  assert.equal(baseline.sizeBytes, Buffer.byteLength(baseline.html, 'utf8'));
+  assert.equal(baseline.htmlHash, sha256Hex(baseline.html));
+  assert.match(baseline.html, /^<!DOCTYPE html>/);
+  assert.match(baseline.html, /tutorial Portable HTML Game Export/);
+  assert.match(baseline.html, /"spriteAnimation":\{/);
+  assert.match(baseline.html, /"animations":\[\]/);
+  assert.match(baseline.html, /"warnings":\[\]/);
+  assert.match(baseline.html, /"invalidRefs":\[\]/);
+  assert.match(baseline.html, /"kind":"rect"/);
+  assert.doesNotMatch(baseline.html, /"kind":"sprite"/);
+  assert.doesNotMatch(baseline.html, /data:image\/png;base64,/);
+  assert.doesNotMatch(baseline.html, /file:\/\/\//);
+  assertNoForbiddenPortableExportHtmlSurface(baseline.html);
+});
+
 test('Portable HTML Export v2 keeps asset-backed sprite rendering and empty animation metadata when spriteAnimation is enabled without visual.sprite.animation', async () => {
   const baseline = await buildPortableHtmlGameExportV2(visualSpriteScenePath, {
     assetManifestPath: visualSpriteAssetManifestPath,
@@ -369,6 +409,24 @@ test('export-portable-html-game CLI writes deterministic files for inline assets
       },
       present: [/"spriteAnimation":\{/, /"animations":\[\]/, /"kind":"sprite"/, /"assetSrc":"data:image\/png;base64,/],
       absent: [/file:\/\/\//, /"uiSystem":/]
+    },
+    {
+      name: 'sprite-animation-legacy-sprite-no-op-with-manifest',
+      scenePath: tutorialScenePath,
+      flags: ['--asset-manifest', validAssetManifestPath, '--sprite-animation'],
+      expectedScene: 'tutorial',
+      expectedEmbeddedAssetCount: 0,
+      options: {
+        assetManifest: true,
+        movementBlocking: false,
+        gameplayHud: false,
+        playableSaveLoad: false,
+        audioLite: false,
+        spriteAnimation: true,
+        uiSystem: false
+      },
+      present: [/"spriteAnimation":\{/, /"animations":\[\]/, /"kind":"rect"/],
+      absent: [/file:\/\/\//, /data:image\/png;base64,/, /"kind":"sprite"/, /"uiSystem":/]
     },
     {
       name: 'sprite-animation-no-op-with-manifest',
@@ -704,6 +762,71 @@ test('export_portable_html_game MCP stays a no-op for asset-backed sprite render
     assert.equal(mcpResponse.result.isError, false);
     const mcpEnvelope = mcpResponse.result.structuredContent;
     assertPortableExportEnvelopeShape(mcpEnvelope, { expectedScene: 'sprite-animation-missing-visual-sprite-fixture' });
+    assert.equal(mcpEnvelope.outputPath, mcpOutPath);
+    assert.deepEqual(
+      { ...mcpEnvelope, outputPath: '<normalized>' },
+      { ...cliEnvelope, outputPath: '<normalized>' }
+    );
+
+    const mcpHtml = await readFile(mcpEnvelope.outputPath, 'utf8');
+    assert.equal(mcpHtml, cliHtml);
+    assertNoForbiddenPortableExportHtmlSurface(mcpHtml);
+  } finally {
+    await client.close();
+  }
+});
+
+test('export_portable_html_game MCP keeps rect fallback and empty animation metadata when assetManifestPath is present but the scene has no compatible asset-backed sprites or visual.sprite.animation', async (t) => {
+  const repoTempDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(repoTempDir, 'cli-portable-sprite-animation-legacy-sprite-no-op-with-manifest.html');
+  const mcpOutPath = path.join(repoTempDir, 'mcp-portable-sprite-animation-legacy-sprite-no-op-with-manifest.html');
+  const cliResult = runCli([
+    'export-portable-html-game',
+    tutorialScenePath,
+    '--out',
+    cliOutPath,
+    '--asset-manifest',
+    validAssetManifestPath,
+    '--sprite-animation',
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+  assert.deepEqual(cliEnvelope.options, {
+    assetManifest: true,
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    spriteAnimation: true,
+    uiSystem: false
+  });
+  assert.equal(cliEnvelope.embeddedAssetCount, 0);
+  const cliHtml = await readFile(cliEnvelope.outputPath, 'utf8');
+  assert.match(cliHtml, /"spriteAnimation":\{/);
+  assert.match(cliHtml, /"animations":\[\]/);
+  assert.match(cliHtml, /"kind":"rect"/);
+  assert.doesNotMatch(cliHtml, /"kind":"sprite"/);
+  assert.doesNotMatch(cliHtml, /data:image\/png;base64,/);
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_portable_html_game',
+      arguments: {
+        scenePath: tutorialSceneMcpPath,
+        outputPath: path.relative(repoRoot, mcpOutPath),
+        assetManifestPath: validAssetManifestMcpPath,
+        spriteAnimation: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+    assertPortableExportEnvelopeShape(mcpEnvelope, { expectedScene: 'tutorial' });
     assert.equal(mcpEnvelope.outputPath, mcpOutPath);
     assert.deepEqual(
       { ...mcpEnvelope, outputPath: '<normalized>' },
