@@ -605,6 +605,7 @@ Contrato versionado para escrever HTML jogavel portatil com assets inline e cons
 - sem `assetManifestPath`, o fallback visual atual permanece.
 - sem `assetManifestPath`, `spriteAnimation` pode permanecer no metadata, mas os drawCalls continuam no fallback atual `rect`, sem `data:` URL inline e sem `file:///`.
 - mesmo com `assetManifestPath`, se a cena nao produzir drawCalls `sprite` asset-backed compativeis, `spriteAnimation` permanece no-op visual: metadata pode existir, `embeddedAssetCount` fica `0` e o HTML segue em fallback `rect`, sem `data:` URL inline e sem `file:///`.
+- mesmo com `assetManifestPath`, se a cena tiver `visual.sprite` asset-backed mas nao declarar `visual.sprite.animation`, `spriteAnimation` permanece no-op de animacao: metadata pode existir com `animations: []`, `embeddedAssetCount` continua contando os sprites inline e o HTML preserva drawCalls `sprite` normais, sem `file:///`.
 - `Simple HTML Export v1` continua sem consumo visual de Sprite Animation neste slice; a evolucao acontece no contrato v2 separado.
 - nao e bundler, servidor, atlas pipeline, editor ou runtime canonico amplo de gameplay.
 
