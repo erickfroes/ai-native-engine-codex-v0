@@ -128,6 +128,10 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     const toolsResponse = await client.request('tools/list');
     assert.ok(Array.isArray(toolsResponse.result.tools));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_scene'));
+    const validateAssetManifestTool = toolsResponse.result.tools.find((tool) => tool.name === 'validate_asset_manifest');
+    assert.ok(validateAssetManifestTool);
+    assert.equal(validateAssetManifestTool.title, 'Validate Asset Manifest');
+    assert.deepEqual(validateAssetManifestTool.inputSchema.required, ['path']);
     const validateInputIntentTool = toolsResponse.result.tools.find((tool) => tool.name === 'validate_input_intent');
     assert.ok(validateInputIntentTool);
     assert.equal(validateInputIntentTool.title, 'Validate Input Intent');
@@ -318,6 +322,78 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
         (error) => error.path === '$.entityId' && error.message === 'is required'
       )
     );
+
+    const validAssetManifestResponse = await client.request('tools/call', {
+      name: 'validate_asset_manifest',
+      arguments: {
+        path: './fixtures/assets/valid.asset-manifest.json'
+      }
+    });
+
+    assert.equal(validAssetManifestResponse.result.isError, false);
+    assert.equal(validAssetManifestResponse.result.structuredContent.assetManifestValidationReportVersion, 1);
+    assert.equal(validAssetManifestResponse.result.structuredContent.ok, true);
+    assert.equal(validAssetManifestResponse.result.structuredContent.assetManifest.assetManifestVersion, 1);
+    assert.equal(validAssetManifestResponse.result.structuredContent.assetManifest.assets.length, 2);
+    assert.deepEqual(validAssetManifestResponse.result.structuredContent.errors, []);
+
+    const invalidAssetManifestResponse = await client.request('tools/call', {
+      name: 'validate_asset_manifest',
+      arguments: {
+        path: './fixtures/assets/invalid.traversal-src.asset-manifest.json'
+      }
+    });
+
+    assert.equal(invalidAssetManifestResponse.result.isError, true);
+    assert.equal(invalidAssetManifestResponse.result.structuredContent.ok, false);
+    assert.deepEqual(invalidAssetManifestResponse.result.structuredContent.errors, [
+      {
+        path: '$.assets[0].src',
+        message: 'must stay inside the manifest directory'
+      }
+    ]);
+
+    const malformedAssetManifestResponse = await client.request('tools/call', {
+      name: 'validate_asset_manifest',
+      arguments: {
+        path: './fixtures/assets/invalid-malformed.asset-manifest.json'
+      }
+    });
+
+    assert.equal(malformedAssetManifestResponse.result.isError, true);
+    assert.deepEqual(malformedAssetManifestResponse.result.structuredContent, {
+      assetManifestValidationReportVersion: 1,
+      ok: false,
+      absolutePath: path.join(repoRoot, 'fixtures', 'assets', 'invalid-malformed.asset-manifest.json'),
+      assetManifest: null,
+      errors: [
+        {
+          path: '$',
+          message: 'asset manifest JSON is malformed'
+        }
+      ]
+    });
+
+    const missingAssetManifestResponse = await client.request('tools/call', {
+      name: 'validate_asset_manifest',
+      arguments: {
+        path: './fixtures/assets/missing.asset-manifest.json'
+      }
+    });
+
+    assert.equal(missingAssetManifestResponse.result.isError, true);
+    assert.deepEqual(missingAssetManifestResponse.result.structuredContent, {
+      assetManifestValidationReportVersion: 1,
+      ok: false,
+      absolutePath: path.join(repoRoot, 'fixtures', 'assets', 'missing.asset-manifest.json'),
+      assetManifest: null,
+      errors: [
+        {
+          path: '$',
+          message: 'asset manifest file was not found'
+        }
+      ]
+    });
 
     const validPrefabResponse = await client.request('tools/call', {
       name: 'validate_prefab',

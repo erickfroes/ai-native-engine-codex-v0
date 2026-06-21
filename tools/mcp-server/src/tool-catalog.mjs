@@ -16,6 +16,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'validate_asset_manifest',
+    title: 'Validate Asset Manifest',
+    description: 'Validate an Asset Manifest v1 JSON file against the runtime contract.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'validate_input_intent',
     title: 'Validate Input Intent',
     description: 'Validate an Input Intent v1 JSON file against the runtime contract.',

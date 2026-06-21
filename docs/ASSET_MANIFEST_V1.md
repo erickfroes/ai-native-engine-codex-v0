@@ -38,6 +38,8 @@ Definir um contrato local, declarativo e deterministico para registrar assets de
 - `validateAssetManifestV1(assetManifest)` valida o contrato em memoria.
 - `validateAssetManifestV1File(path)` valida o manifesto em disco e preserva `absolutePath`.
 - `loadValidatedAssetManifestV1(path)` retorna o manifesto validado ou falha de forma previsivel.
+- CLI: `validate-asset-manifest <path> [--json]`.
+- MCP: `validate_asset_manifest({ path })`.
 - `buildRenderSnapshotV1(sceneOrPath, { assetManifest, assetManifestPath })` pode usar o manifesto de forma opt-in para emitir `drawCalls.kind = "sprite"`.
 - entidades podem declarar `visual.sprite.fields.assetId` para escolher o asset local de forma declarativa na propria cena.
 - quando `visual.sprite.fields.width` ou `height` nao sao informados, o builder usa `assets[].width` e `assets[].height` do manifesto.
@@ -52,6 +54,7 @@ Definir um contrato local, declarativo e deterministico para registrar assets de
 - quando a browser demo recebe `assetManifestPath`, o `assetSrc` relativo do manifesto e resolvido para `file:///...` local no HTML gerado.
 - se a imagem local falhar, `Image.onerror` mantem o fallback visual para `rect`.
 - sem `assetManifestPath`, `visual.sprite` e sprites legados continuam usando fallback `rect`.
+- a validacao direta em CLI/MCP reaproveita o mesmo report de runtime para manifestos parseaveis; falhas de leitura ou JSON malformado continuam sendo erros previsiveis de arquivo/parse neste slice minimo.
 
 ## Fora deste slice
 

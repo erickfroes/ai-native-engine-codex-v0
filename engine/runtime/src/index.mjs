@@ -11,6 +11,7 @@ export { validateInputIntentV1, validateInputIntentV1File } from './input/valida
 export { loadValidatedInputIntentV1 } from './input/load-validated-input-intent-v1.mjs';
 export { createInputIntentFromKeyboardV1 } from './input/create-input-intent-from-keyboard-v1.mjs';
 export { validateAssetManifestV1, validateAssetManifestV1File } from './assets/validate-asset-manifest-v1.mjs';
+export { buildAssetManifestValidationReportV1 } from './assets/build-asset-manifest-validation-report-v1.mjs';
 export { loadValidatedAssetManifestV1 } from './assets/load-validated-asset-manifest-v1.mjs';
 export {
   validateKeyboardInputScriptV1,

@@ -84,6 +84,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 ## Comandos CLI principais
 
 - `validate-scene`: valida scene document + invariantes do runtime
+- `validate-asset-manifest`: valida um arquivo `Asset Manifest v1` diretamente
 - `validate-input-intent`: valida InputIntent v1
 - `keyboard-to-input-intent`: traduz teclas declaradas para InputIntent v1
 - `plan-loop`: planeja execucao sem rodar handlers
@@ -112,6 +113,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 ## Tools MCP principais
 
 - `validate_scene`
+- `validate_asset_manifest`
 - `validate_input_intent`
 - `validate_prefab`
 - `keyboard_to_input_intent`

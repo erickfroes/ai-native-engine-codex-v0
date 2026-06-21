@@ -7,6 +7,7 @@ import {
   validateLoopScene,
   formatSceneValidationReportV1,
   validateSaveFile,
+  buildAssetManifestValidationReportV1,
   loadStateSnapshotSaveV1,
   saveStateSnapshotV1,
   validateInputIntentV1,
@@ -53,6 +54,7 @@ import {
 function printUsage() {
   console.log(`Usage:
   node engine/runtime/src/cli.mjs validate-scene <path> [--json]
+  node engine/runtime/src/cli.mjs validate-asset-manifest <path> [--json]
   node engine/runtime/src/cli.mjs validate-prefab <path> [--json]
   node engine/runtime/src/cli.mjs validate-save <path> [--json]
   node engine/runtime/src/cli.mjs validate-input-intent <path> [--json]
@@ -218,6 +220,35 @@ async function run() {
       console.log(`Content version: ${report.save.contentVersion}`);
       console.log(`Seed: ${report.save.seed}`);
       console.log(`Payload ref: ${report.save.payloadRef}`);
+      console.log('');
+      console.log(report.ok ? 'Status: OK' : 'Status: INVALID');
+      if (report.errors.length > 0) {
+        console.log('');
+        console.log('Errors:');
+        for (const error of report.errors) {
+          console.log(`- ${error.path}: ${error.message}`);
+        }
+      }
+    }
+    process.exitCode = report.ok ? 0 : 1;
+    return;
+  }
+
+  if (command === 'validate-asset-manifest') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildAssetManifestValidationReportV1(maybePath);
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Asset manifest: ${report.absolutePath}`);
+      console.log(`Asset manifest validation report version: ${report.assetManifestValidationReportVersion}`);
+      console.log(`Version: ${report.assetManifest?.assetManifestVersion ?? '(missing)'}`);
+      console.log(`Assets: ${Array.isArray(report.assetManifest?.assets) ? report.assetManifest.assets.length : '(missing)'}`);
       console.log('');
       console.log(report.ok ? 'Status: OK' : 'Status: INVALID');
       if (report.errors.length > 0) {

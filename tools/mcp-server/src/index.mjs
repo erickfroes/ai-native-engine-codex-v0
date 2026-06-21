@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import {
   validateLoopScene,
   formatSceneValidationReportV1,
+  buildAssetManifestValidationReportV1,
   validateInputIntentV1,
   buildPrefabValidationReportV1,
   validateSaveFile,
@@ -119,6 +120,7 @@ async function handleToolCall(params) {
 
   if (
     params.name !== 'validate_scene' &&
+    params.name !== 'validate_asset_manifest' &&
     params.name !== 'validate_input_intent' &&
     params.name !== 'validate_prefab' &&
     params.name !== 'keyboard_to_input_intent' &&
@@ -1133,6 +1135,15 @@ async function handleToolCall(params) {
       };
     }
 
+    if (params.name === 'validate_asset_manifest') {
+      const report = await buildAssetManifestValidationReportV1(targetPath);
+      return {
+        content: toTextContent(report.ok ? 'Asset manifest validation passed.' : 'Asset manifest validation failed.'),
+        structuredContent: report,
+        isError: !report.ok
+      };
+    }
+
     if (params.name === 'validate_prefab') {
       const report = await buildPrefabValidationReportV1(targetPath);
       return {
@@ -1194,7 +1205,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_input_intent, validate_prefab, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_asset_manifest, validate_input_intent, validate_prefab, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }
