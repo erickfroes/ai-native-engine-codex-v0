@@ -23,6 +23,8 @@ const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
+const prefabOnlyScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'prefab-usage-prefab-only.scene.json');
+const prefabOnlySceneMcpPath = './engine/runtime/test/fixtures/prefab-usage-prefab-only.scene.json';
 const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
 const portableEmptyVisualScenePath = path.join(
   repoRoot,
@@ -475,6 +477,86 @@ test('browser playable demo with visual.sprite and asset manifest stays aligned 
       expectedTick: 4,
       withAssetLoading: true,
       expectedAssetSrcPatterns: visualSpriteAssetSrcPatterns
+    });
+    assert.deepEqual(runtimeEnvelope, cliEnvelope);
+    assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+    assert.equal(runtimeEnvelope.html, cliEnvelope.html);
+    assert.equal(runtimeEnvelope.html, mcpEnvelope.html);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('browser playable demo keeps fully inherited prefab-backed sprite assetSrc aligned across runtime, CLI and MCP', async () => {
+  const scene = await loadSceneFile(prefabOnlyScenePath);
+  const snapshot = materializeBrowserDemoAssetSrcV1(
+    await buildRenderSnapshotV1(scene, {
+      assetManifestPath: visualSpriteAssetManifestPath
+    }),
+    visualSpriteAssetManifestPath
+  );
+
+  const runtimeEnvelope = {
+    browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderBrowserPlayableDemoHtmlV1({
+      title: `${snapshot.scene} Browser Playable Demo`,
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot)
+    })
+  };
+
+  const cliResult = runCli([
+    'render-browser-demo',
+    prefabOnlyScenePath,
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: prefabOnlySceneMcpPath,
+        assetManifestPath: './fixtures/assets/visual-sprite.asset-manifest.json'
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+    const expectedAssetSrcPatterns = [/"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/];
+
+    assertBrowserDemoEnvelope(runtimeEnvelope, {
+      expectedScene: 'prefab-usage-prefab-only-fixture',
+      expectedTick: 0,
+      withAssetLoading: true,
+      expectedAssetSrcPatterns
+    });
+    assertBrowserDemoEnvelope(cliEnvelope, {
+      expectedScene: 'prefab-usage-prefab-only-fixture',
+      expectedTick: 0,
+      withAssetLoading: true,
+      expectedAssetSrcPatterns
+    });
+    assertBrowserDemoEnvelope(mcpEnvelope, {
+      expectedScene: 'prefab-usage-prefab-only-fixture',
+      expectedTick: 0,
+      withAssetLoading: true,
+      expectedAssetSrcPatterns
     });
     assert.deepEqual(runtimeEnvelope, cliEnvelope);
     assert.deepEqual(runtimeEnvelope, mcpEnvelope);

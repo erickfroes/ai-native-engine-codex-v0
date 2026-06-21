@@ -39,6 +39,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Prefab SVG hardening sem `components` explicitos + `assetManifestPath`: concluido com propagacao de `assetManifestPath` em `render-svg` CLI/MCP e cobertura runtime/cross-interface para `Render SVG v1` em cena prefab-backed herdando `visual.sprite` integralmente do prefab, preservando fallback `rect` deterministico com `data-asset-id`.
 - Prefab SVG demo hardening sem `components` explicitos + `assetManifestPath`: concluido com propagacao de `assetManifestPath` em `render-svg-demo` CLI e cobertura runtime/CLI para `SVG Demo HTML v1` em cena prefab-backed herdando `visual.sprite` integralmente do prefab, preservando SVG embutido com fallback `rect` deterministico, `data-asset-id` estavel e sem `assetSrc`/`file:///`.
 - Prefab Simple HTML Export hardening sem `components` explicitos + `assetManifestPath`: concluido com propagacao de `assetManifestPath` em `export-html-game` CLI/MCP e cobertura runtime/CLI/MCP para `Simple HTML Export v1` em cena prefab-backed herdando `visual.sprite` integralmente do prefab, preservando Browser Demo embutida com drawCall `sprite` asset-backed estavel e `assetSrc` local deterministico.
+- Prefab Browser Demo hardening sem `components` explicitos + `assetManifestPath`: concluido com cobertura runtime e cross-interface para `Browser Playable Demo v1` em cena prefab-backed herdando `visual.sprite` integralmente do prefab, preservando HTML runtime/CLI/MCP alinhado com `assetSrc` local estavel e drawImage no ponto herdado.
 - Portable HTML Export v2 no-op hardening sem `visual.sprite.animation`: concluido com cobertura runtime/CLI/MCP para `assetManifestPath` + `spriteAnimation` em cena com `visual.sprite` asset-backed e `animations: []`, preservando sprites inline normais, `embeddedAssetCount > 0` e ausencia de `file:///`.
 - Prefab System v1: concluido como resolucao declarativa minima por arquivo e report diagnostico runtime/CLI/MCP.
 - Prefab Validation Report v1: concluido como validacao direta de `.prefab.json` via runtime/CLI/MCP.
@@ -142,7 +143,7 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Espelhar o mesmo hardening visual de prefab na proxima superficie derivada da trilha browser interativa: cobrir explicitamente `Browser Playable Demo v1` para entidade prefab-backed sem `components` explicitos e com `assetManifestPath`, preservando HTML runtime/CLI/MCP alinhado com `assetSrc` local estavel e sem reabrir comportamento implicito fora da trilha browser demo.
+1. Espelhar o mesmo hardening visual de prefab na proxima superficie derivada da trilha export portatil: cobrir explicitamente `Portable HTML Export v2` para entidade prefab-backed sem `components` explicitos e com `assetManifestPath`, preservando sprite inline portatil estavel, `embeddedAssetCount > 0` e ausencia de `file:///`.
 2. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Regra de manutencao da linha de seguimento

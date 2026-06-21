@@ -10,6 +10,7 @@ import {
   createBrowserPlayableDemoMetadataV1,
   loadSceneFile,
   buildRenderSnapshotV1,
+  materializeBrowserDemoAssetSrcV1,
   BROWSER_PLAYABLE_DEMO_VERSION,
   DEFAULT_BROWSER_PLAYABLE_STEP_PX
 } from '../src/index.mjs';
@@ -17,6 +18,15 @@ import {
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const v1Small2dScenePath = path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json');
+const prefabOnlyScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'prefab-usage-prefab-only.scene.json'
+);
+const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const playableLocalStateFixturePath = path.join(
   repoRoot,
   'fixtures',
@@ -1377,6 +1387,37 @@ test('renderBrowserPlayableDemoHtmlV1 safely embeds escaped assetSrc and isolate
     ),
     'expected failed second sprite fallback after first sprite load'
   );
+});
+
+test('renderBrowserPlayableDemoHtmlV1 keeps fully inherited prefab-backed sprite assetSrc local and stable with assetManifestPath', async () => {
+  const scene = await loadSceneFile(prefabOnlyScenePath);
+  const snapshot = materializeBrowserDemoAssetSrcV1(
+    await buildRenderSnapshotV1(scene, {
+      assetManifestPath: visualSpriteAssetManifestPath
+    }),
+    visualSpriteAssetManifestPath
+  );
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: `${snapshot.scene} Browser Playable Demo`,
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot)
+  });
+  const harness = createCanvasHarness(html);
+
+  assertNoForbiddenBrowserDemoHtmlSurface(html);
+  assert.match(html, /prefab-usage-prefab-only-fixture Browser Playable Demo/);
+  assert.match(html, /"assetId":"player\.sprite"/);
+  assert.match(html, /"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/);
+  assert.equal(harness.imageInstances.length, 1);
+  assert.match(harness.imageInstances[0].src, /^file:\/\/\/.*images\/player\.png$/);
+
+  harness.operations.length = 0;
+  assert.equal(typeof harness.imageInstances[0].onload, 'function');
+  harness.imageInstances[0].onload();
+
+  const drawImageCalls = harness.operations.filter((entry) => entry.method === 'drawImage');
+  assert.ok(drawImageCalls.length >= 1);
+  assert.deepEqual(drawImageCalls[0].args.slice(-4), [4, 3, 16, 16]);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 falls back to the first rect when player.hero is absent', () => {
