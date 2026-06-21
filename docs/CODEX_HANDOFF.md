@@ -49,6 +49,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Prefab follow-up baseline sem `components` explicitos em entidade prefab-backed: concluido e promovido para a linha viva de continuidade.
 - Cena `scenes/prefab-instanced.scene.json`: endurecida com 3 entidades reutilizando o mesmo prefab, incluindo uma entidade sem `components` explicitos, validada por runtime/CLI/MCP.
 - Prefab Usage Report v2: concluido como diagnostico opt-in com `absolutePath`, `entityPath`, `prefabAbsolutePath`, paths de componente e overrides explicitos via runtime/CLI/MCP, preservando `v1`.
+- Asset Manifest Validation Report v1: concluido como validacao direta minima de `Asset Manifest v1` em runtime/CLI/MCP com `buildAssetManifestValidationReportV1`, `validate-asset-manifest` e `validate_asset_manifest`, preservando manifesto parseado quando invalido e retornando erros estaveis para arquivo ausente e JSON malformado sem mutar `RenderSnapshot v1`.
 
 ## O que o Codex recebe
 
@@ -56,6 +57,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - runtime, CLI e MCP alinhados;
 - Browser Playable Demo autocontida;
 - Asset Manifest, visual.sprite, tile.layer e camera.viewport;
+- `validate-asset-manifest` / `validate_asset_manifest` para validar `Asset Manifest v1` diretamente via `AssetManifestValidationReport v1`;
 - collision.bounds declarativo;
 - CollisionBoundsReport v1;
 - CollisionOverlapReport v1;
@@ -77,6 +79,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `templates/top-down-basic` e `templates/side-view-blocking-basic`;
 - cena `scenes/v1-small-2d.scene.json` para readiness V1;
 - `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`;
+- `docs/ASSET_MANIFEST_VALIDATION_REPORT_V1.md`;
 - `docs/SIMPLE_HTML_EXPORT_V1.md`;
 - `docs/GAME_TEMPLATES_V1.md`;
 - `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`;
@@ -146,7 +149,7 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Expor validacao direta minima de `Asset Manifest v1` em CLI/MCP, reutilizando o validador atual para diagnosticar manifesto antes dos consumidores visuais, sem criar pipeline de assets, sem bundling e sem mutar `RenderSnapshot v1`.
+1. Retomar a expansao minima do prefab system em diff pequeno, priorizando hardening de referencias por path em `entity.prefab` via runtime/CLI/MCP, sem nested prefab e sem mutar `RenderSnapshot v1`.
 2. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Regra de manutencao da linha de seguimento

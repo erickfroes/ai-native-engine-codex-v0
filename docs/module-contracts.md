@@ -266,6 +266,19 @@ Compatibilidade:
 - nao altera Save/Load v1;
 - nao adiciona rede, editor ou pipeline pesado de assets.
 
+## Asset Manifest Validation Report v1 (validacao direta)
+
+Contrato minimo para validar um arquivo `Asset Manifest v1` diretamente, sem depender de `RenderSnapshot v1` ou dos consumidores visuais:
+
+- ver `docs/ASSET_MANIFEST_VALIDATION_REPORT_V1.md`.
+- schema formal: `docs/schemas/asset-manifest-validation-report-v1.schema.json`.
+- runtime: `buildAssetManifestValidationReportV1(path)`.
+- CLI: `validate-asset-manifest <path> [--json]`.
+- MCP: `validate_asset_manifest({ path })`.
+- preserva o manifesto parseado quando o JSON existe mas o contrato falha;
+- retorna `assetManifest: null` para arquivo ausente ou JSON malformado, com mensagens estaveis;
+- nao altera `Asset Manifest v1`, `RenderSnapshot v1`, Browser Demo, Canvas2D Demo ou exports HTML.
+
 ## Render Snapshot v1 (render headless declarativo)
 
 Contrato JSON deterministico para descrever draw calls minimas sem canvas real:

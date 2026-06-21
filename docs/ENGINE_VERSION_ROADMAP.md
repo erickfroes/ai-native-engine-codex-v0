@@ -60,6 +60,7 @@ Capacidades alvo:
 - UI System v1 entregue como contrato declarativo/report de V2 e consumo visual opt-in na Browser Demo/export;
 - Audio Lite v1 como primeiro pacote incremental pos-checkpoint;
 - Sprite Animation v1 concluido como diagnostico declarativo runtime/CLI/MCP;
+- `AssetManifestValidationReport v1` concluido como validacao direta minima de manifesto em runtime/CLI/MCP, com report versionado e erros previsiveis;
 - save/load jogavel formal futuro, se ainda necessario;
 - release checkpoint V1 Small 2D concluido como gate de fechamento.
 
@@ -212,5 +213,5 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Expor validacao direta minima de `Asset Manifest v1` em CLI/MCP, reutilizando o validador atual para diagnosticar manifesto antes dos consumidores visuais, sem criar pipeline de assets, sem bundling e sem mutar `RenderSnapshot v1`.
-2. Retomar a expansao do prefab system minimo sem perder seguranca por path, contratos curtos e diff pequeno.
+1. Retomar a expansao minima do prefab system sem perder seguranca por path, priorizando hardening pequeno de referencias `entity.prefab` em runtime/CLI/MCP, sem nested prefab e sem mutar `RenderSnapshot v1`.
+2. Manter hardenings incrementais pequenos sem reabrir pipeline pesado de assets.

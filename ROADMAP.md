@@ -110,7 +110,7 @@ Entregas alvo:
 - matriz de regressao visual/headless;
 - pacote Codex com prompts/skills/subagentes para criar um jogo 2D pequeno.
 
-Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. Audio Lite v1, Sprite Animation v1 e Portable HTML Export v2 ja iniciam V2 de forma incremental, sem editor, servidor, fisica completa ou pathfinding.
+Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. Audio Lite v1, Sprite Animation v1 e Portable HTML Export v2 ja iniciam V2 de forma incremental, sem editor, servidor, fisica completa ou pathfinding. `AssetManifestValidationReport v1` agora tambem fecha a validacao direta minima de manifesto em runtime/CLI/MCP, com shape versionado e erros previsiveis para arquivo ausente e JSON malformado.
 
 Criterio de conclusao:
 
@@ -127,8 +127,8 @@ Subagentes recomendados:
 
 Linha de trabalho atual recomendada:
 
-1. Expor validacao direta minima de `Asset Manifest v1` em CLI/MCP, reutilizando o validador atual para diagnosticar manifesto antes dos consumidores visuais, sem criar pipeline de assets, sem bundling e sem mutar `RenderSnapshot v1`.
-2. Retomar a expansao do prefab system minimo sem perder seguranca por path, contratos curtos e diff pequeno.
+1. Retomar a expansao minima do prefab system sem perder seguranca por path, priorizando hardening pequeno de referencias `entity.prefab` em runtime/CLI/MCP, sem nested prefab e sem mutar `RenderSnapshot v1`.
+2. Manter hardenings visuais incrementais em slices pequenos, sem reabrir pipeline pesado de assets.
 
 ---
 

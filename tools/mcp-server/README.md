@@ -5,6 +5,7 @@ Servidor MCP local via stdio.
 ## Tools atuais
 
 - `validate_scene`
+- `validate_asset_manifest`
 - `validate_input_intent`
 - `keyboard_to_input_intent`
 - `validate_save`
@@ -38,4 +39,4 @@ node ./tools/mcp-server/src/index.mjs
 
 ## Papel atual
 
-Expor validacao, inspecao headless, render/export visual e diagnosticos V1/V2 incrementais para o Codex sem depender de GUI. Audio Lite v1 aparece como report deterministico via `inspect_audio_lite` e como opt-in em `render_browser_demo`/`export_html_game`; UI System v1 aparece como report deterministico via `inspect_ui_system` e como overlay visual opt-in em `render_browser_demo`/`export_html_game`; Sprite Animation v1 aparece como report deterministico via `inspect_sprite_animation` e como animacao visual opt-in em `render_browser_demo`.
+Expor validacao, inspecao headless, render/export visual e diagnosticos V1/V2 incrementais para o Codex sem depender de GUI. `validate_asset_manifest` agora expoe `AssetManifestValidationReport v1` para diagnosticar manifestos diretamente antes dos consumidores visuais. Audio Lite v1 aparece como report deterministico via `inspect_audio_lite` e como opt-in em `render_browser_demo`/`export_html_game`; UI System v1 aparece como report deterministico via `inspect_ui_system` e como overlay visual opt-in em `render_browser_demo`/`export_html_game`; Sprite Animation v1 aparece como report deterministico via `inspect_sprite_animation` e como animacao visual opt-in em `render_browser_demo`.

@@ -31,6 +31,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - Browser Playable Demo v1;
 - Browser Runtime Loop v1;
 - Asset Manifest v1;
+- AssetManifestValidationReport v1;
 - sprite drawCall;
 - `visual.sprite`;
 - `tile.layer`;
@@ -53,6 +54,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - Portable HTML Export v2 com assets inline e Sprite Animation v1 opt-in no caminho portatil;
 - Prefab System v1 como resolucao declarativa minima e report diagnostico runtime/CLI/MCP;
 - Prefab Validation Report v1 como validacao direta de `.prefab.json` em runtime/CLI/MCP;
+- validacao direta de `Asset Manifest v1` em runtime/CLI/MCP com `AssetManifestValidationReport v1`;
 - Prefab follow-up baseline sem `components` explicitos em entidade prefab-backed;
 - V1 Small 2D Capability Matrix;
 - V1 Small 2D Release Validation;
@@ -63,9 +65,9 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. Expor validacao direta minima de `Asset Manifest v1` em CLI/MCP, reutilizando o validador atual para diagnosticar manifesto antes dos consumidores visuais, sem criar pipeline de assets, sem bundling e sem mutar `RenderSnapshot v1`.
-2. Retomar a expansao do prefab system minimo apenas em diff pequeno, com seguranca por path e sem nested prefab.
-3. Manter novos hardenings visuais em slices pequenos, preservando `RenderSnapshot v1`, `Simple HTML Export v1` e os contratos V1 base.
+1. Retomar a expansao minima do prefab system em diff pequeno, priorizando hardening de referencias por path em `entity.prefab` via runtime/CLI/MCP, sem nested prefab e sem mutar `RenderSnapshot v1`.
+2. Manter novos hardenings visuais em slices pequenos, preservando `RenderSnapshot v1`, `Simple HTML Export v1` e os contratos V1 base.
+3. Manter `AssetManifestValidationReport v1` como superficie publica direta do manifesto, sem reabrir bundling ou pipeline pesado de assets.
 
 ## Versoes de produto
 

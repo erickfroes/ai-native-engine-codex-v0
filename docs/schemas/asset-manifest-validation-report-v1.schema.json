@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "asset-manifest-validation-report-v1.schema.json",
+  "title": "AssetManifestValidationReportV1",
+  "type": "object",
+  "required": [
+    "assetManifestValidationReportVersion",
+    "ok",
+    "absolutePath",
+    "assetManifest",
+    "errors"
+  ],
+  "properties": {
+    "assetManifestValidationReportVersion": {
+      "const": 1
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "absolutePath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assetManifest": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "message"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

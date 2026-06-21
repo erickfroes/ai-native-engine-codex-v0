@@ -79,7 +79,7 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 
 A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1, Sprite Animation v1 diagnostico consumido de forma visual opt-in na Browser Demo para sprites asset-backed e Portable HTML Export v2 com assets inline e `Sprite Animation v1` no export portatil.
 
-Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface e consumo visual opt-in na Browser Demo/export por overlay passivo, preservando HUD Lite como diagnostico local.
+Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface e consumo visual opt-in na Browser Demo/export por overlay passivo, preservando HUD Lite como diagnostico local. `AssetManifestValidationReport v1` agora expoe validacao direta minima de manifesto em runtime/CLI/MCP com erro previsivel para arquivo ausente e JSON malformado, sem mutar `RenderSnapshot v1`.
 
 ## Comandos CLI principais
 
@@ -160,6 +160,9 @@ Observacao: `render-svg-demo` e um fluxo de CLI/runtime. A Meta 2 nao define uma
 # validar cena
 node ./engine/runtime/src/cli.mjs validate-scene ./scenes/tutorial.scene.json --json
 
+# validar asset manifest diretamente
+node ./engine/runtime/src/cli.mjs validate-asset-manifest ./fixtures/assets/valid.asset-manifest.json --json
+
 # executar loop headless
 node ./engine/runtime/src/cli.mjs run-loop ./scenes/tutorial.scene.json --ticks 3 --seed 42 --json
 
@@ -233,6 +236,7 @@ npm run smoke
 - `docs/V1_SMALL_2D_READINESS.md`: gate consolidado da V1 Small 2D
 - `docs/V1_SMALL_2D_TEST_MATRIX.md`: matriz runtime/CLI/MCP/testes da cena consolidada
 - `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`: formato local do Playable Save/Load Lite
+- `docs/ASSET_MANIFEST_VALIDATION_REPORT_V1.md`: contrato do report de validacao direta de asset manifest
 - `docs/SIMPLE_HTML_EXPORT_V1.md`: contrato do export HTML jogavel simples
 - `docs/PREFAB_SYSTEM_V1.md`: contrato do Prefab System v1
 - `docs/PREFAB_USAGE_REPORT_V2.md`: contrato do report diagnostico detalhado de prefab
