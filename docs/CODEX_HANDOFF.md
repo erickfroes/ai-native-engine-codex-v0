@@ -34,6 +34,11 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `portable-empty-visual` v1 non-regression hardening: concluido com cobertura cross-interface para `RenderSnapshot v1`, `Browser Playable Demo` default e `Simple HTML Export v1`, preservando `drawCalls: []`, sem `assetManifestPath`, sem `spriteAnimation` e sem reabrir metadata opt-in dos contratos v1.
 - `portable-empty-visual` render mirror hardening: concluido com cobertura cross-interface para `Render SVG v1` e `Canvas2D Demo v1`, preservando `drawCalls: []`, sem `assetManifestPath`, sem drawCalls `rect`/`sprite` e sem reabrir comportamento implicito nas superficies visuais v1.
 - `portable-empty-visual` SVG demo hardening: concluido com cobertura runtime/CLI para `SVG Demo HTML v1`, preservando `drawCalls: []`, sem `assetManifestPath`, sem `rect`/`sprite` serializados e sem reabrir a trilha SVG/HTML derivada de `RenderSnapshot v1`.
+- Prefab visual render hardening com `assetManifestPath`: concluido com cobertura runtime e cross-interface para `RenderSnapshot v1` em cena prefab-backed com `visual.sprite` vindo do prefab, preservando resolucao por path, override local de `transform`, merge de componentes e drawCall `sprite` asset-backed estavel.
+- Prefab visual render hardening sem `components` explicitos + `assetManifestPath`: concluido com cobertura runtime e cross-interface para `RenderSnapshot v1` em cena prefab-backed herdando `transform` e `visual.sprite` integralmente do prefab, preservando resolucao por path, heranca completa e drawCall `sprite` asset-backed estavel.
+- Prefab SVG hardening sem `components` explicitos + `assetManifestPath`: concluido com propagacao de `assetManifestPath` em `render-svg` CLI/MCP e cobertura runtime/cross-interface para `Render SVG v1` em cena prefab-backed herdando `visual.sprite` integralmente do prefab, preservando fallback `rect` deterministico com `data-asset-id`.
+- Prefab SVG demo hardening sem `components` explicitos + `assetManifestPath`: concluido com propagacao de `assetManifestPath` em `render-svg-demo` CLI e cobertura runtime/CLI para `SVG Demo HTML v1` em cena prefab-backed herdando `visual.sprite` integralmente do prefab, preservando SVG embutido com fallback `rect` deterministico, `data-asset-id` estavel e sem `assetSrc`/`file:///`.
+- Prefab Simple HTML Export hardening sem `components` explicitos + `assetManifestPath`: concluido com propagacao de `assetManifestPath` em `export-html-game` CLI/MCP e cobertura runtime/CLI/MCP para `Simple HTML Export v1` em cena prefab-backed herdando `visual.sprite` integralmente do prefab, preservando Browser Demo embutida com drawCall `sprite` asset-backed estavel e `assetSrc` local deterministico.
 - Portable HTML Export v2 no-op hardening sem `visual.sprite.animation`: concluido com cobertura runtime/CLI/MCP para `assetManifestPath` + `spriteAnimation` em cena com `visual.sprite` asset-backed e `animations: []`, preservando sprites inline normais, `embeddedAssetCount > 0` e ausencia de `file:///`.
 - Prefab System v1: concluido como resolucao declarativa minima por arquivo e report diagnostico runtime/CLI/MCP.
 - Prefab Validation Report v1: concluido como validacao direta de `.prefab.json` via runtime/CLI/MCP.
@@ -137,7 +142,7 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Retomar a trilha do `Prefab System v1` com um hardening pequeno e visual: cobrir explicitamente `RenderSnapshot v1` para cena prefab-backed com `visual.sprite` asset-backed e `assetManifestPath`, preservando resolucao por path, merge local e fallback seguro.
+1. Espelhar o mesmo hardening visual de prefab na proxima superficie derivada da trilha browser interativa: cobrir explicitamente `Browser Playable Demo v1` para entidade prefab-backed sem `components` explicitos e com `assetManifestPath`, preservando HTML runtime/CLI/MCP alinhado com `assetSrc` local estavel e sem reabrir comportamento implicito fora da trilha browser demo.
 2. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Regra de manutencao da linha de seguimento

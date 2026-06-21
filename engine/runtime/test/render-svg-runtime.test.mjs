@@ -10,6 +10,7 @@ const repoRoot = path.resolve(testDir, '../../..');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
 const cameraViewportScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'camera-viewport.scene.json');
+const prefabOnlyScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'prefab-usage-prefab-only.scene.json');
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 
 test('renderSnapshotToSvgV1 returns deterministic SVG for RenderSnapshot v1 rect draw calls', async () => {
@@ -100,6 +101,23 @@ test('renderSnapshotToSvgV1 renders camera-shifted drawCalls without extra rende
     svg,
     /<rect id="player\.hero" data-asset-id="player\.sprite" data-kind="sprite" data-layer="2" x="22" y="36" width="20" height="24" \/>/
   );
+});
+
+test('renderSnapshotToSvgV1 renders fully inherited prefab-backed sprite drawCalls as deterministic rect fallbacks', async () => {
+  const snapshot = await buildRenderSnapshotV1(prefabOnlyScenePath, {
+    assetManifestPath: visualSpriteAssetManifestPath
+  });
+  const svg = renderSnapshotToSvgV1(snapshot);
+
+  assert.match(
+    svg,
+    /<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" data-svg-version="1" data-scene="prefab-usage-prefab-only-fixture" data-tick="0" width="160" height="90" viewBox="0 0 160 90">/
+  );
+  assert.match(
+    svg,
+    /<rect id="player\.hero" data-asset-id="player\.sprite" data-kind="sprite" data-layer="2" x="4" y="3" width="16" height="16" \/>/
+  );
+  assert.doesNotMatch(svg, /assetSrc|file:\/\/\//);
 });
 
 test('renderSnapshotToSvgV1 preserves drawCall order already present in the snapshot', () => {

@@ -16,6 +16,7 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const prefabOnlyScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'prefab-usage-prefab-only.scene.json');
 const portableEmptyVisualScenePath = path.join(
   repoRoot,
   'engine',
@@ -24,6 +25,7 @@ const portableEmptyVisualScenePath = path.join(
   'fixtures',
   'portable-empty-visual.scene.json'
 );
+const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -102,6 +104,45 @@ test('render-svg-demo keeps empty drawCalls aligned with runtime HTML for scenes
   assert.match(payload.html, /data-scene="portable-empty-visual-fixture"/);
   assert.doesNotMatch(payload.html, /<rect\b/);
   assert.doesNotMatch(payload.html, /data-asset-id=/);
+});
+
+test('render-svg-demo keeps fully inherited prefab-backed sprite fallback SVG aligned with runtime HTML when assetManifestPath is provided', async () => {
+  const snapshot = await buildRenderSnapshotV1(prefabOnlyScenePath, {
+    assetManifestPath: visualSpriteAssetManifestPath
+  });
+  const svg = renderSnapshotToSvgV1(snapshot);
+  const runtimeHtml = renderSvgDemoHtmlV1({
+    title: `${snapshot.scene} SVG Demo`,
+    svg,
+    metadata: {
+      scene: snapshot.scene,
+      svgVersion: RENDER_SVG_VERSION,
+      tick: snapshot.tick,
+      viewport: `${snapshot.viewport.width}x${snapshot.viewport.height}`
+    }
+  });
+
+  const result = runCli([
+    'render-svg-demo',
+    prefabOnlyScenePath,
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.demoHtmlVersion, SVG_DEMO_HTML_VERSION);
+  assert.equal(payload.scene, snapshot.scene);
+  assert.equal(payload.tick, snapshot.tick);
+  assert.equal(payload.html, runtimeHtml);
+  assert.match(payload.html, /prefab-usage-prefab-only-fixture SVG Demo/);
+  assert.match(
+    payload.html,
+    /<rect id="player\.hero" data-asset-id="player\.sprite" data-kind="sprite" data-layer="2" x="4" y="3" width="16" height="16" \/>/
+  );
+  assert.doesNotMatch(payload.html, /assetSrc|file:\/\/\//);
 });
 
 test('render-svg-demo stays deterministic for the same scene options', () => {

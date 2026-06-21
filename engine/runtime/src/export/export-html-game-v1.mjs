@@ -7,6 +7,7 @@ import {
   createBrowserPlayableDemoMetadataV1,
   renderBrowserPlayableDemoHtmlV1
 } from '../render/render-browser-playable-demo-html-v1.mjs';
+import { materializeBrowserDemoAssetSrcV1 } from '../render/materialize-browser-demo-asset-src-v1.mjs';
 import { sha256Hex } from '../save/canonical-json.mjs';
 
 export const SIMPLE_HTML_EXPORT_VERSION = 1;
@@ -32,7 +33,12 @@ function normalizeExportOptions(options) {
     }
   }
 
+  if (options.assetManifestPath !== undefined) {
+    assertNonEmptyString('options.assetManifestPath', options.assetManifestPath);
+  }
+
   return {
+    assetManifestPath: options.assetManifestPath,
     movementBlocking: options.movementBlocking === true,
     gameplayHud: options.gameplayHud === true,
     playableSaveLoad: options.playableSaveLoad === true,
@@ -54,8 +60,12 @@ async function resolveScene(sceneOrPath) {
 export async function buildHtmlGameExportV1(sceneOrPath, options = {}) {
   const scene = await resolveScene(sceneOrPath);
   const exportOptions = normalizeExportOptions(options);
-  const snapshot = await buildRenderSnapshotV1(scene);
-  const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, exportOptions);
+  const { assetManifestPath, ...publicOptions } = exportOptions;
+  const rawSnapshot = await buildRenderSnapshotV1(scene, {
+    assetManifestPath
+  });
+  const snapshot = materializeBrowserDemoAssetSrcV1(rawSnapshot, assetManifestPath);
+  const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, publicOptions);
   const html = renderBrowserPlayableDemoHtmlV1({
     title: `${snapshot.scene} HTML Game Export`,
     renderSnapshot: snapshot,
@@ -65,7 +75,7 @@ export async function buildHtmlGameExportV1(sceneOrPath, options = {}) {
   return {
     exportVersion: SIMPLE_HTML_EXPORT_VERSION,
     scene: snapshot.scene,
-    options: exportOptions,
+    options: publicOptions,
     sizeBytes: Buffer.byteLength(html, 'utf8'),
     htmlHash: sha256Hex(html),
     html

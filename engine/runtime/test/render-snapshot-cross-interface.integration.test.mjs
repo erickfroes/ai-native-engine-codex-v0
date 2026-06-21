@@ -17,6 +17,10 @@ const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
+const prefabUsageScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'prefab-usage.scene.json');
+const prefabUsageSceneMcpPath = './engine/runtime/test/fixtures/prefab-usage.scene.json';
+const prefabOnlyScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'prefab-usage-prefab-only.scene.json');
+const prefabOnlySceneMcpPath = './engine/runtime/test/fixtures/prefab-usage-prefab-only.scene.json';
 const cameraViewportScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'camera-viewport.scene.json');
 const portableEmptyVisualScenePath = path.join(
   repoRoot,
@@ -320,6 +324,136 @@ test('RenderSnapshot v1 with visual.sprite and asset manifest stays aligned acro
         y: 12,
         width: 20,
         height: 24,
+        layer: 2
+      }
+    ]);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('RenderSnapshot v1 keeps prefab-backed asset-backed sprite drawCalls aligned across runtime, CLI and MCP', async () => {
+  const runtimeSnapshot = await buildRenderSnapshotV1(prefabUsageScenePath, {
+    assetManifestPath: visualSpriteAssetManifestPath
+  });
+  assertRenderSnapshotV1(runtimeSnapshot);
+
+  const cliResult = runCli([
+    'render-snapshot',
+    prefabUsageScenePath,
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliSnapshot = JSON.parse(cliResult.stdout);
+  assertRenderSnapshotV1(cliSnapshot);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: prefabUsageSceneMcpPath,
+        assetManifestPath: './fixtures/assets/visual-sprite.asset-manifest.json'
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpSnapshot = mcpResponse.result.structuredContent;
+    assertRenderSnapshotV1(mcpSnapshot);
+
+    assert.deepEqual(runtimeSnapshot, cliSnapshot);
+    assert.deepEqual(runtimeSnapshot, mcpSnapshot);
+    assert.equal(runtimeSnapshot.scene, 'prefab-usage-fixture');
+    assert.deepEqual(runtimeSnapshot.viewport, {
+      width: 160,
+      height: 90
+    });
+    assert.deepEqual(runtimeSnapshot.drawCalls, [
+      {
+        kind: 'sprite',
+        id: 'player.hero',
+        assetId: 'player.sprite',
+        assetSrc: 'images/player.png',
+        x: 24,
+        y: 12,
+        width: 16,
+        height: 16,
+        layer: 2
+      }
+    ]);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('RenderSnapshot v1 keeps fully inherited prefab-backed asset-backed sprite drawCalls aligned across runtime, CLI and MCP', async () => {
+  const runtimeSnapshot = await buildRenderSnapshotV1(prefabOnlyScenePath, {
+    assetManifestPath: visualSpriteAssetManifestPath
+  });
+  assertRenderSnapshotV1(runtimeSnapshot);
+
+  const cliResult = runCli([
+    'render-snapshot',
+    prefabOnlyScenePath,
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliSnapshot = JSON.parse(cliResult.stdout);
+  assertRenderSnapshotV1(cliSnapshot);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: prefabOnlySceneMcpPath,
+        assetManifestPath: './fixtures/assets/visual-sprite.asset-manifest.json'
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpSnapshot = mcpResponse.result.structuredContent;
+    assertRenderSnapshotV1(mcpSnapshot);
+
+    assert.deepEqual(runtimeSnapshot, cliSnapshot);
+    assert.deepEqual(runtimeSnapshot, mcpSnapshot);
+    assert.equal(runtimeSnapshot.scene, 'prefab-usage-prefab-only-fixture');
+    assert.deepEqual(runtimeSnapshot.viewport, {
+      width: 160,
+      height: 90
+    });
+    assert.deepEqual(runtimeSnapshot.drawCalls, [
+      {
+        kind: 'sprite',
+        id: 'player.hero',
+        assetId: 'player.sprite',
+        assetSrc: 'images/player.png',
+        x: 4,
+        y: 3,
+        width: 16,
+        height: 16,
         layer: 2
       }
     ]);

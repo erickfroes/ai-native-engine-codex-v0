@@ -20,6 +20,7 @@ const prefabOnlyScenePath = path.join(fixtureDir, 'prefab-usage-prefab-only.scen
 const missingPrefabScenePath = path.join(fixtureDir, 'invalid_prefab_missing.scene.json');
 const duplicatePrefabScenePath = path.join(fixtureDir, 'invalid_prefab_duplicate_component.scene.json');
 const prefabInstancedScenePath = path.join(repoRoot, 'scenes', 'prefab-instanced.scene.json');
+const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 
 test('loadSceneFile resolves prefab components and preserves entity overrides deterministically', async () => {
   const first = await loadSceneFile(prefabScenePath);
@@ -149,6 +150,54 @@ test('render and collision reports consume resolved prefab scenes by file path',
     ]
   });
   assert.equal(prefabUsage.prefabs.length, 1);
+});
+
+test('buildRenderSnapshotV1 renders prefab-backed visual.sprite as asset-backed sprite drawCalls when assetManifestPath is provided', async () => {
+  const snapshot = await buildRenderSnapshotV1(prefabScenePath, {
+    assetManifestPath: visualSpriteAssetManifestPath
+  });
+
+  assert.deepEqual(snapshot.viewport, {
+    width: 160,
+    height: 90
+  });
+  assert.deepEqual(snapshot.drawCalls, [
+    {
+      kind: 'sprite',
+      id: 'player.hero',
+      assetId: 'player.sprite',
+      assetSrc: 'images/player.png',
+      x: 24,
+      y: 12,
+      width: 16,
+      height: 16,
+      layer: 2
+    }
+  ]);
+});
+
+test('buildRenderSnapshotV1 renders fully inherited prefab-backed visual.sprite as asset-backed sprite drawCalls when assetManifestPath is provided', async () => {
+  const snapshot = await buildRenderSnapshotV1(prefabOnlyScenePath, {
+    assetManifestPath: visualSpriteAssetManifestPath
+  });
+
+  assert.deepEqual(snapshot.viewport, {
+    width: 160,
+    height: 90
+  });
+  assert.deepEqual(snapshot.drawCalls, [
+    {
+      kind: 'sprite',
+      id: 'player.hero',
+      assetId: 'player.sprite',
+      assetSrc: 'images/player.png',
+      x: 4,
+      y: 3,
+      width: 16,
+      height: 16,
+      layer: 2
+    }
+  ]);
 });
 
 test('prefab scene validation fails predictably for missing and invalid prefab documents', async () => {

@@ -29,6 +29,10 @@ const portableEmptyVisualScenePath = path.join(
 );
 const portableEmptyVisualSceneMcpPath = './engine/runtime/test/fixtures/portable-empty-visual.scene.json';
 const uiScreenPrefabScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'ui-screen-prefab.scene.json');
+const prefabOnlyScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'prefab-usage-prefab-only.scene.json');
+const prefabOnlySceneMcpPath = './engine/runtime/test/fixtures/prefab-usage-prefab-only.scene.json';
+const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
+const visualSpriteAssetManifestMcpPath = './fixtures/assets/visual-sprite.asset-manifest.json';
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -247,6 +251,89 @@ test('Simple HTML Export v1 keeps empty drawCalls aligned across runtime, CLI an
   }
 });
 
+test('Simple HTML Export v1 keeps fully inherited prefab-backed asset-backed sprite Browser Demo HTML aligned across runtime, CLI and MCP when assetManifestPath is provided', async (t) => {
+  const runtimeEnvelope = await buildHtmlGameExportV1(prefabOnlyScenePath, {
+    assetManifestPath: visualSpriteAssetManifestPath
+  });
+  const repeatedRuntimeEnvelope = await buildHtmlGameExportV1(prefabOnlyScenePath, {
+    assetManifestPath: visualSpriteAssetManifestPath
+  });
+
+  assert.deepEqual(runtimeEnvelope, repeatedRuntimeEnvelope);
+  assert.equal(runtimeEnvelope.exportVersion, SIMPLE_HTML_EXPORT_VERSION);
+  assert.equal(runtimeEnvelope.scene, 'prefab-usage-prefab-only-fixture');
+  assert.deepEqual(runtimeEnvelope.options, {
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    uiSystem: false
+  });
+  assert.equal(runtimeEnvelope.sizeBytes, Buffer.byteLength(runtimeEnvelope.html, 'utf8'));
+  assert.equal(runtimeEnvelope.htmlHash, sha256Hex(runtimeEnvelope.html));
+  assert.match(runtimeEnvelope.html, /^<!DOCTYPE html>/);
+  assert.match(runtimeEnvelope.html, /prefab-usage-prefab-only-fixture HTML Game Export/);
+  assert.match(runtimeEnvelope.html, /"assetId":"player\.sprite"/);
+  assert.match(runtimeEnvelope.html, /"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/);
+  assert.doesNotMatch(runtimeEnvelope.html, /"movementBlocking":/);
+  assert.doesNotMatch(runtimeEnvelope.html, /"gameplayHud":/);
+  assert.doesNotMatch(runtimeEnvelope.html, /"playableSaveLoad":/);
+  assert.doesNotMatch(runtimeEnvelope.html, /"audioLite":/);
+  assert.doesNotMatch(runtimeEnvelope.html, /"uiSystem":/);
+  assertNoForbiddenExportHtmlSurface(runtimeEnvelope.html);
+
+  const repoTempDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(repoTempDir, 'prefab-only-cli.html');
+  const mcpOutPath = path.join(repoTempDir, 'prefab-only-mcp.html');
+  const cliResult = runCli([
+    'export-html-game',
+    prefabOnlyScenePath,
+    '--out',
+    cliOutPath,
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+  assertExportEnvelopeShape(cliEnvelope, { expectedScene: 'prefab-usage-prefab-only-fixture' });
+  const cliHtml = await readFile(cliEnvelope.outputPath, 'utf8');
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_html_game',
+      arguments: {
+        scenePath: prefabOnlySceneMcpPath,
+        outputPath: path.relative(repoRoot, mcpOutPath),
+        assetManifestPath: visualSpriteAssetManifestMcpPath
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+    assertExportEnvelopeShape(mcpEnvelope, { expectedScene: 'prefab-usage-prefab-only-fixture' });
+    const mcpHtml = await readFile(mcpEnvelope.outputPath, 'utf8');
+
+    assert.deepEqual(cliEnvelope.options, runtimeEnvelope.options);
+    assert.deepEqual(mcpEnvelope.options, runtimeEnvelope.options);
+    assert.equal(cliEnvelope.sizeBytes, runtimeEnvelope.sizeBytes);
+    assert.equal(mcpEnvelope.sizeBytes, runtimeEnvelope.sizeBytes);
+    assert.equal(cliEnvelope.htmlHash, runtimeEnvelope.htmlHash);
+    assert.equal(mcpEnvelope.htmlHash, runtimeEnvelope.htmlHash);
+    assert.equal(cliHtml, runtimeEnvelope.html);
+    assert.equal(mcpHtml, runtimeEnvelope.html);
+    assert.equal(mcpHtml, cliHtml);
+    assertNoForbiddenExportHtmlSurface(cliHtml);
+    assertNoForbiddenExportHtmlSurface(mcpHtml);
+  } finally {
+    await client.close();
+  }
+});
+
 test('export-html-game CLI writes deterministic files for each supported option set', async (t) => {
   const outDir = await createTempDir(t);
   const cases = [
@@ -381,6 +468,7 @@ test('export_html_game MCP writes the same all-options HTML export as CLI', asyn
     const tool = toolsResponse.result.tools.find((candidate) => candidate.name === 'export_html_game');
     assert.ok(tool);
     assert.deepEqual(tool.inputSchema.required, ['scenePath', 'outputPath']);
+    assert.ok(Object.prototype.hasOwnProperty.call(tool.inputSchema.properties, 'assetManifestPath'));
     assert.ok(Object.prototype.hasOwnProperty.call(tool.inputSchema.properties, 'movementBlocking'));
     assert.ok(Object.prototype.hasOwnProperty.call(tool.inputSchema.properties, 'gameplayHud'));
     assert.ok(Object.prototype.hasOwnProperty.call(tool.inputSchema.properties, 'playableSaveLoad'));
@@ -450,6 +538,14 @@ test('export_html_game MCP rejects invalid arguments and output paths outside th
         uiSystem: 'yes'
       }
     });
+    const invalidAssetManifestPath = await client.request('tools/call', {
+      name: 'export_html_game',
+      arguments: {
+        scenePath: sceneMcpPath,
+        outputPath: './tmp/out.html',
+        assetManifestPath: true
+      }
+    });
     const outsideOutput = await client.request('tools/call', {
       name: 'export_html_game',
       arguments: {
@@ -466,6 +562,8 @@ test('export_html_game MCP rejects invalid arguments and output paths outside th
     assert.match(invalidAudioLiteFlag.result.content[0].text, /audioLite/);
     assert.equal(invalidUiSystemFlag.result.isError, true);
     assert.match(invalidUiSystemFlag.result.content[0].text, /uiSystem/);
+    assert.equal(invalidAssetManifestPath.result.isError, true);
+    assert.match(invalidAssetManifestPath.result.content[0].text, /assetManifestPath/);
     assert.equal(outsideOutput.result.isError, true);
     assert.match(outsideOutput.result.content[0].text, /path must stay inside the repository root/);
   } finally {

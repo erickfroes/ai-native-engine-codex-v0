@@ -1,7 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import { renderSvgDemoHtmlV1 } from '../src/index.mjs';
+import { buildRenderSnapshotV1, renderSnapshotToSvgV1, renderSvgDemoHtmlV1 } from '../src/index.mjs';
+
+const testDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(testDir, '../../..');
+const prefabOnlyScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'prefab-usage-prefab-only.scene.json');
+const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 
 const sampleSvg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" data-svg-version="1" data-scene="tutorial" data-tick="4" width="320" height="180" viewBox="0 0 320 180">
@@ -94,4 +101,28 @@ test('renderSvgDemoHtmlV1 escapes title and metadata values but preserves raw SV
   assert.match(html, /<h1>Demo &amp; &quot;quoted&quot; &lt;tag&gt; &#39;apostrophe&#39;<\/h1>/);
   assert.match(html, /<dd>Value &amp; &quot;quoted&quot; &lt;tag&gt; &#39;apostrophe&#39;<\/dd>/);
   assert.match(html, /<svg data-demo="ok"><\/svg>/);
+});
+
+test('renderSvgDemoHtmlV1 preserves fully inherited prefab-backed sprite fallback SVG without leaking assetSrc', async () => {
+  const snapshot = await buildRenderSnapshotV1(prefabOnlyScenePath, {
+    assetManifestPath: visualSpriteAssetManifestPath
+  });
+  const svg = renderSnapshotToSvgV1(snapshot);
+  const html = renderSvgDemoHtmlV1({
+    title: `${snapshot.scene} SVG Demo`,
+    svg,
+    metadata: {
+      scene: snapshot.scene,
+      svgVersion: 1,
+      tick: snapshot.tick,
+      viewport: `${snapshot.viewport.width}x${snapshot.viewport.height}`
+    }
+  });
+
+  assert.match(html, /prefab-usage-prefab-only-fixture SVG Demo/);
+  assert.match(
+    html,
+    /<rect id="player\.hero" data-asset-id="player\.sprite" data-kind="sprite" data-layer="2" x="4" y="3" width="16" height="16" \/>/
+  );
+  assert.doesNotMatch(html, /assetSrc|file:\/\/\//);
 });

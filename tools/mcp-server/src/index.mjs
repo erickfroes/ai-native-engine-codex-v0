@@ -218,7 +218,16 @@ async function handleToolCall(params) {
     if (params.name === 'export_html_game') {
       const unexpectedArgument = findUnexpectedArgument(
         args,
-        new Set(['scenePath', 'outputPath', 'movementBlocking', 'gameplayHud', 'playableSaveLoad', 'audioLite', 'uiSystem'])
+        new Set([
+          'scenePath',
+          'outputPath',
+          'assetManifestPath',
+          'movementBlocking',
+          'gameplayHud',
+          'playableSaveLoad',
+          'audioLite',
+          'uiSystem'
+        ])
       );
       if (unexpectedArgument !== undefined) {
         return {
@@ -276,8 +285,21 @@ async function handleToolCall(params) {
         };
       }
 
+      if (
+        args.assetManifestPath !== undefined &&
+        (typeof args.assetManifestPath !== 'string' || args.assetManifestPath.trim().length === 0)
+      ) {
+        return {
+          content: toTextContent('export_html_game: `assetManifestPath` must be a non-empty string when provided.'),
+          isError: true
+        };
+      }
+
       const exportEnvelope = await exportHtmlGameV1(resolveRepoPath(args.scenePath), {
         outputPath: resolveRepoPath(args.outputPath),
+        assetManifestPath: args.assetManifestPath === undefined
+          ? undefined
+          : resolveRepoPath(args.assetManifestPath),
         movementBlocking: args.movementBlocking === true,
         gameplayHud: args.gameplayHud === true,
         playableSaveLoad: args.playableSaveLoad === true,
@@ -867,10 +889,23 @@ async function handleToolCall(params) {
         };
       }
 
+      if (
+        args.assetManifestPath !== undefined &&
+        (typeof args.assetManifestPath !== 'string' || args.assetManifestPath.trim().length === 0)
+      ) {
+        return {
+          content: toTextContent('render_svg: `assetManifestPath` must be a non-empty string when provided.'),
+          isError: true
+        };
+      }
+
       const snapshot = await buildRenderSnapshotV1(targetPath, {
         tick: args.tick,
         width: args.width,
-        height: args.height
+        height: args.height,
+        assetManifestPath: args.assetManifestPath === undefined
+          ? undefined
+          : resolveRepoPath(args.assetManifestPath)
       });
       const svg = renderSnapshotToSvgV1(snapshot);
 

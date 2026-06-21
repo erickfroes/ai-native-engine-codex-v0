@@ -314,6 +314,10 @@ export const toolCatalog = [
           type: 'string',
           description: 'Absolute path or path relative to the repository root where the HTML file will be written.'
         },
+        assetManifestPath: {
+          type: 'string',
+          description: 'Optional repository-relative or absolute path to an Asset Manifest v1 JSON file for asset-backed Browser Demo sprite loading.'
+        },
         movementBlocking: {
           type: 'boolean',
           description: 'When true, embed local Browser Demo movement blocking data.'
