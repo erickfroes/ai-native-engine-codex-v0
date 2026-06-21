@@ -42,6 +42,15 @@ const prefabOnlyScenePath = path.join(
   'prefab-usage-prefab-only.scene.json'
 );
 const prefabOnlySceneMcpPath = './engine/runtime/test/fixtures/prefab-usage-prefab-only.scene.json';
+const unsafePrefabPathsScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'invalid_prefab_unsafe_paths.scene.json'
+);
+const unsafePrefabPathsSceneMcpPath = './engine/runtime/test/fixtures/invalid_prefab_unsafe_paths.scene.json';
 const spriteAnimationIdleScenePath = path.join(
   repoRoot,
   'engine',
@@ -109,6 +118,16 @@ function assertNoForbiddenPortableExportHtmlSurface(html) {
     html,
     /<script[^>]+src=|<link[^>]+href=|https?:\/\/|file:\/\/\/|fetch\(|XMLHttpRequest|WebSocket|EventSource|import\(|Date\.now|new Date|performance\.now|localStorage|sessionStorage|IndexedDB|indexedDB/
   );
+}
+
+function assertUnsafePrefabSceneValidationError(error) {
+  assert.equal(error.name, 'SceneValidationError');
+  assert.match(error.message, /Scene validation failed/);
+  assert.equal(error.report?.errors?.length, 4);
+  for (const reportError of error.report.errors) {
+    assert.match(reportError.message, /prefab must be a safe relative path/);
+  }
+  return true;
 }
 
 function assertPortableExportEnvelopeShape(envelope, { expectedScene }) {
@@ -844,6 +863,50 @@ test('Portable HTML Export v2 fails predictably for unsupported inline asset ext
       mcpResponse.result.content[0].text,
       /unsupported image asset extension `\.txt`.*supported extensions: \.png, \.jpg, \.jpeg, \.webp, \.gif, \.bmp, \.svg/
     );
+  } finally {
+    await client.close();
+  }
+});
+
+test('Portable HTML Export v2 fails predictably across runtime, CLI and MCP for unsafe prefab path references', async (t) => {
+  const repoTempDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(repoTempDir, 'unsafe-prefab-portable-cli.html');
+  const mcpOutPath = path.join(repoTempDir, 'unsafe-prefab-portable-mcp.html');
+
+  await assert.rejects(
+    () => buildPortableHtmlGameExportV2(unsafePrefabPathsScenePath),
+    assertUnsafePrefabSceneValidationError
+  );
+
+  const cliResult = runCli([
+    'export-portable-html-game',
+    unsafePrefabPathsScenePath,
+    '--out',
+    cliOutPath,
+    '--json'
+  ]);
+
+  assert.notEqual(cliResult.status, 0);
+  assert.match(cliResult.stderr, /SceneValidationError: Scene validation failed for/);
+  assert.match(cliResult.stderr, /invalid_prefab_unsafe_paths\.scene\.json/);
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_portable_html_game',
+      arguments: {
+        scenePath: unsafePrefabPathsSceneMcpPath,
+        outputPath: path.relative(repoRoot, mcpOutPath)
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, true);
+    assert.equal(mcpResponse.result.structuredContent.ok, false);
+    assert.equal(mcpResponse.result.structuredContent.errorName, 'SceneValidationError');
+    assert.match(mcpResponse.result.content[0].text, /Scene validation failed for/);
+    assert.match(mcpResponse.result.structuredContent.errorMessage, /invalid_prefab_unsafe_paths\.scene\.json/);
   } finally {
     await client.close();
   }

@@ -79,11 +79,11 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 
 A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1, Sprite Animation v1 diagnostico consumido de forma visual opt-in na Browser Demo para sprites asset-backed e Portable HTML Export v2 com assets inline e `Sprite Animation v1` no export portatil.
 
-Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. `entity.prefab` continua relativo a cena, exige alvo `.prefab.json` e rejeita URL, traversal e paths absolutos/UNC; Render SVG, Canvas2D Demo e Simple HTML Export tambem falham de forma previsivel nesses casos. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface e consumo visual opt-in na Browser Demo/export por overlay passivo, preservando HUD Lite como diagnostico local. `AssetManifestValidationReport v1` agora expoe validacao direta minima de manifesto em runtime/CLI/MCP com erro previsivel para arquivo ausente e JSON malformado, sem mutar `RenderSnapshot v1`.
+Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. `entity.prefab` continua relativo a cena, exige alvo `.prefab.json` e rejeita URL, traversal e paths absolutos/UNC; Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export tambem falham de forma previsivel nesses casos. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface e consumo visual opt-in na Browser Demo/export por overlay passivo, preservando HUD Lite como diagnostico local. `AssetManifestValidationReport v1` agora expoe validacao direta minima de manifesto em runtime/CLI/MCP com erro previsivel para arquivo ausente e JSON malformado, sem mutar `RenderSnapshot v1`.
 
 ## Comandos CLI principais
 
-- `validate-scene`: valida scene document + invariantes do runtime
+- `validate-scene`: valida preflight minimo de cena para `SceneValidationReport v1` (arquivo/JSON e systems conhecidos)
 - `validate-asset-manifest`: valida um arquivo `Asset Manifest v1` diretamente
 - `validate-input-intent`: valida InputIntent v1
 - `keyboard-to-input-intent`: traduz teclas declaradas para InputIntent v1
@@ -246,6 +246,7 @@ npm run smoke
 - `docs/AUDIO_LITE_V1.md`: contrato de Audio Lite v1 diagnostico
 - `docs/SPRITE_ANIMATION_V1.md`: contrato de Sprite Animation v1 diagnostico e consumo visual opt-in na Browser Demo
 - `docs/PORTABLE_HTML_EXPORT_V2.md`: contrato do export portatil v2 com assets inline e Sprite Animation opt-in
+- `docs/V2_GAP_AUDIT.md`: auditoria curta das lacunas V2 e proximo pacote recomendado
 - `docs/V1_SMALL_2D_GAME_CREATION_GUIDE.md`: fluxo Codex-first para criar um jogo pequeno 2D
 - `docs/V1_SMALL_2D_GAME_CREATION_CHECKLIST.md`: checklist de validacao para jogos criados a partir dos templates
 - `docs/codex-packages/V1_SMALL_2D_CREATE_GAME_PACKAGE.md`: pacote de prompt para Codex

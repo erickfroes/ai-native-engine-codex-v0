@@ -2,7 +2,7 @@ export const toolCatalog = [
   {
     name: 'validate_scene',
     title: 'Validate Scene',
-    description: 'Validate a scene JSON file against repo schemas and runtime invariants.',
+    description: 'Validate a scene JSON file with the minimal SceneValidationReport v1 preflight for file/JSON readability and known systems.',
     inputSchema: {
       type: 'object',
       required: ['path'],

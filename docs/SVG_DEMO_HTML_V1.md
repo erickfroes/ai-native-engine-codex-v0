@@ -9,10 +9,11 @@ Nao existe runtime interativo, canvas, Pixi, Three, WebGL, servidor web ou edito
 ## Contrato minimo
 
 - runtime: `renderSvgDemoHtmlV1({ title, svg, metadata })`
-- CLI: `render-svg-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]`
+- CLI: `render-svg-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]`
 - a saida e um documento HTML com o SVG embutido inline
 - `title` e `metadata` sao escapados como HTML
 - o markup SVG recebido e preservado inline, sem backend grafico adicional
+- cenas carregadas por path com `entity.prefab` inseguro falham antes da emissao do HTML, com cobertura runtime/CLI; nao ha tool MCP dedicada para esta superficie
 
 Envelope JSON minimo de `render-svg-demo --json`:
 

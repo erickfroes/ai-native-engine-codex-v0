@@ -196,4 +196,4 @@ Ao fim, o jogo V1 pequeno deve ter:
 
 ## Proximo pacote recomendado
 
-Depois deste guia, do V1 Small 2D Release Checkpoint, de Audio Lite v1, de UI System v1 visual opt-in, de Sprite Animation v1 e de Portable HTML Export v2, o proximo pacote recomendado e expandir o prefab system de forma incremental conforme roadmap.
+Depois deste guia, do V1 Small 2D Release Checkpoint, de Audio Lite v1, de UI System v1 visual opt-in, de Sprite Animation v1, de Portable HTML Export v2 e do fechamento de `entity.prefab` v1, o audit pequeno de lacunas V2 fica registrado em `docs/V2_GAP_AUDIT.md` e recomenda `Visual Regression Baseline v1` como proximo pacote.

@@ -87,10 +87,12 @@ Contrato público interno de `runMinimalSystemLoop` (runtime), `run-loop --json`
 
 ## Scene validation report v1 (pré-execução)
 
-Contrato público interno para validação de cena antes da execução do loop:
+Contrato público interno para preflight minimo de cena antes da execução do loop:
 
 - ver `docs/SCENE_VALIDATION_REPORT_V1.md`.
 - schema formal: `docs/schemas/scene-validation-report-v1.schema.json`.
+- cobre arquivo/JSON e systems conhecidos no caminho `validate-scene` / `validate_scene`;
+- nao substitui a validacao estrita por path (`validateSceneFile`) usada por consumidores que precisam de schema, invariantes de componentes e resolucao segura de `entity.prefab`.
 
 Separação explícita:
 
@@ -661,7 +663,7 @@ Contrato minimo para resolver `entity.prefab` a partir de um arquivo declarativo
 - entidade com `prefab` pode omitir `components` quando nao precisa override local.
 - `entity.prefab` deve permanecer path relativo seguro e apontar para `.prefab.json`; refs com traversal, URL, path absoluto/UNC ou extensao diferente falham de forma previsivel.
 - merge: componentes do prefab entram primeiro, componentes da entidade sobrescrevem por `kind`, extras da entidade entram ao final.
-- `validateSceneFile`, `RenderSnapshot v1`, Render SVG, Canvas2D Demo, Simple HTML Export, reports de colisao, Browser Demo e demais fluxos por path passam a consumir a cena resolvida ou falhar de forma previsivel antes do consumo visual.
+- `validateSceneFile`, `RenderSnapshot v1`, Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export, Portable HTML Export, reports de colisao, Browser Demo e demais fluxos por path passam a consumir a cena resolvida ou falhar de forma previsivel antes do consumo visual.
 - cenas sem `entity.prefab` permanecem iguais.
 - objetos de cena em memoria continuam sem resolucao automatica de prefab neste slice.
 - nao e nested prefab, prefab hierarchy, hot reload, editor, template engine, UI system formal ou pipeline de authoring.
@@ -704,4 +706,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2 e Prefab System v1 ja foram entregues como incrementos pequenos pos-checkpoint; proximo pacote recomendado: expandir o prefab system de forma incremental conforme roadmap.
+- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2 e Prefab System v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `Visual Regression Baseline v1`.

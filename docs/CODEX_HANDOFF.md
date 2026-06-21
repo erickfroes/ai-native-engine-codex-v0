@@ -53,6 +53,8 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Prefab path extension hardening: concluido com erro previsivel para `entity.prefab` que nao aponta para `.prefab.json`, preservando a exigencia de path relativo seguro por cena e cobrindo runtime/CLI/MCP das superficies prefab-backed sem abrir nested prefab.
 - Prefab unsafe path hardening: concluido com cobertura runtime/CLI/MCP para `entity.prefab` com traversal, URL e paths absolutos/UNC, preservando a exigencia de path relativo seguro por cena sem abrir nested prefab nem mutar `RenderSnapshot v1`.
 - Prefab visual/export negative hardening: concluido com cobertura runtime/CLI/MCP para Render SVG v1, Canvas2D Demo v1 e Simple HTML Export v1 em cenas com `entity.prefab` inseguro, preservando falha antes do consumo visual sem mutar `RenderSnapshot v1`.
+- Prefab visual/export mirror hardening final: concluido com cobertura negativa para SVG Demo HTML v1 em runtime/CLI e Portable HTML Export v2 em runtime/CLI/MCP para cenas com `entity.prefab` inseguro, fechando os espelhos visuais/export restantes sem nested prefab nem mutar `RenderSnapshot v1`.
+- V2 Gap Audit: concluido em `docs/V2_GAP_AUDIT.md`, escolhendo `Visual Regression Baseline v1` como proximo pacote pequeno e mantendo `Scene Transition v1` como proximo pacote de produto V2 depois do baseline visual.
 
 ## O que o Codex recebe
 
@@ -72,7 +74,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `visual.sprite.animation` com `inspect-sprite-animation` / `inspect_sprite_animation` e `render-browser-demo --sprite-animation` / `render_browser_demo({ spriteAnimation: true })`;
 - `export-portable-html-game` / `export_portable_html_game` com `--asset-manifest` e `--sprite-animation` para HTML portatil com assets inline;
 - `ui.screen` declarativo com widget tree serializavel, `inspect-ui-system` / `inspect_ui_system` e `render-browser-demo --ui-system` / `export-html-game --ui-system`;
-- `entity.prefab` resolvido por arquivo local seguro em `loadSceneFile` e consumidores por path, com falha previsivel para traversal, URL, path absoluto/UNC e extensao errada tambem nas superficies visuais/export reforcadas;
+- `entity.prefab` resolvido por arquivo local seguro em `loadSceneFile` e consumidores por path, com falha previsivel para traversal, URL, path absoluto/UNC e extensao errada tambem nas superficies visuais/export reforcadas, incluindo SVG Demo HTML e Portable HTML Export;
 - entidade prefab-backed pode omitir `components` quando nao ha override local;
 - `scenes/prefab-instanced.scene.json` demonstra reutilizacao real do mesmo prefab em multiplas entidades sem semantica nova;
 - `validate-prefab` / `validate_prefab` para validar prefab sem depender de uma cena;
@@ -100,6 +102,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `docs/PORTABLE_HTML_EXPORT_V2.md`;
 - `docs/PREFAB_SYSTEM_V1.md`;
 - `docs/PREFAB_VALIDATION_REPORT_V1.md`;
+- `docs/V2_GAP_AUDIT.md`;
 - suites cross-interface;
 - roadmap progressivo ate 3D AAA;
 - estrategia de subagentes e skills.
@@ -138,6 +141,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 30. `docs/SPRITE_ANIMATION_V1.md`
 31. `docs/PREFAB_SYSTEM_V1.md`
 32. `docs/PREFAB_VALIDATION_REPORT_V1.md`
+33. `docs/V2_GAP_AUDIT.md`
 
 ## Baseline obrigatorio
 
@@ -152,8 +156,9 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Fechar o menor hardening visual restante para `entity.prefab` inseguro, priorizando SVG Demo HTML CLI-only e Portable HTML Export v2, sem nested prefab e sem mutar `RenderSnapshot v1`.
-2. 3D indie apenas depois de V1/V2 demonstradas.
+1. Fechar `Visual Regression Baseline v1` como proximo pacote V2 pequeno: contrato/report opt-in derivado de `RenderSnapshot v1` e/ou `Render SVG v1`, fixture minima, runtime/CLI/MCP se o shape estiver claro, sem pixel-diff obrigatorio e sem mutar contratos visuais v1.
+2. Manter `entity.prefab` v1 congelado em bugfix/compatibilidade; se a lacuna de validacao estrita for atacada, criar uma superficie opt-in nova (`validate-scene-strict` / `validate_scene_strict`) em vez de mutar `SceneValidationReport v1`.
+3. Depois do baseline visual, priorizar `Scene Transition v1` como proximo pacote de produto V2 para multiplas cenas; 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Regra de manutencao da linha de seguimento
 

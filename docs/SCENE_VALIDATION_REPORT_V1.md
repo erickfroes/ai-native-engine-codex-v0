@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Padronizar a validação de cena antes da execução do loop headless com um relatório estruturado comum para runtime, CLI, MCP, testes e agentes.
+Padronizar o preflight minimo de cena antes da execução do loop headless com um relatório estruturado comum para runtime, CLI, MCP, testes e agentes.
 
 ## Shape
 
@@ -47,4 +47,8 @@ Schema formal: `docs/schemas/scene-validation-report-v1.schema.json`.
 - `LoopReport v1`: resultado da execução do loop;
 - `LoopTrace v1`: diagnóstico opt-in por tick/system;
 - `System Registry v1`: fonte de verdade de systems conhecidos.
+
+## Limite atual
+
+`validate-scene` / `validate_scene` preservam este contrato v1 como preflight minimo de arquivo, JSON e systems conhecidos. A validacao estrita por path (`validateSceneFile`) cobre schema, invariantes de componentes e resolucao segura de `entity.prefab` para consumidores como render/export/reports, mas nao e exposta por este contrato v1.
 

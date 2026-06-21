@@ -116,5 +116,5 @@ Para jogos criados fora de `./scenes`, rode tambem o gate explicito do jogo: `va
 
 ## Proximo Pacote Recomendado
 
-- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2 e `entity.prefab` v1 foram entregues como incrementos pos-checkpoint; proximo pacote recomendado: congelar a semantica de prefab e fechar apenas espelhos negativos visuais/export restantes, sem nested prefab nem mutar `RenderSnapshot v1`.
+- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2 e `entity.prefab` v1 foram entregues como incrementos pos-checkpoint; `entity.prefab` v1 fica congelado para bugfix/compatibilidade apos os espelhos negativos visuais/export, sem nested prefab nem mutar `RenderSnapshot v1`.
 - Manter fora deste pacote: editor, servidor, build system amplo, UI system completo e savegame avancado.

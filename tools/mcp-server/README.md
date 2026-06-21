@@ -7,6 +7,7 @@ Servidor MCP local via stdio.
 - `validate_scene`
 - `validate_asset_manifest`
 - `validate_input_intent`
+- `validate_prefab`
 - `keyboard_to_input_intent`
 - `validate_save`
 - `save_state_snapshot`
@@ -17,6 +18,7 @@ Servidor MCP local via stdio.
 - `render_canvas_demo`
 - `render_browser_demo`
 - `export_html_game`
+- `export_portable_html_game`
 - `plan_loop`
 - `run_loop`
 - `run_replay`
@@ -26,6 +28,8 @@ Servidor MCP local via stdio.
 - `inspect_collision_bounds`
 - `inspect_collision_overlaps`
 - `inspect_tile_collision`
+- `inspect_prefab_usage`
+- `inspect_prefab_usage_v2`
 - `inspect_movement_blocking`
 - `inspect_audio_lite`
 - `inspect_ui_system`
@@ -39,4 +43,4 @@ node ./tools/mcp-server/src/index.mjs
 
 ## Papel atual
 
-Expor validacao, inspecao headless, render/export visual e diagnosticos V1/V2 incrementais para o Codex sem depender de GUI. `validate_asset_manifest` agora expoe `AssetManifestValidationReport v1` para diagnosticar manifestos diretamente antes dos consumidores visuais. Audio Lite v1 aparece como report deterministico via `inspect_audio_lite` e como opt-in em `render_browser_demo`/`export_html_game`; UI System v1 aparece como report deterministico via `inspect_ui_system` e como overlay visual opt-in em `render_browser_demo`/`export_html_game`; Sprite Animation v1 aparece como report deterministico via `inspect_sprite_animation` e como animacao visual opt-in em `render_browser_demo`.
+Expor validacao, inspecao headless, render/export visual e diagnosticos V1/V2 incrementais para o Codex sem depender de GUI. `validate_scene` permanece o preflight minimo de `SceneValidationReport v1` para leitura/JSON e systems conhecidos; consumidores por path que precisam de schema, invariantes e prefab usam a validacao estrita interna antes de render/export/diagnosticos. `validate_asset_manifest` agora expoe `AssetManifestValidationReport v1` para diagnosticar manifestos diretamente antes dos consumidores visuais. `validate_prefab` e `inspect_prefab_usage`/`inspect_prefab_usage_v2` cobrem a trilha declarativa de prefab. Audio Lite v1 aparece como report deterministico via `inspect_audio_lite` e como opt-in em `render_browser_demo`/`export_html_game`; UI System v1 aparece como report deterministico via `inspect_ui_system` e como overlay visual opt-in em `render_browser_demo`/`export_html_game`; Sprite Animation v1 aparece como report deterministico via `inspect_sprite_animation` e como animacao visual opt-in em `render_browser_demo`; Portable HTML Export v2 aparece em `export_portable_html_game`.

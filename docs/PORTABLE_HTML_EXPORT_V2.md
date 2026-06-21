@@ -78,6 +78,7 @@ O MCP valida `scenePath`, `outputPath` e `assetManifestPath` dentro do repo, esc
 - Reutiliza `RenderSnapshot v1`, `createBrowserPlayableDemoMetadataV1` e `renderBrowserPlayableDemoHtmlV1`.
 - Nao altera `RenderSnapshot v1`.
 - Nao altera `Simple HTML Export v1`.
+- Cenas carregadas por path com `entity.prefab` inseguro falham antes da escrita do HTML/export em runtime, CLI e MCP.
 - `assetManifestPath` continua opt-in.
 - Quando `assetManifestPath` esta presente, drawCalls `sprite` recebem `assetSrc` inline como `data:` URL.
 - Extensoes inline suportadas neste slice: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`, `.bmp`, `.svg`.
@@ -125,6 +126,11 @@ Cobertura dedicada:
 - `engine/runtime/test/cli-render-browser-demo.test.mjs`;
 - `engine/runtime/test/simple-html-export-v1.test.mjs`;
 - `tools/mcp-server/test/mcp-server.test.mjs`.
+
+Cobertura de seguranca de prefab:
+
+- `entity.prefab` com traversal, URL ou paths absolutos/UNC falha de forma previsivel antes de gerar HTML portatil;
+- runtime, CLI e MCP preservam `SceneValidationError` para esse caso.
 
 Rodar:
 

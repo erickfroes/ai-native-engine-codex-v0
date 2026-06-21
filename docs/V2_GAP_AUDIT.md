@@ -1,0 +1,71 @@
+# V2 Gap Audit
+
+## Objetivo
+
+Registrar o audit pequeno pedido apos o congelamento de `entity.prefab` v1 e escolher o menor proximo pacote seguro para V2.
+
+Este documento nao cria contrato runtime novo, nao altera schemas e nao muda comportamento de CLI/MCP. Ele serve como trilha de decisao para o proximo slice.
+
+## Estado consolidado
+
+- V1 Small 2D esta release-checkpointed e permanece aberta apenas para bugfix, hardening e compatibilidade.
+- Audio Lite v1, UI System v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1 e AssetManifestValidationReport v1 ja iniciam V2 em slices pequenos.
+- `entity.prefab` v1 esta congelado: sem nested prefab, prefab hierarchy, hot reload, editor ou template engine.
+- O hardening de prefab inseguro ja cobre consumidores visuais/export por path, incluindo Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export.
+
+## Lacunas V2 avaliadas
+
+| Lacuna V2 | Tamanho | Risco | Decisao |
+| --- | --- | --- | --- |
+| Visual regression basica | pequeno | baixo/medio | Recomendado como proximo pacote. |
+| Scene transitions / composition | medio | medio | Proximo pacote de produto depois de existir baseline visual simples. |
+| Particle-lite | medio | medio | Deixar para depois; toca render/tempo/fixtures. |
+| Atlas/material manifest | medio/grande | medio/alto | Evitar por enquanto para nao abrir pipeline pesado de assets. |
+| Editor-lite automatizavel | grande | alto | Nao iniciar antes de contratos V2 menores. |
+| Pathfinding grid v1 | medio | medio | Pacote gameplay separado, depois de uma regressao visual minima. |
+
+## Guardrail de validacao
+
+Durante o audit foi confirmado que `validate-scene` / `validate_scene` continuam emitindo `SceneValidationReport v1` com escopo pre-loop minimalista. Essa superficie valida leitura/JSON e systems conhecidos, mas nao deve ser tratada hoje como gate completo de schema, invariantes de componentes ou resolucao de `entity.prefab`.
+
+Consumidores por path que passam por `validateSceneFile` ja falham de forma previsivel para refs `entity.prefab` inseguras. Portanto, qualquer pacote que precise garantir seguranca de prefab deve usar consumidores por path ou fechar antes um slice pequeno de decisao/hardening da superficie `validate_scene`.
+
+Se essa lacuna for fechada, o caminho seguro e criar uma superficie opt-in nova, por exemplo `validate-scene-strict` / `validate_scene_strict`, com schema/doc proprios para o report estrito. Nao mutar `SceneValidationReport v1` nem o comportamento padrao de `validate-scene` / `validate_scene` em-place.
+
+## Decisao de continuidade
+
+O audit encontrou dois candidatos pequenos:
+
+- `Visual Regression Baseline v1`: menor risco, fortalece render/export antes de abrir novas telas/cenas e nao muda semantica de gameplay.
+- `Scene Transition v1`: mais diretamente ligado ao criterio V2 de jogos com multiplas cenas, mas toca fluxo de estado e navegacao entre cenas.
+
+Decisao: fazer primeiro **Visual Regression Baseline v1** e manter **Scene Transition v1** como o proximo pacote de produto V2 depois dele.
+
+## Proximo pacote recomendado
+
+Fechar **Visual Regression Baseline v1** como primeiro pacote V2 pos-audit.
+
+Escopo recomendado:
+
+- criar um report/baseline opt-in derivado de `RenderSnapshot v1` e/ou `Render SVG v1`;
+- cobrir inicialmente `scenes/v1-small-2d.scene.json` e um fixture visual pequeno;
+- expor runtime, CLI e MCP apenas se o shape do report estiver claro;
+- comparar hashes/campos deterministas, sem screenshot obrigatorio e sem browser pixel-diff nesta primeira versao;
+- preservar `RenderSnapshot v1`, `Render SVG v1`, Browser Demo, exports HTML e Prefab System v1 sem mutacao de contrato.
+
+Fora de escopo:
+
+- renderer novo, Pixi, Three, WebGL ou WebGPU;
+- pipeline pesado de assets;
+- atlas/material manifest;
+- nested prefab ou nova semantica de prefab;
+- editor visual;
+- 3D.
+
+## Criterio de pronto do proximo pacote
+
+- contrato curto e schema do report, se houver envelope publico;
+- fixture minima de baseline;
+- testes runtime/CLI/MCP cross-interface;
+- `npm test`, `npm run validate:scenes` e `npm run smoke` verdes;
+- docs atualizadas e `docs/CODEX_HANDOFF.md` reescrito para o menor passo seguinte.

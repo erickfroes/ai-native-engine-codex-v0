@@ -155,4 +155,4 @@ O V1 Small 2D Release Checkpoint tambem esta concluido:
 
 ## Proximo pacote recomendado
 
-Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1 e Portable HTML Export v2 foram entregues como incrementos pos-checkpoint. Proximo pacote recomendado: expandir o prefab system de forma incremental conforme roadmap.
+Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1 e Portable HTML Export v2 foram entregues como incrementos pos-checkpoint. `entity.prefab` v1 fica congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta em `docs/V2_GAP_AUDIT.md` e recomenda `Visual Regression Baseline v1` como proximo pacote.

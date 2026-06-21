@@ -197,4 +197,4 @@ npm run smoke
 
 ## Continuidade
 
-UI System v1 esta fechado como contrato declarativo/report e agora possui consumo visual opt-in incremental na Browser Demo/export. Portable HTML Export v2 ja cobre assets inline com Sprite Animation v1 no caminho portatil. Proximo pacote recomendado: expandir o prefab system de forma incremental.
+UI System v1 esta fechado como contrato declarativo/report e agora possui consumo visual opt-in incremental na Browser Demo/export. Portable HTML Export v2 ja cobre assets inline com Sprite Animation v1 no caminho portatil. `entity.prefab` v1 fica congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta em `docs/V2_GAP_AUDIT.md` e recomenda `Visual Regression Baseline v1` como proximo pacote.

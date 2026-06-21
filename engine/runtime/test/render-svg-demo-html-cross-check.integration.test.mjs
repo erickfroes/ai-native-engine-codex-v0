@@ -25,6 +25,14 @@ const portableEmptyVisualScenePath = path.join(
   'fixtures',
   'portable-empty-visual.scene.json'
 );
+const unsafePrefabPathsScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'invalid_prefab_unsafe_paths.scene.json'
+);
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 
 function runCli(args) {
@@ -32,6 +40,16 @@ function runCli(args) {
     cwd: repoRoot,
     encoding: 'utf8'
   });
+}
+
+function assertUnsafePrefabSceneValidationError(error) {
+  assert.equal(error.name, 'SceneValidationError');
+  assert.match(error.message, /Scene validation failed/);
+  assert.equal(error.report?.errors?.length, 4);
+  for (const reportError of error.report.errors) {
+    assert.match(reportError.message, /prefab must be a safe relative path/);
+  }
+  return true;
 }
 
 test('render-svg-demo stays aligned with runtime SVG output for the same scene options', async () => {
@@ -143,6 +161,23 @@ test('render-svg-demo keeps fully inherited prefab-backed sprite fallback SVG al
     /<rect id="player\.hero" data-asset-id="player\.sprite" data-kind="sprite" data-layer="2" x="4" y="3" width="16" height="16" \/>/
   );
   assert.doesNotMatch(payload.html, /assetSrc|file:\/\/\//);
+});
+
+test('render-svg-demo fails predictably for unsafe prefab path references', async () => {
+  await assert.rejects(
+    () => buildRenderSnapshotV1(unsafePrefabPathsScenePath),
+    assertUnsafePrefabSceneValidationError
+  );
+
+  const result = runCli([
+    'render-svg-demo',
+    unsafePrefabPathsScenePath,
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /SceneValidationError: Scene validation failed for/);
+  assert.match(result.stderr, /invalid_prefab_unsafe_paths\.scene\.json/);
 });
 
 test('render-svg-demo stays deterministic for the same scene options', () => {
