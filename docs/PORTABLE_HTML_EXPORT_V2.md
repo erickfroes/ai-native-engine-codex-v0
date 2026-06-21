@@ -86,6 +86,7 @@ O MCP valida `scenePath`, `outputPath` e `assetManifestPath` dentro do repo, esc
 - `spriteAnimation` continua opt-in e reutiliza `Sprite Animation v1`.
 - Sem `assetManifestPath`, o export v2 preserva o fallback atual da Browser Demo/export simples.
 - Sem `assetManifestPath`, `--sprite-animation` pode manter `metadata.spriteAnimation`, mas os drawCalls continuam no fallback atual `rect`, sem `data:` URL inline e sem `file:///`.
+- Mesmo com `assetManifestPath`, se a cena nao produzir drawCalls `sprite` asset-backed compativeis, `--sprite-animation` continua como no-op visual: `metadata.spriteAnimation` pode permanecer, `embeddedAssetCount` fica `0` e o HTML segue em fallback `rect`, sem `data:` URL inline e sem `file:///`.
 - `sizeBytes` e calculado com `Buffer.byteLength(html, "utf8")`.
 - `htmlHash` e SHA-256 do HTML escrito.
 

@@ -27,6 +27,16 @@ const spriteAnimationIdleScenePath = path.join(
   'sprite-animation-idle.scene.json'
 );
 const spriteAnimationIdleSceneMcpPath = './engine/runtime/test/fixtures/sprite-animation-idle.scene.json';
+const spriteAnimationMissingVisualSpriteScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'sprite-animation-missing-visual-sprite.scene.json'
+);
+const spriteAnimationMissingVisualSpriteSceneMcpPath =
+  './engine/runtime/test/fixtures/sprite-animation-missing-visual-sprite.scene.json';
 const uiScreenPrefabScenePath = path.join(
   repoRoot,
   'engine',
@@ -226,6 +236,42 @@ test('Portable HTML Export v2 keeps rect fallback without assetManifestPath even
   assertNoForbiddenPortableExportHtmlSurface(baseline.html);
 });
 
+test('Portable HTML Export v2 stays a no-op for asset-backed sprite rendering when spriteAnimation is enabled but the scene has no compatible sprite drawCalls', async () => {
+  const baseline = await buildPortableHtmlGameExportV2(spriteAnimationMissingVisualSpriteScenePath, {
+    assetManifestPath: validAssetManifestPath,
+    spriteAnimation: true
+  });
+  const repeated = await buildPortableHtmlGameExportV2(spriteAnimationMissingVisualSpriteScenePath, {
+    assetManifestPath: validAssetManifestPath,
+    spriteAnimation: true
+  });
+
+  assert.deepEqual(baseline, repeated);
+  assert.equal(baseline.exportVersion, PORTABLE_HTML_EXPORT_VERSION);
+  assert.equal(baseline.scene, 'sprite-animation-missing-visual-sprite-fixture');
+  assert.deepEqual(baseline.options, {
+    assetManifest: true,
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    spriteAnimation: true,
+    uiSystem: false
+  });
+  assert.equal(baseline.embeddedAssetCount, 0);
+  assert.equal(baseline.sizeBytes, Buffer.byteLength(baseline.html, 'utf8'));
+  assert.equal(baseline.htmlHash, sha256Hex(baseline.html));
+  assert.match(baseline.html, /^<!DOCTYPE html>/);
+  assert.match(baseline.html, /sprite-animation-missing-visual-sprite-fixture Portable HTML Game Export/);
+  assert.match(baseline.html, /"spriteAnimation":\{/);
+  assert.match(baseline.html, /"assetId":"player\.missing"/);
+  assert.match(baseline.html, /"kind":"rect"/);
+  assert.doesNotMatch(baseline.html, /"kind":"sprite"/);
+  assert.doesNotMatch(baseline.html, /data:image\/png;base64,/);
+  assert.doesNotMatch(baseline.html, /file:\/\/\//);
+  assertNoForbiddenPortableExportHtmlSurface(baseline.html);
+});
+
 test('export-portable-html-game CLI writes deterministic files for inline assets, sprite animation and UI overlay', async (t) => {
   const outDir = await createTempDir(t);
   const cases = [
@@ -264,6 +310,24 @@ test('export-portable-html-game CLI writes deterministic files for inline assets
       },
       present: [/"spriteAnimation":\{/, /"animationId":"player\.idle"/, /"assetSrc":"data:image\/png;base64,/],
       absent: [/file:\/\/\//, /"uiSystem":/]
+    },
+    {
+      name: 'sprite-animation-no-op-with-manifest',
+      scenePath: spriteAnimationMissingVisualSpriteScenePath,
+      flags: ['--asset-manifest', validAssetManifestPath, '--sprite-animation'],
+      expectedScene: 'sprite-animation-missing-visual-sprite-fixture',
+      expectedEmbeddedAssetCount: 0,
+      options: {
+        assetManifest: true,
+        movementBlocking: false,
+        gameplayHud: false,
+        playableSaveLoad: false,
+        audioLite: false,
+        spriteAnimation: true,
+        uiSystem: false
+      },
+      present: [/"spriteAnimation":\{/, /"assetId":"player\.missing"/, /"kind":"rect"/],
+      absent: [/file:\/\/\//, /data:image\/png;base64,/, /"kind":"sprite"/, /"uiSystem":/]
     },
     {
       name: 'sprite-animation-fallback-no-manifest',
@@ -516,6 +580,71 @@ test('export_portable_html_game MCP preserves rect fallback without assetManifes
     assert.equal(mcpResponse.result.isError, false);
     const mcpEnvelope = mcpResponse.result.structuredContent;
     assertPortableExportEnvelopeShape(mcpEnvelope, { expectedScene: 'sprite-animation-idle-fixture' });
+    assert.equal(mcpEnvelope.outputPath, mcpOutPath);
+    assert.deepEqual(
+      { ...mcpEnvelope, outputPath: '<normalized>' },
+      { ...cliEnvelope, outputPath: '<normalized>' }
+    );
+
+    const mcpHtml = await readFile(mcpEnvelope.outputPath, 'utf8');
+    assert.equal(mcpHtml, cliHtml);
+    assertNoForbiddenPortableExportHtmlSurface(mcpHtml);
+  } finally {
+    await client.close();
+  }
+});
+
+test('export_portable_html_game MCP stays a no-op for asset-backed sprite rendering when assetManifestPath and spriteAnimation are present but the scene has no compatible sprite drawCalls', async (t) => {
+  const repoTempDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(repoTempDir, 'cli-portable-sprite-animation-no-op-with-manifest.html');
+  const mcpOutPath = path.join(repoTempDir, 'mcp-portable-sprite-animation-no-op-with-manifest.html');
+  const cliResult = runCli([
+    'export-portable-html-game',
+    spriteAnimationMissingVisualSpriteScenePath,
+    '--out',
+    cliOutPath,
+    '--asset-manifest',
+    validAssetManifestPath,
+    '--sprite-animation',
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+  assert.deepEqual(cliEnvelope.options, {
+    assetManifest: true,
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    spriteAnimation: true,
+    uiSystem: false
+  });
+  assert.equal(cliEnvelope.embeddedAssetCount, 0);
+  const cliHtml = await readFile(cliEnvelope.outputPath, 'utf8');
+  assert.match(cliHtml, /"spriteAnimation":\{/);
+  assert.match(cliHtml, /"assetId":"player\.missing"/);
+  assert.match(cliHtml, /"kind":"rect"/);
+  assert.doesNotMatch(cliHtml, /"kind":"sprite"/);
+  assert.doesNotMatch(cliHtml, /data:image\/png;base64,/);
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_portable_html_game',
+      arguments: {
+        scenePath: spriteAnimationMissingVisualSpriteSceneMcpPath,
+        outputPath: path.relative(repoRoot, mcpOutPath),
+        assetManifestPath: validAssetManifestMcpPath,
+        spriteAnimation: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+    assertPortableExportEnvelopeShape(mcpEnvelope, { expectedScene: 'sprite-animation-missing-visual-sprite-fixture' });
     assert.equal(mcpEnvelope.outputPath, mcpOutPath);
     assert.deepEqual(
       { ...mcpEnvelope, outputPath: '<normalized>' },
