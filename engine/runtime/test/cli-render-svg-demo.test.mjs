@@ -10,6 +10,14 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const portableEmptyVisualScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'portable-empty-visual.scene.json'
+);
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -55,6 +63,26 @@ test('render-svg-demo prints deterministic HTML to stdout when --out is omitted'
   assert.match(first.stdout, /<title>tutorial SVG Demo<\/title>/);
   assert.match(first.stdout, /<h1>tutorial SVG Demo<\/h1>/);
   assert.match(first.stdout, /<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);
+});
+
+test('render-svg-demo prints deterministic empty SVG demo HTML for scenes without visual components when --out is omitted', () => {
+  const first = runCli([
+    'render-svg-demo',
+    portableEmptyVisualScenePath
+  ]);
+  const second = runCli([
+    'render-svg-demo',
+    portableEmptyVisualScenePath
+  ]);
+
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(second.status, 0, second.stderr);
+  assert.equal(first.stdout, second.stdout);
+  assert.match(first.stdout, /<!DOCTYPE html>/);
+  assert.match(first.stdout, /<title>portable-empty-visual-fixture SVG Demo<\/title>/);
+  assert.match(first.stdout, /<h1>portable-empty-visual-fixture SVG Demo<\/h1>/);
+  assert.match(first.stdout, /data-scene="portable-empty-visual-fixture"/);
+  assert.doesNotMatch(first.stdout, /<rect\b/);
 });
 
 test('render-svg-demo writes HTML to --out and returns a small JSON envelope', async (t) => {

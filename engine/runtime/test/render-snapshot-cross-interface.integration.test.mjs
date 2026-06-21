@@ -18,6 +18,15 @@ const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
 const cameraViewportScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'camera-viewport.scene.json');
+const portableEmptyVisualScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'portable-empty-visual.scene.json'
+);
+const portableEmptyVisualSceneMcpPath = './engine/runtime/test/fixtures/portable-empty-visual.scene.json';
 const invalidCameraViewportScenePath = path.join(
   repoRoot,
   'engine',
@@ -158,6 +167,55 @@ test('RenderSnapshot v1 stays semantically aligned across runtime, CLI and MCP',
         layer: 0
       }
     ]);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('RenderSnapshot v1 keeps empty drawCalls aligned across runtime, CLI and MCP for scenes without visual components', async () => {
+  const runtimeSnapshot = await buildRenderSnapshotV1(portableEmptyVisualScenePath);
+  assertRenderSnapshotV1(runtimeSnapshot);
+
+  const cliResult = runCli([
+    'render-snapshot',
+    portableEmptyVisualScenePath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliSnapshot = JSON.parse(cliResult.stdout);
+  assertRenderSnapshotV1(cliSnapshot);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: portableEmptyVisualSceneMcpPath
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpSnapshot = mcpResponse.result.structuredContent;
+    assertRenderSnapshotV1(mcpSnapshot);
+
+    assert.deepEqual(runtimeSnapshot, cliSnapshot);
+    assert.deepEqual(runtimeSnapshot, mcpSnapshot);
+    assert.equal(runtimeSnapshot.scene, 'portable-empty-visual-fixture');
+    assert.equal(runtimeSnapshot.tick, 0);
+    assert.deepEqual(runtimeSnapshot.viewport, {
+      width: 320,
+      height: 180
+    });
+    assert.deepEqual(runtimeSnapshot.drawCalls, []);
   } finally {
     await mcp.close();
   }

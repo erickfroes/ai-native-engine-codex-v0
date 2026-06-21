@@ -16,6 +16,14 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const portableEmptyVisualScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'portable-empty-visual.scene.json'
+);
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -61,6 +69,39 @@ test('render-svg-demo stays aligned with runtime SVG output for the same scene o
   assert.equal(payload.tick, snapshot.tick);
   assert.equal(payload.html, runtimeHtml);
   assert.ok(payload.html.includes(svg));
+});
+
+test('render-svg-demo keeps empty drawCalls aligned with runtime HTML for scenes without visual components', async () => {
+  const snapshot = await buildRenderSnapshotV1(portableEmptyVisualScenePath);
+  const svg = renderSnapshotToSvgV1(snapshot);
+  const runtimeHtml = renderSvgDemoHtmlV1({
+    title: `${snapshot.scene} SVG Demo`,
+    svg,
+    metadata: {
+      scene: snapshot.scene,
+      svgVersion: RENDER_SVG_VERSION,
+      tick: snapshot.tick,
+      viewport: `${snapshot.viewport.width}x${snapshot.viewport.height}`
+    }
+  });
+
+  const result = runCli([
+    'render-svg-demo',
+    portableEmptyVisualScenePath,
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.demoHtmlVersion, SVG_DEMO_HTML_VERSION);
+  assert.equal(payload.scene, snapshot.scene);
+  assert.equal(payload.tick, snapshot.tick);
+  assert.equal(payload.html, runtimeHtml);
+  assert.match(payload.html, /portable-empty-visual-fixture SVG Demo/);
+  assert.match(payload.html, /data-scene="portable-empty-visual-fixture"/);
+  assert.doesNotMatch(payload.html, /<rect\b/);
+  assert.doesNotMatch(payload.html, /data-asset-id=/);
 });
 
 test('render-svg-demo stays deterministic for the same scene options', () => {

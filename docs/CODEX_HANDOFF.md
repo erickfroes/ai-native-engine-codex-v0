@@ -31,6 +31,9 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Portable HTML Export v2 no-op hardening em cenas puramente `rect`: concluido com cobertura runtime/CLI/MCP para `assetManifestPath` + `spriteAnimation` em `tile.layer` sem qualquer componente de sprite, preservando `animations: []`, `embeddedAssetCount = 0`, drawCalls apenas `rect` e ausencia de `data:` URL inline / `file:///`.
 - Portable HTML Export v2 no-op hardening com `drawCalls` vazios: concluido com cobertura runtime/CLI/MCP para `assetManifestPath` + `spriteAnimation` em cena sem qualquer componente visual renderizavel, preservando `animations: []`, `embeddedAssetCount = 0`, `drawCalls: []` e ausencia de `data:` URL inline / `file:///`.
 - Portable HTML Export v2 no-op hardening com `drawCalls` vazios sem manifesto: concluido com cobertura runtime/CLI/MCP para `spriteAnimation` sem `assetManifestPath` em cena sem qualquer componente visual renderizavel, preservando `animations: []`, `embeddedAssetCount = 0`, `drawCalls: []` e ausencia de fallback `rect`, `data:` URL inline e `file:///`.
+- `portable-empty-visual` v1 non-regression hardening: concluido com cobertura cross-interface para `RenderSnapshot v1`, `Browser Playable Demo` default e `Simple HTML Export v1`, preservando `drawCalls: []`, sem `assetManifestPath`, sem `spriteAnimation` e sem reabrir metadata opt-in dos contratos v1.
+- `portable-empty-visual` render mirror hardening: concluido com cobertura cross-interface para `Render SVG v1` e `Canvas2D Demo v1`, preservando `drawCalls: []`, sem `assetManifestPath`, sem drawCalls `rect`/`sprite` e sem reabrir comportamento implicito nas superficies visuais v1.
+- `portable-empty-visual` SVG demo hardening: concluido com cobertura runtime/CLI para `SVG Demo HTML v1`, preservando `drawCalls: []`, sem `assetManifestPath`, sem `rect`/`sprite` serializados e sem reabrir a trilha SVG/HTML derivada de `RenderSnapshot v1`.
 - Portable HTML Export v2 no-op hardening sem `visual.sprite.animation`: concluido com cobertura runtime/CLI/MCP para `assetManifestPath` + `spriteAnimation` em cena com `visual.sprite` asset-backed e `animations: []`, preservando sprites inline normais, `embeddedAssetCount > 0` e ausencia de `file:///`.
 - Prefab System v1: concluido como resolucao declarativa minima por arquivo e report diagnostico runtime/CLI/MCP.
 - Prefab Validation Report v1: concluido como validacao direta de `.prefab.json` via runtime/CLI/MCP.
@@ -134,7 +137,7 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Continuar o hardening incremental em torno da fixture `portable-empty-visual` cobrindo explicitamente `RenderSnapshot v1`, `Browser Playable Demo` default e `Simple HTML Export v1` com `drawCalls: []`, sem `assetManifestPath` e sem `spriteAnimation`, para provar que o hardening de `Portable HTML Export v2` nao reabriu os contratos v1.
+1. Retomar a trilha do `Prefab System v1` com um hardening pequeno e visual: cobrir explicitamente `RenderSnapshot v1` para cena prefab-backed com `visual.sprite` asset-backed e `assetManifestPath`, preservando resolucao por path, merge local e fallback seguro.
 2. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Regra de manutencao da linha de seguimento

@@ -12,6 +12,15 @@ const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
+const portableEmptyVisualScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'portable-empty-visual.scene.json'
+);
+const portableEmptyVisualSceneMcpPath = './engine/runtime/test/fixtures/portable-empty-visual.scene.json';
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -123,6 +132,57 @@ test('Render SVG v1 stays semantically aligned across runtime, CLI and MCP', asy
     assert.deepEqual(Object.keys(runtimeEnvelope).sort(), ['scene', 'svg', 'svgVersion', 'tick']);
     assert.deepEqual(runtimeEnvelope, cliEnvelope);
     assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('Render SVG v1 keeps empty drawCalls aligned across runtime, CLI and MCP for scenes without visual components', async () => {
+  const snapshot = await buildRenderSnapshotV1(portableEmptyVisualScenePath);
+  const runtimeEnvelope = {
+    svgVersion: RENDER_SVG_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    svg: renderSnapshotToSvgV1(snapshot)
+  };
+
+  const cliResult = runCli([
+    'render-svg',
+    portableEmptyVisualScenePath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_svg',
+      arguments: {
+        path: portableEmptyVisualSceneMcpPath
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+
+    assert.deepEqual(runtimeEnvelope, cliEnvelope);
+    assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+    assert.equal(runtimeEnvelope.scene, 'portable-empty-visual-fixture');
+    assert.equal(runtimeEnvelope.tick, 0);
+    assert.match(runtimeEnvelope.svg, /data-scene="portable-empty-visual-fixture"/);
+    assert.match(runtimeEnvelope.svg, /data-tick="0"/);
+    assert.doesNotMatch(runtimeEnvelope.svg, /<rect\b/);
+    assert.doesNotMatch(runtimeEnvelope.svg, /data-asset-id=/);
   } finally {
     await mcp.close();
   }

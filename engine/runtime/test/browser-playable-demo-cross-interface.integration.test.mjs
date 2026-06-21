@@ -24,6 +24,15 @@ const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const tileLayerScenePath = path.join(repoRoot, 'fixtures', 'tile-layer.scene.json');
+const portableEmptyVisualScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'portable-empty-visual.scene.json'
+);
+const portableEmptyVisualSceneMcpPath = './engine/runtime/test/fixtures/portable-empty-visual.scene.json';
 const movementBlockingTileBlockedScenePath = path.join(
   repoRoot,
   'engine',
@@ -217,6 +226,78 @@ test('browser playable demo stays aligned across runtime, CLI and MCP for the sa
     assert.deepEqual(runtimeEnvelope, mcpEnvelope);
     assert.equal(runtimeEnvelope.html, cliEnvelope.html);
     assert.equal(runtimeEnvelope.html, mcpEnvelope.html);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('browser playable demo default keeps empty drawCalls aligned across runtime, CLI and MCP', async () => {
+  const scene = await loadSceneFile(portableEmptyVisualScenePath);
+  const snapshot = await buildRenderSnapshotV1(scene);
+  const runtimeEnvelope = {
+    browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderBrowserPlayableDemoHtmlV1({
+      title: `${snapshot.scene} Browser Playable Demo`,
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot)
+    })
+  };
+
+  const cliResult = runCli([
+    'render-browser-demo',
+    portableEmptyVisualScenePath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: portableEmptyVisualSceneMcpPath
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+
+    assertBrowserDemoEnvelope(runtimeEnvelope, {
+      expectedScene: 'portable-empty-visual-fixture',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(cliEnvelope, {
+      expectedScene: 'portable-empty-visual-fixture',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(mcpEnvelope, {
+      expectedScene: 'portable-empty-visual-fixture',
+      expectedTick: 0
+    });
+    assert.deepEqual(runtimeEnvelope, cliEnvelope);
+    assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+    assert.match(runtimeEnvelope.html, /"drawCalls":\[\]/);
+    assert.match(runtimeEnvelope.html, /data-controllable-entity=""/);
+    assert.match(runtimeEnvelope.html, /Position: none/);
+    assert.match(runtimeEnvelope.html, /No controllable rect/);
+    assert.doesNotMatch(runtimeEnvelope.html, /"movementBlocking":/);
+    assert.doesNotMatch(runtimeEnvelope.html, /"gameplayHud":/);
+    assert.doesNotMatch(runtimeEnvelope.html, /"playableSaveLoad":/);
+    assert.doesNotMatch(runtimeEnvelope.html, /"audioLite":/);
+    assert.doesNotMatch(runtimeEnvelope.html, /"uiSystem":/);
+    assert.doesNotMatch(runtimeEnvelope.html, /"spriteAnimation":/);
   } finally {
     await mcp.close();
   }

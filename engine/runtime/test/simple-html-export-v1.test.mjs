@@ -19,6 +19,15 @@ const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
 const scenePath = path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json');
 const sceneMcpPath = './scenes/v1-small-2d.scene.json';
+const portableEmptyVisualScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'portable-empty-visual.scene.json'
+);
+const portableEmptyVisualSceneMcpPath = './engine/runtime/test/fixtures/portable-empty-visual.scene.json';
 const uiScreenPrefabScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'ui-screen-prefab.scene.json');
 
 function runCli(args) {
@@ -161,6 +170,81 @@ test('Simple HTML Export v1 builds a deterministic Browser Demo artifact without
   assert.doesNotMatch(baseline.html, /browser-audio-lite/);
   assert.doesNotMatch(baseline.html, /browser-ui-system/);
   assertNoForbiddenExportHtmlSurface(baseline.html);
+});
+
+test('Simple HTML Export v1 keeps empty drawCalls aligned across runtime, CLI and MCP for scenes without visual components', async (t) => {
+  const runtimeEnvelope = await buildHtmlGameExportV1(portableEmptyVisualScenePath);
+  const repeatedRuntimeEnvelope = await buildHtmlGameExportV1(portableEmptyVisualScenePath);
+
+  assert.deepEqual(runtimeEnvelope, repeatedRuntimeEnvelope);
+  assert.equal(runtimeEnvelope.exportVersion, SIMPLE_HTML_EXPORT_VERSION);
+  assert.equal(runtimeEnvelope.scene, 'portable-empty-visual-fixture');
+  assert.deepEqual(runtimeEnvelope.options, {
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    uiSystem: false
+  });
+  assert.equal(runtimeEnvelope.sizeBytes, Buffer.byteLength(runtimeEnvelope.html, 'utf8'));
+  assert.equal(runtimeEnvelope.htmlHash, sha256Hex(runtimeEnvelope.html));
+  assert.match(runtimeEnvelope.html, /^<!DOCTYPE html>/);
+  assert.match(runtimeEnvelope.html, /portable-empty-visual-fixture HTML Game Export/);
+  assert.match(runtimeEnvelope.html, /"drawCalls":\[\]/);
+  assert.doesNotMatch(runtimeEnvelope.html, /"movementBlocking":/);
+  assert.doesNotMatch(runtimeEnvelope.html, /"gameplayHud":/);
+  assert.doesNotMatch(runtimeEnvelope.html, /"playableSaveLoad":/);
+  assert.doesNotMatch(runtimeEnvelope.html, /"audioLite":/);
+  assert.doesNotMatch(runtimeEnvelope.html, /"uiSystem":/);
+  assertNoForbiddenExportHtmlSurface(runtimeEnvelope.html);
+
+  const repoTempDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(repoTempDir, 'portable-empty-visual-cli.html');
+  const mcpOutPath = path.join(repoTempDir, 'portable-empty-visual-mcp.html');
+  const cliResult = runCli([
+    'export-html-game',
+    portableEmptyVisualScenePath,
+    '--out',
+    cliOutPath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+  assertExportEnvelopeShape(cliEnvelope, { expectedScene: 'portable-empty-visual-fixture' });
+  const cliHtml = await readFile(cliEnvelope.outputPath, 'utf8');
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_html_game',
+      arguments: {
+        scenePath: portableEmptyVisualSceneMcpPath,
+        outputPath: path.relative(repoRoot, mcpOutPath)
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+    assertExportEnvelopeShape(mcpEnvelope, { expectedScene: 'portable-empty-visual-fixture' });
+    const mcpHtml = await readFile(mcpEnvelope.outputPath, 'utf8');
+
+    assert.deepEqual(cliEnvelope.options, runtimeEnvelope.options);
+    assert.deepEqual(mcpEnvelope.options, runtimeEnvelope.options);
+    assert.equal(cliEnvelope.sizeBytes, runtimeEnvelope.sizeBytes);
+    assert.equal(mcpEnvelope.sizeBytes, runtimeEnvelope.sizeBytes);
+    assert.equal(cliEnvelope.htmlHash, runtimeEnvelope.htmlHash);
+    assert.equal(mcpEnvelope.htmlHash, runtimeEnvelope.htmlHash);
+    assert.equal(cliHtml, runtimeEnvelope.html);
+    assert.equal(mcpHtml, runtimeEnvelope.html);
+    assert.equal(mcpHtml, cliHtml);
+    assertNoForbiddenExportHtmlSurface(cliHtml);
+    assertNoForbiddenExportHtmlSurface(mcpHtml);
+  } finally {
+    await client.close();
+  }
 });
 
 test('export-html-game CLI writes deterministic files for each supported option set', async (t) => {
