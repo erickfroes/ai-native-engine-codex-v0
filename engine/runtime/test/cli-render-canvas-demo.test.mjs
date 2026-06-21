@@ -10,6 +10,7 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
 const prefabOnlyScenePath = path.join(
   repoRoot,
   'engine',
@@ -17,6 +18,19 @@ const prefabOnlyScenePath = path.join(
   'test',
   'fixtures',
   'prefab-usage-prefab-only.scene.json'
+);
+const missingAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'missing.asset-manifest.json');
+const invalidAssetManifestPath = path.join(
+  repoRoot,
+  'fixtures',
+  'assets',
+  'invalid.non-positive-size.asset-manifest.json'
+);
+const invalidTraversalAssetManifestPath = path.join(
+  repoRoot,
+  'fixtures',
+  'assets',
+  'invalid.traversal-src.asset-manifest.json'
 );
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 
@@ -96,6 +110,21 @@ test('render-canvas-demo writes HTML to --out and returns a small JSON envelope'
   assert.equal(writtenHtml, payload.html);
 });
 
+test('render-canvas-demo keeps sprite fallback intact when --asset-manifest is omitted', () => {
+  const result = runCli([
+    'render-canvas-demo',
+    spriteScenePath,
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+  const payload = JSON.parse(result.stdout);
+  assert.match(payload.html, /"kind":"rect"/);
+  assert.doesNotMatch(payload.html, /"kind":"sprite"/);
+  assert.doesNotMatch(payload.html, /file:\/\/\//);
+  assert.doesNotMatch(payload.html, /drawImage/);
+});
+
 test('render-canvas-demo with --asset-manifest keeps fully inherited prefab-backed sprite loading stable', () => {
   const result = runCli([
     'render-canvas-demo',
@@ -117,6 +146,49 @@ test('render-canvas-demo with --asset-manifest keeps fully inherited prefab-back
   assert.match(payload.html, /"x":4,"y":3,"width":16,"height":16,"layer":2/);
   assert.match(payload.html, /const image = new Image\(\);/);
   assert.match(payload.html, /context\.drawImage\(imageState\.image, drawCall\.x, drawCall\.y, drawCall\.width, drawCall\.height\);/);
+});
+
+test('render-canvas-demo fails predictably when --asset-manifest path does not exist', () => {
+  const result = runCli([
+    'render-canvas-demo',
+    spriteScenePath,
+    '--asset-manifest',
+    missingAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /ENOENT: no such file or directory/);
+  assert.match(result.stderr, /missing\.asset-manifest\.json/);
+});
+
+test('render-canvas-demo fails predictably when --asset-manifest is invalid', () => {
+  const result = runCli([
+    'render-canvas-demo',
+    spriteScenePath,
+    '--asset-manifest',
+    invalidAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /AssetManifestValidationError: asset manifest is invalid:/);
+  assert.match(result.stderr, /\$\.assets\[0\]\.width: must be >= 1/);
+  assert.match(result.stderr, /\$\.assets\[0\]\.height: must be >= 1/);
+});
+
+test('render-canvas-demo fails predictably when --asset-manifest src escapes manifest directory', () => {
+  const result = runCli([
+    'render-canvas-demo',
+    spriteScenePath,
+    '--asset-manifest',
+    invalidTraversalAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /AssetManifestValidationError: asset manifest is invalid:/);
+  assert.match(result.stderr, /\$\.assets\[0\]\.src: must stay inside the manifest directory/);
 });
 
 test('render-canvas-demo fails predictably for invalid width and height flags', () => {

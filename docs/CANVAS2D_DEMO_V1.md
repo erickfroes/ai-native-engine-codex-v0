@@ -15,6 +15,7 @@ Nao existe Pixi, Three, WebGL, editor, captura real de input, loop interativo re
 - o HTML e autocontido, sem scripts externos, pacotes, fetches de rede ou assets remotos
 - sem `assetManifestPath`, o script preserva o fallback atual e desenha apenas `drawCalls` com `kind: "rect"`
 - com `assetManifestPath`, `drawCalls` `sprite` herdados de `RenderSnapshot v1` recebem `assetSrc` local `file:///...` e o script tenta `new Image()` + `drawImage`, com fallback visual `rect` em erro ou indisponibilidade de `Image`
+- manifesto ausente, manifesto invalido e `src` com traversal falham de forma previsivel antes da geracao do HTML, reaproveitando o hardening compartilhado de `Asset Manifest v1` / `RenderSnapshot v1`
 - `title` e `metadata` sao escapados como HTML
 - `scene` e `id` do snapshot sao serializados com escaping seguro para script inline
 

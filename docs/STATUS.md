@@ -63,10 +63,9 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. Fechar o hardening do slice atual de prefab sem `components`, validando arquivo isolado, cena resolvida e pelo menos um consumidor downstream real.
-2. Adotar esse comportamento em 1 cena ou template pequeno com 2-3 entidades reutilizando o mesmo prefab, sem semantica nova.
-3. Expandir o diagnostico de prefab com rastreabilidade por path/origem/override, sem nested prefab e sem resolucao em memoria.
-4. So depois retomar o hardening incremental de `Portable HTML Export v2`, preservando `RenderSnapshot v1`.
+1. Expor validacao direta minima de `Asset Manifest v1` em CLI/MCP, reutilizando o validador atual para diagnosticar manifesto antes dos consumidores visuais, sem criar pipeline de assets, sem bundling e sem mutar `RenderSnapshot v1`.
+2. Retomar a expansao do prefab system minimo apenas em diff pequeno, com seguranca por path e sem nested prefab.
+3. Manter novos hardenings visuais em slices pequenos, preservando `RenderSnapshot v1`, `Simple HTML Export v1` e os contratos V1 base.
 
 ## Versoes de produto
 

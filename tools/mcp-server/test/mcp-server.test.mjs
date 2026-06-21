@@ -1049,6 +1049,73 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
       /\$\.assets\[0\]\.src: must stay inside the manifest directory/
     );
 
+    const renderCanvasDemoWithManifestMissingResponse = await client.request('tools/call', {
+      name: 'render_canvas_demo',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        assetManifestPath: './fixtures/assets/missing.asset-manifest.json'
+      }
+    });
+
+    assert.equal(renderCanvasDemoWithManifestMissingResponse.result.isError, true);
+    assert.equal(renderCanvasDemoWithManifestMissingResponse.result.structuredContent.ok, false);
+    assert.equal(renderCanvasDemoWithManifestMissingResponse.result.structuredContent.errorName, 'Error');
+    assert.match(
+      renderCanvasDemoWithManifestMissingResponse.result.content[0].text,
+      /ENOENT: no such file or directory/
+    );
+    assert.match(
+      renderCanvasDemoWithManifestMissingResponse.result.structuredContent.errorMessage,
+      /missing\.asset-manifest\.json/
+    );
+
+    const renderCanvasDemoWithManifestInvalidResponse = await client.request('tools/call', {
+      name: 'render_canvas_demo',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        assetManifestPath: './fixtures/assets/invalid.non-positive-size.asset-manifest.json'
+      }
+    });
+
+    assert.equal(renderCanvasDemoWithManifestInvalidResponse.result.isError, true);
+    assert.equal(renderCanvasDemoWithManifestInvalidResponse.result.structuredContent.ok, false);
+    assert.equal(renderCanvasDemoWithManifestInvalidResponse.result.structuredContent.errorName, 'AssetManifestValidationError');
+    assert.match(
+      renderCanvasDemoWithManifestInvalidResponse.result.content[0].text,
+      /asset manifest is invalid:/
+    );
+    assert.match(
+      renderCanvasDemoWithManifestInvalidResponse.result.structuredContent.errorMessage,
+      /\$\.assets\[0\]\.width: must be >= 1/
+    );
+    assert.match(
+      renderCanvasDemoWithManifestInvalidResponse.result.structuredContent.errorMessage,
+      /\$\.assets\[0\]\.height: must be >= 1/
+    );
+
+    const renderCanvasDemoWithManifestTraversalResponse = await client.request('tools/call', {
+      name: 'render_canvas_demo',
+      arguments: {
+        path: './fixtures/assets/sprite.scene.json',
+        assetManifestPath: './fixtures/assets/invalid.traversal-src.asset-manifest.json'
+      }
+    });
+
+    assert.equal(renderCanvasDemoWithManifestTraversalResponse.result.isError, true);
+    assert.equal(renderCanvasDemoWithManifestTraversalResponse.result.structuredContent.ok, false);
+    assert.equal(
+      renderCanvasDemoWithManifestTraversalResponse.result.structuredContent.errorName,
+      'AssetManifestValidationError'
+    );
+    assert.match(
+      renderCanvasDemoWithManifestTraversalResponse.result.content[0].text,
+      /asset manifest is invalid:/
+    );
+    assert.match(
+      renderCanvasDemoWithManifestTraversalResponse.result.structuredContent.errorMessage,
+      /\$\.assets\[0\]\.src: must stay inside the manifest directory/
+    );
+
     const renderBrowserDemoInvalidWidthResponse = await client.request('tools/call', {
       name: 'render_browser_demo',
       arguments: {

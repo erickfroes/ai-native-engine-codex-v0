@@ -16,6 +16,7 @@ const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
 const prefabOnlyScenePath = path.join(
   repoRoot,
   'engine',
@@ -34,6 +35,23 @@ const portableEmptyVisualScenePath = path.join(
   'portable-empty-visual.scene.json'
 );
 const portableEmptyVisualSceneMcpPath = './engine/runtime/test/fixtures/portable-empty-visual.scene.json';
+const spriteSceneMcpPath = './fixtures/assets/sprite.scene.json';
+const missingAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'missing.asset-manifest.json');
+const invalidAssetManifestPath = path.join(
+  repoRoot,
+  'fixtures',
+  'assets',
+  'invalid.non-positive-size.asset-manifest.json'
+);
+const invalidTraversalAssetManifestPath = path.join(
+  repoRoot,
+  'fixtures',
+  'assets',
+  'invalid.traversal-src.asset-manifest.json'
+);
+const missingAssetManifestMcpPath = './fixtures/assets/missing.asset-manifest.json';
+const invalidAssetManifestMcpPath = './fixtures/assets/invalid.non-positive-size.asset-manifest.json';
+const invalidTraversalAssetManifestMcpPath = './fixtures/assets/invalid.traversal-src.asset-manifest.json';
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const visualSpriteAssetManifestMcpPath = './fixtures/assets/visual-sprite.asset-manifest.json';
 
@@ -92,6 +110,16 @@ function createMcpClient() {
   }
 
   return { request, notify, close };
+}
+
+async function initializeMcpClient(client) {
+  const initResponse = await client.request('initialize', {
+    protocolVersion: '2025-06-18',
+    capabilities: {},
+    clientInfo: { name: 'node-test', version: '1.0.0' }
+  });
+  assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+  client.notify('notifications/initialized');
 }
 
 test('render-canvas-demo stays aligned across runtime, CLI and MCP for the same scene options', async () => {
@@ -306,4 +334,189 @@ test('render-canvas-demo stays deterministic for the same scene options', () => 
   assert.equal(first.status, 0, first.stderr);
   assert.equal(second.status, 0, second.stderr);
   assert.equal(first.stdout, second.stdout);
+});
+
+test('render-canvas-demo keeps sprite fallback intact across runtime, CLI and MCP without assetManifestPath', async () => {
+  const snapshot = await buildRenderSnapshotV1(spriteScenePath);
+  const runtimeEnvelope = {
+    canvasDemoVersion: CANVAS_2D_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderCanvas2DDemoHtmlV1({
+      title: `${snapshot.scene} Canvas 2D Demo`,
+      renderSnapshot: snapshot,
+      metadata: {
+        scene: snapshot.scene,
+        tick: snapshot.tick,
+        viewport: `${snapshot.viewport.width}x${snapshot.viewport.height}`
+      }
+    })
+  };
+
+  const cliResult = runCli([
+    'render-canvas-demo',
+    spriteScenePath,
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+
+  const mcp = createMcpClient();
+  try {
+    await initializeMcpClient(mcp);
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_canvas_demo',
+      arguments: {
+        path: spriteSceneMcpPath
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+
+    assert.deepEqual(runtimeEnvelope, cliEnvelope);
+    assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+    assert.match(runtimeEnvelope.html, /"kind":"rect"/);
+    assert.doesNotMatch(runtimeEnvelope.html, /"kind":"sprite"/);
+    assert.doesNotMatch(runtimeEnvelope.html, /file:\/\/\//);
+    assert.doesNotMatch(runtimeEnvelope.html, /drawImage/);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('render-canvas-demo reports missing asset manifest predictably across runtime, CLI and MCP', async () => {
+  await assert.rejects(
+    buildRenderSnapshotV1(spriteScenePath, { assetManifestPath: missingAssetManifestPath }),
+    /ENOENT: no such file or directory/
+  );
+
+  const cliResult = runCli([
+    'render-canvas-demo',
+    spriteScenePath,
+    '--asset-manifest',
+    missingAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.notEqual(cliResult.status, 0);
+  assert.match(cliResult.stderr, /ENOENT: no such file or directory/);
+  assert.match(cliResult.stderr, /missing\.asset-manifest\.json/);
+
+  const mcp = createMcpClient();
+  try {
+    await initializeMcpClient(mcp);
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_canvas_demo',
+      arguments: {
+        path: spriteSceneMcpPath,
+        assetManifestPath: missingAssetManifestMcpPath
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, true);
+    assert.equal(mcpResponse.result.structuredContent.ok, false);
+    assert.equal(mcpResponse.result.structuredContent.errorName, 'Error');
+    assert.match(mcpResponse.result.content[0].text, /ENOENT: no such file or directory/);
+    assert.match(mcpResponse.result.structuredContent.errorMessage, /missing\.asset-manifest\.json/);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('render-canvas-demo reports invalid asset manifest predictably across runtime, CLI and MCP', async () => {
+  await assert.rejects(
+    buildRenderSnapshotV1(spriteScenePath, { assetManifestPath: invalidAssetManifestPath }),
+    (error) => {
+      assert.equal(error.name, 'AssetManifestValidationError');
+      assert.match(error.message, /\$\.assets\[0\]\.width: must be >= 1/);
+      assert.match(error.message, /\$\.assets\[0\]\.height: must be >= 1/);
+      return true;
+    }
+  );
+
+  const cliResult = runCli([
+    'render-canvas-demo',
+    spriteScenePath,
+    '--asset-manifest',
+    invalidAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.notEqual(cliResult.status, 0);
+  assert.match(cliResult.stderr, /AssetManifestValidationError: asset manifest is invalid:/);
+  assert.match(cliResult.stderr, /\$\.assets\[0\]\.width: must be >= 1/);
+  assert.match(cliResult.stderr, /\$\.assets\[0\]\.height: must be >= 1/);
+
+  const mcp = createMcpClient();
+  try {
+    await initializeMcpClient(mcp);
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_canvas_demo',
+      arguments: {
+        path: spriteSceneMcpPath,
+        assetManifestPath: invalidAssetManifestMcpPath
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, true);
+    assert.equal(mcpResponse.result.structuredContent.ok, false);
+    assert.equal(mcpResponse.result.structuredContent.errorName, 'AssetManifestValidationError');
+    assert.match(mcpResponse.result.content[0].text, /asset manifest is invalid:/);
+    assert.match(mcpResponse.result.structuredContent.errorMessage, /\$\.assets\[0\]\.width: must be >= 1/);
+    assert.match(mcpResponse.result.structuredContent.errorMessage, /\$\.assets\[0\]\.height: must be >= 1/);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('render-canvas-demo reports manifest traversal predictably across runtime, CLI and MCP', async () => {
+  await assert.rejects(
+    buildRenderSnapshotV1(spriteScenePath, { assetManifestPath: invalidTraversalAssetManifestPath }),
+    (error) => {
+      assert.equal(error.name, 'AssetManifestValidationError');
+      assert.match(error.message, /\$\.assets\[0\]\.src: must stay inside the manifest directory/);
+      return true;
+    }
+  );
+
+  const cliResult = runCli([
+    'render-canvas-demo',
+    spriteScenePath,
+    '--asset-manifest',
+    invalidTraversalAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.notEqual(cliResult.status, 0);
+  assert.match(cliResult.stderr, /AssetManifestValidationError: asset manifest is invalid:/);
+  assert.match(cliResult.stderr, /\$\.assets\[0\]\.src: must stay inside the manifest directory/);
+
+  const mcp = createMcpClient();
+  try {
+    await initializeMcpClient(mcp);
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_canvas_demo',
+      arguments: {
+        path: spriteSceneMcpPath,
+        assetManifestPath: invalidTraversalAssetManifestMcpPath
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, true);
+    assert.equal(mcpResponse.result.structuredContent.ok, false);
+    assert.equal(mcpResponse.result.structuredContent.errorName, 'AssetManifestValidationError');
+    assert.match(mcpResponse.result.content[0].text, /asset manifest is invalid:/);
+    assert.match(
+      mcpResponse.result.structuredContent.errorMessage,
+      /\$\.assets\[0\]\.src: must stay inside the manifest directory/
+    );
+  } finally {
+    await mcp.close();
+  }
 });

@@ -43,6 +43,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Portable HTML Export v2 no-op hardening sem `visual.sprite.animation`: concluido com cobertura runtime/CLI/MCP para `assetManifestPath` + `spriteAnimation` em cena com `visual.sprite` asset-backed e `animations: []`, preservando sprites inline normais, `embeddedAssetCount > 0` e ausencia de `file:///`.
 - Prefab Portable HTML Export hardening sem `components` explicitos + `assetManifestPath`: concluido com cobertura runtime/CLI/MCP para `Portable HTML Export v2` em cena prefab-backed herdando `visual.sprite` integralmente do prefab, preservando sprite inline estavel, `embeddedAssetCount > 0`, metadata vazia de `spriteAnimation` e ausencia de `file:///`.
 - Prefab Canvas2D Demo hardening sem `components` explicitos + `assetManifestPath`: concluido com suporte opt-in a `assetManifestPath` em runtime/CLI/MCP para `Canvas2D Demo v1` e cobertura cross-interface em cena prefab-backed herdando `visual.sprite` integralmente do prefab, preservando `assetSrc` local estavel, `drawImage` no ponto herdado e fallback `rect` deterministico quando a imagem nao estiver disponivel.
+- Canvas2D Demo v1 hardening negativo de `assetManifestPath`: concluido com cobertura runtime/CLI/MCP para manifesto ausente, manifesto invalido e traversal, preservando o fallback antigo sem manifesto e sem reabrir `RenderSnapshot v1`.
 - Prefab System v1: concluido como resolucao declarativa minima por arquivo e report diagnostico runtime/CLI/MCP.
 - Prefab Validation Report v1: concluido como validacao direta de `.prefab.json` via runtime/CLI/MCP.
 - Prefab follow-up baseline sem `components` explicitos em entidade prefab-backed: concluido e promovido para a linha viva de continuidade.
@@ -145,7 +146,7 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Fechar o hardening negativo recem-aberto por `assetManifestPath` em `Canvas2D Demo v1`: cobrir erros previsiveis de manifesto ausente/invalido/traversal em runtime/CLI/MCP, preservando o comportamento antigo sem manifesto e sem reabrir `RenderSnapshot v1`.
+1. Expor validacao direta minima de `Asset Manifest v1` em CLI/MCP, reutilizando o validador atual para diagnosticar manifesto antes dos consumidores visuais, sem criar pipeline de assets, sem bundling e sem mutar `RenderSnapshot v1`.
 2. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Regra de manutencao da linha de seguimento

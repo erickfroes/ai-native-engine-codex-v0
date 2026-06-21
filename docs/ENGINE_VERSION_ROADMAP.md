@@ -212,5 +212,5 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Expandir o prefab system minimo sem perder seguranca por path, contratos curtos e diff pequeno.
-2. Harden `Portable HTML Export v2` em slices pequenos, preservando `RenderSnapshot v1`, HUD Lite e UI System visual sem reabrir `Simple HTML Export v1`.
+1. Expor validacao direta minima de `Asset Manifest v1` em CLI/MCP, reutilizando o validador atual para diagnosticar manifesto antes dos consumidores visuais, sem criar pipeline de assets, sem bundling e sem mutar `RenderSnapshot v1`.
+2. Retomar a expansao do prefab system minimo sem perder seguranca por path, contratos curtos e diff pequeno.
