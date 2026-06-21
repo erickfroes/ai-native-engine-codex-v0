@@ -39,6 +39,15 @@ const invalidCameraViewportScenePath = path.join(
   'fixtures',
   'invalid_camera_viewport_x.scene.json'
 );
+const unsafePrefabPathsScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'invalid_prefab_unsafe_paths.scene.json'
+);
+const unsafePrefabPathsSceneMcpPath = './engine/runtime/test/fixtures/invalid_prefab_unsafe_paths.scene.json';
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -720,6 +729,49 @@ test('RenderSnapshot v1 reports invalid camera viewport scenes predictably acros
     assert.equal(mcpResponse.result.structuredContent.errorName, 'SceneValidationError');
     assert.match(mcpResponse.result.content[0].text, /Scene validation failed for/);
     assert.match(mcpResponse.result.structuredContent.errorMessage, /invalid_camera_viewport_x\.scene\.json/);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('RenderSnapshot v1 fails predictably across runtime, CLI and MCP for unsafe prefab path references', async () => {
+  await assert.rejects(
+    () => buildRenderSnapshotV1(unsafePrefabPathsScenePath),
+    /Scene validation failed/
+  );
+
+  const cliResult = runCli([
+    'render-snapshot',
+    unsafePrefabPathsScenePath,
+    '--json'
+  ]);
+
+  assert.notEqual(cliResult.status, 0);
+  assert.match(cliResult.stderr, /SceneValidationError: Scene validation failed for/);
+  assert.match(cliResult.stderr, /invalid_prefab_unsafe_paths\.scene\.json/);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_snapshot',
+      arguments: {
+        path: unsafePrefabPathsSceneMcpPath
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, true);
+    assert.equal(mcpResponse.result.structuredContent.ok, false);
+    assert.equal(mcpResponse.result.structuredContent.errorName, 'SceneValidationError');
+    assert.match(mcpResponse.result.content[0].text, /Scene validation failed for/);
+    assert.match(mcpResponse.result.structuredContent.errorMessage, /invalid_prefab_unsafe_paths\.scene\.json/);
   } finally {
     await mcp.close();
   }

@@ -31,6 +31,14 @@ export function isSafePrefabRelativePath(value) {
   );
 }
 
+export function isPrefabDocumentPath(value) {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    return false;
+  }
+
+  return value.trim().replaceAll('\\', '/').endsWith('.prefab.json');
+}
+
 function validatePrefabInvariants(prefab) {
   const errors = [];
 
@@ -252,6 +260,12 @@ export async function resolveScenePrefabsV1(scene, scenePath) {
     const prefabPathErrorPath = `$.entities[${entityIndex}].prefab`;
     if (!isSafePrefabRelativePath(prefabRef)) {
       pushMessage(errors, prefabPathErrorPath, 'prefab must be a safe relative path');
+      resolvedScene.entities.push(cloneJson(entity));
+      continue;
+    }
+
+    if (!isPrefabDocumentPath(prefabRef)) {
+      pushMessage(errors, prefabPathErrorPath, 'prefab must reference a .prefab.json file');
       resolvedScene.entities.push(cloneJson(entity));
       continue;
     }

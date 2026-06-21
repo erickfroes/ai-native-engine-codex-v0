@@ -10,6 +10,7 @@ const fixtureDir = path.join(testDir, 'fixtures');
 const prefabScenePath = path.join(fixtureDir, 'prefab-usage.scene.json');
 const prefabOnlyScenePath = path.join(fixtureDir, 'prefab-usage-prefab-only.scene.json');
 const missingPrefabScenePath = path.join(fixtureDir, 'invalid_prefab_missing.scene.json');
+const unsafePrefabPathsScenePath = path.join(fixtureDir, 'invalid_prefab_unsafe_paths.scene.json');
 const validPrefabAbsolutePath = path.join(fixtureDir, 'prefabs', 'player-actor.prefab.json');
 
 test('buildPrefabUsageReportV2 returns deterministic traceable prefab usage for entity overrides', async () => {
@@ -108,6 +109,13 @@ test('buildPrefabUsageReportV2 keeps source paths deterministic when prefab-back
 test('buildPrefabUsageReportV2 fails predictably for invalid prefab scenes', async () => {
   await assert.rejects(
     () => buildPrefabUsageReportV2(missingPrefabScenePath),
+    /Scene validation failed/
+  );
+});
+
+test('buildPrefabUsageReportV2 fails predictably for unsafe prefab path references', async () => {
+  await assert.rejects(
+    () => buildPrefabUsageReportV2(unsafePrefabPathsScenePath),
     /Scene validation failed/
   );
 });

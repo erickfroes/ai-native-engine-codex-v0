@@ -19,6 +19,8 @@ const prefabScenePath = path.join(fixtureDir, 'prefab-usage.scene.json');
 const prefabOnlyScenePath = path.join(fixtureDir, 'prefab-usage-prefab-only.scene.json');
 const missingPrefabScenePath = path.join(fixtureDir, 'invalid_prefab_missing.scene.json');
 const duplicatePrefabScenePath = path.join(fixtureDir, 'invalid_prefab_duplicate_component.scene.json');
+const wrongExtensionPrefabScenePath = path.join(fixtureDir, 'invalid_prefab_wrong_extension.scene.json');
+const unsafePrefabPathsScenePath = path.join(fixtureDir, 'invalid_prefab_unsafe_paths.scene.json');
 const prefabInstancedScenePath = path.join(repoRoot, 'scenes', 'prefab-instanced.scene.json');
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 
@@ -200,9 +202,11 @@ test('buildRenderSnapshotV1 renders fully inherited prefab-backed visual.sprite 
   ]);
 });
 
-test('prefab scene validation fails predictably for missing and invalid prefab documents', async () => {
+test('prefab scene validation fails predictably for missing, invalid, wrong-extension and unsafe-path prefab documents', async () => {
   const missingReport = await validateSceneFile(missingPrefabScenePath);
   const duplicateReport = await validateSceneFile(duplicatePrefabScenePath);
+  const wrongExtensionReport = await validateSceneFile(wrongExtensionPrefabScenePath);
+  const unsafePathsReport = await validateSceneFile(unsafePrefabPathsScenePath);
 
   assert.equal(missingReport.ok, false);
   assert.ok(
@@ -221,6 +225,35 @@ test('prefab scene validation fails predictably for missing and invalid prefab d
         error.message.includes('duplicate component kind in prefab: visual.sprite')
       )
   );
+
+  assert.equal(wrongExtensionReport.ok, false);
+  assert.ok(
+    wrongExtensionReport.errors.some(
+      (error) =>
+        error.path === '$.entities[0].prefab' &&
+        error.message === 'prefab must reference a .prefab.json file'
+    )
+  );
+
+  assert.equal(unsafePathsReport.ok, false);
+  assert.deepEqual(unsafePathsReport.errors, [
+    {
+      path: '$.entities[0].prefab',
+      message: 'prefab must be a safe relative path'
+    },
+    {
+      path: '$.entities[1].prefab',
+      message: 'prefab must be a safe relative path'
+    },
+    {
+      path: '$.entities[2].prefab',
+      message: 'prefab must be a safe relative path'
+    },
+    {
+      path: '$.entities[3].prefab',
+      message: 'prefab must be a safe relative path'
+    }
+  ]);
 });
 
 test('prefab-instanced scene reuses one prefab across multiple entities without introducing new semantics', async () => {

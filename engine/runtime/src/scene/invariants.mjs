@@ -1,3 +1,5 @@
+import { isPrefabDocumentPath } from './prefab-v1.mjs';
+
 function pushMessage(collection, path, message) {
   collection.push({ path, message });
 }
@@ -589,6 +591,8 @@ export function validateSceneInvariants(scene) {
 
     if (hasSafePrefabReference(entity) && !isSafeRelativePath(entity.prefab)) {
       pushMessage(errors, `${entityPath}.prefab`, 'prefab must be a safe relative path');
+    } else if (hasSafePrefabReference(entity) && !isPrefabDocumentPath(entity.prefab)) {
+      pushMessage(errors, `${entityPath}.prefab`, 'prefab must reference a .prefab.json file');
     }
 
     if (entity.components === undefined) {

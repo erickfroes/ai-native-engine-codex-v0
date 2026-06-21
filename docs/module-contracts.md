@@ -659,6 +659,7 @@ Contrato minimo para resolver `entity.prefab` a partir de um arquivo declarativo
 - MCP: `inspect_prefab_usage({ path })`.
 - MCP: `inspect_prefab_usage_v2({ path })`.
 - entidade com `prefab` pode omitir `components` quando nao precisa override local.
+- `entity.prefab` deve permanecer path relativo seguro e apontar para `.prefab.json`; refs com traversal, URL, path absoluto/UNC ou extensao diferente falham de forma previsivel.
 - merge: componentes do prefab entram primeiro, componentes da entidade sobrescrevem por `kind`, extras da entidade entram ao final.
 - `validateSceneFile`, `RenderSnapshot v1`, reports de colisao, Browser Demo e demais fluxos por path passam a consumir a cena resolvida.
 - cenas sem `entity.prefab` permanecem iguais.

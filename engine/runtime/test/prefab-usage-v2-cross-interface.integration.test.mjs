@@ -168,3 +168,23 @@ test('PrefabUsageReport v2 invalid prefab scenes fail predictably across runtime
   assert.equal(mcpResponse.result.isError, true);
   assert.match(mcpResponse.result.content[0].text, /Scene validation failed/);
 });
+
+test('PrefabUsageReport v2 fails predictably across runtime, CLI and MCP for unsafe prefab path references', async () => {
+  const relativePath = 'engine/runtime/test/fixtures/invalid_prefab_unsafe_paths.scene.json';
+  const absolutePath = path.join(repoRoot, relativePath);
+
+  await assert.rejects(
+    () => buildPrefabUsageReportV2(absolutePath),
+    /Scene validation failed/
+  );
+
+  const cliResult = runCli(['inspect-prefab-usage-v2', absolutePath, '--json']);
+  assert.notEqual(cliResult.status, 0);
+  assert.match(cliResult.stderr, /Scene validation failed/);
+
+  const mcpResponse = await callMcpTool('inspect_prefab_usage_v2', {
+    path: `./${relativePath}`
+  });
+  assert.equal(mcpResponse.result.isError, true);
+  assert.match(mcpResponse.result.content[0].text, /Scene validation failed/);
+});

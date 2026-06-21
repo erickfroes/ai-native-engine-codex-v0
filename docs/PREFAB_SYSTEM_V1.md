@@ -5,6 +5,8 @@ Prefab System v1 inicia o slice de V2 com uma semantica pequena, deterministica 
 ## Escopo do contrato
 
 - `entity.prefab` aponta para um arquivo `.prefab.json` com caminho relativo seguro a partir do diretorio da cena.
+- refs com traversal, URL e paths absolutos/UNC continuam invalidas; o runtime falha de forma previsivel antes da resolucao do arquivo.
+- refs seguras com extensao errada continuam invalidas; o runtime falha de forma previsivel quando `entity.prefab` nao aponta para `.prefab.json`.
 - O arquivo segue `schemas/prefab.schema.json`.
 - O runtime resolve prefabs quando recebe **path de cena**. Objetos de cena em memoria continuam sem resolucao automatica de prefab neste slice.
 - Cada prefab representa um pacote de componentes para uma unica entidade.
@@ -57,6 +59,7 @@ Validacao direta de arquivo:
 - Cenas sem `entity.prefab` permanecem iguais.
 - `validateSceneFile`, `render-snapshot`, reports de colisao, Browser Demo e demais fluxos que carregam cena por path passam a consumir a cena resolvida.
 - `Game Templates v1` e `V1 Small 2D Game Creation Guide` continuam validos; eles apenas nao dependem deste contrato.
+- refs `entity.prefab` com extensao diferente de `.prefab.json`, traversal, URL ou paths absolutos/UNC falham antes da resolucao do arquivo, sem abrir nested prefab nem mutar `RenderSnapshot v1`.
 
 ## Fora de escopo
 

@@ -54,6 +54,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - Portable HTML Export v2 com assets inline e Sprite Animation v1 opt-in no caminho portatil;
 - Prefab System v1 como resolucao declarativa minima e report diagnostico runtime/CLI/MCP;
 - Prefab Validation Report v1 como validacao direta de `.prefab.json` em runtime/CLI/MCP;
+- Prefab path hardening v1 com erros previsiveis para `entity.prefab` fora de `.prefab.json` ou com traversal, URL e path absoluto/UNC;
 - validacao direta de `Asset Manifest v1` em runtime/CLI/MCP com `AssetManifestValidationReport v1`;
 - Prefab follow-up baseline sem `components` explicitos em entidade prefab-backed;
 - V1 Small 2D Capability Matrix;
@@ -65,7 +66,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. Retomar a expansao minima do prefab system em diff pequeno, priorizando hardening de referencias por path em `entity.prefab` via runtime/CLI/MCP, sem nested prefab e sem mutar `RenderSnapshot v1`.
+1. Congelar `entity.prefab` v1 apos o hardening de path e evitar nova semantica de prefab fora de bugfix/compatibilidade.
 2. Manter novos hardenings visuais em slices pequenos, preservando `RenderSnapshot v1`, `Simple HTML Export v1` e os contratos V1 base.
 3. Manter `AssetManifestValidationReport v1` como superficie publica direta do manifesto, sem reabrir bundling ou pipeline pesado de assets.
 

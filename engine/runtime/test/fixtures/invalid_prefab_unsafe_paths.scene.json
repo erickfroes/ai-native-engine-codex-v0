@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "invalid-prefab-unsafe-paths-fixture"
+  },
+  "systems": [
+    "core.loop",
+    "input.keyboard"
+  ],
+  "entities": [
+    {
+      "id": "player.traversal",
+      "name": "Player Traversal",
+      "prefab": "../prefabs/player-actor.prefab.json",
+      "components": []
+    },
+    {
+      "id": "player.url",
+      "name": "Player Url",
+      "prefab": "file://prefabs/player-actor.prefab.json",
+      "components": []
+    },
+    {
+      "id": "player.absolute",
+      "name": "Player Absolute",
+      "prefab": "C:\\temp\\player-actor.prefab.json",
+      "components": []
+    },
+    {
+      "id": "player.unc",
+      "name": "Player Unc",
+      "prefab": "\\\\server\\share\\player-actor.prefab.json",
+      "components": []
+    }
+  ]
+}

@@ -50,6 +50,8 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Cena `scenes/prefab-instanced.scene.json`: endurecida com 3 entidades reutilizando o mesmo prefab, incluindo uma entidade sem `components` explicitos, validada por runtime/CLI/MCP.
 - Prefab Usage Report v2: concluido como diagnostico opt-in com `absolutePath`, `entityPath`, `prefabAbsolutePath`, paths de componente e overrides explicitos via runtime/CLI/MCP, preservando `v1`.
 - Asset Manifest Validation Report v1: concluido como validacao direta minima de `Asset Manifest v1` em runtime/CLI/MCP com `buildAssetManifestValidationReportV1`, `validate-asset-manifest` e `validate_asset_manifest`, preservando manifesto parseado quando invalido e retornando erros estaveis para arquivo ausente e JSON malformado sem mutar `RenderSnapshot v1`.
+- Prefab path extension hardening: concluido com erro previsivel para `entity.prefab` que nao aponta para `.prefab.json`, preservando a exigencia de path relativo seguro por cena e cobrindo runtime/CLI/MCP das superficies prefab-backed sem abrir nested prefab.
+- Prefab unsafe path hardening: concluido com cobertura runtime/CLI/MCP para `entity.prefab` com traversal, URL e paths absolutos/UNC, preservando a exigencia de path relativo seguro por cena sem abrir nested prefab nem mutar `RenderSnapshot v1`.
 
 ## O que o Codex recebe
 
@@ -69,7 +71,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `visual.sprite.animation` com `inspect-sprite-animation` / `inspect_sprite_animation` e `render-browser-demo --sprite-animation` / `render_browser_demo({ spriteAnimation: true })`;
 - `export-portable-html-game` / `export_portable_html_game` com `--asset-manifest` e `--sprite-animation` para HTML portatil com assets inline;
 - `ui.screen` declarativo com widget tree serializavel, `inspect-ui-system` / `inspect_ui_system` e `render-browser-demo --ui-system` / `export-html-game --ui-system`;
-- `entity.prefab` resolvido por arquivo local seguro em `loadSceneFile` e consumidores por path;
+- `entity.prefab` resolvido por arquivo local seguro em `loadSceneFile` e consumidores por path, com falha previsivel para traversal, URL, path absoluto/UNC e extensao errada;
 - entidade prefab-backed pode omitir `components` quando nao ha override local;
 - `scenes/prefab-instanced.scene.json` demonstra reutilizacao real do mesmo prefab em multiplas entidades sem semantica nova;
 - `validate-prefab` / `validate_prefab` para validar prefab sem depender de uma cena;
@@ -149,7 +151,7 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Retomar a expansao minima do prefab system em diff pequeno, priorizando hardening de referencias por path em `entity.prefab` via runtime/CLI/MCP, sem nested prefab e sem mutar `RenderSnapshot v1`.
+1. Congelar `entity.prefab` v1 apos o hardening de path e priorizar o menor hardening visual cross-interface restante, sem nested prefab e sem mutar `RenderSnapshot v1`.
 2. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Regra de manutencao da linha de seguimento

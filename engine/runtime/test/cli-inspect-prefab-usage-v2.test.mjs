@@ -10,6 +10,7 @@ const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const fixtureDir = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures');
 const prefabScenePath = path.join(fixtureDir, 'prefab-usage.scene.json');
 const missingPrefabScenePath = path.join(fixtureDir, 'invalid_prefab_missing.scene.json');
+const unsafePrefabPathsScenePath = path.join(fixtureDir, 'invalid_prefab_unsafe_paths.scene.json');
 const validPrefabAbsolutePath = path.join(fixtureDir, 'prefabs', 'player-actor.prefab.json');
 
 function runCli(args) {
@@ -97,4 +98,11 @@ test('inspect-prefab-usage-v2 fails predictably for invalid prefab scenes', () =
 
   assert.equal(result.status, 1);
   assert.match(result.stderr, /Scene validation failed for .*invalid_prefab_missing\.scene\.json/);
+});
+
+test('inspect-prefab-usage-v2 fails predictably for unsafe prefab path references', () => {
+  const result = runCli(['inspect-prefab-usage-v2', unsafePrefabPathsScenePath, '--json']);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Scene validation failed for .*invalid_prefab_unsafe_paths\.scene\.json/);
 });
