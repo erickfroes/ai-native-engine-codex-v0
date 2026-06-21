@@ -192,6 +192,40 @@ test('Portable HTML Export v2 builds deterministic inline-asset HTML without mut
   assertNoForbiddenPortableExportHtmlSurface(baseline.html);
 });
 
+test('Portable HTML Export v2 keeps rect fallback without assetManifestPath even when spriteAnimation is enabled', async () => {
+  const baseline = await buildPortableHtmlGameExportV2(spriteAnimationIdleScenePath, {
+    spriteAnimation: true
+  });
+  const repeated = await buildPortableHtmlGameExportV2(spriteAnimationIdleScenePath, {
+    spriteAnimation: true
+  });
+
+  assert.deepEqual(baseline, repeated);
+  assert.equal(baseline.exportVersion, PORTABLE_HTML_EXPORT_VERSION);
+  assert.equal(baseline.scene, 'sprite-animation-idle-fixture');
+  assert.deepEqual(baseline.options, {
+    assetManifest: false,
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    spriteAnimation: true,
+    uiSystem: false
+  });
+  assert.equal(baseline.embeddedAssetCount, 0);
+  assert.equal(baseline.sizeBytes, Buffer.byteLength(baseline.html, 'utf8'));
+  assert.equal(baseline.htmlHash, sha256Hex(baseline.html));
+  assert.match(baseline.html, /^<!DOCTYPE html>/);
+  assert.match(baseline.html, /sprite-animation-idle-fixture Portable HTML Game Export/);
+  assert.match(baseline.html, /"spriteAnimation":\{/);
+  assert.match(baseline.html, /"animationId":"player\.idle"/);
+  assert.match(baseline.html, /"kind":"rect"/);
+  assert.doesNotMatch(baseline.html, /"kind":"sprite"/);
+  assert.doesNotMatch(baseline.html, /data:image\/png;base64,/);
+  assert.doesNotMatch(baseline.html, /file:\/\/\//);
+  assertNoForbiddenPortableExportHtmlSurface(baseline.html);
+});
+
 test('export-portable-html-game CLI writes deterministic files for inline assets, sprite animation and UI overlay', async (t) => {
   const outDir = await createTempDir(t);
   const cases = [
@@ -230,6 +264,24 @@ test('export-portable-html-game CLI writes deterministic files for inline assets
       },
       present: [/"spriteAnimation":\{/, /"animationId":"player\.idle"/, /"assetSrc":"data:image\/png;base64,/],
       absent: [/file:\/\/\//, /"uiSystem":/]
+    },
+    {
+      name: 'sprite-animation-fallback-no-manifest',
+      scenePath: spriteAnimationIdleScenePath,
+      flags: ['--sprite-animation'],
+      expectedScene: 'sprite-animation-idle-fixture',
+      expectedEmbeddedAssetCount: 0,
+      options: {
+        assetManifest: false,
+        movementBlocking: false,
+        gameplayHud: false,
+        playableSaveLoad: false,
+        audioLite: false,
+        spriteAnimation: true,
+        uiSystem: false
+      },
+      present: [/"spriteAnimation":\{/, /"animationId":"player\.idle"/, /"kind":"rect"/],
+      absent: [/file:\/\/\//, /data:image\/png;base64,/, /"kind":"sprite"/, /"uiSystem":/]
     },
     {
       name: 'ui-system',
@@ -396,6 +448,67 @@ test('export_portable_html_game MCP writes the same sprite-animation portable ex
         scenePath: spriteAnimationIdleSceneMcpPath,
         outputPath: path.relative(repoRoot, mcpOutPath),
         assetManifestPath: validAssetManifestMcpPath,
+        spriteAnimation: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+    assertPortableExportEnvelopeShape(mcpEnvelope, { expectedScene: 'sprite-animation-idle-fixture' });
+    assert.equal(mcpEnvelope.outputPath, mcpOutPath);
+    assert.deepEqual(
+      { ...mcpEnvelope, outputPath: '<normalized>' },
+      { ...cliEnvelope, outputPath: '<normalized>' }
+    );
+
+    const mcpHtml = await readFile(mcpEnvelope.outputPath, 'utf8');
+    assert.equal(mcpHtml, cliHtml);
+    assertNoForbiddenPortableExportHtmlSurface(mcpHtml);
+  } finally {
+    await client.close();
+  }
+});
+
+test('export_portable_html_game MCP preserves rect fallback without assetManifestPath when spriteAnimation is true', async (t) => {
+  const repoTempDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(repoTempDir, 'cli-portable-sprite-animation-no-manifest.html');
+  const mcpOutPath = path.join(repoTempDir, 'mcp-portable-sprite-animation-no-manifest.html');
+  const cliResult = runCli([
+    'export-portable-html-game',
+    spriteAnimationIdleScenePath,
+    '--out',
+    cliOutPath,
+    '--sprite-animation',
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+  assert.deepEqual(cliEnvelope.options, {
+    assetManifest: false,
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    spriteAnimation: true,
+    uiSystem: false
+  });
+  assert.equal(cliEnvelope.embeddedAssetCount, 0);
+  const cliHtml = await readFile(cliEnvelope.outputPath, 'utf8');
+  assert.match(cliHtml, /"spriteAnimation":\{/);
+  assert.match(cliHtml, /"kind":"rect"/);
+  assert.doesNotMatch(cliHtml, /"kind":"sprite"/);
+  assert.doesNotMatch(cliHtml, /data:image\/png;base64,/);
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_portable_html_game',
+      arguments: {
+        scenePath: spriteAnimationIdleSceneMcpPath,
+        outputPath: path.relative(repoRoot, mcpOutPath),
         spriteAnimation: true
       }
     });

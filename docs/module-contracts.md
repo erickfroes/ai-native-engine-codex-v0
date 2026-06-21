@@ -603,6 +603,7 @@ Contrato versionado para escrever HTML jogavel portatil com assets inline e cons
 - se um sprite do manifesto apontar para extensao fora dessa lista, runtime/CLI/MCP falham de forma previsivel no contrato v2 sem mutar `Asset Manifest v1`.
 - com `spriteAnimation`, o HTML exportado pode animar sprite-sheets embutidos localmente.
 - sem `assetManifestPath`, o fallback visual atual permanece.
+- sem `assetManifestPath`, `spriteAnimation` pode permanecer no metadata, mas os drawCalls continuam no fallback atual `rect`, sem `data:` URL inline e sem `file:///`.
 - `Simple HTML Export v1` continua sem consumo visual de Sprite Animation neste slice; a evolucao acontece no contrato v2 separado.
 - nao e bundler, servidor, atlas pipeline, editor ou runtime canonico amplo de gameplay.
 

@@ -25,6 +25,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Sprite Animation v1: concluido como diagnostico declarativo runtime/CLI/MCP e consumo visual opt-in na Browser Demo para sprites asset-backed.
 - Portable HTML Export v2: concluido como export portatil com assets inline e consumo visual opt-in de Sprite Animation v1, preservando `RenderSnapshot v1` e mantendo `Simple HTML Export v1` fechado.
 - Portable HTML Export v2 unsupported-extension hardening: concluido com erro previsivel para assets fora das extensoes inline suportadas (`.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`, `.bmp`, `.svg`) em runtime/CLI/MCP, sem mutar `Asset Manifest v1`.
+- Portable HTML Export v2 no-manifest spriteAnimation fallback hardening: concluido com cobertura runtime/CLI/MCP para `spriteAnimation` sem `assetManifestPath`, preservando `metadata.spriteAnimation` opt-in quando solicitado e mantendo drawCalls no fallback `rect`, sem `data:` URL inline e sem `file:///`.
 - Prefab System v1: concluido como resolucao declarativa minima por arquivo e report diagnostico runtime/CLI/MCP.
 - Prefab Validation Report v1: concluido como validacao direta de `.prefab.json` via runtime/CLI/MCP.
 - Prefab follow-up baseline sem `components` explicitos em entidade prefab-backed: concluido e promovido para a linha viva de continuidade.
@@ -127,7 +128,7 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Continuar o hardening incremental de `Portable HTML Export v2` cobrindo explicitamente o fallback sem `assetManifestPath`, inclusive com `spriteAnimation`, preservando `RenderSnapshot v1`, `Simple HTML Export v1` e o caminho default da Browser Demo.
+1. Continuar o hardening incremental de `Portable HTML Export v2` cobrindo explicitamente o caminho no-op com `assetManifestPath` e `spriteAnimation` quando a cena nao produz drawCalls `sprite` asset-backed, preservando `RenderSnapshot v1`, `Simple HTML Export v1` e o caminho default da Browser Demo.
 2. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Regra de manutencao da linha de seguimento
