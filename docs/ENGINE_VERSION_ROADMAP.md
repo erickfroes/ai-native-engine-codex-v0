@@ -61,7 +61,7 @@ Capacidades alvo:
 - Audio Lite v1 como primeiro pacote incremental pos-checkpoint;
 - Sprite Animation v1 concluido como diagnostico declarativo runtime/CLI/MCP;
 - `AssetManifestValidationReport v1` concluido como validacao direta minima de manifesto em runtime/CLI/MCP, com report versionado e erros previsiveis;
-- `entity.prefab` agora endurece refs com extensao errada, traversal, URL e paths absolutos/UNC, falhando de forma previsivel fora do contrato v1;
+- `entity.prefab` agora endurece refs com extensao errada, traversal, URL e paths absolutos/UNC, falhando de forma previsivel fora do contrato v1 tambem em Render SVG, Canvas2D Demo e Simple HTML Export;
 - save/load jogavel formal futuro, se ainda necessario;
 - release checkpoint V1 Small 2D concluido como gate de fechamento.
 
@@ -215,4 +215,4 @@ Criterio realista:
 A partir do estado atual, seguir:
 
 1. Congelar `entity.prefab` v1 apos o hardening de path e priorizar apenas bugfix/compatibilidade nessa trilha.
-2. Manter hardenings incrementais pequenos sem reabrir pipeline pesado de assets.
+2. Fechar hardenings visuais restantes em slices pequenos, especialmente SVG Demo HTML e Portable HTML Export v2, sem reabrir pipeline pesado de assets.

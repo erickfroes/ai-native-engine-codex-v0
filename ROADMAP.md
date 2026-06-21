@@ -110,7 +110,7 @@ Entregas alvo:
 - matriz de regressao visual/headless;
 - pacote Codex com prompts/skills/subagentes para criar um jogo 2D pequeno.
 
-Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. Audio Lite v1, Sprite Animation v1 e Portable HTML Export v2 ja iniciam V2 de forma incremental, sem editor, servidor, fisica completa ou pathfinding. `AssetManifestValidationReport v1` agora tambem fecha a validacao direta minima de manifesto em runtime/CLI/MCP, com shape versionado e erros previsiveis para arquivo ausente e JSON malformado. `entity.prefab` agora tambem falha de forma previsivel quando nao aponta para `.prefab.json` ou tenta usar traversal, URL e paths absolutos/UNC.
+Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. Audio Lite v1, Sprite Animation v1 e Portable HTML Export v2 ja iniciam V2 de forma incremental, sem editor, servidor, fisica completa ou pathfinding. `AssetManifestValidationReport v1` agora tambem fecha a validacao direta minima de manifesto em runtime/CLI/MCP, com shape versionado e erros previsiveis para arquivo ausente e JSON malformado. `entity.prefab` agora tambem falha de forma previsivel quando nao aponta para `.prefab.json` ou tenta usar traversal, URL e paths absolutos/UNC, incluindo cobertura visual/export para Render SVG, Canvas2D Demo e Simple HTML Export.
 
 Criterio de conclusao:
 
@@ -128,7 +128,7 @@ Subagentes recomendados:
 Linha de trabalho atual recomendada:
 
 1. Congelar `entity.prefab` v1 apos o hardening de path e priorizar apenas bugfix/compatibilidade nessa trilha.
-2. Manter hardenings visuais incrementais em slices pequenos, sem reabrir pipeline pesado de assets.
+2. Fechar hardenings visuais restantes em slices pequenos, especialmente SVG Demo HTML e Portable HTML Export v2, sem reabrir pipeline pesado de assets.
 
 ---
 

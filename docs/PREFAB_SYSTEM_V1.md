@@ -60,6 +60,7 @@ Validacao direta de arquivo:
 - `validateSceneFile`, `render-snapshot`, reports de colisao, Browser Demo e demais fluxos que carregam cena por path passam a consumir a cena resolvida.
 - `Game Templates v1` e `V1 Small 2D Game Creation Guide` continuam validos; eles apenas nao dependem deste contrato.
 - refs `entity.prefab` com extensao diferente de `.prefab.json`, traversal, URL ou paths absolutos/UNC falham antes da resolucao do arquivo, sem abrir nested prefab nem mutar `RenderSnapshot v1`.
+- Render SVG, Canvas2D Demo e Simple HTML Export preservam essa falha previsivel em runtime/CLI/MCP quando carregam cenas por path.
 
 ## Fora de escopo
 

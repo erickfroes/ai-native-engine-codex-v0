@@ -35,6 +35,15 @@ const portableEmptyVisualScenePath = path.join(
   'portable-empty-visual.scene.json'
 );
 const portableEmptyVisualSceneMcpPath = './engine/runtime/test/fixtures/portable-empty-visual.scene.json';
+const unsafePrefabPathsScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'invalid_prefab_unsafe_paths.scene.json'
+);
+const unsafePrefabPathsSceneMcpPath = './engine/runtime/test/fixtures/invalid_prefab_unsafe_paths.scene.json';
 const spriteSceneMcpPath = './fixtures/assets/sprite.scene.json';
 const missingAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'missing.asset-manifest.json');
 const invalidAssetManifestPath = path.join(
@@ -382,6 +391,43 @@ test('render-canvas-demo keeps sprite fallback intact across runtime, CLI and MC
     assert.doesNotMatch(runtimeEnvelope.html, /"kind":"sprite"/);
     assert.doesNotMatch(runtimeEnvelope.html, /file:\/\/\//);
     assert.doesNotMatch(runtimeEnvelope.html, /drawImage/);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('render-canvas-demo fails predictably across runtime, CLI and MCP for unsafe prefab path references', async () => {
+  await assert.rejects(
+    () => buildRenderSnapshotV1(unsafePrefabPathsScenePath),
+    /Scene validation failed/
+  );
+
+  const cliResult = runCli([
+    'render-canvas-demo',
+    unsafePrefabPathsScenePath,
+    '--json'
+  ]);
+
+  assert.notEqual(cliResult.status, 0);
+  assert.match(cliResult.stderr, /SceneValidationError: Scene validation failed for/);
+  assert.match(cliResult.stderr, /invalid_prefab_unsafe_paths\.scene\.json/);
+
+  const mcp = createMcpClient();
+  try {
+    await initializeMcpClient(mcp);
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_canvas_demo',
+      arguments: {
+        path: unsafePrefabPathsSceneMcpPath
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, true);
+    assert.equal(mcpResponse.result.structuredContent.ok, false);
+    assert.equal(mcpResponse.result.structuredContent.errorName, 'SceneValidationError');
+    assert.match(mcpResponse.result.content[0].text, /Scene validation failed for/);
+    assert.match(mcpResponse.result.structuredContent.errorMessage, /invalid_prefab_unsafe_paths\.scene\.json/);
   } finally {
     await mcp.close();
   }

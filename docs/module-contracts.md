@@ -661,7 +661,7 @@ Contrato minimo para resolver `entity.prefab` a partir de um arquivo declarativo
 - entidade com `prefab` pode omitir `components` quando nao precisa override local.
 - `entity.prefab` deve permanecer path relativo seguro e apontar para `.prefab.json`; refs com traversal, URL, path absoluto/UNC ou extensao diferente falham de forma previsivel.
 - merge: componentes do prefab entram primeiro, componentes da entidade sobrescrevem por `kind`, extras da entidade entram ao final.
-- `validateSceneFile`, `RenderSnapshot v1`, reports de colisao, Browser Demo e demais fluxos por path passam a consumir a cena resolvida.
+- `validateSceneFile`, `RenderSnapshot v1`, Render SVG, Canvas2D Demo, Simple HTML Export, reports de colisao, Browser Demo e demais fluxos por path passam a consumir a cena resolvida ou falhar de forma previsivel antes do consumo visual.
 - cenas sem `entity.prefab` permanecem iguais.
 - objetos de cena em memoria continuam sem resolucao automatica de prefab neste slice.
 - nao e nested prefab, prefab hierarchy, hot reload, editor, template engine, UI system formal ou pipeline de authoring.

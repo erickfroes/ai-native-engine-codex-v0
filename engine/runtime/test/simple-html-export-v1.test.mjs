@@ -31,6 +31,15 @@ const portableEmptyVisualSceneMcpPath = './engine/runtime/test/fixtures/portable
 const uiScreenPrefabScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'ui-screen-prefab.scene.json');
 const prefabOnlyScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'prefab-usage-prefab-only.scene.json');
 const prefabOnlySceneMcpPath = './engine/runtime/test/fixtures/prefab-usage-prefab-only.scene.json';
+const unsafePrefabPathsScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'invalid_prefab_unsafe_paths.scene.json'
+);
+const unsafePrefabPathsSceneMcpPath = './engine/runtime/test/fixtures/invalid_prefab_unsafe_paths.scene.json';
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 const visualSpriteAssetManifestMcpPath = './fixtures/assets/visual-sprite.asset-manifest.json';
 
@@ -437,6 +446,50 @@ test('export-html-game CLI requires --out and prints outputPath in readable mode
 
   const html = await readFile(outPath, 'utf8');
   assert.match(html, /^<!DOCTYPE html>/);
+});
+
+test('Simple HTML Export v1 fails predictably across runtime, CLI and MCP for unsafe prefab path references', async (t) => {
+  const repoTempDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(repoTempDir, 'unsafe-prefab-cli.html');
+  const mcpOutPath = path.join(repoTempDir, 'unsafe-prefab-mcp.html');
+
+  await assert.rejects(
+    () => buildHtmlGameExportV1(unsafePrefabPathsScenePath),
+    /Scene validation failed/
+  );
+
+  const cliResult = runCli([
+    'export-html-game',
+    unsafePrefabPathsScenePath,
+    '--out',
+    cliOutPath,
+    '--json'
+  ]);
+
+  assert.notEqual(cliResult.status, 0);
+  assert.match(cliResult.stderr, /SceneValidationError: Scene validation failed for/);
+  assert.match(cliResult.stderr, /invalid_prefab_unsafe_paths\.scene\.json/);
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_html_game',
+      arguments: {
+        scenePath: unsafePrefabPathsSceneMcpPath,
+        outputPath: path.relative(repoRoot, mcpOutPath)
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, true);
+    assert.equal(mcpResponse.result.structuredContent.ok, false);
+    assert.equal(mcpResponse.result.structuredContent.errorName, 'SceneValidationError');
+    assert.match(mcpResponse.result.content[0].text, /Scene validation failed for/);
+    assert.match(mcpResponse.result.structuredContent.errorMessage, /invalid_prefab_unsafe_paths\.scene\.json/);
+  } finally {
+    await client.close();
+  }
 });
 
 test('export_html_game MCP writes the same all-options HTML export as CLI', async (t) => {
