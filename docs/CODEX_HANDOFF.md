@@ -27,6 +27,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Prefab System v1: concluido como resolucao declarativa minima por arquivo e report diagnostico runtime/CLI/MCP.
 - Prefab Validation Report v1: concluido como validacao direta de `.prefab.json` via runtime/CLI/MCP.
 - Prefab follow-up baseline sem `components` explicitos em entidade prefab-backed: concluido e promovido para a linha viva de continuidade.
+- Cena `scenes/prefab-instanced.scene.json`: endurecida com 3 entidades reutilizando o mesmo prefab, incluindo uma entidade sem `components` explicitos, validada por runtime/CLI/MCP.
 
 ## O que o Codex recebe
 
@@ -47,6 +48,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `ui.screen` declarativo com widget tree serializavel, `inspect-ui-system` / `inspect_ui_system` e `render-browser-demo --ui-system` / `export-html-game --ui-system`;
 - `entity.prefab` resolvido por arquivo local seguro em `loadSceneFile` e consumidores por path;
 - entidade prefab-backed pode omitir `components` quando nao ha override local;
+- `scenes/prefab-instanced.scene.json` demonstra reutilizacao real do mesmo prefab em multiplas entidades sem semantica nova;
 - `validate-prefab` / `validate_prefab` para validar prefab sem depender de uma cena;
 - `inspect-prefab-usage` / `inspect_prefab_usage`;
 - `export-html-game` / `export_html_game` para escrever HTML jogavel autocontido;
@@ -122,11 +124,9 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Fechar o hardening do slice atual de prefab sem `components`, validando arquivo isolado, cena resolvida e pelo menos um consumidor downstream real.
-2. Adotar esse comportamento em 1 cena ou template pequeno com 2-3 entidades reutilizando o mesmo prefab, sem semantica nova.
-3. Expandir o diagnostico de prefab com rastreabilidade por path/origem/override, sem nested prefab e sem resolucao em memoria.
-4. So depois retomar o hardening incremental de `Portable HTML Export v2`, preservando `RenderSnapshot v1`.
-5. 3D indie apenas depois de V1/V2 demonstradas.
+1. Expandir o diagnostico de prefab com rastreabilidade por path/origem/override, sem nested prefab e sem resolucao em memoria.
+2. So depois retomar o hardening incremental de `Portable HTML Export v2`, preservando `RenderSnapshot v1`.
+3. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Regra de manutencao da linha de seguimento
 
