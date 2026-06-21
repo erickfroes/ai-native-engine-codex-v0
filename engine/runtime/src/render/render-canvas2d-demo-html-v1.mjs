@@ -74,7 +74,7 @@ function renderMetadataBlock(entries) {
 function normalizeRectDrawCall(drawCall, index) {
   assertObject(drawCall, `renderSnapshot.drawCalls[${index}]`);
   if (drawCall.kind !== 'rect') {
-    throw new Error(`renderCanvas2DDemoHtmlV1: drawCalls[${index}].kind must be \`rect\``);
+    throw new Error(`renderCanvas2DDemoHtmlV1: drawCalls[${index}].kind must be \`rect\` or \`sprite\``);
   }
 
   assertNonEmptyString(`renderSnapshot.drawCalls[${index}].id`, drawCall.id);
@@ -93,6 +93,44 @@ function normalizeRectDrawCall(drawCall, index) {
     height: drawCall.height,
     layer: drawCall.layer
   };
+}
+
+function normalizeSpriteDrawCall(drawCall, index) {
+  assertObject(drawCall, `renderSnapshot.drawCalls[${index}]`);
+  if (drawCall.kind !== 'sprite') {
+    throw new Error(`renderCanvas2DDemoHtmlV1: drawCalls[${index}].kind must be \`rect\` or \`sprite\``);
+  }
+
+  assertNonEmptyString(`renderSnapshot.drawCalls[${index}].id`, drawCall.id);
+  assertNonEmptyString(`renderSnapshot.drawCalls[${index}].assetId`, drawCall.assetId);
+  if (drawCall.assetSrc !== undefined) {
+    assertNonEmptyString(`renderSnapshot.drawCalls[${index}].assetSrc`, drawCall.assetSrc);
+  }
+  assertInteger(`renderSnapshot.drawCalls[${index}].x`, drawCall.x);
+  assertInteger(`renderSnapshot.drawCalls[${index}].y`, drawCall.y);
+  assertInteger(`renderSnapshot.drawCalls[${index}].width`, drawCall.width, 1);
+  assertInteger(`renderSnapshot.drawCalls[${index}].height`, drawCall.height, 1);
+  assertInteger(`renderSnapshot.drawCalls[${index}].layer`, drawCall.layer);
+
+  return {
+    kind: 'sprite',
+    id: drawCall.id,
+    assetId: drawCall.assetId,
+    ...(drawCall.assetSrc !== undefined ? { assetSrc: drawCall.assetSrc } : {}),
+    x: drawCall.x,
+    y: drawCall.y,
+    width: drawCall.width,
+    height: drawCall.height,
+    layer: drawCall.layer
+  };
+}
+
+function normalizeDrawCall(drawCall, index) {
+  if (drawCall?.kind === 'sprite') {
+    return normalizeSpriteDrawCall(drawCall, index);
+  }
+
+  return normalizeRectDrawCall(drawCall, index);
 }
 
 function normalizeRenderSnapshot(renderSnapshot) {
@@ -120,8 +158,84 @@ function normalizeRenderSnapshot(renderSnapshot) {
       width: renderSnapshot.viewport.width,
       height: renderSnapshot.viewport.height
     },
-    drawCalls: renderSnapshot.drawCalls.map(normalizeRectDrawCall)
+    drawCalls: renderSnapshot.drawCalls.map(normalizeDrawCall)
   };
+}
+
+function buildRectOnlyScriptLines(serializedSnapshot) {
+  return [
+    '      <script>',
+    `        const renderSnapshot = ${serializedSnapshot};`,
+    '        const canvas = document.getElementById("render-canvas-demo");',
+    '        const context = canvas.getContext("2d");',
+    '        if (context) {',
+    '          context.clearRect(0, 0, renderSnapshot.viewport.width, renderSnapshot.viewport.height);',
+    '          context.fillStyle = "#201a13";',
+    '          context.strokeStyle = "#201a13";',
+    '          context.lineWidth = 1;',
+    '          for (const drawCall of renderSnapshot.drawCalls) {',
+    '            context.fillRect(drawCall.x, drawCall.y, drawCall.width, drawCall.height);',
+    '            context.strokeRect(drawCall.x, drawCall.y, drawCall.width, drawCall.height);',
+    '          }',
+    '        }',
+    '      </script>'
+  ];
+}
+
+function buildSpriteAwareScriptLines(serializedSnapshot) {
+  return [
+    '      <script>',
+    `        const renderSnapshot = ${serializedSnapshot};`,
+    '        const canvas = document.getElementById("render-canvas-demo");',
+    '        const context = canvas.getContext("2d");',
+    '        if (context) {',
+    '          const spriteImageStateById = new Map();',
+    '          function drawRectFallback(drawCall) {',
+    '            context.fillRect(drawCall.x, drawCall.y, drawCall.width, drawCall.height);',
+    '            context.strokeRect(drawCall.x, drawCall.y, drawCall.width, drawCall.height);',
+    '          }',
+    '          function redraw() {',
+    '            context.clearRect(0, 0, renderSnapshot.viewport.width, renderSnapshot.viewport.height);',
+    '            context.fillStyle = "#201a13";',
+    '            context.strokeStyle = "#201a13";',
+    '            context.lineWidth = 1;',
+    '            for (const drawCall of renderSnapshot.drawCalls) {',
+    '              if (drawCall.kind === "sprite") {',
+    '                const imageState = spriteImageStateById.get(drawCall.id);',
+    '                if (imageState?.loaded && imageState.image) {',
+    '                  context.drawImage(imageState.image, drawCall.x, drawCall.y, drawCall.width, drawCall.height);',
+    '                  continue;',
+    '                }',
+    '              }',
+    '              drawRectFallback(drawCall);',
+    '            }',
+    '          }',
+    '          function makeSpriteImageState(drawCall) {',
+    '            if (typeof Image !== "function" || typeof drawCall.assetSrc !== "string") {',
+    '              return { image: null, loaded: false };',
+    '            }',
+    '            const image = new Image();',
+    '            const state = { image, loaded: false };',
+    '            image.onload = () => {',
+    '              state.loaded = true;',
+    '              redraw();',
+    '            };',
+    '            image.onerror = () => {',
+    '              state.loaded = false;',
+    '              redraw();',
+    '            };',
+    '            image.src = drawCall.assetSrc;',
+    '            return state;',
+    '          }',
+    '          for (const drawCall of renderSnapshot.drawCalls) {',
+    '            if (drawCall.kind === "sprite") {',
+    '              spriteImageStateById.set(drawCall.id, makeSpriteImageState(drawCall));',
+    '            }',
+    '          }',
+    '          redraw();',
+    '        }',
+    '      </script>'
+  ];
 }
 
 export function renderCanvas2DDemoHtmlV1({ title, renderSnapshot, metadata } = {}) {
@@ -131,6 +245,10 @@ export function renderCanvas2DDemoHtmlV1({ title, renderSnapshot, metadata } = {
   const serializedSnapshot = serializeInlineJson(normalizedSnapshot);
   const metadataEntries = normalizeMetadataEntries(metadata);
   const metadataBlock = renderMetadataBlock(metadataEntries);
+  const hasSpriteDrawCalls = normalizedSnapshot.drawCalls.some((drawCall) => drawCall.kind === 'sprite');
+  const scriptLines = hasSpriteDrawCalls
+    ? buildSpriteAwareScriptLines(serializedSnapshot)
+    : buildRectOnlyScriptLines(serializedSnapshot);
 
   return [
     '<!DOCTYPE html>',
@@ -158,21 +276,7 @@ export function renderCanvas2DDemoHtmlV1({ title, renderSnapshot, metadata } = {
     '    </header>',
     '    <section class="frame">',
     `      <canvas id="render-canvas-demo" data-canvas-demo-version="${CANVAS_2D_DEMO_VERSION}" data-scene="${escapeHtml(normalizedSnapshot.scene)}" data-tick="${normalizedSnapshot.tick}" width="${normalizedSnapshot.viewport.width}" height="${normalizedSnapshot.viewport.height}"></canvas>`,
-    '      <script>',
-    `        const renderSnapshot = ${serializedSnapshot};`,
-    '        const canvas = document.getElementById("render-canvas-demo");',
-    '        const context = canvas.getContext("2d");',
-    '        if (context) {',
-    '          context.clearRect(0, 0, renderSnapshot.viewport.width, renderSnapshot.viewport.height);',
-    '          context.fillStyle = "#201a13";',
-    '          context.strokeStyle = "#201a13";',
-    '          context.lineWidth = 1;',
-    '          for (const drawCall of renderSnapshot.drawCalls) {',
-    '            context.fillRect(drawCall.x, drawCall.y, drawCall.width, drawCall.height);',
-    '            context.strokeRect(drawCall.x, drawCall.y, drawCall.width, drawCall.height);',
-    '          }',
-    '        }',
-    '      </script>',
+    ...scriptLines,
     '    </section>',
     metadataBlock.trimEnd(),
     '  </main>',

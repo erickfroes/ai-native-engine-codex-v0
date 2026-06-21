@@ -25,7 +25,7 @@ Leia:
 - gerar `RenderSnapshot v1` deterministico a partir de uma cena;
 - gerar `Render SVG v1` textual e deterministico;
 - gerar `SVG Demo HTML v1` com SVG inline;
-- gerar `Canvas2D Demo v1` com Canvas 2D nativo;
+- gerar `Canvas2D Demo v1` com Canvas 2D nativo e sprite loading local opt-in via `Asset Manifest v1`;
 - gerar `Browser Playable Demo v1` autocontida com canvas focavel e input local;
 - carregar imagens locais opcionais via `Asset Manifest v1` na browser demo, com fallback visual deterministico;
 - usar `visual.sprite` para sprite declarativo com fallback `rect`;
@@ -105,7 +105,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `render-snapshot`: gera RenderSnapshot v1
 - `render-svg`: gera SVG textual deterministico
 - `render-svg-demo`: gera HTML estatico com SVG inline
-- `render-canvas-demo`: gera HTML estatico com Canvas 2D
+- `render-canvas-demo`: gera HTML estatico com Canvas 2D e sprite loading local opt-in via `--asset-manifest`
 - `render-browser-demo`: gera HTML interativo minimo com Canvas 2D, teclado local, fallback de sprites, blocking local opt-in, HUD Lite opt-in, Playable Save/Load Lite opt-in, Audio Lite opt-in, Sprite Animation opt-in e UI System opt-in
 - `export-html-game`: escreve um HTML jogavel autocontido com opcoes da Browser Demo, incluindo Audio Lite e UI System opt-in
 
@@ -173,8 +173,8 @@ node ./engine/runtime/src/cli.mjs render-svg ./scenes/tutorial.scene.json --tick
 # gerar demo HTML estatica com SVG inline
 node ./engine/runtime/src/cli.mjs render-svg-demo ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --out ./tmp/tutorial-svg-demo.html --json
 
-# gerar demo HTML estatica com Canvas 2D
-node ./engine/runtime/src/cli.mjs render-canvas-demo ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --out ./tmp/tutorial-canvas-demo.html --json
+# gerar demo HTML estatica com Canvas 2D e sprite loading local opt-in
+node ./engine/runtime/src/cli.mjs render-canvas-demo ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --asset-manifest ./fixtures/assets/valid.asset-manifest.json --out ./tmp/tutorial-canvas-demo.html --json
 
 # gerar Browser Playable Demo com input local
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --out ./tmp/tutorial-browser-demo.html --json

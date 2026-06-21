@@ -10,6 +10,15 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const prefabOnlyScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'prefab-usage-prefab-only.scene.json'
+);
+const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -85,6 +94,29 @@ test('render-canvas-demo writes HTML to --out and returns a small JSON envelope'
 
   const writtenHtml = await readFile(payload.outputPath, 'utf8');
   assert.equal(writtenHtml, payload.html);
+});
+
+test('render-canvas-demo with --asset-manifest keeps fully inherited prefab-backed sprite loading stable', () => {
+  const result = runCli([
+    'render-canvas-demo',
+    prefabOnlyScenePath,
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.scene, 'prefab-usage-prefab-only-fixture');
+  assert.equal(payload.tick, 0);
+  assert.match(payload.html, /prefab-usage-prefab-only-fixture Canvas 2D Demo/);
+  assert.match(payload.html, /"kind":"sprite"/);
+  assert.match(payload.html, /"id":"player\.hero"/);
+  assert.match(payload.html, /"assetId":"player\.sprite"/);
+  assert.match(payload.html, /"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/);
+  assert.match(payload.html, /"x":4,"y":3,"width":16,"height":16,"layer":2/);
+  assert.match(payload.html, /const image = new Image\(\);/);
+  assert.match(payload.html, /context\.drawImage\(imageState\.image, drawCall\.x, drawCall\.y, drawCall\.width, drawCall\.height\);/);
 });
 
 test('render-canvas-demo fails predictably for invalid width and height flags', () => {

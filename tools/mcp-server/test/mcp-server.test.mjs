@@ -162,6 +162,13 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'width'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'height'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'assetManifestPath'));
+    const renderCanvasDemoTool = toolsResponse.result.tools.find((tool) => tool.name === 'render_canvas_demo');
+    assert.ok(renderCanvasDemoTool);
+    assert.deepEqual(renderCanvasDemoTool.inputSchema.required, ['path']);
+    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'tick'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'width'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'height'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderCanvasDemoTool.inputSchema.properties, 'assetManifestPath'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'movementBlocking'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'gameplayHud'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'playableSaveLoad'));

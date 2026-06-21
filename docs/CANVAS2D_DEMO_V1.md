@@ -9,11 +9,12 @@ Nao existe Pixi, Three, WebGL, editor, captura real de input, loop interativo re
 ## Contrato minimo
 
 - runtime: `renderCanvas2DDemoHtmlV1({ title, renderSnapshot, metadata })`
-- CLI: `render-canvas-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]`
-- MCP: `render_canvas_demo(path, tick?, width?, height?)`
+- CLI: `render-canvas-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]`
+- MCP: `render_canvas_demo(path, tick?, width?, height?, assetManifestPath?)`
 - a saida e um documento HTML com `<canvas>` e um unico `script` inline minimo
-- o HTML e autocontido, sem scripts externos, pacotes, fetches de rede ou assets externos
-- o script desenha apenas `drawCalls` com `kind: "rect"`
+- o HTML e autocontido, sem scripts externos, pacotes, fetches de rede ou assets remotos
+- sem `assetManifestPath`, o script preserva o fallback atual e desenha apenas `drawCalls` com `kind: "rect"`
+- com `assetManifestPath`, `drawCalls` `sprite` herdados de `RenderSnapshot v1` recebem `assetSrc` local `file:///...` e o script tenta `new Image()` + `drawImage`, com fallback visual `rect` em erro ou indisponibilidade de `Image`
 - `title` e `metadata` sao escapados como HTML
 - `scene` e `id` do snapshot sao serializados com escaping seguro para script inline
 
@@ -35,9 +36,10 @@ Envelope JSON minimo de CLI `--json` e MCP `structuredContent`:
 - visualizacao estatica e deterministica
 - usa apenas Canvas 2D nativo
 - sem dependencias externas
+- sem rede; `file:///` local so aparece quando `assetManifestPath` e fornecido
 - sem captura real de input
 - nao substitui runtime visual real
 - nao adiciona input real
 - nao adiciona loop interativo
 - nao adiciona editor
-- nao adiciona assets reais
+- nao adiciona pipeline pesado de assets

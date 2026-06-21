@@ -62,7 +62,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs render-snapshot <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--json]
   node engine/runtime/src/cli.mjs render-svg <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-svg-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
-  node engine/runtime/src/cli.mjs render-canvas-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--out <path>] [--json]
+  node engine/runtime/src/cli.mjs render-canvas-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs export-html-game <path> --out <path> [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--ui-system] [--json]
   node engine/runtime/src/cli.mjs export-portable-html-game <path> --out <path> [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--json]
@@ -476,8 +476,15 @@ async function run() {
     const tick = readNumberFlag('render-canvas-demo', '--tick', undefined);
     const width = readNumberFlag('render-canvas-demo', '--width', undefined);
     const height = readNumberFlag('render-canvas-demo', '--height', undefined);
+    const assetManifestPath = readStringFlag('render-canvas-demo', '--asset-manifest', undefined);
     const requestedOutPath = readStringFlag('render-canvas-demo', '--out', undefined);
-    const snapshot = await buildRenderSnapshotV1(maybePath, { tick, width, height });
+    const rawSnapshot = await buildRenderSnapshotV1(maybePath, {
+      tick,
+      width,
+      height,
+      assetManifestPath
+    });
+    const snapshot = materializeBrowserDemoAssetSrcV1(rawSnapshot, assetManifestPath);
     const html = renderCanvas2DDemoHtmlV1({
       title: `${snapshot.scene} Canvas 2D Demo`,
       renderSnapshot: snapshot,

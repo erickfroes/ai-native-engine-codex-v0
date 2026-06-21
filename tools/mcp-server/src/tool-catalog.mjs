@@ -237,6 +237,10 @@ export const toolCatalog = [
         height: {
           type: 'integer',
           description: 'Optional viewport height. Defaults to 180.'
+        },
+        assetManifestPath: {
+          type: 'string',
+          description: 'Optional repository-relative or absolute path to an Asset Manifest v1 JSON file for asset-backed Canvas2D sprite loading.'
         }
       },
       additionalProperties: false

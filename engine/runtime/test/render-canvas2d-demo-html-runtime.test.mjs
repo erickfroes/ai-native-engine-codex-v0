@@ -1,7 +1,25 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import { renderCanvas2DDemoHtmlV1 } from '../src/index.mjs';
+import {
+  buildRenderSnapshotV1,
+  materializeBrowserDemoAssetSrcV1,
+  renderCanvas2DDemoHtmlV1
+} from '../src/index.mjs';
+
+const testDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(testDir, '../../..');
+const prefabOnlyScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'prefab-usage-prefab-only.scene.json'
+);
+const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
 
 test('renderCanvas2DDemoHtmlV1 returns deterministic HTML with canvas and rect draw commands', () => {
   const renderSnapshot = {
@@ -103,6 +121,33 @@ test('renderCanvas2DDemoHtmlV1 returns deterministic HTML with canvas and rect d
   assert.match(first, /<canvas id="render-canvas-demo"/);
   assert.match(first, /context\.fillRect\(drawCall\.x, drawCall\.y, drawCall\.width, drawCall\.height\);/);
   assert.match(first, /context\.strokeRect\(drawCall\.x, drawCall\.y, drawCall\.width, drawCall\.height\);/);
+});
+
+test('renderCanvas2DDemoHtmlV1 keeps fully inherited prefab-backed sprite assetSrc local and stable with assetManifestPath', async () => {
+  const rawSnapshot = await buildRenderSnapshotV1(prefabOnlyScenePath, {
+    assetManifestPath: visualSpriteAssetManifestPath
+  });
+  const snapshot = materializeBrowserDemoAssetSrcV1(rawSnapshot, visualSpriteAssetManifestPath);
+  const html = renderCanvas2DDemoHtmlV1({
+    title: `${snapshot.scene} Canvas 2D Demo`,
+    renderSnapshot: snapshot,
+    metadata: {
+      scene: snapshot.scene,
+      tick: snapshot.tick,
+      viewport: `${snapshot.viewport.width}x${snapshot.viewport.height}`
+    }
+  });
+
+  assert.match(html, /prefab-usage-prefab-only-fixture Canvas 2D Demo/);
+  assert.match(html, /"kind":"sprite"/);
+  assert.match(html, /"id":"player\.hero"/);
+  assert.match(html, /"assetId":"player\.sprite"/);
+  assert.match(html, /"assetSrc":"file:\/\/\/[^"]+images\/player\.png"/);
+  assert.match(html, /"x":4,"y":3,"width":16,"height":16,"layer":2/);
+  assert.match(html, /const spriteImageStateById = new Map\(\);/);
+  assert.match(html, /const image = new Image\(\);/);
+  assert.match(html, /image\.src = drawCall\.assetSrc;/);
+  assert.match(html, /context\.drawImage\(imageState\.image, drawCall\.x, drawCall\.y, drawCall\.width, drawCall\.height\);/);
 });
 
 test('renderCanvas2DDemoHtmlV1 renders deterministic empty HTML when drawCalls is empty', () => {
