@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "prefab-usage-report-v2.schema.json",
+  "title": "PrefabUsageReportV2",
+  "type": "object",
+  "required": [
+    "prefabUsageReportVersion",
+    "absolutePath",
+    "scene",
+    "prefabs"
+  ],
+  "properties": {
+    "prefabUsageReportVersion": {
+      "const": 2
+    },
+    "absolutePath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scene": {
+      "type": "string",
+      "minLength": 1
+    },
+    "prefabs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "entityId",
+          "entityPath",
+          "prefab",
+          "prefabAbsolutePath",
+          "prefabName",
+          "prefabVersion",
+          "components",
+          "overriddenComponents",
+          "overrides"
+        ],
+        "properties": {
+          "entityId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "entityPath": {
+            "type": "string",
+            "minLength": 1
+          },
+          "prefab": {
+            "type": "string",
+            "minLength": 1
+          },
+          "prefabAbsolutePath": {
+            "type": "string",
+            "minLength": 1
+          },
+          "prefabName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "prefabVersion": {
+            "const": 1
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "kind",
+                "source",
+                "sourceComponentPath",
+                "resolvedComponentPath"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source": {
+                  "enum": [
+                    "prefab",
+                    "entity"
+                  ]
+                },
+                "sourceComponentPath": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "resolvedComponentPath": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "overriddenComponents": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "overrides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "kind",
+                "entityComponentPath",
+                "prefabComponentPath",
+                "resolvedComponentPath"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "entityComponentPath": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "prefabComponentPath": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "resolvedComponentPath": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

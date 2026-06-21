@@ -70,28 +70,62 @@ function formatPrefabErrors(errors) {
     .join('; ');
 }
 
-function mergePrefabComponents(prefabComponents, entityComponents) {
+function sortOverridesV2(overrides) {
+  overrides.sort(
+    (left, right) =>
+      compareStableString(left.kind, right.kind) ||
+      compareStableString(left.entityComponentPath, right.entityComponentPath) ||
+      compareStableString(left.prefabComponentPath, right.prefabComponentPath)
+  );
+}
+
+function mergePrefabComponents(prefabComponents, entityComponents, entityIndex) {
   const mergedComponents = [];
   const componentOrigins = [];
+  const componentOriginsV2 = [];
   const overriddenComponents = [];
+  const overrides = [];
   const entityByKind = new Map(
     (entityComponents ?? [])
       .filter((component) => component && typeof component === 'object' && !Array.isArray(component))
-      .map((component) => [component.kind, cloneJson(component)])
+      .map((component, componentIndex) => [
+        component.kind,
+        {
+          component: cloneJson(component),
+          sourceComponentPath: `$.entities[${entityIndex}].components[${componentIndex}]`
+        }
+      ])
   );
   const prefabKinds = new Set();
+  let resolvedComponentIndex = 0;
 
-  for (const component of prefabComponents ?? []) {
+  for (const [componentIndex, component] of (prefabComponents ?? []).entries()) {
+    const prefabComponentPath = `$.components[${componentIndex}]`;
+    const resolvedComponentPath = `$.entities[${entityIndex}].components[${resolvedComponentIndex}]`;
     prefabKinds.add(component.kind);
 
     if (entityByKind.has(component.kind)) {
-      mergedComponents.push(entityByKind.get(component.kind));
+      const entityOverride = entityByKind.get(component.kind);
+      mergedComponents.push(entityOverride.component);
       componentOrigins.push({
         kind: component.kind,
         source: 'entity'
       });
+      componentOriginsV2.push({
+        kind: component.kind,
+        source: 'entity',
+        sourceComponentPath: entityOverride.sourceComponentPath,
+        resolvedComponentPath
+      });
       overriddenComponents.push(component.kind);
+      overrides.push({
+        kind: component.kind,
+        entityComponentPath: entityOverride.sourceComponentPath,
+        prefabComponentPath,
+        resolvedComponentPath
+      });
       entityByKind.delete(component.kind);
+      resolvedComponentIndex += 1;
       continue;
     }
 
@@ -100,26 +134,45 @@ function mergePrefabComponents(prefabComponents, entityComponents) {
       kind: component.kind,
       source: 'prefab'
     });
+    componentOriginsV2.push({
+      kind: component.kind,
+      source: 'prefab',
+      sourceComponentPath: prefabComponentPath,
+      resolvedComponentPath
+    });
+    resolvedComponentIndex += 1;
   }
 
-  for (const component of entityComponents ?? []) {
+  for (const [componentIndex, component] of (entityComponents ?? []).entries()) {
     if (prefabKinds.has(component.kind)) {
       continue;
     }
 
+    const sourceComponentPath = `$.entities[${entityIndex}].components[${componentIndex}]`;
+    const resolvedComponentPath = `$.entities[${entityIndex}].components[${resolvedComponentIndex}]`;
     mergedComponents.push(cloneJson(component));
     componentOrigins.push({
       kind: component.kind,
       source: 'entity'
     });
+    componentOriginsV2.push({
+      kind: component.kind,
+      source: 'entity',
+      sourceComponentPath,
+      resolvedComponentPath
+    });
+    resolvedComponentIndex += 1;
   }
 
   overriddenComponents.sort(compareStableString);
+  sortOverridesV2(overrides);
 
   return {
     mergedComponents,
     componentOrigins,
-    overriddenComponents
+    componentOriginsV2,
+    overriddenComponents,
+    overrides
   };
 }
 
@@ -183,6 +236,7 @@ export async function resolveScenePrefabsV1(scene, scenePath) {
   const resolvedScene = cloneJson(scene);
   const errors = [];
   const prefabUsage = [];
+  const prefabUsageV2 = [];
   const prefabCache = new Map();
 
   resolvedScene.entities = [];
@@ -220,14 +274,16 @@ export async function resolveScenePrefabsV1(scene, scenePath) {
       continue;
     }
 
-    const { mergedComponents, componentOrigins, overriddenComponents } = mergePrefabComponents(
+    const { mergedComponents, componentOrigins, componentOriginsV2, overriddenComponents, overrides } = mergePrefabComponents(
       prefabReport.prefab.components,
-      entity.components ?? []
+      entity.components ?? [],
+      entityIndex
     );
     const resolvedEntity = cloneJson(entity);
     resolvedEntity.prefab = normalizedPrefabRef;
     resolvedEntity.components = mergedComponents;
     resolvedScene.entities.push(resolvedEntity);
+    const entityPath = `$.entities[${entityIndex}]`;
     prefabUsage.push({
       entityId: entity.id,
       prefab: normalizedPrefabRef,
@@ -236,9 +292,24 @@ export async function resolveScenePrefabsV1(scene, scenePath) {
       components: componentOrigins,
       overriddenComponents
     });
+    prefabUsageV2.push({
+      entityId: entity.id,
+      entityPath,
+      prefab: normalizedPrefabRef,
+      prefabAbsolutePath: absolutePrefabPath,
+      prefabName: prefabReport.prefab.metadata.name,
+      prefabVersion: prefabReport.prefab.prefabVersion,
+      components: componentOriginsV2,
+      overriddenComponents,
+      overrides
+    });
   }
 
   prefabUsage.sort(
+    (left, right) =>
+      compareStableString(left.entityId, right.entityId) || compareStableString(left.prefab, right.prefab)
+  );
+  prefabUsageV2.sort(
     (left, right) =>
       compareStableString(left.entityId, right.entityId) || compareStableString(left.prefab, right.prefab)
   );
@@ -246,6 +317,7 @@ export async function resolveScenePrefabsV1(scene, scenePath) {
   return {
     scene: resolvedScene,
     errors,
-    prefabUsage
+    prefabUsage,
+    prefabUsageV2
   };
 }

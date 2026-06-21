@@ -46,7 +46,8 @@ import {
   buildUiSystemReportV1,
   buildSpriteAnimationReportV1,
   buildPrefabValidationReportV1,
-  buildPrefabUsageReportV1
+  buildPrefabUsageReportV1,
+  buildPrefabUsageReportV2
 } from './index.mjs';
 
 function printUsage() {
@@ -78,6 +79,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-ui-system <path> [--json]
   node engine/runtime/src/cli.mjs inspect-sprite-animation <path> [--json]
   node engine/runtime/src/cli.mjs inspect-prefab-usage <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-prefab-usage-v2 <path> [--json]
   node engine/runtime/src/cli.mjs simulate-state <path> --ticks <n> [--seed <n>] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-loop <path> --ticks <n> [--seed <n>] [--input-intent <path>] [--keyboard-script <path>] [--movement-blocking] [--json] [--trace]
   node engine/runtime/src/cli.mjs run-replay-artifact <path> --ticks <n> [--seed <n>] [--json]
@@ -1030,6 +1032,46 @@ async function run() {
         console.log(`- ${prefab.entityId}: ${prefab.prefab} (${prefab.prefabName})`);
         console.log(`  components: ${components}`);
         console.log(`  overridden: ${overrides}`);
+      }
+    }
+
+    return;
+  }
+
+  if (command === 'inspect-prefab-usage-v2') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildPrefabUsageReportV2(maybePath);
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`Path: ${report.absolutePath}`);
+      console.log(`Prefab usage report version: ${report.prefabUsageReportVersion}`);
+      console.log(`Prefab entities: ${report.prefabs.length}`);
+      for (const prefab of report.prefabs) {
+        const components = prefab.components
+          .map(
+            (component) =>
+              `${component.kind}(${component.source} ${component.sourceComponentPath} -> ${component.resolvedComponentPath})`
+          )
+          .join(', ');
+        const overrides = prefab.overrides
+          .map(
+            (override) =>
+              `${override.kind}(${override.entityComponentPath} -> ${override.prefabComponentPath} -> ${override.resolvedComponentPath})`
+          )
+          .join(', ') || '(none)';
+        console.log(`- ${prefab.entityId}: ${prefab.prefab} (${prefab.prefabName})`);
+        console.log(`  entityPath: ${prefab.entityPath}`);
+        console.log(`  prefabAbsolutePath: ${prefab.prefabAbsolutePath}`);
+        console.log(`  components: ${components}`);
+        console.log(`  overrides: ${overrides}`);
       }
     }
 

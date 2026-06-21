@@ -24,8 +24,11 @@ Prefab System v1 inicia o slice de V2 com uma semantica pequena, deterministica 
 - MCP: `validate_prefab({ path })`.
 - Runtime: `loadSceneFile(path)` passa a devolver a cena com prefabs resolvidos.
 - Runtime: `buildPrefabUsageReportV1(path)` gera `PrefabUsageReport v1`.
+- Runtime: `buildPrefabUsageReportV2(path)` gera `PrefabUsageReport v2` opt-in com rastreabilidade de paths/origins/overrides.
 - CLI: `inspect-prefab-usage <scene> [--json]`.
+- CLI: `inspect-prefab-usage-v2 <scene> [--json]`.
 - MCP: `inspect_prefab_usage({ path })`.
+- MCP: `inspect_prefab_usage_v2({ path })`.
 
 ## Report
 
@@ -37,6 +40,12 @@ Prefab System v1 inicia o slice de V2 com uma semantica pequena, deterministica 
 - quais componentes do prefab foram sobrescritos pela entidade.
 
 Schema formal: `docs/schemas/prefab-usage-report-v1.schema.json`.
+
+Diagnostico expandido:
+
+- `PrefabUsageReport v2` adiciona `absolutePath`, `entityPath`, `prefabAbsolutePath`, paths de componente e mapeamento explicito de `overrides`.
+- Schema formal: `docs/schemas/prefab-usage-report-v2.schema.json`.
+- Documentacao dedicada: `docs/PREFAB_USAGE_REPORT_V2.md`.
 
 Validacao direta de arquivo:
 

@@ -28,6 +28,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Prefab Validation Report v1: concluido como validacao direta de `.prefab.json` via runtime/CLI/MCP.
 - Prefab follow-up baseline sem `components` explicitos em entidade prefab-backed: concluido e promovido para a linha viva de continuidade.
 - Cena `scenes/prefab-instanced.scene.json`: endurecida com 3 entidades reutilizando o mesmo prefab, incluindo uma entidade sem `components` explicitos, validada por runtime/CLI/MCP.
+- Prefab Usage Report v2: concluido como diagnostico opt-in com `absolutePath`, `entityPath`, `prefabAbsolutePath`, paths de componente e overrides explicitos via runtime/CLI/MCP, preservando `v1`.
 
 ## O que o Codex recebe
 
@@ -51,6 +52,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `scenes/prefab-instanced.scene.json` demonstra reutilizacao real do mesmo prefab em multiplas entidades sem semantica nova;
 - `validate-prefab` / `validate_prefab` para validar prefab sem depender de uma cena;
 - `inspect-prefab-usage` / `inspect_prefab_usage`;
+- `inspect-prefab-usage-v2` / `inspect_prefab_usage_v2` para rastreabilidade opt-in de paths/origins/overrides;
 - `export-html-game` / `export_html_game` para escrever HTML jogavel autocontido;
 - `templates/top-down-basic` e `templates/side-view-blocking-basic`;
 - cena `scenes/v1-small-2d.scene.json` para readiness V1;
@@ -124,9 +126,8 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Expandir o diagnostico de prefab com rastreabilidade por path/origem/override, sem nested prefab e sem resolucao em memoria.
-2. So depois retomar o hardening incremental de `Portable HTML Export v2`, preservando `RenderSnapshot v1`.
-3. 3D indie apenas depois de V1/V2 demonstradas.
+1. Retomar o hardening incremental de `Portable HTML Export v2`, preservando `RenderSnapshot v1`, `Simple HTML Export v1` e o caminho default da Browser Demo.
+2. 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Regra de manutencao da linha de seguimento
 

@@ -19,12 +19,14 @@ export async function validateSceneFile(scenePath) {
   let resolvedScene = scene;
   let prefabErrors = [];
   let prefabUsage = [];
+  let prefabUsageV2 = [];
   let resolvedInvariantReport = { errors: [], warnings: [] };
 
   if (shapeErrors.length === 0 && rawInvariantReport.errors.length === 0) {
     const prefabResolution = await resolveScenePrefabsV1(scene, absolutePath);
     prefabErrors = prefabResolution.errors;
     prefabUsage = prefabResolution.prefabUsage;
+    prefabUsageV2 = prefabResolution.prefabUsageV2;
 
     if (prefabErrors.length === 0) {
       resolvedScene = prefabResolution.scene;
@@ -43,7 +45,8 @@ export async function validateSceneFile(scenePath) {
     summary,
     errors,
     warnings,
-    prefabUsage
+    prefabUsage,
+    prefabUsageV2
   };
 }
 

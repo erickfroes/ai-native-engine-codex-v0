@@ -631,14 +631,30 @@ Contrato minimo para resolver `entity.prefab` a partir de um arquivo declarativo
 - MCP: `validate_prefab({ path })`.
 - runtime: `loadSceneFile(path)` resolve prefabs em chamadas por path.
 - runtime: `buildPrefabUsageReportV1(path)`.
+- runtime: `buildPrefabUsageReportV2(path)`.
 - CLI: `inspect-prefab-usage <scene> [--json]`.
+- CLI: `inspect-prefab-usage-v2 <scene> [--json]`.
 - MCP: `inspect_prefab_usage({ path })`.
+- MCP: `inspect_prefab_usage_v2({ path })`.
 - entidade com `prefab` pode omitir `components` quando nao precisa override local.
 - merge: componentes do prefab entram primeiro, componentes da entidade sobrescrevem por `kind`, extras da entidade entram ao final.
 - `validateSceneFile`, `RenderSnapshot v1`, reports de colisao, Browser Demo e demais fluxos por path passam a consumir a cena resolvida.
 - cenas sem `entity.prefab` permanecem iguais.
 - objetos de cena em memoria continuam sem resolucao automatica de prefab neste slice.
 - nao e nested prefab, prefab hierarchy, hot reload, editor, template engine, UI system formal ou pipeline de authoring.
+
+## Prefab Usage Report v2
+
+Contrato opt-in para rastrear composicao de prefab por path/origem/override sem mutar `PrefabUsageReport v1`:
+
+- ver `docs/PREFAB_USAGE_REPORT_V2.md`.
+- schema formal: `docs/schemas/prefab-usage-report-v2.schema.json`.
+- runtime: `buildPrefabUsageReportV2(path)`.
+- CLI: `inspect-prefab-usage-v2 <scene> [--json]`.
+- MCP: `inspect_prefab_usage_v2({ path })`.
+- adiciona `absolutePath` da cena, `entityPath`, `prefabAbsolutePath`, `sourceComponentPath`, `resolvedComponentPath` e `overrides[]`.
+- `inspect-prefab-usage` / `inspect_prefab_usage` permanecem em `PrefabUsageReport v1`.
+- nao e nested prefab, nao resolve prefabs em objetos de cena em memoria e nao altera `RenderSnapshot v1`.
 
 ## V1 Small 2D Game Creation Guide
 

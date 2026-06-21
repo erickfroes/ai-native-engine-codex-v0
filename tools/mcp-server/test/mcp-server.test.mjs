@@ -213,6 +213,11 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     );
     assert.ok(inspectPrefabUsageTool);
     assert.deepEqual(inspectPrefabUsageTool.inputSchema.required, ['path']);
+    const inspectPrefabUsageV2Tool = toolsResponse.result.tools.find(
+      (tool) => tool.name === 'inspect_prefab_usage_v2'
+    );
+    assert.ok(inspectPrefabUsageV2Tool);
+    assert.deepEqual(inspectPrefabUsageV2Tool.inputSchema.required, ['path']);
     const inspectMovementBlockingTool = toolsResponse.result.tools.find(
       (tool) => tool.name === 'inspect_movement_blocking'
     );

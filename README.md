@@ -79,7 +79,7 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 
 A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1, Sprite Animation v1 diagnostico consumido de forma visual opt-in na Browser Demo para sprites asset-backed e Portable HTML Export v2 com assets inline e `Sprite Animation v1` no export portatil.
 
-Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local e report diagnostico cross-interface. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface e consumo visual opt-in na Browser Demo/export por overlay passivo, preservando HUD Lite como diagnostico local.
+Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface e consumo visual opt-in na Browser Demo/export por overlay passivo, preservando HUD Lite como diagnostico local.
 
 ## Comandos CLI principais
 
@@ -96,6 +96,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `inspect-movement-blocking`: avalia tentativa de movimento contra colisao solida
 - `validate-prefab`: valida um arquivo `.prefab.json` diretamente
 - `inspect-prefab-usage`: inspeciona composicao declarativa de `entity.prefab`
+- `inspect-prefab-usage-v2`: inspeciona composicao declarativa de `entity.prefab` com rastreabilidade por path/origem/override
 - `inspect-audio-lite`: inspeciona clips e triggers declarativos de Audio Lite v1
 - `inspect-ui-system`: inspeciona screens declarativas e arvores de widgets de UI System v1
 - `inspect-sprite-animation`: inspeciona animacoes declarativas de Sprite Animation v1
@@ -135,6 +136,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `inspect_tile_collision`
 - `inspect_movement_blocking`
 - `inspect_prefab_usage`
+- `inspect_prefab_usage_v2`
 - `inspect_audio_lite`
 - `inspect_ui_system`
 - `inspect_sprite_animation`
@@ -204,6 +206,9 @@ node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixt
 # exportar HTML portatil com assets inline e Sprite Animation v1
 node ./engine/runtime/src/cli.mjs export-portable-html-game ./engine/runtime/test/fixtures/sprite-animation-idle.scene.json --asset-manifest ./fixtures/assets/valid.asset-manifest.json --sprite-animation --out ./tmp/sprite-animation-portable-export.html --json
 
+# inspecionar Prefab Usage Report v2 com rastreabilidade de origem e override
+node ./engine/runtime/src/cli.mjs inspect-prefab-usage-v2 ./scenes/prefab-instanced.scene.json --json
+
 # exportar um HTML jogavel simples da cena consolidada V1 small 2D
 node ./engine/runtime/src/cli.mjs export-html-game ./scenes/v1-small-2d.scene.json --movement-blocking --gameplay-hud --playable-save-load --audio-lite --ui-system --out ./tmp/v1-small-2d-export.html --json
 ```
@@ -228,6 +233,7 @@ npm run smoke
 - `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`: formato local do Playable Save/Load Lite
 - `docs/SIMPLE_HTML_EXPORT_V1.md`: contrato do export HTML jogavel simples
 - `docs/PREFAB_SYSTEM_V1.md`: contrato do Prefab System v1
+- `docs/PREFAB_USAGE_REPORT_V2.md`: contrato do report diagnostico detalhado de prefab
 - `docs/PREFAB_VALIDATION_REPORT_V1.md`: contrato do report de validacao direta de prefab
 - `docs/UI_SYSTEM_V1.md`: contrato do UI System v1
 - `docs/GAME_TEMPLATES_V1.md`: templates V1 Small 2D copiar-e-adaptar

@@ -616,6 +616,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_prefab_usage_v2',
+    title: 'Inspect Prefab Usage V2',
+    description: 'Build PrefabUsageReport v2 with scene/prefab/component path traceability and explicit override mapping.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'inspect_audio_lite',
     title: 'Inspect Audio Lite',
     description: 'Build AudioLiteReport v1 from declarative audio.clip components without playback side effects.',
