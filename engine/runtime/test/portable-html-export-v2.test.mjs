@@ -33,6 +33,15 @@ const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.
 const spriteSceneMcpPath = './fixtures/assets/sprite.scene.json';
 const visualSpriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.scene.json');
 const visualSpriteSceneMcpPath = './fixtures/assets/visual-sprite.scene.json';
+const prefabOnlyScenePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'prefab-usage-prefab-only.scene.json'
+);
+const prefabOnlySceneMcpPath = './engine/runtime/test/fixtures/prefab-usage-prefab-only.scene.json';
 const spriteAnimationIdleScenePath = path.join(
   repoRoot,
   'engine',
@@ -478,6 +487,47 @@ test('Portable HTML Export v2 keeps asset-backed sprite rendering and empty anim
   assertNoForbiddenPortableExportHtmlSurface(baseline.html);
 });
 
+test('Portable HTML Export v2 keeps prefab-backed inherited sprite rendering inline and stable when spriteAnimation is enabled with assetManifestPath', async () => {
+  const baseline = await buildPortableHtmlGameExportV2(prefabOnlyScenePath, {
+    assetManifestPath: visualSpriteAssetManifestPath,
+    spriteAnimation: true
+  });
+  const repeated = await buildPortableHtmlGameExportV2(prefabOnlyScenePath, {
+    assetManifestPath: visualSpriteAssetManifestPath,
+    spriteAnimation: true
+  });
+
+  assert.deepEqual(baseline, repeated);
+  assert.equal(baseline.exportVersion, PORTABLE_HTML_EXPORT_VERSION);
+  assert.equal(baseline.scene, 'prefab-usage-prefab-only-fixture');
+  assert.deepEqual(baseline.options, {
+    assetManifest: true,
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    spriteAnimation: true,
+    uiSystem: false
+  });
+  assert.equal(baseline.embeddedAssetCount, 1);
+  assert.equal(baseline.sizeBytes, Buffer.byteLength(baseline.html, 'utf8'));
+  assert.equal(baseline.htmlHash, sha256Hex(baseline.html));
+  assert.match(baseline.html, /^<!DOCTYPE html>/);
+  assert.match(baseline.html, /prefab-usage-prefab-only-fixture Portable HTML Game Export/);
+  assert.match(baseline.html, /"spriteAnimation":\{/);
+  assert.match(baseline.html, /"animations":\[\]/);
+  assert.match(baseline.html, /"warnings":\[\]/);
+  assert.match(baseline.html, /"invalidRefs":\[\]/);
+  assert.match(baseline.html, /"kind":"sprite"/);
+  assert.match(baseline.html, /"id":"player\.hero"/);
+  assert.match(baseline.html, /"assetId":"player\.sprite"/);
+  assert.match(baseline.html, /Position: x 4, y 3/);
+  assert.match(baseline.html, /"kind":"sprite","layer":2,"width":16,"x":4,"y":3/);
+  assert.match(baseline.html, /"assetSrc":"data:image\/png;base64,/);
+  assert.doesNotMatch(baseline.html, /file:\/\/\//);
+  assertNoForbiddenPortableExportHtmlSurface(baseline.html);
+});
+
 test('export-portable-html-game CLI writes deterministic files for inline assets, sprite animation and UI overlay', async (t) => {
   const outDir = await createTempDir(t);
   const cases = [
@@ -533,6 +583,33 @@ test('export-portable-html-game CLI writes deterministic files for inline assets
         uiSystem: false
       },
       present: [/"spriteAnimation":\{/, /"animations":\[\]/, /"kind":"sprite"/, /"assetSrc":"data:image\/png;base64,/],
+      absent: [/file:\/\/\//, /"uiSystem":/]
+    },
+    {
+      name: 'prefab-only-sprite-animation-empty-metadata-with-manifest',
+      scenePath: prefabOnlyScenePath,
+      flags: ['--asset-manifest', visualSpriteAssetManifestPath, '--sprite-animation'],
+      expectedScene: 'prefab-usage-prefab-only-fixture',
+      expectedEmbeddedAssetCount: 1,
+      options: {
+        assetManifest: true,
+        movementBlocking: false,
+        gameplayHud: false,
+        playableSaveLoad: false,
+        audioLite: false,
+        spriteAnimation: true,
+        uiSystem: false
+      },
+      present: [
+        /"spriteAnimation":\{/,
+        /"animations":\[\]/,
+        /"kind":"sprite"/,
+        /"id":"player\.hero"/,
+        /"assetId":"player\.sprite"/,
+        /Position: x 4, y 3/,
+        /"kind":"sprite","layer":2,"width":16,"x":4,"y":3/,
+        /"assetSrc":"data:image\/png;base64,/
+      ],
       absent: [/file:\/\/\//, /"uiSystem":/]
     },
     {
@@ -1266,6 +1343,75 @@ test('export_portable_html_game MCP keeps asset-backed sprite rendering and empt
     assert.equal(mcpResponse.result.isError, false);
     const mcpEnvelope = mcpResponse.result.structuredContent;
     assertPortableExportEnvelopeShape(mcpEnvelope, { expectedScene: 'visual-sprite-fixture' });
+    assert.equal(mcpEnvelope.outputPath, mcpOutPath);
+    assert.deepEqual(
+      { ...mcpEnvelope, outputPath: '<normalized>' },
+      { ...cliEnvelope, outputPath: '<normalized>' }
+    );
+
+    const mcpHtml = await readFile(mcpEnvelope.outputPath, 'utf8');
+    assert.equal(mcpHtml, cliHtml);
+    assertNoForbiddenPortableExportHtmlSurface(mcpHtml);
+  } finally {
+    await client.close();
+  }
+});
+
+test('export_portable_html_game MCP keeps prefab-backed inherited sprite rendering inline and stable when spriteAnimation is enabled with assetManifestPath', async (t) => {
+  const repoTempDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(repoTempDir, 'cli-portable-prefab-only-sprite-animation-empty-metadata-with-manifest.html');
+  const mcpOutPath = path.join(repoTempDir, 'mcp-portable-prefab-only-sprite-animation-empty-metadata-with-manifest.html');
+  const cliResult = runCli([
+    'export-portable-html-game',
+    prefabOnlyScenePath,
+    '--out',
+    cliOutPath,
+    '--asset-manifest',
+    visualSpriteAssetManifestPath,
+    '--sprite-animation',
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+  assert.deepEqual(cliEnvelope.options, {
+    assetManifest: true,
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    spriteAnimation: true,
+    uiSystem: false
+  });
+  assert.equal(cliEnvelope.embeddedAssetCount, 1);
+  const cliHtml = await readFile(cliEnvelope.outputPath, 'utf8');
+  assert.match(cliHtml, /"spriteAnimation":\{/);
+  assert.match(cliHtml, /"animations":\[\]/);
+  assert.match(cliHtml, /"kind":"sprite"/);
+  assert.match(cliHtml, /"id":"player\.hero"/);
+  assert.match(cliHtml, /"assetId":"player\.sprite"/);
+  assert.match(cliHtml, /Position: x 4, y 3/);
+  assert.match(cliHtml, /"kind":"sprite","layer":2,"width":16,"x":4,"y":3/);
+  assert.match(cliHtml, /"assetSrc":"data:image\/png;base64,/);
+  assert.doesNotMatch(cliHtml, /file:\/\/\//);
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_portable_html_game',
+      arguments: {
+        scenePath: prefabOnlySceneMcpPath,
+        outputPath: path.relative(repoRoot, mcpOutPath),
+        assetManifestPath: visualSpriteAssetManifestMcpPath,
+        spriteAnimation: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+    assertPortableExportEnvelopeShape(mcpEnvelope, { expectedScene: 'prefab-usage-prefab-only-fixture' });
     assert.equal(mcpEnvelope.outputPath, mcpOutPath);
     assert.deepEqual(
       { ...mcpEnvelope, outputPath: '<normalized>' },
