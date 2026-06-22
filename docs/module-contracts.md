@@ -117,6 +117,21 @@ Relações:
 - `LoopReport v1`: resultado real de execução;
 - `LoopTrace v1`: diagnóstico real opt-in.
 
+## Scene Transition Report v1 (transicao explicita opt-in)
+
+Contrato de diagnostico para uma troca explicita entre duas cenas por path:
+
+- ver `docs/SCENE_TRANSITION_V1.md`.
+- schema formal: `docs/schemas/scene-transition-report-v1.schema.json`.
+- runtime: `buildSceneTransitionReportV1({ fromPath, toPath })`.
+- CLI: `inspect-scene-transition <from> <to> [--json]`.
+- MCP: `inspect_scene_transition({ fromPath, toPath })`.
+- cada endpoint passa por `validateSceneFile`, cobrindo schema, invariantes e resolucao segura de `entity.prefab`.
+- `ok` so e verdadeiro quando source e target nao possuem erros.
+- erros e warnings sao preservados por endpoint e agregados com `endpoint: from | to | transition`.
+- nao altera `Scene Document v1`, `SceneValidationReport v1`, `run-loop`, render, Browser Demo, exports HTML ou `savegame v1`.
+- nao adiciona system, componente, trigger automatico, carry-over de estado ou composition graph neste slice.
+
 ## Visual Components v1 (declarativo)
 
 Contrato minimo para componentes visuais declarados na propria cena:
@@ -721,4 +736,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2, Prefab System v1 e Visual Regression Baseline v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `Scene Transition v1`.
+- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1 e Scene Transition Report v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e o menor manifesto externo de composicao multi-cena.

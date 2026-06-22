@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "scene-transition-target",
+    "author": "OpenAI scaffold",
+    "tags": ["scene-transition", "target"]
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "target.spawn",
+      "name": "Target Spawn",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "position": {
+              "x": 8,
+              "y": 4,
+              "z": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

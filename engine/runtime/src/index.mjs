@@ -1,6 +1,10 @@
 export { loadSchemaRegistry, getRepoRoot } from './schema/registry.mjs';
 export { validateSceneFile, formatValidationReport } from './scene/validate-scene.mjs';
 export { validateLoopScene, formatSceneValidationReportV1 } from './scene/validate-loop-scene.mjs';
+export {
+  buildSceneTransitionReportV1,
+  SCENE_TRANSITION_REPORT_VERSION
+} from './scene/build-scene-transition-report-v1.mjs';
 export { buildPrefabValidationReportV1 } from './scene/build-prefab-validation-report-v1.mjs';
 export { buildPrefabUsageReportV1 } from './scene/build-prefab-usage-report-v1.mjs';
 export { buildPrefabUsageReportV2 } from './scene/build-prefab-usage-report-v2.mjs';

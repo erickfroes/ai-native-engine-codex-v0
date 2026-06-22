@@ -146,6 +146,12 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.deepEqual(keyboardToInputIntentTool.inputSchema.required, ['tick', 'entityId', 'keys']);
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_save'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'emit_world_snapshot'));
+    const inspectSceneTransitionTool = toolsResponse.result.tools.find(
+      (tool) => tool.name === 'inspect_scene_transition'
+    );
+    assert.ok(inspectSceneTransitionTool);
+    assert.equal(inspectSceneTransitionTool.title, 'Inspect Scene Transition');
+    assert.deepEqual(inspectSceneTransitionTool.inputSchema.required, ['fromPath', 'toPath']);
     const renderSnapshotTool = toolsResponse.result.tools.find((tool) => tool.name === 'render_snapshot');
     assert.ok(renderSnapshotTool);
     assert.deepEqual(renderSnapshotTool.inputSchema.required, ['path']);

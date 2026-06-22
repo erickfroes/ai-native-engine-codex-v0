@@ -16,6 +16,7 @@ import {
   loadValidatedInputIntentV1,
   loadSceneFile,
   buildWorldSnapshotMessage,
+  buildSceneTransitionReportV1,
   buildRenderSnapshotV1,
   renderSnapshotToSvgV1,
   RENDER_SVG_VERSION,
@@ -62,6 +63,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs keyboard-to-input-intent --tick <n> --entity <id> --keys <comma-list> [--json]
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-scene-transition <from> <to> [--json]
   node engine/runtime/src/cli.mjs render-snapshot <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--json]
   node engine/runtime/src/cli.mjs render-svg <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs inspect-visual-regression-baseline <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--json]
@@ -380,6 +382,45 @@ async function run() {
       }
     }
 
+    return;
+  }
+
+  if (command === 'inspect-scene-transition') {
+    if (!maybePath || !process.argv[4] || process.argv[4].startsWith('--')) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildSceneTransitionReportV1({
+      fromPath: maybePath,
+      toPath: process.argv[4]
+    });
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene transition report version: ${report.sceneTransitionReportVersion}`);
+      console.log(report.ok ? 'Status: OK' : 'Status: INVALID');
+      console.log(`From: ${report.from.scene ?? '(invalid)'} (${report.from.path})`);
+      console.log(`To: ${report.to.scene ?? '(invalid)'} (${report.to.path})`);
+      if (report.errors.length > 0) {
+        console.log('');
+        console.log('Errors:');
+        for (const error of report.errors) {
+          console.log(`- ${error.endpoint} ${error.path}: ${error.message}`);
+        }
+      }
+      if (report.warnings.length > 0) {
+        console.log('');
+        console.log('Warnings:');
+        for (const warning of report.warnings) {
+          console.log(`- ${warning.endpoint} ${warning.path}: ${warning.message}`);
+        }
+      }
+    }
+
+    process.exitCode = report.ok ? 0 : 1;
     return;
   }
 

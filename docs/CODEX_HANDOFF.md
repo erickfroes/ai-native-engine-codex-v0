@@ -54,8 +54,9 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Prefab unsafe path hardening: concluido com cobertura runtime/CLI/MCP para `entity.prefab` com traversal, URL e paths absolutos/UNC, preservando a exigencia de path relativo seguro por cena sem abrir nested prefab nem mutar `RenderSnapshot v1`.
 - Prefab visual/export negative hardening: concluido com cobertura runtime/CLI/MCP para Render SVG v1, Canvas2D Demo v1 e Simple HTML Export v1 em cenas com `entity.prefab` inseguro, preservando falha antes do consumo visual sem mutar `RenderSnapshot v1`.
 - Prefab visual/export mirror hardening final: concluido com cobertura negativa para SVG Demo HTML v1 em runtime/CLI e Portable HTML Export v2 em runtime/CLI/MCP para cenas com `entity.prefab` inseguro, fechando os espelhos visuais/export restantes sem nested prefab nem mutar `RenderSnapshot v1`.
-- V2 Gap Audit: concluido em `docs/V2_GAP_AUDIT.md`; a decisao de executar `Visual Regression Baseline v1` primeiro ja foi fechada, mantendo `Scene Transition v1` como proximo pacote de produto V2.
+- V2 Gap Audit: concluido em `docs/V2_GAP_AUDIT.md`; a decisao de executar `Visual Regression Baseline v1` primeiro ja foi fechada, e o follow-up `SceneTransitionReport v1` tambem foi entregue como diagnostico multi-cena report-only.
 - Visual Regression Baseline v1: concluido como `VisualRegressionBaselineReport v1` opt-in, derivado de `RenderSnapshot v1` e `Render SVG v1`, com schema, runtime/CLI/MCP, hashes SHA-256 deterministas, cobertura `v1-small-2d` + `visual-sprite-fixture` e sem pixel-diff/browser/screenshot obrigatorio.
+- Scene Transition Report v1: concluido como `SceneTransitionReport v1` opt-in entre dois paths explicitos de cena, com schema, runtime/CLI/MCP, fixtures de source/target, diagnostico de target invalido/ausente, paridade cross-interface e sem mutar `Scene Document v1`, `SceneValidationReport v1`, loop, render ou `savegame v1`.
 
 ## O que o Codex recebe
 
@@ -81,6 +82,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `validate-prefab` / `validate_prefab` para validar prefab sem depender de uma cena;
 - `inspect-prefab-usage` / `inspect_prefab_usage`;
 - `inspect-prefab-usage-v2` / `inspect_prefab_usage_v2` para rastreabilidade opt-in de paths/origins/overrides;
+- `inspect-scene-transition` / `inspect_scene_transition` para diagnosticar uma transicao explicita entre duas cenas por path, via `SceneTransitionReport v1`;
 - `export-html-game` / `export_html_game` para escrever HTML jogavel autocontido;
 - `templates/top-down-basic` e `templates/side-view-blocking-basic`;
 - cena `scenes/v1-small-2d.scene.json` para readiness V1;
@@ -103,6 +105,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `docs/PORTABLE_HTML_EXPORT_V2.md`;
 - `docs/PREFAB_SYSTEM_V1.md`;
 - `docs/PREFAB_VALIDATION_REPORT_V1.md`;
+- `docs/SCENE_TRANSITION_V1.md`;
 - `docs/V2_GAP_AUDIT.md`;
 - suites cross-interface;
 - roadmap progressivo ate 3D AAA;
@@ -144,6 +147,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 32. `docs/PREFAB_VALIDATION_REPORT_V1.md`
 33. `docs/V2_GAP_AUDIT.md`
 34. `docs/VISUAL_REGRESSION_BASELINE_V1.md`
+35. `docs/SCENE_TRANSITION_V1.md`
 
 ## Baseline obrigatorio
 
@@ -158,9 +162,9 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Fechar `Scene Transition v1` como proximo pacote V2 pequeno: contrato opt-in para trocar entre duas cenas validas por referencia explicita, fixture minima com duas cenas e alinhamento runtime/CLI/MCP, sem mutar `Scene Document v1`, `SceneValidationReport v1` ou `savegame v1`.
-2. Manter `Visual Regression Baseline v1` e `entity.prefab` v1 em bugfix/compatibilidade; qualquer validacao mais estrita continua em superficie opt-in nova, nao em mutacao de `validate-scene`.
-3. Depois de `Scene Transition v1`, priorizar apenas o menor slice de composicao multi-cena restante antes de atlas/pathfinding/editor-lite; 3D indie apenas depois de V1/V2 demonstradas.
+1. Fechar o menor slice restante de composicao multi-cena: manifesto externo opt-in com `entryScene` e refs explicitas para cenas validas, fixture minima de tres cenas e alinhamento runtime/CLI/MCP, sem mutar `Scene Document v1`, `SceneValidationReport v1` ou `savegame v1`.
+2. Manter `SceneTransitionReport v1`, `Visual Regression Baseline v1` e `entity.prefab` v1 em bugfix/compatibilidade; qualquer validacao mais estrita continua em superficie opt-in nova, nao em mutacao de `validate-scene`.
+3. Depois da composicao multi-cena minima, escolher apenas um entre atlas/material manifest, pathfinding grid v1 ou editor-lite; 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Regra de manutencao da linha de seguimento
 

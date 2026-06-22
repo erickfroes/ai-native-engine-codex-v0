@@ -167,6 +167,26 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_scene_transition',
+    title: 'Inspect Scene Transition',
+    description: 'Build a SceneTransitionReport v1 for an explicit switch from one valid scene path to another.',
+    inputSchema: {
+      type: 'object',
+      required: ['fromPath', 'toPath'],
+      properties: {
+        fromPath: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root for the current scene.'
+        },
+        toPath: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root for the target scene.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'render_snapshot',
     title: 'Render Snapshot',
     description: 'Build a deterministic headless RenderSnapshot v1 JSON payload from a scene.',

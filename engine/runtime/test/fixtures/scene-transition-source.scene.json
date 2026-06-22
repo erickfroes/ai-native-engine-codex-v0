@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "scene-transition-source",
+    "author": "OpenAI scaffold",
+    "tags": ["scene-transition", "source"]
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "source.spawn",
+      "name": "Source Spawn",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "position": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

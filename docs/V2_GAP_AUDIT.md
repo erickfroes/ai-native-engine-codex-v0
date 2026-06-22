@@ -4,12 +4,12 @@
 
 Registrar o audit pequeno pedido apos o congelamento de `entity.prefab` v1 e a decisao do menor pacote seguro que abriu V2.
 
-Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`; a continuidade agora aponta para `Scene Transition v1`.
+Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, e o follow-up imediato tambem foi fechado como `SceneTransitionReport v1`; a continuidade agora aponta para o menor manifesto externo de composicao multi-cena.
 
 ## Estado consolidado
 
 - V1 Small 2D esta release-checkpointed e permanece aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, AssetManifestValidationReport v1 e Visual Regression Baseline v1 ja iniciam V2 em slices pequenos.
+- Audio Lite v1, UI System v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, AssetManifestValidationReport v1, Visual Regression Baseline v1 e SceneTransitionReport v1 ja iniciam V2 em slices pequenos.
 - `entity.prefab` v1 esta congelado: sem nested prefab, prefab hierarchy, hot reload, editor ou template engine.
 - O hardening de prefab inseguro ja cobre consumidores visuais/export por path, incluindo Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export.
 
@@ -18,7 +18,7 @@ Este documento e historico. A decisao principal ja foi executada por `Visual Reg
 | Lacuna V2 | Tamanho | Risco | Decisao |
 | --- | --- | --- | --- |
 | Visual regression basica | pequeno | baixo/medio | Executado como `VisualRegressionBaselineReport v1`. |
-| Scene transitions / composition | medio | medio | Proximo pacote de produto recomendado. |
+| Scene transitions / composition | medio | medio | `SceneTransitionReport v1` executado; composicao multi-cena externa segue como proximo menor pacote. |
 | Particle-lite | medio | medio | Deixar para depois; toca render/tempo/fixtures. |
 | Atlas/material manifest | medio/grande | medio/alto | Evitar por enquanto para nao abrir pipeline pesado de assets. |
 | Editor-lite automatizavel | grande | alto | Nao iniciar antes de contratos V2 menores. |
@@ -39,7 +39,7 @@ O audit encontrou dois candidatos pequenos:
 - `Visual Regression Baseline v1`: menor risco, fortalece render/export antes de abrir novas telas/cenas e nao muda semantica de gameplay.
 - `Scene Transition v1`: mais diretamente ligado ao criterio V2 de jogos com multiplas cenas, mas toca fluxo de estado e navegacao entre cenas.
 
-Decisao executada: fazer primeiro **Visual Regression Baseline v1** e manter **Scene Transition v1** como o proximo pacote de produto V2 depois dele.
+Decisao executada: fazer primeiro **Visual Regression Baseline v1** e depois fechar **SceneTransitionReport v1** como primeiro diagnostico multi-cena report-only.
 
 ## Pacote executado
 
@@ -53,7 +53,17 @@ Escopo executado:
 - comparar hashes/campos deterministas, sem screenshot obrigatorio e sem browser pixel-diff;
 - preservar `RenderSnapshot v1`, `Render SVG v1`, Browser Demo, exports HTML e Prefab System v1 sem mutacao de contrato.
 
-Proximo pacote recomendado: **Scene Transition v1**, com contrato opt-in para trocar entre cenas validas por referencia explicita, fixture minima de duas cenas e alinhamento runtime/CLI/MCP, sem mutar `Scene Document v1`, `SceneValidationReport v1` ou `savegame v1`.
+**SceneTransitionReport v1** foi fechado em seguida como diagnostico opt-in entre duas cenas explicitas.
+
+Escopo executado:
+
+- criar report versionado para `fromPath` e `toPath`;
+- validar cada endpoint por `validateSceneFile`;
+- expor runtime, CLI e MCP com shape alinhado;
+- cobrir casos validos, target invalido, arquivo ausente, warning de mesmo path e paridade cross-interface;
+- preservar `Scene Document v1`, `SceneValidationReport v1`, loop, render, Browser Demo, exports HTML e `savegame v1`.
+
+Proximo pacote recomendado: **Scene Composition Manifest v1**, com manifesto externo opt-in contendo `entryScene` e refs explicitas para cenas validas, fixture minima de tres cenas e alinhamento runtime/CLI/MCP, sem mutar `Scene Document v1`, `SceneValidationReport v1` ou `savegame v1`.
 
 Fora de escopo:
 

@@ -12,6 +12,7 @@ import {
   getSystemRegistryV1,
   getSystemPhaseRegistryV1,
   buildTileCollisionReportV1,
+  buildSceneTransitionReportV1,
   buildVisualRegressionBaselineReportV1
 } from '../src/index.mjs';
 import { assertLoopReportV1 } from './helpers/assertLoopReportV1.mjs';
@@ -22,12 +23,29 @@ import { assertStateMutationTraceV1 } from './helpers/assertStateMutationTraceV1
 import { assertSystemRegistryV1 } from './helpers/assertSystemRegistryV1.mjs';
 import { assertSystemPhaseRegistryV1 } from './helpers/assertSystemPhaseRegistryV1.mjs';
 import { assertTileCollisionReportV1 } from './helpers/assertTileCollisionReportV1.mjs';
+import { assertSceneTransitionReportV1 } from './helpers/assertSceneTransitionReportV1.mjs';
 import { assertVisualRegressionBaselineReportV1 } from './helpers/assertVisualRegressionBaselineReportV1.mjs';
 import { simulateStateV1WithMutationTrace } from '../src/index.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const sceneTransitionSourcePath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'scene-transition-source.scene.json'
+);
+const sceneTransitionTargetPath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'scene-transition-target.scene.json'
+);
 
 test('contract governance: v1 contract shapes remain strict and aligned', async () => {
   const scene = await loadSceneFile(tutorialScenePath);
@@ -64,6 +82,12 @@ test('contract governance: v1 contract shapes remain strict and aligned', async 
     path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'tile-collision-solid.scene.json')
   );
   assertTileCollisionReportV1(tileCollisionReport);
+
+  const sceneTransitionReport = await buildSceneTransitionReportV1({
+    fromPath: sceneTransitionSourcePath,
+    toPath: sceneTransitionTargetPath
+  });
+  assertSceneTransitionReportV1(sceneTransitionReport);
 
   const visualRegressionBaselineReport = await buildVisualRegressionBaselineReportV1(
     path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json')

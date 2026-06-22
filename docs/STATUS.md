@@ -58,6 +58,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - Prefab visual/export negative hardening com cobertura para Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export em refs inseguras;
 - validacao direta de `Asset Manifest v1` em runtime/CLI/MCP com `AssetManifestValidationReport v1`;
 - VisualRegressionBaselineReport v1 em runtime/CLI/MCP para regressao visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`;
+- SceneTransitionReport v1 em runtime/CLI/MCP para diagnosticar transicao explicita entre duas cenas por path;
 - Prefab follow-up baseline sem `components` explicitos em entidade prefab-backed;
 - V1 Small 2D Capability Matrix;
 - V1 Small 2D Release Validation;
@@ -68,10 +69,10 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. Fechar `Scene Transition v1` como proximo pacote V2 pequeno e opt-in, com runtime/CLI/MCP alinhados e fixture minima de duas cenas validas.
-2. Manter `Visual Regression Baseline v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 em bugfix/compatibilidade, sem reabrir pipeline pesado de assets ou nova semantica de prefab.
+1. Fechar o menor slice restante de composicao multi-cena: manifesto externo opt-in com `entryScene` e refs explicitas para cenas validas, fixture minima de tres cenas e alinhamento runtime/CLI/MCP.
+2. Manter `SceneTransitionReport v1`, `Visual Regression Baseline v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 em bugfix/compatibilidade, sem reabrir pipeline pesado de assets ou nova semantica de prefab.
 3. Se a lacuna de validacao estrita for atacada, criar superficie opt-in nova em vez de mutar `validate-scene` / `SceneValidationReport v1`.
-4. Depois de `Scene Transition v1`, escolher apenas o menor slice de composicao multi-cena antes de atlas/pathfinding/editor-lite.
+4. Adiar atlas/material manifest, pathfinding e editor-lite ate a composicao multi-cena minima estar validada end-to-end.
 
 ## Versoes de produto
 

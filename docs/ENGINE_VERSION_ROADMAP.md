@@ -62,6 +62,7 @@ Capacidades alvo:
 - Sprite Animation v1 concluido como diagnostico declarativo runtime/CLI/MCP;
 - `AssetManifestValidationReport v1` concluido como validacao direta minima de manifesto em runtime/CLI/MCP, com report versionado e erros previsiveis;
 - `entity.prefab` agora endurece refs com extensao errada, traversal, URL e paths absolutos/UNC, falhando de forma previsivel fora do contrato v1 tambem em Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export;
+- `SceneTransitionReport v1` concluido como diagnostico opt-in entre dois paths de cena explicitos, sem mutar Scene Document, loop ou savegame;
 - save/load jogavel formal futuro, se ainda necessario;
 - release checkpoint V1 Small 2D concluido como gate de fechamento.
 
@@ -84,7 +85,7 @@ Objetivo: aumentar escala e conforto para jogos pequenos de producao indie.
 Capacidades alvo:
 
 - prefab/templates;
-- scene transitions;
+- scene transition report concluido e scene composition minima aberta;
 - UI system v1;
 - audio v1;
 - sprite animation v1;
@@ -214,6 +215,6 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Fechar `Scene Transition v1` como proximo pacote V2 pequeno, opt-in e cross-interface, sem mutar `Scene Document v1`, `SceneValidationReport v1` ou `savegame v1`.
-2. Manter `Visual Regression Baseline v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-3. Depois de `Scene Transition v1`, priorizar apenas o menor slice de composicao multi-cena restante antes de atlas/pathfinding/editor-lite.
+1. Fechar o menor slice restante de composicao multi-cena: manifesto externo opt-in com `entryScene` e refs explicitas para cenas validas, fixture minima de tres cenas e alinhamento runtime/CLI/MCP, sem mutar `Scene Document v1`, `SceneValidationReport v1` ou `savegame v1`.
+2. Manter `SceneTransitionReport v1`, `Visual Regression Baseline v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
+3. Depois da composicao multi-cena minima, escolher entre atlas/material manifest, pathfinding grid v1 ou editor-lite.
