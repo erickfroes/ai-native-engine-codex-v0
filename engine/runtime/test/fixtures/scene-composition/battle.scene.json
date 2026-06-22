@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "composition-battle",
+    "author": "OpenAI scaffold",
+    "tags": ["scene-composition", "battle"]
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "battle.enemy",
+      "name": "Battle Enemy",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "position": {
+              "x": 64,
+              "y": 32,
+              "z": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

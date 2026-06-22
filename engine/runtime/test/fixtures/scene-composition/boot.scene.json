@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "composition-boot",
+    "author": "OpenAI scaffold",
+    "tags": ["scene-composition", "boot"]
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "boot.spawn",
+      "name": "Boot Spawn",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "position": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

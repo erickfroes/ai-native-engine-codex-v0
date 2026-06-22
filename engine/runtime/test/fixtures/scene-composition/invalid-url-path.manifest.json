@@ -1,0 +1,13 @@
+{
+  "sceneCompositionManifestVersion": 1,
+  "metadata": {
+    "name": "invalid-url-path"
+  },
+  "entryScene": "boot",
+  "scenes": [
+    {
+      "ref": "boot",
+      "path": "https://example.com/boot.scene.json"
+    }
+  ]
+}

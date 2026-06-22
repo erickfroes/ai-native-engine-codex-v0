@@ -4,12 +4,12 @@
 
 Registrar o audit pequeno pedido apos o congelamento de `entity.prefab` v1 e a decisao do menor pacote seguro que abriu V2.
 
-Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, e o follow-up imediato tambem foi fechado como `SceneTransitionReport v1`; a continuidade agora aponta para o menor manifesto externo de composicao multi-cena.
+Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, o follow-up imediato foi fechado como `SceneTransitionReport v1` e a composicao minima foi fechada como `Scene Composition Manifest v1`; a continuidade agora aponta para `Pathfinding Grid v1`.
 
 ## Estado consolidado
 
 - V1 Small 2D esta release-checkpointed e permanece aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, AssetManifestValidationReport v1, Visual Regression Baseline v1 e SceneTransitionReport v1 ja iniciam V2 em slices pequenos.
+- Audio Lite v1, UI System v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, AssetManifestValidationReport v1, Visual Regression Baseline v1, SceneTransitionReport v1 e Scene Composition Manifest v1 ja iniciam V2 em slices pequenos.
 - `entity.prefab` v1 esta congelado: sem nested prefab, prefab hierarchy, hot reload, editor ou template engine.
 - O hardening de prefab inseguro ja cobre consumidores visuais/export por path, incluindo Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export.
 
@@ -18,11 +18,11 @@ Este documento e historico. A decisao principal ja foi executada por `Visual Reg
 | Lacuna V2 | Tamanho | Risco | Decisao |
 | --- | --- | --- | --- |
 | Visual regression basica | pequeno | baixo/medio | Executado como `VisualRegressionBaselineReport v1`. |
-| Scene transitions / composition | medio | medio | `SceneTransitionReport v1` executado; composicao multi-cena externa segue como proximo menor pacote. |
+| Scene transitions / composition | medio | medio | `SceneTransitionReport v1` e `Scene Composition Manifest v1` executados como superficies report-only. |
 | Particle-lite | medio | medio | Deixar para depois; toca render/tempo/fixtures. |
 | Atlas/material manifest | medio/grande | medio/alto | Evitar por enquanto para nao abrir pipeline pesado de assets. |
 | Editor-lite automatizavel | grande | alto | Nao iniciar antes de contratos V2 menores. |
-| Pathfinding grid v1 | medio | medio | Pacote gameplay separado, depois de uma regressao visual minima. |
+| Pathfinding grid v1 | medio | medio | Proximo menor pacote recomendado apos composicao multi-cena minima. |
 
 ## Guardrail de validacao
 
@@ -63,7 +63,18 @@ Escopo executado:
 - cobrir casos validos, target invalido, arquivo ausente, warning de mesmo path e paridade cross-interface;
 - preservar `Scene Document v1`, `SceneValidationReport v1`, loop, render, Browser Demo, exports HTML e `savegame v1`.
 
-Proximo pacote recomendado: **Scene Composition Manifest v1**, com manifesto externo opt-in contendo `entryScene` e refs explicitas para cenas validas, fixture minima de tres cenas e alinhamento runtime/CLI/MCP, sem mutar `Scene Document v1`, `SceneValidationReport v1` ou `savegame v1`.
+**Scene Composition Manifest v1** foi fechado como composicao minima externa e opt-in.
+
+Escopo executado:
+
+- criar manifesto versionado com `entryScene` e refs explicitas para cenas validas;
+- validar paths relativos seguros ao diretorio do manifesto;
+- validar cada cena referenciada por `validateSceneFile`;
+- expor runtime, CLI e MCP com shape alinhado;
+- cobrir fixture minima de tres cenas, manifesto ausente/malformado, entry ausente, refs/paths duplicados, path inseguro/extensao errada e cena referenciada invalida;
+- preservar `Scene Document v1`, `SceneValidationReport v1`, `SceneTransitionReport v1`, loop, render, Browser Demo, exports HTML e `savegame v1`.
+
+Proximo pacote recomendado: **Pathfinding Grid v1**, derivado de `tile.layer` e `collision.bounds`, em superficie opt-in nova e sem acoplar editor, atlas/material manifest ou pipeline pesado de assets.
 
 Fora de escopo:
 

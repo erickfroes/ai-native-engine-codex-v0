@@ -1,0 +1,17 @@
+{
+  "sceneCompositionManifestVersion": 1,
+  "metadata": {
+    "name": "invalid-duplicate-path"
+  },
+  "entryScene": "boot",
+  "scenes": [
+    {
+      "ref": "boot",
+      "path": "./boot.scene.json"
+    },
+    {
+      "ref": "alias",
+      "path": "boot.scene.json"
+    }
+  ]
+}

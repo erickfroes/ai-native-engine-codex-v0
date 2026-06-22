@@ -110,9 +110,10 @@ Entregas alvo:
 - matriz de regressao visual/headless;
 - Visual Regression Baseline v1 concluido como report estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`;
 - Scene Transition Report v1 concluido como report opt-in entre dois paths de cena explicitos, sem mutar loop/save/Scene Document;
+- Scene Composition Manifest v1 concluido como manifesto externo opt-in com `entryScene`, refs explicitas e fixture minima de tres cenas;
 - pacote Codex com prompts/skills/subagentes para criar um jogo 2D pequeno.
 
-Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. Audio Lite v1, Sprite Animation v1 e Portable HTML Export v2 ja iniciam V2 de forma incremental, sem editor, servidor, fisica completa ou pathfinding. `AssetManifestValidationReport v1` agora tambem fecha a validacao direta minima de manifesto em runtime/CLI/MCP, com shape versionado e erros previsiveis para arquivo ausente e JSON malformado. `entity.prefab` agora tambem falha de forma previsivel quando nao aponta para `.prefab.json` ou tenta usar traversal, URL e paths absolutos/UNC, incluindo cobertura visual/export para Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export. `VisualRegressionBaselineReport v1` agora fecha o baseline visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`, sem pixel-diff obrigatorio. `SceneTransitionReport v1` agora fecha o primeiro diagnostico multi-cena por dois paths explicitos, sem executar troca no loop nem mutar savegame.
+Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. Audio Lite v1, Sprite Animation v1 e Portable HTML Export v2 ja iniciam V2 de forma incremental, sem editor, servidor, fisica completa ou pathfinding. `AssetManifestValidationReport v1` agora tambem fecha a validacao direta minima de manifesto em runtime/CLI/MCP, com shape versionado e erros previsiveis para arquivo ausente e JSON malformado. `entity.prefab` agora tambem falha de forma previsivel quando nao aponta para `.prefab.json` ou tenta usar traversal, URL e paths absolutos/UNC, incluindo cobertura visual/export para Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export. `VisualRegressionBaselineReport v1` agora fecha o baseline visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`, sem pixel-diff obrigatorio. `SceneTransitionReport v1` fecha o primeiro diagnostico multi-cena por dois paths explicitos, e `Scene Composition Manifest v1` fecha a composicao multi-cena minima por manifesto externo, sem executar troca no loop nem mutar savegame.
 
 Criterio de conclusao:
 
@@ -129,9 +130,9 @@ Subagentes recomendados:
 
 Linha de trabalho atual recomendada:
 
-1. Fechar o menor slice restante de composicao multi-cena: manifesto externo opt-in com `entryScene` e refs explicitas para cenas validas, fixture minima de tres cenas e alinhamento runtime/CLI/MCP, sem mutar `Scene Document v1`, `SceneValidationReport v1` ou `savegame v1`.
-2. Manter `SceneTransitionReport v1`, `Visual Regression Baseline v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-3. Depois da composicao multi-cena minima, escolher entre atlas/material manifest, pathfinding grid v1 ou editor-lite, mantendo 3D indie para depois de V1/V2 demonstradas.
+1. Manter `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
+2. Abrir `Pathfinding Grid v1` como menor proximo passo seguro, derivado de `tile.layer` e `collision.bounds`, em superficie opt-in nova e sem acoplar editor ou pipeline pesado de assets.
+3. Manter atlas/material manifest e editor-lite adiados ate `Pathfinding Grid v1` estar validado end-to-end, com 3D indie apenas depois de V1/V2 demonstradas.
 
 ---
 
@@ -142,7 +143,7 @@ Objetivo: sair de demo e chegar a uma base de producao pequena.
 Entregas alvo:
 
 - prefab/template v1;
-- scene transition report concluido e scene composition minima aberta;
+- scene transition report e scene composition minima concluidos;
 - UI v1 com menus, HUD e mensagens;
 - animacao sprite/tile v1;
 - asset atlas v1;

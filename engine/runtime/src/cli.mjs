@@ -17,6 +17,7 @@ import {
   loadSceneFile,
   buildWorldSnapshotMessage,
   buildSceneTransitionReportV1,
+  buildSceneCompositionManifestReportV1,
   buildRenderSnapshotV1,
   renderSnapshotToSvgV1,
   RENDER_SVG_VERSION,
@@ -64,6 +65,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs inspect-scene-transition <from> <to> [--json]
+  node engine/runtime/src/cli.mjs inspect-scene-composition <path> [--json]
   node engine/runtime/src/cli.mjs render-snapshot <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--json]
   node engine/runtime/src/cli.mjs render-svg <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs inspect-visual-regression-baseline <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--json]
@@ -416,6 +418,49 @@ async function run() {
         console.log('Warnings:');
         for (const warning of report.warnings) {
           console.log(`- ${warning.endpoint} ${warning.path}: ${warning.message}`);
+        }
+      }
+    }
+
+    process.exitCode = report.ok ? 0 : 1;
+    return;
+  }
+
+  if (command === 'inspect-scene-composition') {
+    if (!maybePath || maybePath.startsWith('--')) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildSceneCompositionManifestReportV1(maybePath);
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene composition manifest report version: ${report.sceneCompositionManifestReportVersion}`);
+      console.log(report.ok ? 'Status: OK' : 'Status: INVALID');
+      console.log(`Manifest: ${report.absolutePath}`);
+      console.log(`Entry scene: ${report.entryScene ?? '(invalid)'}`);
+      console.log(`Entry path: ${report.entryScenePath ?? '(invalid)'}`);
+      console.log(`Scenes: ${report.scenes.length}`);
+      for (const scene of report.scenes) {
+        console.log(`- ${scene.ref ?? '(invalid)'}: ${scene.scene ?? '(invalid)'} (${scene.path})`);
+      }
+      if (report.errors.length > 0) {
+        console.log('');
+        console.log('Errors:');
+        for (const error of report.errors) {
+          const ref = error.ref === null ? '' : ` ${error.ref}`;
+          console.log(`- ${error.target}${ref} ${error.path}: ${error.message}`);
+        }
+      }
+      if (report.warnings.length > 0) {
+        console.log('');
+        console.log('Warnings:');
+        for (const warning of report.warnings) {
+          const ref = warning.ref === null ? '' : ` ${warning.ref}`;
+          console.log(`- ${warning.target}${ref} ${warning.path}: ${warning.message}`);
         }
       }
     }

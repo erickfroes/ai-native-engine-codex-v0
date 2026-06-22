@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "composition-town",
+    "author": "OpenAI scaffold",
+    "tags": ["scene-composition", "town"]
+  },
+  "systems": [
+    "core.loop",
+    "input.keyboard"
+  ],
+  "entities": [
+    {
+      "id": "town.player",
+      "name": "Town Player",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "position": {
+              "x": 16,
+              "y": 24,
+              "z": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

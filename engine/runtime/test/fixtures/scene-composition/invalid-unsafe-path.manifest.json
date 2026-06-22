@@ -1,0 +1,13 @@
+{
+  "sceneCompositionManifestVersion": 1,
+  "metadata": {
+    "name": "invalid-unsafe-path"
+  },
+  "entryScene": "boot",
+  "scenes": [
+    {
+      "ref": "boot",
+      "path": "../scene-transition-source.scene.json"
+    }
+  ]
+}

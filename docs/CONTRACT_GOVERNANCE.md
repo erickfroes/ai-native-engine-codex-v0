@@ -11,6 +11,7 @@ Definir como evoluir contratos v1 para v2 sem quebrar compatibilidade operaciona
 - `LoopTrace v1`
 - `SceneValidationReport v1`
 - `SceneTransitionReport v1` (opt-in)
+- `SceneCompositionManifestReport v1` (opt-in)
 - `ExecutionPlan v1`
 - `StateSnapshot v1` (opt-in)
 - `StateSimulationReport v1` (opt-in)

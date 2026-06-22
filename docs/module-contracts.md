@@ -132,6 +132,23 @@ Contrato de diagnostico para uma troca explicita entre duas cenas por path:
 - nao altera `Scene Document v1`, `SceneValidationReport v1`, `run-loop`, render, Browser Demo, exports HTML ou `savegame v1`.
 - nao adiciona system, componente, trigger automatico, carry-over de estado ou composition graph neste slice.
 
+## Scene Composition Manifest v1 (composicao multi-cena opt-in)
+
+Contrato externo e report-only para declarar uma composicao pequena de cenas por refs estaveis:
+
+- ver `docs/SCENE_COMPOSITION_MANIFEST_V1.md`.
+- schema formal do manifesto: `docs/schemas/scene-composition-manifest-v1.schema.json`.
+- schema formal do report: `docs/schemas/scene-composition-manifest-report-v1.schema.json`.
+- runtime: `buildSceneCompositionManifestReportV1(path)`.
+- CLI: `inspect-scene-composition <path> [--json]`.
+- MCP: `inspect_scene_composition({ path })`.
+- `entryScene` referencia um `scenes[].ref`, nao um path.
+- cada `scenes[].path` deve ser relativo seguro ao diretorio do manifesto, apontar para `.scene.json` e permanecer contido nesse diretorio.
+- cada cena referenciada passa por `validateSceneFile`, cobrindo schema, invariantes e resolucao segura de `entity.prefab`.
+- o report preserva o manifesto parseado quando possivel, agrega erros de manifesto e de cena e mantem summaries deterministas por ref.
+- nao altera `Scene Document v1`, `SceneValidationReport v1`, `SceneTransitionReport v1`, `validate-scene`, `validate_scene`, `validate-all-scenes`, loop, render, Browser Demo, exports HTML ou `savegame v1`.
+- nao adiciona navegacao runtime, trigger automatico, graph de transicao, carry-over de estado, nested manifests, editor ou servidor.
+
 ## Visual Components v1 (declarativo)
 
 Contrato minimo para componentes visuais declarados na propria cena:
@@ -736,4 +753,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1 e Scene Transition Report v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e o menor manifesto externo de composicao multi-cena.
+- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1 e Scene Composition Manifest v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `Pathfinding Grid v1`.

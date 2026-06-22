@@ -5,6 +5,11 @@ export {
   buildSceneTransitionReportV1,
   SCENE_TRANSITION_REPORT_VERSION
 } from './scene/build-scene-transition-report-v1.mjs';
+export {
+  buildSceneCompositionManifestReportV1,
+  SCENE_COMPOSITION_MANIFEST_VERSION,
+  SCENE_COMPOSITION_MANIFEST_REPORT_VERSION
+} from './scene/build-scene-composition-manifest-report-v1.mjs';
 export { buildPrefabValidationReportV1 } from './scene/build-prefab-validation-report-v1.mjs';
 export { buildPrefabUsageReportV1 } from './scene/build-prefab-usage-report-v1.mjs';
 export { buildPrefabUsageReportV2 } from './scene/build-prefab-usage-report-v2.mjs';

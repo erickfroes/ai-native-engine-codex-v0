@@ -13,6 +13,7 @@ import {
   getSystemPhaseRegistryV1,
   buildTileCollisionReportV1,
   buildSceneTransitionReportV1,
+  buildSceneCompositionManifestReportV1,
   buildVisualRegressionBaselineReportV1
 } from '../src/index.mjs';
 import { assertLoopReportV1 } from './helpers/assertLoopReportV1.mjs';
@@ -24,6 +25,7 @@ import { assertSystemRegistryV1 } from './helpers/assertSystemRegistryV1.mjs';
 import { assertSystemPhaseRegistryV1 } from './helpers/assertSystemPhaseRegistryV1.mjs';
 import { assertTileCollisionReportV1 } from './helpers/assertTileCollisionReportV1.mjs';
 import { assertSceneTransitionReportV1 } from './helpers/assertSceneTransitionReportV1.mjs';
+import { assertSceneCompositionManifestReportV1 } from './helpers/assertSceneCompositionManifestReportV1.mjs';
 import { assertVisualRegressionBaselineReportV1 } from './helpers/assertVisualRegressionBaselineReportV1.mjs';
 import { simulateStateV1WithMutationTrace } from '../src/index.mjs';
 
@@ -45,6 +47,15 @@ const sceneTransitionTargetPath = path.join(
   'test',
   'fixtures',
   'scene-transition-target.scene.json'
+);
+const sceneCompositionManifestPath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'scene-composition',
+  'three-scene-composition.manifest.json'
 );
 
 test('contract governance: v1 contract shapes remain strict and aligned', async () => {
@@ -88,6 +99,9 @@ test('contract governance: v1 contract shapes remain strict and aligned', async 
     toPath: sceneTransitionTargetPath
   });
   assertSceneTransitionReportV1(sceneTransitionReport);
+
+  const sceneCompositionReport = await buildSceneCompositionManifestReportV1(sceneCompositionManifestPath);
+  assertSceneCompositionManifestReportV1(sceneCompositionReport);
 
   const visualRegressionBaselineReport = await buildVisualRegressionBaselineReportV1(
     path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json')

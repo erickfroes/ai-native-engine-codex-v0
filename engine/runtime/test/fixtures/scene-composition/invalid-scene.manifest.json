@@ -1,0 +1,13 @@
+{
+  "sceneCompositionManifestVersion": 1,
+  "metadata": {
+    "name": "invalid-scene-ref"
+  },
+  "entryScene": "broken",
+  "scenes": [
+    {
+      "ref": "broken",
+      "path": "./invalid-camera.scene.json"
+    }
+  ]
+}

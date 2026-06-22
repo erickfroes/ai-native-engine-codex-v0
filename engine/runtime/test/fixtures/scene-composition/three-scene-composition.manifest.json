@@ -1,0 +1,21 @@
+{
+  "sceneCompositionManifestVersion": 1,
+  "metadata": {
+    "name": "three-scene-composition"
+  },
+  "entryScene": "boot",
+  "scenes": [
+    {
+      "ref": "boot",
+      "path": "./boot.scene.json"
+    },
+    {
+      "ref": "town",
+      "path": "./town.scene.json"
+    },
+    {
+      "ref": "battle",
+      "path": "./battle.scene.json"
+    }
+  ]
+}

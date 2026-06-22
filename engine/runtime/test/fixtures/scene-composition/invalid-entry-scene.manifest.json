@@ -1,0 +1,13 @@
+{
+  "sceneCompositionManifestVersion": 1,
+  "metadata": {
+    "name": "invalid-entry-scene"
+  },
+  "entryScene": "missing",
+  "scenes": [
+    {
+      "ref": "boot",
+      "path": "./boot.scene.json"
+    }
+  ]
+}

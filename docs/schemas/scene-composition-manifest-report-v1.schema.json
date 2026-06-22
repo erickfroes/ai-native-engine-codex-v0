@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "scene-composition-manifest-report-v1.schema.json",
+  "title": "SceneCompositionManifestReportV1",
+  "type": "object",
+  "required": [
+    "sceneCompositionManifestReportVersion",
+    "ok",
+    "absolutePath",
+    "manifest",
+    "entryScene",
+    "entryScenePath",
+    "scenes",
+    "errors",
+    "warnings"
+  ],
+  "properties": {
+    "sceneCompositionManifestReportVersion": {
+      "enum": [1]
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "absolutePath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "entryScene": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "entryScenePath": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "scenes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "ref",
+          "path",
+          "ok",
+          "scene",
+          "summary",
+          "errors",
+          "warnings"
+        ],
+        "properties": {
+          "ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "scene": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "summary": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "path",
+                "message"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "message": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "path",
+                "message"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "message": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "target",
+          "ref",
+          "path",
+          "message"
+        ],
+        "properties": {
+          "target": {
+            "enum": [
+              "manifest",
+              "scene"
+            ]
+          },
+          "ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "target",
+          "ref",
+          "path",
+          "message"
+        ],
+        "properties": {
+          "target": {
+            "enum": [
+              "manifest",
+              "scene"
+            ]
+          },
+          "ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

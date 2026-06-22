@@ -23,6 +23,7 @@ import {
   simulateStateV1WithMutationTrace,
   buildWorldSnapshotMessage,
   buildSceneTransitionReportV1,
+  buildSceneCompositionManifestReportV1,
   buildRenderSnapshotV1,
   renderSnapshotToSvgV1,
   RENDER_SVG_VERSION,
@@ -131,6 +132,7 @@ async function handleToolCall(params) {
     params.name !== 'load_save' &&
     params.name !== 'emit_world_snapshot' &&
     params.name !== 'inspect_scene_transition' &&
+    params.name !== 'inspect_scene_composition' &&
     params.name !== 'render_snapshot' &&
     params.name !== 'render_svg' &&
     params.name !== 'inspect_visual_regression_baseline' &&
@@ -470,6 +472,28 @@ async function handleToolCall(params) {
           report.ok
             ? `Scene transition inspected from ${report.from.scene} to ${report.to.scene}.`
             : 'Scene transition inspection failed validation.'
+        ),
+        structuredContent: report,
+        isError: !report.ok
+      };
+    }
+
+    if (params.name === 'inspect_scene_composition') {
+      const unexpectedArgument = findUnexpectedArgument(args, new Set(['path']));
+      if (unexpectedArgument !== undefined) {
+        return {
+          content: toTextContent(`inspect_scene_composition: unexpected argument \`${unexpectedArgument}\`.`),
+          isError: true
+        };
+      }
+
+      const report = await buildSceneCompositionManifestReportV1(resolveRepoPath(args.path));
+
+      return {
+        content: toTextContent(
+          report.ok
+            ? `Scene composition inspected for ${report.entryScene} with ${report.scenes.length} scene(s).`
+            : 'Scene composition inspection failed validation.'
         ),
         structuredContent: report,
         isError: !report.ok
@@ -1305,7 +1329,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_asset_manifest, validate_input_intent, validate_prefab, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, inspect_scene_transition, render_snapshot, render_svg, inspect_visual_regression_baseline, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_asset_manifest, validate_input_intent, validate_prefab, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, inspect_scene_transition, inspect_scene_composition, render_snapshot, render_svg, inspect_visual_regression_baseline, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }

@@ -1,0 +1,13 @@
+{
+  "sceneCompositionManifestVersion": 1,
+  "metadata": {
+    "name": "invalid-absolute-path"
+  },
+  "entryScene": "boot",
+  "scenes": [
+    {
+      "ref": "boot",
+      "path": "/tmp/boot.scene.json"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "sceneCompositionManifestVersion": 1,
+  "metadata": {
+    "name": "invalid-malformed"
+  },
+  "entryScene": "boot",
+  "scenes": [

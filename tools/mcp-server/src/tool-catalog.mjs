@@ -187,6 +187,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_scene_composition',
+    title: 'Inspect Scene Composition',
+    description: 'Build a SceneCompositionManifestReport v1 from an external opt-in manifest and its referenced scene files.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root for a Scene Composition Manifest v1 JSON file.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'render_snapshot',
     title: 'Render Snapshot',
     description: 'Build a deterministic headless RenderSnapshot v1 JSON payload from a scene.',
