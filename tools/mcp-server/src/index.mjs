@@ -45,6 +45,7 @@ import {
   buildCollisionOverlapReportV1,
   buildMovementBlockingReportV1,
   buildTileCollisionReportV1,
+  buildPathfindingGridReportV1,
   buildAudioLiteReportV1,
   buildUiSystemReportV1,
   buildSpriteAnimationReportV1,
@@ -148,6 +149,7 @@ async function handleToolCall(params) {
     params.name !== 'inspect_collision_bounds' &&
     params.name !== 'inspect_collision_overlaps' &&
     params.name !== 'inspect_tile_collision' &&
+    params.name !== 'inspect_pathfinding_grid' &&
     params.name !== 'inspect_audio_lite' &&
     params.name !== 'inspect_ui_system' &&
     params.name !== 'inspect_sprite_animation' &&
@@ -766,6 +768,25 @@ async function handleToolCall(params) {
       };
     }
 
+    if (params.name === 'inspect_pathfinding_grid') {
+      const unexpectedArgument = findUnexpectedArgument(args, new Set(['path']));
+      if (unexpectedArgument !== undefined) {
+        return {
+          content: toTextContent(`inspect_pathfinding_grid: unexpected argument \`${unexpectedArgument}\`.`),
+          isError: true
+        };
+      }
+
+      const report = await buildPathfindingGridReportV1(targetPath);
+      return {
+        content: toTextContent(
+          `Pathfinding grid report built for ${report.scene} with ${report.grids.length} grid(s).`
+        ),
+        structuredContent: report,
+        isError: false
+      };
+    }
+
     if (params.name === 'inspect_ui_system') {
       const report = await buildUiSystemReportV1(targetPath);
       return {
@@ -1329,7 +1350,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_asset_manifest, validate_input_intent, validate_prefab, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, inspect_scene_transition, inspect_scene_composition, render_snapshot, render_svg, inspect_visual_regression_baseline, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_asset_manifest, validate_input_intent, validate_prefab, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, inspect_scene_transition, inspect_scene_composition, render_snapshot, render_svg, inspect_visual_regression_baseline, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_pathfinding_grid, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }

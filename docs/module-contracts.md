@@ -272,6 +272,25 @@ Compatibilidade:
 - `InputIntent v1`, `KeyboardInputScript v1`, RenderSnapshot v1, Save/Load v1 e renderers permanecem inalterados;
 - nao adiciona UI system completo, fisica completa, resolucao complexa, pathfinding, editor ou servidor.
 
+## Pathfinding Grid v1 (ocupacao de grid report-only)
+
+Contrato deterministico para diagnosticar ocupacao de grids 2D derivados de `tile.layer` e `collision.bounds`:
+
+- ver `docs/PATHFINDING_GRID_V1.md`.
+- schema formal: `docs/schemas/pathfinding-grid-report-v1.schema.json`.
+- runtime: `buildPathfindingGridReportV1(sceneOrPath)`.
+- CLI: `inspect-pathfinding-grid <scene> [--json]`.
+- MCP: `inspect_pathfinding_grid({ path })`.
+- cada `tile.layer` gera um grid separado, sem merge global.
+- tiles solidos bloqueiam apenas celulas do proprio layer.
+- `collision.bounds` solidos podem bloquear qualquer grid por overlap AABB com area positiva.
+- `blockerId` e globalmente unico no report, com prefixos `tile:` e `collision.bounds:`.
+- `tile.layer` preserva a semantica atual: `transform` da entidade de mapa nao e aplicado.
+- `blockedCells[]` lista apenas celulas bloqueadas para manter payload pequeno; celulas caminhaveis sao implicitas por `rows * columns`.
+- limite v1 por layer: `4096` celulas.
+- nao altera `Scene Document v1`, `TileCollisionReport v1`, `CollisionBoundsReport v1`, `MovementBlockingReport v1`, `RenderSnapshot v1`, loop, Browser Demo, exports HTML ou `savegame v1`.
+- nao adiciona A*, BFS, route solving, path following, navmesh, editor, servidor ou runtime AI.
+
 ## Input Intent v1 (input headless opt-in no loop)
 
 Contrato de intenção de input headless, com integração opt-in no `run-loop`/`run_loop` e sem acoplamento com `Scene Document v1` ou `simulate-state`:
@@ -753,4 +772,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1 e Scene Composition Manifest v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `Pathfinding Grid v1`.
+- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1 e Pathfinding Grid v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `Atlas/Material Manifest v1`.

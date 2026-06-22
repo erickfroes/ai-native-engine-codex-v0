@@ -80,4 +80,4 @@ Ele fecha o primeiro slice V2 de transicao de cena sem executar troca no loop, s
 - save/load cross-scene;
 - composition graph, streaming, world partition ou editor-lite.
 
-O manifesto externo de composicao multi-cena foi fechado em `docs/SCENE_COMPOSITION_MANIFEST_V1.md`. O proximo menor passo seguro e `Pathfinding Grid v1`, ainda opt-in e sem mutar os contratos v1 existentes.
+O manifesto externo de composicao multi-cena foi fechado em `docs/SCENE_COMPOSITION_MANIFEST_V1.md`, e o primeiro diagnostico de grid foi fechado em `docs/PATHFINDING_GRID_V1.md`. O proximo menor passo seguro e `Atlas/Material Manifest v1`, ainda opt-in e sem mutar os contratos v1 existentes.

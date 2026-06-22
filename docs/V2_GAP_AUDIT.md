@@ -4,12 +4,12 @@
 
 Registrar o audit pequeno pedido apos o congelamento de `entity.prefab` v1 e a decisao do menor pacote seguro que abriu V2.
 
-Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, o follow-up imediato foi fechado como `SceneTransitionReport v1` e a composicao minima foi fechada como `Scene Composition Manifest v1`; a continuidade agora aponta para `Pathfinding Grid v1`.
+Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, o follow-up imediato foi fechado como `SceneTransitionReport v1`, a composicao minima foi fechada como `Scene Composition Manifest v1` e o primeiro diagnostico de grid foi fechado como `Pathfinding Grid v1`; a continuidade agora aponta para `Atlas/Material Manifest v1`.
 
 ## Estado consolidado
 
 - V1 Small 2D esta release-checkpointed e permanece aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, AssetManifestValidationReport v1, Visual Regression Baseline v1, SceneTransitionReport v1 e Scene Composition Manifest v1 ja iniciam V2 em slices pequenos.
+- Audio Lite v1, UI System v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, AssetManifestValidationReport v1, Visual Regression Baseline v1, SceneTransitionReport v1, Scene Composition Manifest v1 e Pathfinding Grid v1 ja iniciam V2 em slices pequenos.
 - `entity.prefab` v1 esta congelado: sem nested prefab, prefab hierarchy, hot reload, editor ou template engine.
 - O hardening de prefab inseguro ja cobre consumidores visuais/export por path, incluindo Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export.
 
@@ -20,9 +20,9 @@ Este documento e historico. A decisao principal ja foi executada por `Visual Reg
 | Visual regression basica | pequeno | baixo/medio | Executado como `VisualRegressionBaselineReport v1`. |
 | Scene transitions / composition | medio | medio | `SceneTransitionReport v1` e `Scene Composition Manifest v1` executados como superficies report-only. |
 | Particle-lite | medio | medio | Deixar para depois; toca render/tempo/fixtures. |
-| Atlas/material manifest | medio/grande | medio/alto | Evitar por enquanto para nao abrir pipeline pesado de assets. |
+| Atlas/material manifest | medio/grande | medio/alto | Proximo menor pacote recomendado, mantendo superficie declarativa/diagnostica opt-in. |
 | Editor-lite automatizavel | grande | alto | Nao iniciar antes de contratos V2 menores. |
-| Pathfinding grid v1 | medio | medio | Proximo menor pacote recomendado apos composicao multi-cena minima. |
+| Pathfinding grid v1 | medio | medio | Executado como `PathfindingGridReport v1`, report-only e sem route solving. |
 
 ## Guardrail de validacao
 
@@ -74,13 +74,22 @@ Escopo executado:
 - cobrir fixture minima de tres cenas, manifesto ausente/malformado, entry ausente, refs/paths duplicados, path inseguro/extensao errada e cena referenciada invalida;
 - preservar `Scene Document v1`, `SceneValidationReport v1`, `SceneTransitionReport v1`, loop, render, Browser Demo, exports HTML e `savegame v1`.
 
-Proximo pacote recomendado: **Pathfinding Grid v1**, derivado de `tile.layer` e `collision.bounds`, em superficie opt-in nova e sem acoplar editor, atlas/material manifest ou pipeline pesado de assets.
+**Pathfinding Grid v1** foi fechado como primeiro diagnostico de ocupacao de grid report-only.
+
+Escopo executado:
+
+- criar `PathfindingGridReport v1` derivado de `tile.layer` e `collision.bounds`;
+- expor runtime, CLI e MCP com shape alinhado;
+- cobrir fixture minima, cena sem grids, multiplas layers, cena invalida, limite de celulas e paridade cross-interface;
+- preservar loop, render, Browser Demo, exports HTML, `savegame v1` e route solving fora do escopo.
+
+Proximo pacote recomendado: **Atlas/Material Manifest v1**, em superficie declarativa/diagnostica opt-in nova e sem acoplar editor-lite ou pipeline pesado obrigatorio.
 
 Fora de escopo:
 
 - renderer novo, Pixi, Three, WebGL ou WebGPU;
 - pipeline pesado de assets;
-- atlas/material manifest;
+- pipeline pesado de atlas/material alem do manifesto minimo;
 - nested prefab ou nova semantica de prefab;
 - editor visual;
 - 3D.

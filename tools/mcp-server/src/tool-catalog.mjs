@@ -658,6 +658,22 @@ export const toolCatalog = [
       additionalProperties: false
     }
   },
+  {
+    name: 'inspect_pathfinding_grid',
+    title: 'Inspect Pathfinding Grid',
+    description: 'Build PathfindingGridReport v1 from tile.layer grids and solid collision blockers without route solving.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
 
   {
     name: 'inspect_ui_system',

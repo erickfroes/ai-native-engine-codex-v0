@@ -58,6 +58,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Visual Regression Baseline v1: concluido como `VisualRegressionBaselineReport v1` opt-in, derivado de `RenderSnapshot v1` e `Render SVG v1`, com schema, runtime/CLI/MCP, hashes SHA-256 deterministas, cobertura `v1-small-2d` + `visual-sprite-fixture` e sem pixel-diff/browser/screenshot obrigatorio.
 - Scene Transition Report v1: concluido como `SceneTransitionReport v1` opt-in entre dois paths explicitos de cena, com schema, runtime/CLI/MCP, fixtures de source/target, diagnostico de target invalido/ausente, paridade cross-interface e sem mutar `Scene Document v1`, `SceneValidationReport v1`, loop, render ou `savegame v1`.
 - Scene Composition Manifest v1: concluido como manifesto externo opt-in com `entryScene` e refs explicitas para cenas validas, `SceneCompositionManifestReport v1`, schemas, runtime/CLI/MCP, fixture minima de tres cenas e diagnosticos para manifesto ausente/malformado, entry ausente, refs/paths duplicados, path inseguro/extensao errada e cena referenciada invalida, sem mutar `Scene Document v1`, `SceneValidationReport v1`, `SceneTransitionReport v1`, loop, render ou `savegame v1`.
+- Pathfinding Grid v1: concluido como `PathfindingGridReport v1` report-only opt-in derivado de `tile.layer` e `collision.bounds`, com schema, runtime/CLI/MCP, limite de 4096 celulas por layer e paridade cross-interface, sem route solving, sem mutar loop, render, Browser Demo, exports ou `savegame v1`.
 
 ## O que o Codex recebe
 
@@ -85,6 +86,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `inspect-prefab-usage-v2` / `inspect_prefab_usage_v2` para rastreabilidade opt-in de paths/origins/overrides;
 - `inspect-scene-transition` / `inspect_scene_transition` para diagnosticar uma transicao explicita entre duas cenas por path, via `SceneTransitionReport v1`;
 - `inspect-scene-composition` / `inspect_scene_composition` para diagnosticar uma composicao multi-cena por manifesto externo, via `SceneCompositionManifestReport v1`;
+- `inspect-pathfinding-grid` / `inspect_pathfinding_grid` para diagnosticar ocupacao de grids derivados de `tile.layer` e `collision.bounds`, via `PathfindingGridReport v1`;
 - `export-html-game` / `export_html_game` para escrever HTML jogavel autocontido;
 - `templates/top-down-basic` e `templates/side-view-blocking-basic`;
 - cena `scenes/v1-small-2d.scene.json` para readiness V1;
@@ -109,6 +111,9 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - `docs/PREFAB_VALIDATION_REPORT_V1.md`;
 - `docs/SCENE_TRANSITION_V1.md`;
 - `docs/SCENE_COMPOSITION_MANIFEST_V1.md`;
+- `docs/PATHFINDING_GRID_V1.md`;
+- `docs/schemas/pathfinding-grid-report-v1.schema.json`;
+- `engine/runtime/test/fixtures/pathfinding-grid-basic.scene.json`;
 - `docs/V2_GAP_AUDIT.md`;
 - suites cross-interface;
 - roadmap progressivo ate 3D AAA;
@@ -152,6 +157,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 34. `docs/VISUAL_REGRESSION_BASELINE_V1.md`
 35. `docs/SCENE_TRANSITION_V1.md`
 36. `docs/SCENE_COMPOSITION_MANIFEST_V1.md`
+37. `docs/PATHFINDING_GRID_V1.md`
 
 ## Baseline obrigatorio
 
@@ -166,9 +172,10 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Manter `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `Pathfinding Grid v1` como menor proximo passo seguro, derivado de `tile.layer` e `collision.bounds`, em superficie opt-in nova e sem acoplar editor ou pipeline pesado de assets.
-3. Manter atlas/material manifest e editor-lite adiados ate `Pathfinding Grid v1` estar validado end-to-end; 3D indie apenas depois de V1/V2 demonstradas.
+1. Manter `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
+2. Abrir `Atlas/Material Manifest v1` como menor proximo passo seguro, em superficie declarativa/diagnostica opt-in nova e sem acoplar editor-lite ou pipeline pesado obrigatorio.
+3. Se a lacuna de validacao estrita for atacada, criar `validate-scene-strict` / `validate_scene_strict` sem mutar `SceneValidationReport v1`.
+4. Manter editor-lite, particle-lite e 3D adiados ate `Atlas/Material Manifest v1` estar validado end-to-end.
 
 ## Regra de manutencao da linha de seguimento
 
@@ -198,7 +205,7 @@ Se a tarefa tocar handoff, roadmap ou continuidade, incluir `docs_handoff_audito
 - servidor;
 - pipeline pesado de assets;
 - multiplayer real;
-- pathfinding/chunk streaming antes de colisao tile;
+- route solving, path following e chunk streaming antes de contratos diagnosticos menores;
 - fisica completa antes de movement blocking opt-in;
 - transformar Simple HTML Export v1 em bundler, servidor ou build pipeline V2;
 - transformar Game Templates v1 em template engine, prefab system ou editor;

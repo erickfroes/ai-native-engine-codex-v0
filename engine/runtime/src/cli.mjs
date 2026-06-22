@@ -46,6 +46,7 @@ import {
   buildCollisionOverlapReportV1,
   buildMovementBlockingReportV1,
   buildTileCollisionReportV1,
+  buildPathfindingGridReportV1,
   buildAudioLiteReportV1,
   buildUiSystemReportV1,
   buildSpriteAnimationReportV1,
@@ -82,6 +83,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-collision-bounds <path> [--json]
   node engine/runtime/src/cli.mjs inspect-collision-overlaps <path> [--json]
   node engine/runtime/src/cli.mjs inspect-tile-collision <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-pathfinding-grid <path> [--json]
   node engine/runtime/src/cli.mjs inspect-movement-blocking <path> --input-intent <path> [--json]
   node engine/runtime/src/cli.mjs inspect-audio-lite <path> [--json]
   node engine/runtime/src/cli.mjs inspect-ui-system <path> [--json]
@@ -1018,6 +1020,36 @@ async function run() {
       for (const tile of report.tiles) {
         console.log(
           `- ${tile.tileId}: ${tile.x},${tile.y} ${tile.width}x${tile.height} palette=${tile.paletteId} solid=${tile.solid}`
+        );
+      }
+    }
+
+    return;
+  }
+
+  if (command === 'inspect-pathfinding-grid') {
+    const positionalArgs = process.argv.slice(3).filter((arg) => arg !== '--json');
+    if (positionalArgs.length === 0) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+    if (positionalArgs.length > 1) {
+      throw new Error(`inspect-pathfinding-grid: unexpected argument \`${positionalArgs[1]}\``);
+    }
+
+    const report = await buildPathfindingGridReportV1(positionalArgs[0]);
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`Pathfinding grid report version: ${report.pathfindingGridReportVersion}`);
+      console.log(`Grids: ${report.grids.length}`);
+      console.log(`Blockers: ${report.blockers.length}`);
+      for (const grid of report.grids) {
+        console.log(
+          `- ${grid.layerEntityId}: ${grid.columns}x${grid.rows} cells=${grid.cellCount} blocked=${grid.blockedCellCount} walkable=${grid.walkableCellCount}`
         );
       }
     }

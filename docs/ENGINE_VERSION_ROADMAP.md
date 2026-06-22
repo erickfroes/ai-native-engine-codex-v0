@@ -64,6 +64,7 @@ Capacidades alvo:
 - `entity.prefab` agora endurece refs com extensao errada, traversal, URL e paths absolutos/UNC, falhando de forma previsivel fora do contrato v1 tambem em Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export;
 - `SceneTransitionReport v1` concluido como diagnostico opt-in entre dois paths de cena explicitos, sem mutar Scene Document, loop ou savegame;
 - `Scene Composition Manifest v1` concluido como manifesto externo opt-in com `entryScene`, refs explicitas e report runtime/CLI/MCP;
+- `Pathfinding Grid v1` concluido como report-only opt-in derivado de `tile.layer` e `collision.bounds`;
 - save/load jogavel formal futuro, se ainda necessario;
 - release checkpoint V1 Small 2D concluido como gate de fechamento.
 
@@ -216,6 +217,6 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Manter `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `Pathfinding Grid v1` como menor proximo passo seguro, derivado de `tile.layer` e `collision.bounds`, em superficie opt-in nova.
-3. Depois de `Pathfinding Grid v1`, escolher entre atlas/material manifest ou editor-lite, mantendo 3D indie para depois de V1/V2 demonstradas.
+1. Manter `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
+2. Abrir `Atlas/Material Manifest v1` como menor proximo passo seguro em superficie declarativa/diagnostica opt-in nova.
+3. Manter editor-lite e 3D indie para depois de V1/V2 demonstradas.

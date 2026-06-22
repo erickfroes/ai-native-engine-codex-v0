@@ -12,6 +12,7 @@ import {
   getSystemRegistryV1,
   getSystemPhaseRegistryV1,
   buildTileCollisionReportV1,
+  buildPathfindingGridReportV1,
   buildSceneTransitionReportV1,
   buildSceneCompositionManifestReportV1,
   buildVisualRegressionBaselineReportV1
@@ -24,6 +25,7 @@ import { assertStateMutationTraceV1 } from './helpers/assertStateMutationTraceV1
 import { assertSystemRegistryV1 } from './helpers/assertSystemRegistryV1.mjs';
 import { assertSystemPhaseRegistryV1 } from './helpers/assertSystemPhaseRegistryV1.mjs';
 import { assertTileCollisionReportV1 } from './helpers/assertTileCollisionReportV1.mjs';
+import { assertPathfindingGridReportV1 } from './helpers/assertPathfindingGridReportV1.mjs';
 import { assertSceneTransitionReportV1 } from './helpers/assertSceneTransitionReportV1.mjs';
 import { assertSceneCompositionManifestReportV1 } from './helpers/assertSceneCompositionManifestReportV1.mjs';
 import { assertVisualRegressionBaselineReportV1 } from './helpers/assertVisualRegressionBaselineReportV1.mjs';
@@ -93,6 +95,11 @@ test('contract governance: v1 contract shapes remain strict and aligned', async 
     path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'tile-collision-solid.scene.json')
   );
   assertTileCollisionReportV1(tileCollisionReport);
+
+  const pathfindingGridReport = await buildPathfindingGridReportV1(
+    path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'pathfinding-grid-basic.scene.json')
+  );
+  assertPathfindingGridReportV1(pathfindingGridReport);
 
   const sceneTransitionReport = await buildSceneTransitionReportV1({
     fromPath: sceneTransitionSourcePath,

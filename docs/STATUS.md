@@ -60,6 +60,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - VisualRegressionBaselineReport v1 em runtime/CLI/MCP para regressao visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`;
 - SceneTransitionReport v1 em runtime/CLI/MCP para diagnosticar transicao explicita entre duas cenas por path;
 - SceneCompositionManifestReport v1 em runtime/CLI/MCP para validar manifesto externo opt-in com `entryScene` e refs explicitas;
+- PathfindingGridReport v1 em runtime/CLI/MCP para diagnosticar ocupacao de grids derivados de `tile.layer` e `collision.bounds`;
 - Prefab follow-up baseline sem `components` explicitos em entidade prefab-backed;
 - V1 Small 2D Capability Matrix;
 - V1 Small 2D Release Validation;
@@ -70,10 +71,10 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. Manter `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `Pathfinding Grid v1` como menor proximo passo seguro, derivado de `tile.layer` e `collision.bounds`, em superficie opt-in nova.
+1. Manter `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
+2. Abrir `Atlas/Material Manifest v1` como menor proximo passo seguro, em superficie declarativa/diagnostica opt-in nova.
 3. Se a lacuna de validacao estrita for atacada, criar superficie opt-in nova em vez de mutar `validate-scene` / `SceneValidationReport v1`.
-4. Adiar atlas/material manifest, editor-lite e 3D ate `Pathfinding Grid v1` estar validado end-to-end.
+4. Adiar editor-lite, particle-lite e 3D ate `Atlas/Material Manifest v1` estar validado end-to-end.
 
 ## Versoes de produto
 

@@ -43,6 +43,7 @@ A engine agora avancou para a fundacao de gameplay 2D:
 - `CollisionOverlapReport v1` para detectar overlaps AABB;
 - `MovementBlockingReport v1` para avaliar tentativas de movimento contra bounds solidos;
 - `TileCollisionReport v1` para inspecionar tiles solidos declarados em `tile.layer`;
+- `PathfindingGridReport v1` para diagnosticar ocupacao de grids derivados de `tile.layer` e `collision.bounds`;
 - blocking opt-in no `run-loop` e na Browser Playable Demo;
 - Playable Save/Load Lite browser-local opt-in na Browser Playable Demo;
 - Simple HTML Export v1 para gerar um arquivo HTML jogavel autocontido;
@@ -80,7 +81,7 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 
 A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1, Sprite Animation v1 diagnostico consumido de forma visual opt-in na Browser Demo para sprites asset-backed e Portable HTML Export v2 com assets inline e `Sprite Animation v1` no export portatil.
 
-Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. `entity.prefab` continua relativo a cena, exige alvo `.prefab.json` e rejeita URL, traversal e paths absolutos/UNC; Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export tambem falham de forma previsivel nesses casos. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface e consumo visual opt-in na Browser Demo/export por overlay passivo, preservando HUD Lite como diagnostico local. `AssetManifestValidationReport v1` agora expoe validacao direta minima de manifesto em runtime/CLI/MCP com erro previsivel para arquivo ausente e JSON malformado, sem mutar `RenderSnapshot v1`. `VisualRegressionBaselineReport v1` fecha uma linha minima de regressao visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`, sem pixel-diff obrigatorio. `SceneTransitionReport v1` fecha o primeiro slice multi-cena por dois paths explicitos em runtime/CLI/MCP. `Scene Composition Manifest v1` fecha a composicao multi-cena minima por manifesto externo com `entryScene` e refs explicitas, sem mutar `Scene Document v1`, `SceneValidationReport v1`, loop ou savegame.
+Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. `entity.prefab` continua relativo a cena, exige alvo `.prefab.json` e rejeita URL, traversal e paths absolutos/UNC; Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export tambem falham de forma previsivel nesses casos. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface e consumo visual opt-in na Browser Demo/export por overlay passivo, preservando HUD Lite como diagnostico local. `AssetManifestValidationReport v1` agora expoe validacao direta minima de manifesto em runtime/CLI/MCP com erro previsivel para arquivo ausente e JSON malformado, sem mutar `RenderSnapshot v1`. `VisualRegressionBaselineReport v1` fecha uma linha minima de regressao visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`, sem pixel-diff obrigatorio. `SceneTransitionReport v1` fecha o primeiro slice multi-cena por dois paths explicitos em runtime/CLI/MCP. `Scene Composition Manifest v1` fecha a composicao multi-cena minima por manifesto externo com `entryScene` e refs explicitas. `PathfindingGridReport v1` fecha a primeira superficie de navegacao report-only por grid, derivada de `tile.layer` e `collision.bounds`, sem mutar `Scene Document v1`, `SceneValidationReport v1`, loop, render, Browser Demo, exports ou savegame.
 
 ## Comandos CLI principais
 
@@ -95,6 +96,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `inspect-collision-bounds`: inspeciona bounds de colisao
 - `inspect-collision-overlaps`: detecta overlaps AABB
 - `inspect-tile-collision`: inspeciona tiles solidos declarados em `tile.layer`
+- `inspect-pathfinding-grid`: inspeciona ocupacao de grids para pathfinding report-only
 - `inspect-movement-blocking`: avalia tentativa de movimento contra colisao solida
 - `validate-prefab`: valida um arquivo `.prefab.json` diretamente
 - `inspect-prefab-usage`: inspeciona composicao declarativa de `entity.prefab`
@@ -143,6 +145,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `inspect_collision_bounds`
 - `inspect_collision_overlaps`
 - `inspect_tile_collision`
+- `inspect_pathfinding_grid`
 - `inspect_movement_blocking`
 - `inspect_prefab_usage`
 - `inspect_prefab_usage_v2`
@@ -191,6 +194,9 @@ node ./engine/runtime/src/cli.mjs inspect-scene-transition ./engine/runtime/test
 
 # inspecionar composicao multi-cena por manifesto externo
 node ./engine/runtime/src/cli.mjs inspect-scene-composition ./engine/runtime/test/fixtures/scene-composition/three-scene-composition.manifest.json --json
+
+# inspecionar grid de pathfinding report-only
+node ./engine/runtime/src/cli.mjs inspect-pathfinding-grid ./engine/runtime/test/fixtures/pathfinding-grid-basic.scene.json --json
 
 # gerar demo HTML estatica com SVG inline
 node ./engine/runtime/src/cli.mjs render-svg-demo ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --out ./tmp/tutorial-svg-demo.html --json
@@ -260,6 +266,7 @@ npm run smoke
 - `docs/PREFAB_VALIDATION_REPORT_V1.md`: contrato do report de validacao direta de prefab
 - `docs/SCENE_TRANSITION_V1.md`: contrato do report opt-in de transicao explicita entre duas cenas
 - `docs/SCENE_COMPOSITION_MANIFEST_V1.md`: contrato do manifesto externo opt-in de composicao multi-cena
+- `docs/PATHFINDING_GRID_V1.md`: contrato do report opt-in de ocupacao de grids para pathfinding
 - `docs/UI_SYSTEM_V1.md`: contrato do UI System v1
 - `docs/GAME_TEMPLATES_V1.md`: templates V1 Small 2D copiar-e-adaptar
 - `docs/AUDIO_LITE_V1.md`: contrato de Audio Lite v1 diagnostico

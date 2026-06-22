@@ -98,4 +98,4 @@ Ele fecha o slice minimo de composicao multi-cena sem embutir referencias em `Sc
 - nested manifests, auto-discovery por pasta ou glob;
 - streaming, world partition, editor-lite ou server.
 
-O proximo menor passo seguro e `Pathfinding Grid v1`, derivado de `tile.layer` e `collision.bounds`, em superficie opt-in nova e sem acoplar editor ou pipeline pesado de assets.
+O primeiro diagnostico de grid foi fechado em `docs/PATHFINDING_GRID_V1.md`. O proximo menor passo seguro e `Atlas/Material Manifest v1`, em superficie declarativa/diagnostica opt-in nova e sem acoplar editor-lite ou pipeline pesado obrigatorio.

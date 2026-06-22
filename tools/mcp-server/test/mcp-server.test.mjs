@@ -229,6 +229,11 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     );
     assert.ok(inspectTileCollisionTool);
     assert.deepEqual(inspectTileCollisionTool.inputSchema.required, ['path']);
+    const inspectPathfindingGridTool = toolsResponse.result.tools.find(
+      (tool) => tool.name === 'inspect_pathfinding_grid'
+    );
+    assert.ok(inspectPathfindingGridTool);
+    assert.deepEqual(inspectPathfindingGridTool.inputSchema.required, ['path']);
     const inspectAudioLiteTool = toolsResponse.result.tools.find(
       (tool) => tool.name === 'inspect_audio_lite'
     );

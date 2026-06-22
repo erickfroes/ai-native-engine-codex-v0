@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pathfinding-grid-report-v1.schema.json",
+  "title": "PathfindingGridReportV1",
+  "type": "object",
+  "required": [
+    "pathfindingGridReportVersion",
+    "scene",
+    "grids",
+    "blockers"
+  ],
+  "properties": {
+    "pathfindingGridReportVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "scene": {
+      "type": "string",
+      "minLength": 1
+    },
+    "grids": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "gridId",
+          "layerEntityId",
+          "tileWidth",
+          "tileHeight",
+          "columns",
+          "rows",
+          "origin",
+          "cellCount",
+          "blockedCellCount",
+          "walkableCellCount",
+          "blockedCells"
+        ],
+        "properties": {
+          "gridId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "layerEntityId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tileWidth": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "tileHeight": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "columns": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "rows": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "origin": {
+            "type": "object",
+            "required": [
+              "x",
+              "y"
+            ],
+            "properties": {
+              "x": {
+                "type": "integer",
+                "const": 0
+              },
+              "y": {
+                "type": "integer",
+                "const": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          "cellCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "blockedCellCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "walkableCellCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "blockedCells": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "cellId",
+                "row",
+                "column",
+                "x",
+                "y",
+                "width",
+                "height",
+                "blockerIds"
+              ],
+              "properties": {
+                "cellId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "row": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "column": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "x": {
+                  "type": "integer"
+                },
+                "y": {
+                  "type": "integer"
+                },
+                "width": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "height": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "blockerIds": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "blockerId",
+          "kind",
+          "x",
+          "y",
+          "width",
+          "height",
+          "solid"
+        ],
+        "properties": {
+          "blockerId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "tile",
+              "collision.bounds"
+            ]
+          },
+          "x": {
+            "type": "integer"
+          },
+          "y": {
+            "type": "integer"
+          },
+          "width": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "solid": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
