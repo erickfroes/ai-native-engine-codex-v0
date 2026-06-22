@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "visual-regression-baseline-report-v1.schema.json",
+  "title": "VisualRegressionBaselineReportV1",
+  "type": "object",
+  "required": [
+    "visualRegressionBaselineReportVersion",
+    "scene",
+    "tick",
+    "viewport",
+    "renderSnapshotVersion",
+    "svgVersion",
+    "hashAlgorithm",
+    "snapshotHash",
+    "svgHash",
+    "drawCallCount",
+    "drawCallsByKind",
+    "layers",
+    "uniqueSpriteAssetIds"
+  ],
+  "properties": {
+    "visualRegressionBaselineReportVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "scene": {
+      "type": "string"
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "viewport": {
+      "type": "object",
+      "required": [
+        "width",
+        "height"
+      ],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "renderSnapshotVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "svgVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "hashAlgorithm": {
+      "type": "string",
+      "enum": ["sha256"]
+    },
+    "snapshotHash": {
+      "type": "string"
+    },
+    "svgHash": {
+      "type": "string"
+    },
+    "drawCallCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "drawCallsByKind": {
+      "type": "object",
+      "required": [
+        "rect",
+        "sprite"
+      ],
+      "properties": {
+        "rect": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sprite": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "layer",
+          "count"
+        ],
+        "properties": {
+          "layer": {
+            "type": "integer"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "uniqueSpriteAssetIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -19,6 +19,7 @@ import {
   buildRenderSnapshotV1,
   renderSnapshotToSvgV1,
   RENDER_SVG_VERSION,
+  buildVisualRegressionBaselineReportV1,
   renderSvgDemoHtmlV1,
   SVG_DEMO_HTML_VERSION,
   renderCanvas2DDemoHtmlV1,
@@ -63,6 +64,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs render-snapshot <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--json]
   node engine/runtime/src/cli.mjs render-svg <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
+  node engine/runtime/src/cli.mjs inspect-visual-regression-baseline <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--json]
   node engine/runtime/src/cli.mjs render-svg-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-canvas-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--out <path>] [--json]
@@ -442,6 +444,41 @@ async function run() {
       console.log(outputPath);
     } else {
       process.stdout.write(svg);
+    }
+
+    return;
+  }
+
+  if (command === 'inspect-visual-regression-baseline') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const tick = readNumberFlag('inspect-visual-regression-baseline', '--tick', undefined);
+    const width = readNumberFlag('inspect-visual-regression-baseline', '--width', undefined);
+    const height = readNumberFlag('inspect-visual-regression-baseline', '--height', undefined);
+    const assetManifestPath = readStringFlag('inspect-visual-regression-baseline', '--asset-manifest', undefined);
+    const report = await buildVisualRegressionBaselineReportV1(maybePath, {
+      tick,
+      width,
+      height,
+      assetManifestPath
+    });
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`Visual regression baseline report version: ${report.visualRegressionBaselineReportVersion}`);
+      console.log(`Tick: ${report.tick}`);
+      console.log(`Viewport: ${report.viewport.width}x${report.viewport.height}`);
+      console.log(
+        `Draw calls: ${report.drawCallCount} (rect=${report.drawCallsByKind.rect}, sprite=${report.drawCallsByKind.sprite})`
+      );
+      console.log(`Snapshot hash: ${report.snapshotHash}`);
+      console.log(`SVG hash: ${report.svgHash}`);
     }
 
     return;

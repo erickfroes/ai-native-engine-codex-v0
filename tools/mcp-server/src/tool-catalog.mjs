@@ -231,6 +231,38 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_visual_regression_baseline',
+    title: 'Inspect Visual Regression Baseline',
+    description: 'Build a deterministic VisualRegressionBaselineReport v1 from RenderSnapshot v1 and Render SVG v1 hashes.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        },
+        tick: {
+          type: 'integer',
+          description: 'Optional render tick. Defaults to 0.'
+        },
+        width: {
+          type: 'integer',
+          description: 'Optional viewport width. Defaults to scene camera viewport or 320.'
+        },
+        height: {
+          type: 'integer',
+          description: 'Optional viewport height. Defaults to scene camera viewport or 180.'
+        },
+        assetManifestPath: {
+          type: 'string',
+          description: 'Optional repository-relative or absolute path to an Asset Manifest v1 JSON file.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'render_canvas_demo',
     title: 'Render Canvas Demo',
     description: 'Build deterministic self-contained Canvas2D Demo v1 HTML from a scene via RenderSnapshot v1.',

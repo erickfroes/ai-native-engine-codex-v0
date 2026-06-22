@@ -312,6 +312,21 @@ Compatibilidade:
 - nao introduz backend grafico;
 - nao representa runtime visual real nesta versao.
 
+## Visual Regression Baseline Report v1
+
+Contrato opt-in para regressao visual estrutural por hashes e campos deterministas derivados de `RenderSnapshot v1` e `Render SVG v1`:
+
+- ver `docs/VISUAL_REGRESSION_BASELINE_V1.md`.
+- schema formal: `docs/schemas/visual-regression-baseline-report-v1.schema.json`.
+- runtime: `buildVisualRegressionBaselineReportV1(scenePathOuScene, options)`.
+- CLI: `inspect-visual-regression-baseline <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--json]`.
+- MCP: `inspect_visual_regression_baseline({ path, tick?, width?, height?, assetManifestPath? })`.
+- usa `snapshotHash` sobre o JSON canonico de `RenderSnapshot v1`.
+- usa `svgHash` sobre a string deterministica de `Render SVG v1`.
+- agrega `drawCallCount`, `drawCallsByKind`, `layers` e `uniqueSpriteAssetIds`.
+- nao adiciona pixel-diff, screenshot, browser ou backend grafico.
+- nao altera `RenderSnapshot v1`, `Render SVG v1`, `SceneValidationReport v1` ou `entity.prefab` v1.
+
 ## SVG Demo HTML v1 (visualizacao estatica textual)
 
 Contrato minimo para embutir `Render SVG v1` em HTML deterministico e estatico:
@@ -706,4 +721,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2 e Prefab System v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `Visual Regression Baseline v1`.
+- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2, Prefab System v1 e Visual Regression Baseline v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `Scene Transition v1`.

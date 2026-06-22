@@ -11,7 +11,8 @@ import {
   createLoopExecutionPlan,
   getSystemRegistryV1,
   getSystemPhaseRegistryV1,
-  buildTileCollisionReportV1
+  buildTileCollisionReportV1,
+  buildVisualRegressionBaselineReportV1
 } from '../src/index.mjs';
 import { assertLoopReportV1 } from './helpers/assertLoopReportV1.mjs';
 import { assertLoopTraceV1 } from './helpers/assertLoopTraceV1.mjs';
@@ -21,6 +22,7 @@ import { assertStateMutationTraceV1 } from './helpers/assertStateMutationTraceV1
 import { assertSystemRegistryV1 } from './helpers/assertSystemRegistryV1.mjs';
 import { assertSystemPhaseRegistryV1 } from './helpers/assertSystemPhaseRegistryV1.mjs';
 import { assertTileCollisionReportV1 } from './helpers/assertTileCollisionReportV1.mjs';
+import { assertVisualRegressionBaselineReportV1 } from './helpers/assertVisualRegressionBaselineReportV1.mjs';
 import { simulateStateV1WithMutationTrace } from '../src/index.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
@@ -62,6 +64,11 @@ test('contract governance: v1 contract shapes remain strict and aligned', async 
     path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'tile-collision-solid.scene.json')
   );
   assertTileCollisionReportV1(tileCollisionReport);
+
+  const visualRegressionBaselineReport = await buildVisualRegressionBaselineReportV1(
+    path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json')
+  );
+  assertVisualRegressionBaselineReportV1(visualRegressionBaselineReport);
 
   assert.equal(plan.estimated.finalState, report.finalState);
   assert.equal(

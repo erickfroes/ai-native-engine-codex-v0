@@ -25,6 +25,7 @@ import {
   buildRenderSnapshotV1,
   renderSnapshotToSvgV1,
   RENDER_SVG_VERSION,
+  buildVisualRegressionBaselineReportV1,
   renderCanvas2DDemoHtmlV1,
   CANVAS_2D_DEMO_VERSION,
   renderBrowserPlayableDemoHtmlV1,
@@ -130,6 +131,7 @@ async function handleToolCall(params) {
     params.name !== 'emit_world_snapshot' &&
     params.name !== 'render_snapshot' &&
     params.name !== 'render_svg' &&
+    params.name !== 'inspect_visual_regression_baseline' &&
     params.name !== 'render_canvas_demo' &&
     params.name !== 'render_browser_demo' &&
     params.name !== 'export_html_game' &&
@@ -923,6 +925,56 @@ async function handleToolCall(params) {
       };
     }
 
+    if (params.name === 'inspect_visual_regression_baseline') {
+      if (args.tick !== undefined && (!Number.isInteger(args.tick) || args.tick < 0)) {
+        return {
+          content: toTextContent('inspect_visual_regression_baseline: `tick` must be an integer >= 0 when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.width !== undefined && (!Number.isInteger(args.width) || args.width < 1)) {
+        return {
+          content: toTextContent('inspect_visual_regression_baseline: `width` must be an integer >= 1 when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.height !== undefined && (!Number.isInteger(args.height) || args.height < 1)) {
+        return {
+          content: toTextContent('inspect_visual_regression_baseline: `height` must be an integer >= 1 when provided.'),
+          isError: true
+        };
+      }
+
+      if (
+        args.assetManifestPath !== undefined &&
+        (typeof args.assetManifestPath !== 'string' || args.assetManifestPath.trim().length === 0)
+      ) {
+        return {
+          content: toTextContent('inspect_visual_regression_baseline: `assetManifestPath` must be a non-empty string when provided.'),
+          isError: true
+        };
+      }
+
+      const report = await buildVisualRegressionBaselineReportV1(targetPath, {
+        tick: args.tick,
+        width: args.width,
+        height: args.height,
+        assetManifestPath: args.assetManifestPath === undefined
+          ? undefined
+          : resolveRepoPath(args.assetManifestPath)
+      });
+
+      return {
+        content: toTextContent(
+          `Visual regression baseline report built for ${report.scene} at tick ${report.tick}.`
+        ),
+        structuredContent: report,
+        isError: false
+      };
+    }
+
     if (params.name === 'render_canvas_demo') {
       if (args.tick !== undefined && (!Number.isInteger(args.tick) || args.tick < 0)) {
         return {
@@ -1205,7 +1257,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_asset_manifest, validate_input_intent, validate_prefab, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_asset_manifest, validate_input_intent, validate_prefab, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, render_snapshot, render_svg, inspect_visual_regression_baseline, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }

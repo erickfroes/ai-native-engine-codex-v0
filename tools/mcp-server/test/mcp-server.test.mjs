@@ -159,6 +159,20 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'tick'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'width'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderSvgTool.inputSchema.properties, 'height'));
+    const inspectVisualRegressionBaselineTool = toolsResponse.result.tools.find(
+      (tool) => tool.name === 'inspect_visual_regression_baseline'
+    );
+    assert.ok(inspectVisualRegressionBaselineTool);
+    assert.deepEqual(inspectVisualRegressionBaselineTool.inputSchema.required, ['path']);
+    assert.ok(Object.prototype.hasOwnProperty.call(inspectVisualRegressionBaselineTool.inputSchema.properties, 'tick'));
+    assert.ok(Object.prototype.hasOwnProperty.call(inspectVisualRegressionBaselineTool.inputSchema.properties, 'width'));
+    assert.ok(Object.prototype.hasOwnProperty.call(inspectVisualRegressionBaselineTool.inputSchema.properties, 'height'));
+    assert.ok(
+      Object.prototype.hasOwnProperty.call(
+        inspectVisualRegressionBaselineTool.inputSchema.properties,
+        'assetManifestPath'
+      )
+    );
     const renderBrowserDemoTool = toolsResponse.result.tools.find((tool) => tool.name === 'render_browser_demo');
     assert.ok(renderBrowserDemoTool);
     assert.deepEqual(renderBrowserDemoTool.inputSchema.required, ['path']);

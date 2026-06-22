@@ -54,7 +54,8 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 - Prefab unsafe path hardening: concluido com cobertura runtime/CLI/MCP para `entity.prefab` com traversal, URL e paths absolutos/UNC, preservando a exigencia de path relativo seguro por cena sem abrir nested prefab nem mutar `RenderSnapshot v1`.
 - Prefab visual/export negative hardening: concluido com cobertura runtime/CLI/MCP para Render SVG v1, Canvas2D Demo v1 e Simple HTML Export v1 em cenas com `entity.prefab` inseguro, preservando falha antes do consumo visual sem mutar `RenderSnapshot v1`.
 - Prefab visual/export mirror hardening final: concluido com cobertura negativa para SVG Demo HTML v1 em runtime/CLI e Portable HTML Export v2 em runtime/CLI/MCP para cenas com `entity.prefab` inseguro, fechando os espelhos visuais/export restantes sem nested prefab nem mutar `RenderSnapshot v1`.
-- V2 Gap Audit: concluido em `docs/V2_GAP_AUDIT.md`, escolhendo `Visual Regression Baseline v1` como proximo pacote pequeno e mantendo `Scene Transition v1` como proximo pacote de produto V2 depois do baseline visual.
+- V2 Gap Audit: concluido em `docs/V2_GAP_AUDIT.md`; a decisao de executar `Visual Regression Baseline v1` primeiro ja foi fechada, mantendo `Scene Transition v1` como proximo pacote de produto V2.
+- Visual Regression Baseline v1: concluido como `VisualRegressionBaselineReport v1` opt-in, derivado de `RenderSnapshot v1` e `Render SVG v1`, com schema, runtime/CLI/MCP, hashes SHA-256 deterministas, cobertura `v1-small-2d` + `visual-sprite-fixture` e sem pixel-diff/browser/screenshot obrigatorio.
 
 ## O que o Codex recebe
 
@@ -142,6 +143,7 @@ Este repositorio esta pronto para continuar como engine AI-native com Meta 1 e M
 31. `docs/PREFAB_SYSTEM_V1.md`
 32. `docs/PREFAB_VALIDATION_REPORT_V1.md`
 33. `docs/V2_GAP_AUDIT.md`
+34. `docs/VISUAL_REGRESSION_BASELINE_V1.md`
 
 ## Baseline obrigatorio
 
@@ -156,9 +158,9 @@ Nao implemente feature nova com baseline vermelho.
 
 ## Linha de seguimento recomendada
 
-1. Fechar `Visual Regression Baseline v1` como proximo pacote V2 pequeno: contrato/report opt-in derivado de `RenderSnapshot v1` e/ou `Render SVG v1`, fixture minima, runtime/CLI/MCP se o shape estiver claro, sem pixel-diff obrigatorio e sem mutar contratos visuais v1.
-2. Manter `entity.prefab` v1 congelado em bugfix/compatibilidade; se a lacuna de validacao estrita for atacada, criar uma superficie opt-in nova (`validate-scene-strict` / `validate_scene_strict`) em vez de mutar `SceneValidationReport v1`.
-3. Depois do baseline visual, priorizar `Scene Transition v1` como proximo pacote de produto V2 para multiplas cenas; 3D indie apenas depois de V1/V2 demonstradas.
+1. Fechar `Scene Transition v1` como proximo pacote V2 pequeno: contrato opt-in para trocar entre duas cenas validas por referencia explicita, fixture minima com duas cenas e alinhamento runtime/CLI/MCP, sem mutar `Scene Document v1`, `SceneValidationReport v1` ou `savegame v1`.
+2. Manter `Visual Regression Baseline v1` e `entity.prefab` v1 em bugfix/compatibilidade; qualquer validacao mais estrita continua em superficie opt-in nova, nao em mutacao de `validate-scene`.
+3. Depois de `Scene Transition v1`, priorizar apenas o menor slice de composicao multi-cena restante antes de atlas/pathfinding/editor-lite; 3D indie apenas depois de V1/V2 demonstradas.
 
 ## Regra de manutencao da linha de seguimento
 

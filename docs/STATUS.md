@@ -57,6 +57,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - Prefab path hardening v1 com erros previsiveis para `entity.prefab` fora de `.prefab.json` ou com traversal, URL e path absoluto/UNC;
 - Prefab visual/export negative hardening com cobertura para Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export em refs inseguras;
 - validacao direta de `Asset Manifest v1` em runtime/CLI/MCP com `AssetManifestValidationReport v1`;
+- VisualRegressionBaselineReport v1 em runtime/CLI/MCP para regressao visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`;
 - Prefab follow-up baseline sem `components` explicitos em entidade prefab-backed;
 - V1 Small 2D Capability Matrix;
 - V1 Small 2D Release Validation;
@@ -67,10 +68,10 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. Manter `entity.prefab` v1 congelado para bugfix/compatibilidade, sem nested prefab ou nova semantica.
-2. Usar `docs/V2_GAP_AUDIT.md` como decisao do audit pequeno de lacunas V2.
-3. Fechar `Visual Regression Baseline v1` como proximo pacote V2 pequeno antes de abrir `Scene Transition v1`.
-4. Manter `AssetManifestValidationReport v1` como superficie publica direta do manifesto, sem reabrir bundling ou pipeline pesado de assets.
+1. Fechar `Scene Transition v1` como proximo pacote V2 pequeno e opt-in, com runtime/CLI/MCP alinhados e fixture minima de duas cenas validas.
+2. Manter `Visual Regression Baseline v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 em bugfix/compatibilidade, sem reabrir pipeline pesado de assets ou nova semantica de prefab.
+3. Se a lacuna de validacao estrita for atacada, criar superficie opt-in nova em vez de mutar `validate-scene` / `SceneValidationReport v1`.
+4. Depois de `Scene Transition v1`, escolher apenas o menor slice de composicao multi-cena antes de atlas/pathfinding/editor-lite.
 
 ## Versoes de produto
 

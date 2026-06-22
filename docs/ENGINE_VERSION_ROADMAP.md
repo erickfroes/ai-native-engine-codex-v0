@@ -214,6 +214,6 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Tratar o audit pequeno de lacunas V2 como concluido em `docs/V2_GAP_AUDIT.md` e manter `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Fechar `Visual Regression Baseline v1` como proximo pacote V2 pequeno, derivado de `RenderSnapshot v1`/`Render SVG v1`, sem pixel-diff obrigatorio, sem mutar contratos visuais v1 e sem reabrir pipeline pesado de assets.
-3. Depois do baseline visual, priorizar `Scene Transition v1` como o proximo pacote de produto V2 para abrir multiplas cenas de forma controlada.
+1. Fechar `Scene Transition v1` como proximo pacote V2 pequeno, opt-in e cross-interface, sem mutar `Scene Document v1`, `SceneValidationReport v1` ou `savegame v1`.
+2. Manter `Visual Regression Baseline v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
+3. Depois de `Scene Transition v1`, priorizar apenas o menor slice de composicao multi-cena restante antes de atlas/pathfinding/editor-lite.

@@ -108,9 +108,10 @@ Entregas alvo:
 - Audio Lite v1 como primeiro pacote incremental pos-checkpoint;
 - Sprite Animation v1 concluido como diagnostico declarativo runtime/CLI/MCP;
 - matriz de regressao visual/headless;
+- Visual Regression Baseline v1 concluido como report estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`;
 - pacote Codex com prompts/skills/subagentes para criar um jogo 2D pequeno.
 
-Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. Audio Lite v1, Sprite Animation v1 e Portable HTML Export v2 ja iniciam V2 de forma incremental, sem editor, servidor, fisica completa ou pathfinding. `AssetManifestValidationReport v1` agora tambem fecha a validacao direta minima de manifesto em runtime/CLI/MCP, com shape versionado e erros previsiveis para arquivo ausente e JSON malformado. `entity.prefab` agora tambem falha de forma previsivel quando nao aponta para `.prefab.json` ou tenta usar traversal, URL e paths absolutos/UNC, incluindo cobertura visual/export para Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export.
+Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. Audio Lite v1, Sprite Animation v1 e Portable HTML Export v2 ja iniciam V2 de forma incremental, sem editor, servidor, fisica completa ou pathfinding. `AssetManifestValidationReport v1` agora tambem fecha a validacao direta minima de manifesto em runtime/CLI/MCP, com shape versionado e erros previsiveis para arquivo ausente e JSON malformado. `entity.prefab` agora tambem falha de forma previsivel quando nao aponta para `.prefab.json` ou tenta usar traversal, URL e paths absolutos/UNC, incluindo cobertura visual/export para Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export. `VisualRegressionBaselineReport v1` agora fecha o baseline visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`, sem pixel-diff obrigatorio.
 
 Criterio de conclusao:
 
@@ -127,9 +128,9 @@ Subagentes recomendados:
 
 Linha de trabalho atual recomendada:
 
-1. Tratar o audit pequeno de lacunas V2 como concluido em `docs/V2_GAP_AUDIT.md` e manter `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Fechar `Visual Regression Baseline v1` como proximo pacote V2 pequeno, derivado de `RenderSnapshot v1`/`Render SVG v1`, sem pixel-diff obrigatorio, sem mutar contratos visuais v1 e sem reabrir pipeline pesado de assets.
-3. Depois do baseline visual, priorizar `Scene Transition v1` como o proximo pacote de produto V2 para abrir multiplas cenas de forma controlada.
+1. Fechar `Scene Transition v1` como proximo pacote V2 pequeno, opt-in e cross-interface, sem mutar `Scene Document v1`, `SceneValidationReport v1` ou `savegame v1`.
+2. Manter `Visual Regression Baseline v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
+3. Depois de `Scene Transition v1`, priorizar apenas o menor slice de composicao multi-cena restante antes de atlas/pathfinding/editor-lite.
 
 ---
 

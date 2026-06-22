@@ -2,14 +2,14 @@
 
 ## Objetivo
 
-Registrar o audit pequeno pedido apos o congelamento de `entity.prefab` v1 e escolher o menor proximo pacote seguro para V2.
+Registrar o audit pequeno pedido apos o congelamento de `entity.prefab` v1 e a decisao do menor pacote seguro que abriu V2.
 
-Este documento nao cria contrato runtime novo, nao altera schemas e nao muda comportamento de CLI/MCP. Ele serve como trilha de decisao para o proximo slice.
+Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`; a continuidade agora aponta para `Scene Transition v1`.
 
 ## Estado consolidado
 
 - V1 Small 2D esta release-checkpointed e permanece aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1 e AssetManifestValidationReport v1 ja iniciam V2 em slices pequenos.
+- Audio Lite v1, UI System v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, AssetManifestValidationReport v1 e Visual Regression Baseline v1 ja iniciam V2 em slices pequenos.
 - `entity.prefab` v1 esta congelado: sem nested prefab, prefab hierarchy, hot reload, editor ou template engine.
 - O hardening de prefab inseguro ja cobre consumidores visuais/export por path, incluindo Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export.
 
@@ -17,8 +17,8 @@ Este documento nao cria contrato runtime novo, nao altera schemas e nao muda com
 
 | Lacuna V2 | Tamanho | Risco | Decisao |
 | --- | --- | --- | --- |
-| Visual regression basica | pequeno | baixo/medio | Recomendado como proximo pacote. |
-| Scene transitions / composition | medio | medio | Proximo pacote de produto depois de existir baseline visual simples. |
+| Visual regression basica | pequeno | baixo/medio | Executado como `VisualRegressionBaselineReport v1`. |
+| Scene transitions / composition | medio | medio | Proximo pacote de produto recomendado. |
 | Particle-lite | medio | medio | Deixar para depois; toca render/tempo/fixtures. |
 | Atlas/material manifest | medio/grande | medio/alto | Evitar por enquanto para nao abrir pipeline pesado de assets. |
 | Editor-lite automatizavel | grande | alto | Nao iniciar antes de contratos V2 menores. |
@@ -39,19 +39,21 @@ O audit encontrou dois candidatos pequenos:
 - `Visual Regression Baseline v1`: menor risco, fortalece render/export antes de abrir novas telas/cenas e nao muda semantica de gameplay.
 - `Scene Transition v1`: mais diretamente ligado ao criterio V2 de jogos com multiplas cenas, mas toca fluxo de estado e navegacao entre cenas.
 
-Decisao: fazer primeiro **Visual Regression Baseline v1** e manter **Scene Transition v1** como o proximo pacote de produto V2 depois dele.
+Decisao executada: fazer primeiro **Visual Regression Baseline v1** e manter **Scene Transition v1** como o proximo pacote de produto V2 depois dele.
 
-## Proximo pacote recomendado
+## Pacote executado
 
-Fechar **Visual Regression Baseline v1** como primeiro pacote V2 pos-audit.
+**Visual Regression Baseline v1** foi fechado como primeiro pacote V2 pos-audit.
 
-Escopo recomendado:
+Escopo executado:
 
-- criar um report/baseline opt-in derivado de `RenderSnapshot v1` e/ou `Render SVG v1`;
-- cobrir inicialmente `scenes/v1-small-2d.scene.json` e um fixture visual pequeno;
-- expor runtime, CLI e MCP apenas se o shape do report estiver claro;
-- comparar hashes/campos deterministas, sem screenshot obrigatorio e sem browser pixel-diff nesta primeira versao;
+- criar um report/baseline opt-in derivado de `RenderSnapshot v1` e `Render SVG v1`;
+- cobrir inicialmente `scenes/v1-small-2d.scene.json` e `fixtures/assets/visual-sprite.scene.json`;
+- expor runtime, CLI e MCP com shape versionado;
+- comparar hashes/campos deterministas, sem screenshot obrigatorio e sem browser pixel-diff;
 - preservar `RenderSnapshot v1`, `Render SVG v1`, Browser Demo, exports HTML e Prefab System v1 sem mutacao de contrato.
+
+Proximo pacote recomendado: **Scene Transition v1**, com contrato opt-in para trocar entre cenas validas por referencia explicita, fixture minima de duas cenas e alinhamento runtime/CLI/MCP, sem mutar `Scene Document v1`, `SceneValidationReport v1` ou `savegame v1`.
 
 Fora de escopo:
 
@@ -62,10 +64,10 @@ Fora de escopo:
 - editor visual;
 - 3D.
 
-## Criterio de pronto do proximo pacote
+## Criterio de pronto executado
 
 - contrato curto e schema do report, se houver envelope publico;
-- fixture minima de baseline;
+- fixture minima de baseline em testes deterministas;
 - testes runtime/CLI/MCP cross-interface;
 - `npm test`, `npm run validate:scenes` e `npm run smoke` verdes;
 - docs atualizadas e `docs/CODEX_HANDOFF.md` reescrito para o menor passo seguinte.

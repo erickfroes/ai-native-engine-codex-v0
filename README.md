@@ -24,6 +24,7 @@ Leia:
 
 - gerar `RenderSnapshot v1` deterministico a partir de uma cena;
 - gerar `Render SVG v1` textual e deterministico;
+- gerar `VisualRegressionBaselineReport v1` por hash/campos deterministas, sem screenshot obrigatorio;
 - gerar `SVG Demo HTML v1` com SVG inline;
 - gerar `Canvas2D Demo v1` com Canvas 2D nativo e sprite loading local opt-in via `Asset Manifest v1`;
 - gerar `Browser Playable Demo v1` autocontida com canvas focavel e input local;
@@ -79,7 +80,7 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 
 A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1, Sprite Animation v1 diagnostico consumido de forma visual opt-in na Browser Demo para sprites asset-backed e Portable HTML Export v2 com assets inline e `Sprite Animation v1` no export portatil.
 
-Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. `entity.prefab` continua relativo a cena, exige alvo `.prefab.json` e rejeita URL, traversal e paths absolutos/UNC; Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export tambem falham de forma previsivel nesses casos. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface e consumo visual opt-in na Browser Demo/export por overlay passivo, preservando HUD Lite como diagnostico local. `AssetManifestValidationReport v1` agora expoe validacao direta minima de manifesto em runtime/CLI/MCP com erro previsivel para arquivo ausente e JSON malformado, sem mutar `RenderSnapshot v1`.
+Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. `entity.prefab` continua relativo a cena, exige alvo `.prefab.json` e rejeita URL, traversal e paths absolutos/UNC; Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export tambem falham de forma previsivel nesses casos. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface e consumo visual opt-in na Browser Demo/export por overlay passivo, preservando HUD Lite como diagnostico local. `AssetManifestValidationReport v1` agora expoe validacao direta minima de manifesto em runtime/CLI/MCP com erro previsivel para arquivo ausente e JSON malformado, sem mutar `RenderSnapshot v1`. `VisualRegressionBaselineReport v1` fecha uma linha minima de regressao visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`, sem pixel-diff obrigatorio.
 
 ## Comandos CLI principais
 
@@ -101,6 +102,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `inspect-audio-lite`: inspeciona clips e triggers declarativos de Audio Lite v1
 - `inspect-ui-system`: inspeciona screens declarativas e arvores de widgets de UI System v1
 - `inspect-sprite-animation`: inspeciona animacoes declarativas de Sprite Animation v1
+- `inspect-visual-regression-baseline`: gera VisualRegressionBaselineReport v1 por hashes de RenderSnapshot/SVG
 - `export-portable-html-game`: escreve HTML jogavel portatil com assets inline e Sprite Animation opt-in
 - `save-state` e `load-save`: persistencia minima de State Snapshot v1
 - `render-snapshot`: gera RenderSnapshot v1
@@ -123,6 +125,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `emit_world_snapshot`
 - `render_snapshot`
 - `render_svg`
+- `inspect_visual_regression_baseline`
 - `render_canvas_demo`
 - `render_browser_demo`
 - `export_html_game`
@@ -150,9 +153,10 @@ Observacao: `render-svg-demo` e um fluxo de CLI/runtime. A Meta 2 nao define uma
 1. Validar a cena com `validate-scene` ou `validate_scene`.
 2. Gerar o contrato visual com `render-snapshot` ou `render_snapshot`.
 3. Serializar uma saida textual com `render-svg` ou `render_svg`.
-4. Gerar demos HTML com `render-svg-demo`, `render-canvas-demo` ou `render-browser-demo`.
-5. Usar `--asset-manifest` ou `assetManifestPath` apenas quando a cena declarar sprites locais.
-6. Para entregar um arquivo jogavel simples, usar `export-html-game`.
+4. Gerar um baseline estrutural com `inspect-visual-regression-baseline` ou `inspect_visual_regression_baseline`.
+5. Gerar demos HTML com `render-svg-demo`, `render-canvas-demo` ou `render-browser-demo`.
+6. Usar `--asset-manifest` ou `assetManifestPath` apenas quando a cena declarar sprites locais.
+7. Para entregar um arquivo jogavel simples, usar `export-html-game`.
 
 ## Exemplos minimos
 
@@ -174,6 +178,9 @@ node ./engine/runtime/src/cli.mjs render-snapshot ./scenes/tutorial.scene.json -
 
 # gerar SVG deterministico
 node ./engine/runtime/src/cli.mjs render-svg ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --json
+
+# gerar baseline visual estrutural
+node ./engine/runtime/src/cli.mjs inspect-visual-regression-baseline ./scenes/v1-small-2d.scene.json --json
 
 # gerar demo HTML estatica com SVG inline
 node ./engine/runtime/src/cli.mjs render-svg-demo ./scenes/tutorial.scene.json --tick 4 --width 320 --height 180 --out ./tmp/tutorial-svg-demo.html --json
