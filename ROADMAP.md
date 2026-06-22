@@ -1,18 +1,37 @@
 # Roadmap
 
-Este roadmap organiza a evolucao do projeto como uma engine **AI-native**, projetada para ser desenvolvida com Codex, subagentes, contratos formais, CLI/MCP e validacao automatica.
+Este roadmap organiza a evolucao do projeto como uma engine **AI-native**, desenvolvida com Codex, subagentes, contratos formais, CLI/MCP e validacao automatica.
 
-A estrategia nao e tentar saltar direto para uma engine AAA 3D. A sequencia correta e progressiva:
+A estrategia nao e saltar direto para AAA 3D. A sequencia correta e:
 
-1. consolidar jogos pequenos;
-2. evoluir para jogos 2D/2.5D completos;
+1. consolidar jogos pequenos 2D;
+2. evoluir para jogos 2D/2.5D indie;
 3. introduzir 3D indie;
-4. amadurecer ferramentas/editor/pipeline;
-5. chegar a uma base AA;
-6. so entao atacar objetivos de engine 3D AAA.
+4. amadurecer runtime/editor AA;
+5. so entao perseguir objetivos AAA.
 
-Detalhamento completo: `docs/ENGINE_VERSION_ROADMAP.md`.
+Detalhamento de versoes: `docs/ENGINE_VERSION_ROADMAP.md`.
 Estrategia Codex/subagentes: `docs/CODEX_SUBAGENT_STRATEGY.md`.
+Handoff operacional: `docs/CODEX_HANDOFF.md`.
+
+## Como ler este checklist
+
+- `[x]` Meta ou subdivisao concluida. Quando uma subdivisao grande esta concluida, ela fica compacta para nao duplicar docs historicos.
+- `[ ]` Trabalho ainda necessario antes de considerar a meta fechada.
+- Cada item aberto deve seguir: contrato/schema -> fixture -> runtime -> CLI -> MCP -> cross-interface -> docs -> hardening.
+- V1 permanece aberta apenas para bugfix, hardening e compatibilidade.
+
+## Estado atual
+
+- [x] Meta 1 / V0 Headless completa.
+- [x] Meta 2 / Visual-interativa minima completa.
+- [x] Meta 3 / V1 Small 2D release-checkpointed.
+- [ ] Meta 4 / V2 2D/2.5D indie production em andamento.
+- [ ] Meta 5 / V3 3D indie ainda nao iniciada.
+- [ ] Meta 6 / V4 runtime/editor AA ainda nao iniciada.
+- [ ] Meta 7 / V5-V6 AAA aspiracional ainda nao iniciada.
+
+Proximo pacote recomendado: **Atlas/Material Manifest v1**.
 
 ---
 
@@ -20,226 +39,291 @@ Estrategia Codex/subagentes: `docs/CODEX_SUBAGENT_STRATEGY.md`.
 
 Status: concluida.
 
-Entregas consolidadas:
+- [x] Runtime headless, validacao, input, replay, save/load, state inspection, RenderSnapshot inicial, CLI/MCP e suites cross-interface.
 
-- validacao de scene document por schema + invariantes;
-- runtime estavel com loop headless interpretavel;
-- InputIntent v1 e KeyboardInputScript v1 opt-in;
-- replay deterministico e replay artifact;
-- save/load v1 minimo;
-- inspect-state, simulate-state e State Mutation Trace v1;
-- RenderSnapshot v1 inicial;
-- Render SVG v1 inicial;
-- CLI e MCP para os fluxos headless principais;
-- suites cross-interface e smoke.
-
-Fora de escopo assumido nesta meta:
-
-- canvas interativo;
-- Pixi, Three, WebGL;
-- editor visual;
-- assets reais;
-- captura real de teclado;
-- multiplayer real;
-- ECS completo.
+Sem pendencias de produto nesta meta. Novas mudancas aqui devem ser bugfix/compatibilidade.
 
 ---
 
-## Meta 2 - Engine visual/interativa minima
+## Meta 2 - Visual/interativa minima
 
 Status: concluida.
 
-Entregas consolidadas:
+- [x] RenderSnapshot/SVG/Canvas/Browser Demo, Asset Manifest v1, componentes visuais 2D, image loading opcional, CLI/MCP e matriz visual.
 
-- RenderSnapshot v1 endurecido para cena crua e componentes visuais;
-- Render SVG v1;
-- SVG Demo HTML v1;
-- Canvas2D Demo v1;
-- Browser Playable Demo v1;
-- Browser Runtime Loop v1 local ao HTML;
-- Asset Manifest v1;
-- sprite drawCall;
-- `visual.sprite`;
-- `tile.layer`;
-- `camera.viewport`;
-- image loading local opcional com fallback;
-- CLI/MCP para fluxos visuais principais;
-- matriz e checklist de validacao visual.
-
-Fora de escopo assumido nesta meta:
-
-- Pixi, Three, WebGL;
-- renderer real do engine;
-- editor visual;
-- servidor;
-- pipeline pesado de assets;
-- colisao resolvida;
-- pathfinding;
-- chunk streaming;
-- animacao avancada;
-- multiplayer real.
+Sem pendencias de produto nesta meta. Renderer real, editor, servidor, pipeline pesado e 3D continuam fora desta meta.
 
 ---
 
 ## Meta 3 - V1: jogos pequenos 2D completos
 
-Status: release-checkpointed. A fundacao V1 Small 2D esta fechada o suficiente para iniciar V2 incrementalmente, mantendo V1 aberta apenas para bugfix, hardening e compatibilidade.
+Status: release-checkpointed.
 
-Objetivo: transformar a engine visual/interativa minima em uma engine capaz de produzir jogos pequenos 2D, ainda com foco em determinismo, contratos e automacao por Codex.
+- [x] Colisao/gameplay 2D, movement blocking, tile collision, camera/viewport, HUD, save/load jogavel, HTML export, templates/guias, release checkpoint e matriz V1.
+- [x] Slices pos-checkpoint que iniciam V2 sem reabrir V1: audio, UI, sprite animation, portable export, prefab, asset validation, visual regression, scene transition/composition e pathfinding grid.
 
-Entregas alvo:
+Pendencias nesta meta:
 
-- `collision.bounds` e `CollisionBoundsReport v1` concluidos;
-- `CollisionOverlapReport v1` concluido;
-- `MovementBlockingReport v1` concluido e endurecido;
-- `tile.layer` solido / Tile Collision v1 concluido;
-- bloqueio de movimento opt-in no `run-loop` concluido;
-- camera/viewport endurecida;
-- Browser Demo usando regras de gameplay reais concluida em modo opt-in;
-- readiness gate V1 Small 2D concluido com cena consolidada;
-- Browser Gameplay HUD Lite opt-in concluido;
-- hardening de exemplos jogaveis pequenos concluido;
-- Playable Save/Load Lite browser-local opt-in concluido;
-- Simple HTML Export v1 concluido;
-- Game Templates v1 concluido com exemplos copiar-e-adaptar;
-- V1 Small 2D Game Creation Guide / Codex package concluido;
-- release checkpoint V1 Small 2D concluido;
-- UI System v1 entregue como contrato declarativo/report de V2 e consumo visual opt-in na Browser Demo/export;
-- Audio Lite v1 como primeiro pacote incremental pos-checkpoint;
-- Sprite Animation v1 concluido como diagnostico declarativo runtime/CLI/MCP;
-- matriz de regressao visual/headless;
-- Visual Regression Baseline v1 concluido como report estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`;
-- Scene Transition Report v1 concluido como report opt-in entre dois paths de cena explicitos, sem mutar loop/save/Scene Document;
-- Scene Composition Manifest v1 concluido como manifesto externo opt-in com `entryScene`, refs explicitas e fixture minima de tres cenas;
-- Pathfinding Grid v1 concluido como report-only opt-in derivado de `tile.layer` e `collision.bounds`, sem route solving;
-- pacote Codex com prompts/skills/subagentes para criar um jogo 2D pequeno.
-
-Status atual da Meta 3: `collision.bounds`, `CollisionOverlapReport v1`, `MovementBlockingReport v1`, Tile Collision v1, Movement Blocking opt-in no `run-loop`, Browser Demo blocking opt-in, readiness gate V1 Small 2D, Browser Gameplay HUD Lite v1, Playable Save/Load Lite v1, hardening de exemplos jogaveis pequenos, Simple HTML Export v1, Game Templates v1, V1 Small 2D Game Creation Guide / Codex package e V1 Small 2D Release Checkpoint ja estao implementados. Audio Lite v1, Sprite Animation v1 e Portable HTML Export v2 ja iniciam V2 de forma incremental, sem editor, servidor ou fisica completa. `AssetManifestValidationReport v1` agora tambem fecha a validacao direta minima de manifesto em runtime/CLI/MCP, com shape versionado e erros previsiveis para arquivo ausente e JSON malformado. `entity.prefab` agora tambem falha de forma previsivel quando nao aponta para `.prefab.json` ou tenta usar traversal, URL e paths absolutos/UNC, incluindo cobertura visual/export para Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export. `VisualRegressionBaselineReport v1` agora fecha o baseline visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`, sem pixel-diff obrigatorio. `SceneTransitionReport v1` fecha o primeiro diagnostico multi-cena por dois paths explicitos, `Scene Composition Manifest v1` fecha a composicao multi-cena minima por manifesto externo e `Pathfinding Grid v1` fecha o primeiro diagnostico de ocupacao de grid por `tile.layer` + `collision.bounds`, sem executar troca no loop, mutar savegame ou resolver rotas.
-
-Criterio de conclusao:
-
-- uma demo 2D pequena com player, mapa, colisao, input, save/load minimo existente, Playable Save/Load Lite opt-in e render browser;
-- runtime/CLI/MCP conseguem validar, simular, salvar, carregar, renderizar e diagnosticar;
-- Codex consegue adicionar uma mecanica pequena usando workflow padronizado sem quebrar contratos.
-
-Subagentes recomendados:
-
-- `gameplay_worker` para mecanicas e sistemas;
-- `render_architect` para impacto visual;
-- `perf_auditor` para regressao/determinismo;
-- `qa_contract_auditor` para shape de reports, CLI/MCP e schemas.
-
-Linha de trabalho atual recomendada:
-
-1. Manter `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `Atlas/Material Manifest v1` como menor proximo passo seguro, em superficie declarativa/diagnostica opt-in nova e sem editor-lite obrigatorio.
-3. Manter editor-lite, particle-lite e 3D adiados ate `Atlas/Material Manifest v1` estar validado end-to-end, com 3D indie apenas depois de V1/V2 demonstradas.
+- [ ] Nenhuma feature grande nova. Manter apenas bugfix, hardening e compatibilidade.
+- [ ] Se for necessario endurecer validacao de cena, criar `validate-scene-strict` / `validate_scene_strict` como superficie opt-in, sem mutar `SceneValidationReport v1`.
 
 ---
 
 ## Meta 4 - V2: jogos 2D/2.5D de escopo indie
 
-Objetivo: sair de demo e chegar a uma base de producao pequena.
+Objetivo: sair de demo e chegar a uma base de producao pequena para jogos 2D/2.5D com multiplas cenas, UI, audio, save/load, assets e export.
 
-Entregas alvo:
+### Ja iniciado em slices pequenos
 
-- prefab/template v1;
-- scene transition report e scene composition minima concluidos;
-- UI v1 com menus, HUD e mensagens;
-- animacao sprite/tile v1;
-- asset atlas v1;
-- particulas 2D simples;
-- audio v1;
-- pathfinding grid v1 concluido como report-only;
-- editor-lite baseado em contratos, ainda automavel por CLI/MCP;
-- visual regression basica;
-- export/browser build estavel;
-- pacote de exemplo: platformer/top-down/RPG-lite.
+- [x] Prefab/templates baseline.
+- [x] Scene Transition Report v1 e Scene Composition Manifest v1.
+- [x] UI System v1 declarativo/report-only com consumo visual opt-in.
+- [x] Audio Lite v1.
+- [x] Sprite Animation v1 diagnostico e consumo visual opt-in inicial.
+- [x] Portable HTML Export v2.
+- [x] Visual Regression Baseline v1 estrutural.
+- [x] Pathfinding Grid v1 report-only.
 
-Criterio de conclusao:
+### Assets e materiais
 
-- criar e manter um jogo 2D pequeno com varias cenas, menus, audio, save/load e assets;
-- Codex consegue gerar novas cenas/prefabs/mecanicas usando skills e MCP;
-- regression matrix cobre gameplay, visual e saves.
+- [ ] Atlas/Material Manifest v1 como proximo pacote.
+- [ ] Schema e doc curta para atlas/material sem pipeline pesado obrigatorio.
+- [ ] Fixture minima com sprite/tile/material refs.
+- [ ] Runtime report/validator deterministico.
+- [ ] CLI e MCP para validar/inspecionar manifesto.
+- [ ] Cross-interface runtime/CLI/MCP.
+- [ ] Integracao opt-in com render/export apenas depois do manifesto validar.
+- [ ] Atualizar skill/import workflow se o manifesto mudar o fluxo de assets.
+
+### UI de producao pequena
+
+- [ ] Menus, HUD e mensagens usando `ui.screen`, sem acoplar ao HUD Lite.
+- [ ] Navegacao/foco minimo e estados de tela serializaveis.
+- [ ] Fixtures de menu, pause/game-over e HUD.
+- [ ] Browser Demo/export com paridade CLI/MCP.
+- [ ] Matriz de regressao UI.
+
+### Animacao 2D
+
+- [ ] Evoluir Sprite Animation para estados/seletores pequenos, preservando v1.
+- [ ] Definir tile animation v1 ou declarar explicitamente como fora do V2 inicial.
+- [ ] Garantir comportamento deterministico em Browser Demo/export.
+- [ ] Cobrir cenas sem assetManifestPath e fallback visual.
+
+### Audio de jogo
+
+- [ ] Evoluir Audio Lite para audio v1 de jogo pequeno.
+- [ ] Validar bancos/clips/eventos sem mixer completo obrigatorio.
+- [ ] Cobrir menus, feedback de movimento e eventos de gameplay.
+- [ ] Garantir export/browser sem dependencia externa surpresa.
+
+### Particle-lite 2D
+
+- [ ] Componente ou manifesto declarativo minimo.
+- [ ] Report/validator runtime.
+- [ ] Render/export opt-in.
+- [ ] Budget de performance e testes deterministas.
+
+### Navegacao e pathfinding
+
+- [x] Pathfinding Grid v1 report-only.
+- [ ] Pathfinding Query/Route Report v1 apenas se o jogo exemplo V2 precisar.
+- [ ] Sem A*/BFS no loop canonico antes de report opt-in e fixtures.
+- [ ] Sem runtime AI/path-following antes de rota report-only estar validada.
+
+### Editor-lite e tooling automatizavel
+
+- [ ] Definir editor-lite por contratos antes de GUI.
+- [ ] Ferramentas CLI/MCP para listar cenas, entidades, componentes e assets.
+- [ ] Inspector/hierarchy/asset browser como dados serializaveis.
+- [ ] Operacoes de authoring com validacao e diff pequeno.
+- [ ] GUI opcional depois de existir caminho CLI/MCP.
+
+### Export/build indie pequeno
+
+- [x] Simple HTML Export v1.
+- [x] Portable HTML Export v2.
+- [ ] Workflow multi-cena com assets, manifestos e checksums.
+- [ ] Envelope de build/export versionado se o shape publico crescer.
+- [ ] Artefatos reproduziveis e validacao automatica.
+
+### Exemplo de jogo V2
+
+- [ ] Escolher um pacote exemplo: platformer, top-down adventure ou RPG-lite.
+- [ ] Multiplas cenas com manifesto/composicao.
+- [ ] Menus, HUD, audio, save/load e assets reais pequenos.
+- [ ] Pelo menos um fluxo completo de gameplay validado por CLI/MCP.
+- [ ] Guia Codex-first para criar/adaptar esse tipo de jogo.
+
+### Regressao e qualidade
+
+- [ ] Matriz V2 cobrindo gameplay, visual, saves, export e manifests.
+- [ ] Baselines visuais para cena V2 exemplo.
+- [ ] Perf smoke/budget para render/export/particles quando existirem.
+- [ ] Atualizar `docs/CODEX_HANDOFF.md` a cada slice fechado.
+
+Criterio de saida da Meta 4:
+
+- [ ] Um jogo 2D/2.5D pequeno com multiplas cenas, UI, audio, save/load e assets pode ser produzido sem refatorar a arquitetura.
+- [ ] Codex consegue gerar cenas/prefabs/mecanicas usando skills e MCP.
+- [ ] Regression matrix cobre gameplay, visual, saves, exports e manifests.
 
 ---
 
-## Meta 5 - V3: 3D indie / 2.5D avançado
+## Meta 5 - V3: 3D indie / 2.5D avancado
 
-Objetivo: introduzir 3D sem tentar competir com AAA ainda.
+Objetivo: introduzir 3D de forma controlada, depois de V2 demonstrada.
 
-Entregas alvo:
+Pre-requisitos:
 
-- Scene3D Document v1;
-- transform 3D;
-- camera 3D basica;
-- glTF import minimo;
-- mesh/material manifest v1;
-- render backend 3D inicial, preferencialmente WebGPU quando for adotado;
-- lighting basico;
-- collision 3D simples;
-- navmesh ou navigation graph inicial;
-- animation clip/skeletal-lite;
-- tooling MCP para validar/importar assets 3D.
+- [ ] Meta 4 validada com jogo exemplo real.
+- [ ] Atlas/Material Manifest v1 e asset pipeline repetivel estabilizados.
+- [ ] Boundaries 2D/3D revisados por `engine_architect`, `render_architect` e `asset_pipeline_architect`.
 
-Criterio de conclusao:
+### Contratos 3D
 
-- demo 3D pequena com camera, mesh, material, movimento, colisao simples e input;
-- render backend isolado de gameplay;
-- contratos e subagentes continuam governando mudancas.
+- [ ] Scene3D Document v1.
+- [ ] `transform.3d` ou equivalente versionado.
+- [ ] Camera 3D basica.
+- [ ] Mesh/material refs serializaveis.
+- [ ] Validacao e fixtures pequenas.
+
+### Assets 3D
+
+- [ ] glTF import minimo.
+- [ ] Mesh/Material Manifest v1.
+- [ ] Validacao de paths, materiais e dimensoes.
+- [ ] CLI/MCP para importar/validar assets 3D.
+
+### Render 3D inicial
+
+- [ ] Backend 3D escolhido sem acoplar gameplay.
+- [ ] Render snapshot/report 3D ou frame metrics iniciais.
+- [ ] Lighting basico.
+- [ ] Testes deterministas e perf budget inicial.
+
+### Gameplay 3D minimo
+
+- [ ] Movimento/camera simples.
+- [ ] Collision 3D simples.
+- [ ] Navigation graph/navmesh inicial apenas depois de contratos.
+- [ ] Demo 3D pequena com mesh, material, camera e input.
+
+Criterio de saida da Meta 5:
+
+- [ ] Demo 3D pequena validada por runtime/CLI/MCP.
+- [ ] Renderer 3D isolado de gameplay.
+- [ ] Contratos 2D existentes preservados.
 
 ---
 
 ## Meta 6 - V4: runtime/editor AA
 
-Objetivo: amadurecer para producao AA, com editor real e pipeline multiusuario.
+Objetivo: amadurecer a engine para equipe pequena e producao AA de escopo controlado.
 
-Entregas alvo:
+Pre-requisitos:
 
-- editor visual modular;
-- inspector, hierarchy, asset browser e scene view;
-- prefab system;
-- terrain/tile/level tooling;
-- animation graph inicial;
-- material system mais completo;
-- navmesh/pathfinding robusto;
-- profiler e telemetry local;
-- build pipeline multi-target;
-- plugin Codex do engine com skills, MCP e templates;
-- subagentes de QA, render, gameplay, netcode, editor e assets.
+- [ ] Meta 4 demonstrada com jogo 2D/2.5D.
+- [ ] Meta 5 demonstrada com demo 3D indie, se o editor for cobrir 3D.
+- [ ] Tooling CLI/MCP suficiente para o editor nao ser GUI-only.
 
-Criterio de conclusao:
+### Editor visual modular
 
-- equipe pequena consegue produzir um jogo AA de escopo limitado;
-- Codex atua como par de desenvolvimento com subagentes especializados e ferramentas MCP do engine.
+- [ ] Inspector.
+- [ ] Hierarchy.
+- [ ] Scene view.
+- [ ] Asset browser.
+- [ ] Comandos equivalentes via CLI/MCP para operacoes importantes.
+
+### Ferramentas de conteudo
+
+- [ ] Prefab tools.
+- [ ] Terrain/tile/level tooling.
+- [ ] Material editor.
+- [ ] Animation graph inicial.
+- [ ] Import/rebuild/diff de assets.
+
+### Runtime de producao
+
+- [ ] Profiler e telemetry local.
+- [ ] Build pipeline multi-target.
+- [ ] Plugin Codex do engine empacotado.
+- [ ] QA automatizada por dominio.
+
+### Workflow de equipe
+
+- [ ] Subagentes por dominio com responsabilidades estaveis.
+- [ ] Performance budgets por cena/demo.
+- [ ] Regressao visual e savegame em CI.
+- [ ] Documentacao operacional para equipe pequena.
+
+Criterio de saida da Meta 6:
+
+- [ ] Equipe pequena consegue produzir um jogo AA limitado usando editor, CLI/MCP e Codex.
 
 ---
 
 ## Meta 7 - V5/V6: caminho para engine 3D AAA
 
-Objetivo: fase aspiracional de longo prazo. Nao deve ser atacada antes das metas anteriores.
+Status: aspiracional. Nao iniciar antes das metas anteriores demonstrarem projetos reais.
 
-Entregas alvo de alto nivel:
+Pre-requisitos:
 
-- renderer 3D moderno com frame graph;
-- PBR completo;
-- sombras avancadas;
-- GI/reflections conforme backend escolhido;
-- skeletal animation robusta;
-- cinematic tools;
-- streaming de mundos grandes;
-- multiplayer/server authoritative robusto;
-- physics integration madura;
-- asset pipeline profissional;
-- editor multiusuario;
-- CI/CD, QA automatizado e performance budgets;
-- marketplace/plugin system;
-- integracao profunda com Codex/subagentes para review, content authoring, profiling e regressao.
+- [ ] Meta 6 validada em producao de equipe pequena.
+- [ ] Pipeline/editor/QA/performance maduros.
+- [ ] Netcode, assets e renderer com budgets e telemetria.
 
-Criterio de conclusao:
+### Renderer e mundo grande
 
-- nao e apenas tecnologia grafica: precisa pipeline, editor, QA, assets, performance, estabilidade e automacao de equipe.
-- AAA depende tanto de tooling e conteudo quanto de renderer.
+- [ ] Frame graph moderno.
+- [ ] PBR completo.
+- [ ] Sombras avancadas, GI/reflections conforme backend.
+- [ ] Streaming de mundo, LOD e asset cache incremental.
+
+### Gameplay, rede e simulacao
+
+- [ ] Physics madura.
+- [ ] Navmesh/pathfinding robusto.
+- [ ] Multiplayer server-authoritative robusto.
+- [ ] Prediction/reconciliation quando necessario.
+
+### Pipeline profissional
+
+- [ ] Editor multiusuario.
+- [ ] Cinematic tools.
+- [ ] Animation/skeletal system robusto.
+- [ ] CI/CD, QA automatizado e performance budgets.
+- [ ] Marketplace/plugin system.
+
+Criterio realista:
+
+- [ ] AAA so e meta valida depois que V1-V4 estiverem demonstradas com jogos reais, editor, pipeline, QA e performance.
+
+---
+
+## Proximo pacote recomendado
+
+**Atlas/Material Manifest v1**
+
+Checklist minimo do pacote:
+
+- [ ] Ler `README.md`, `docs/CODEX_HANDOFF.md`, `SPEC.md`, `docs/module-contracts.md`, `schemas/`, `ROADMAP.md` e `docs/ENGINE_VERSION_ROADMAP.md`.
+- [ ] Usar subagentes: `explorer`, `asset_pipeline_architect`, `render_architect`, `qa_contract_auditor`, `perf_auditor` e `docs_handoff_auditor`.
+- [ ] Definir contrato/schema sem abrir pipeline pesado.
+- [ ] Criar fixture minima de atlas/material.
+- [ ] Implementar runtime report/validator.
+- [ ] Expor CLI e MCP.
+- [ ] Criar testes runtime/CLI/MCP/cross-interface.
+- [ ] Atualizar docs e handoff.
+- [ ] Rodar `npm test`, `npm run validate:scenes` e `npm run smoke`.
+
+Fora do pacote inicial:
+
+- [ ] Editor visual.
+- [ ] Importador completo de atlas.
+- [ ] Renderer novo.
+- [ ] 3D/glTF.
+- [ ] Material system completo.
 
 ---
 
@@ -258,6 +342,7 @@ Cada pacote funcional deve seguir, quando aplicavel:
 9. matriz/checklist da meta.
 
 Commits recomendados: 3 a 6 por PR medio.
+
 Merge somente com:
 
 - `npm test` verde;
