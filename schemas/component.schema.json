@@ -104,6 +104,10 @@
                 "type": "string",
                 "minLength": 1
               },
+              "atlasBindingId": {
+                "type": "string",
+                "minLength": 1
+              },
               "width": {
                 "type": "integer",
                 "minimum": 1

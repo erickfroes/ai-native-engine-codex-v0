@@ -16,6 +16,7 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
+const UI_SYSTEM_EXPORT_DELTA_BUDGET_BYTES = 5 * 1024;
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const tutorialSceneMcpPath = './scenes/tutorial.scene.json';
 const portableEmptyVisualScenePath = path.join(
@@ -70,14 +71,8 @@ const spriteAnimationMissingVisualSpriteScenePath = path.join(
 );
 const spriteAnimationMissingVisualSpriteSceneMcpPath =
   './engine/runtime/test/fixtures/sprite-animation-missing-visual-sprite.scene.json';
-const uiScreenPrefabScenePath = path.join(
-  repoRoot,
-  'engine',
-  'runtime',
-  'test',
-  'fixtures',
-  'ui-screen-prefab.scene.json'
-);
+const uiProductionScenePath = path.join(repoRoot, 'scenes', 'ui-production-screens.scene.json');
+const uiProductionSceneMcpPath = './scenes/ui-production-screens.scene.json';
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
 const validAssetManifestMcpPath = './fixtures/assets/valid.asset-manifest.json';
 const visualSpriteAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'visual-sprite.asset-manifest.json');
@@ -245,6 +240,22 @@ test('Portable HTML Export v2 builds deterministic inline-asset HTML without mut
   assert.doesNotMatch(baseline.html, /file:\/\/\//);
   assert.doesNotMatch(baseline.html, /"spriteAnimation":/);
   assertNoForbiddenPortableExportHtmlSurface(baseline.html);
+});
+
+test('Portable HTML Export v2 keeps production UI overlay size bounded', async () => {
+  const baseline = await buildPortableHtmlGameExportV2(uiProductionScenePath);
+  const withUiSystem = await buildPortableHtmlGameExportV2(uiProductionScenePath, { uiSystem: true });
+  const deltaBytes = withUiSystem.sizeBytes - baseline.sizeBytes;
+
+  assert.equal(baseline.scene, 'ui-production-screens');
+  assert.equal(withUiSystem.scene, 'ui-production-screens');
+  assert.equal(withUiSystem.embeddedAssetCount, 0);
+  assert.equal(deltaBytes > 0, true);
+  assert.equal(deltaBytes <= UI_SYSTEM_EXPORT_DELTA_BUDGET_BYTES, true);
+  assert.match(withUiSystem.html, /data-screen-id="hud\.main"/);
+  assert.match(withUiSystem.html, /data-screen-id="menu\.main"/);
+  assert.doesNotMatch(withUiSystem.html, /data-screen-id="pause\.overlay"/);
+  assertNoForbiddenPortableExportHtmlSurface(withUiSystem.html);
 });
 
 test('Portable HTML Export v2 keeps rect fallback without assetManifestPath even when spriteAnimation is enabled', async () => {
@@ -741,9 +752,9 @@ test('export-portable-html-game CLI writes deterministic files for inline assets
     },
     {
       name: 'ui-system',
-      scenePath: uiScreenPrefabScenePath,
+      scenePath: uiProductionScenePath,
       flags: ['--ui-system'],
-      expectedScene: 'ui-screen-prefab-fixture',
+      expectedScene: 'ui-production-screens',
       expectedEmbeddedAssetCount: 0,
       options: {
         assetManifest: false,
@@ -754,8 +765,8 @@ test('export-portable-html-game CLI writes deterministic files for inline assets
         spriteAnimation: false,
         uiSystem: true
       },
-      present: [/id="browser-ui-system"/, /"uiSystem":\{"enabled":true,"scene":"ui-screen-prefab-fixture"/, />Score: 000<\/div>/],
-      absent: [/file:\/\/\//, /"assetSrc":"data:image\/png;base64,/]
+      present: [/id="browser-ui-system"/, /"uiSystem":\{"enabled":true,"scene":"ui-production-screens"/, />Skyline Rescue<\/div>/, />Score 000<\/div>/],
+      absent: [/file:\/\/\//, /"assetSrc":"data:image\/png;base64,/, /data-screen-id="pause\.overlay"/, /id="browser-gameplay-hud"/]
     }
   ];
 
@@ -955,6 +966,68 @@ test('export_portable_html_game MCP writes the same sprite-animation portable ex
     assert.equal(mcpResponse.result.isError, false);
     const mcpEnvelope = mcpResponse.result.structuredContent;
     assertPortableExportEnvelopeShape(mcpEnvelope, { expectedScene: 'sprite-animation-idle-fixture' });
+    assert.equal(mcpEnvelope.outputPath, mcpOutPath);
+    assert.deepEqual(
+      { ...mcpEnvelope, outputPath: '<normalized>' },
+      { ...cliEnvelope, outputPath: '<normalized>' }
+    );
+
+    const mcpHtml = await readFile(mcpEnvelope.outputPath, 'utf8');
+    assert.equal(mcpHtml, cliHtml);
+    assertNoForbiddenPortableExportHtmlSurface(mcpHtml);
+  } finally {
+    await client.close();
+  }
+});
+
+test('export_portable_html_game MCP writes the same production UI overlay as CLI', async (t) => {
+  const repoTempDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(repoTempDir, 'cli-portable-ui-production.html');
+  const mcpOutPath = path.join(repoTempDir, 'mcp-portable-ui-production.html');
+  const cliResult = runCli([
+    'export-portable-html-game',
+    uiProductionScenePath,
+    '--out',
+    cliOutPath,
+    '--ui-system',
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+  assert.deepEqual(cliEnvelope.options, {
+    assetManifest: false,
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    spriteAnimation: false,
+    uiSystem: true
+  });
+  assert.equal(cliEnvelope.embeddedAssetCount, 0);
+  const cliHtml = await readFile(cliEnvelope.outputPath, 'utf8');
+  assert.match(cliHtml, /"uiSystem":\{"enabled":true,"scene":"ui-production-screens"/);
+  assert.match(cliHtml, />Skyline Rescue<\/div>/);
+  assert.match(cliHtml, />Score 000<\/div>/);
+  assert.doesNotMatch(cliHtml, /data-screen-id="pause\.overlay"/);
+  assert.doesNotMatch(cliHtml, /id="browser-gameplay-hud"/);
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_portable_html_game',
+      arguments: {
+        scenePath: uiProductionSceneMcpPath,
+        outputPath: path.relative(repoRoot, mcpOutPath),
+        uiSystem: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+    assertPortableExportEnvelopeShape(mcpEnvelope, { expectedScene: 'ui-production-screens' });
     assert.equal(mcpEnvelope.outputPath, mcpOutPath);
     assert.deepEqual(
       { ...mcpEnvelope, outputPath: '<normalized>' },

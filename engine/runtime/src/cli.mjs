@@ -8,6 +8,7 @@ import {
   formatSceneValidationReportV1,
   validateSaveFile,
   buildAssetManifestValidationReportV1,
+  buildAtlasMaterialManifestReportV1,
   loadStateSnapshotSaveV1,
   saveStateSnapshotV1,
   validateInputIntentV1,
@@ -30,6 +31,7 @@ import {
   createBrowserPlayableDemoMetadataV1,
   BROWSER_PLAYABLE_DEMO_VERSION,
   materializeBrowserDemoAssetSrcV1,
+  resolveAtlasMaterialRenderInputsV1,
   exportHtmlGameV1,
   exportPortableHtmlGameV2,
   runDeterministicReplay,
@@ -59,6 +61,7 @@ function printUsage() {
   console.log(`Usage:
   node engine/runtime/src/cli.mjs validate-scene <path> [--json]
   node engine/runtime/src/cli.mjs validate-asset-manifest <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-atlas-material-manifest <path> [--json]
   node engine/runtime/src/cli.mjs validate-prefab <path> [--json]
   node engine/runtime/src/cli.mjs validate-save <path> [--json]
   node engine/runtime/src/cli.mjs validate-input-intent <path> [--json]
@@ -72,9 +75,9 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-visual-regression-baseline <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--json]
   node engine/runtime/src/cli.mjs render-svg-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-canvas-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
-  node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--out <path>] [--json]
+  node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--atlas-material-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs export-html-game <path> --out <path> [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--ui-system] [--json]
-  node engine/runtime/src/cli.mjs export-portable-html-game <path> --out <path> [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--json]
+  node engine/runtime/src/cli.mjs export-portable-html-game <path> --out <path> [--asset-manifest <path>] [--atlas-material-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--json]
   node engine/runtime/src/cli.mjs save-state <path> --ticks <n> [--seed <n>] --out <dir> [--json]
   node engine/runtime/src/cli.mjs load-save <path> [--json]
   node engine/runtime/src/cli.mjs run-replay <path> --ticks <n> [--seed <n>] [--json]
@@ -264,6 +267,48 @@ async function run() {
         console.log('Errors:');
         for (const error of report.errors) {
           console.log(`- ${error.path}: ${error.message}`);
+        }
+      }
+    }
+    process.exitCode = report.ok ? 0 : 1;
+    return;
+  }
+
+  if (command === 'inspect-atlas-material-manifest') {
+    if (!maybePath || maybePath.startsWith('--')) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildAtlasMaterialManifestReportV1(maybePath);
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Atlas/material manifest: ${report.absolutePath}`);
+      console.log(`Atlas/material manifest report version: ${report.atlasMaterialManifestReportVersion}`);
+      console.log(`Asset manifest: ${report.assetManifestPath ?? '(missing)'}`);
+      console.log(`Atlases: ${report.summary.atlasCount}`);
+      console.log(`Regions: ${report.summary.regionCount}`);
+      console.log(`Materials: ${report.summary.materialCount}`);
+      console.log(`Sprite bindings: ${report.summary.spriteBindingCount}`);
+      console.log(`Tile bindings: ${report.summary.tileBindingCount}`);
+      console.log('');
+      console.log(report.ok ? 'Status: OK' : 'Status: INVALID');
+      if (report.errors.length > 0) {
+        console.log('');
+        console.log('Errors:');
+        for (const error of report.errors) {
+          const ref = error.ref === null ? '' : ` ${error.ref}`;
+          console.log(`- ${error.target}${ref} ${error.path}: ${error.message}`);
+        }
+      }
+      if (report.warnings.length > 0) {
+        console.log('');
+        console.log('Warnings:');
+        for (const warning of report.warnings) {
+          const ref = warning.ref === null ? '' : ` ${warning.ref}`;
+          console.log(`- ${warning.target}${ref} ${warning.path}: ${warning.message}`);
         }
       }
     }
@@ -687,6 +732,7 @@ async function run() {
     const width = readNumberFlag('render-browser-demo', '--width', undefined);
     const height = readNumberFlag('render-browser-demo', '--height', undefined);
     const assetManifestPath = readStringFlag('render-browser-demo', '--asset-manifest', undefined);
+    const atlasMaterialManifestPath = readStringFlag('render-browser-demo', '--atlas-material-manifest', undefined);
     const requestedOutPath = readStringFlag('render-browser-demo', '--out', undefined);
     const movementBlocking = hasFlag('--movement-blocking');
     const gameplayHud = hasFlag('--gameplay-hud');
@@ -694,21 +740,29 @@ async function run() {
     const audioLite = hasFlag('--audio-lite');
     const spriteAnimation = hasFlag('--sprite-animation');
     const uiSystem = hasFlag('--ui-system');
+    if (spriteAnimation && atlasMaterialManifestPath !== undefined) {
+      throw new Error('render-browser-demo: --sprite-animation cannot be combined with --atlas-material-manifest');
+    }
     const scene = await loadSceneFile(maybePath);
-    const rawSnapshot = await buildRenderSnapshotV1(scene, {
+    const atlasInputs = await resolveAtlasMaterialRenderInputsV1(scene, {
+      assetManifestPath,
+      atlasMaterialManifestPath
+    });
+    const rawSnapshot = await buildRenderSnapshotV1(atlasInputs.scene, {
       tick,
       width,
       height,
-      assetManifestPath
+      assetManifestPath: atlasInputs.assetManifestPath
     });
-    const snapshot = materializeBrowserDemoAssetSrcV1(rawSnapshot, assetManifestPath);
+    const snapshot = materializeBrowserDemoAssetSrcV1(rawSnapshot, atlasInputs.assetManifestPath);
     const title = `${snapshot.scene} Browser Playable Demo`;
-    const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+    const metadata = createBrowserPlayableDemoMetadataV1(atlasInputs.scene, snapshot, {
       movementBlocking,
       gameplayHud,
       playableSaveLoad,
       audioLite,
       spriteAnimation,
+      atlasMaterial: atlasInputs.atlasMaterial,
       uiSystem
     });
     const html = renderBrowserPlayableDemoHtmlV1({
@@ -1133,6 +1187,11 @@ async function run() {
 
     const requestedOutPath = readStringFlag('export-portable-html-game', '--out', undefined);
     const assetManifestPath = readStringFlag('export-portable-html-game', '--asset-manifest', undefined);
+    const atlasMaterialManifestPath = readStringFlag(
+      'export-portable-html-game',
+      '--atlas-material-manifest',
+      undefined
+    );
     const movementBlocking = hasFlag('--movement-blocking');
     const gameplayHud = hasFlag('--gameplay-hud');
     const playableSaveLoad = hasFlag('--playable-save-load');
@@ -1142,6 +1201,7 @@ async function run() {
     const envelope = await exportPortableHtmlGameV2(maybePath, {
       outputPath: requestedOutPath,
       assetManifestPath,
+      atlasMaterialManifestPath,
       movementBlocking,
       gameplayHud,
       playableSaveLoad,

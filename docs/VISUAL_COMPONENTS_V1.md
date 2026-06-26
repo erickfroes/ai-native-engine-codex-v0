@@ -17,6 +17,7 @@ Componente atual:
   "replicated": false,
   "fields": {
     "assetId": "player.sprite",
+    "atlasBindingId": "player.hero",
     "width": 16,
     "height": 16,
     "layer": 0
@@ -30,6 +31,7 @@ Regras:
 - `version` deve ser exatamente `1`.
 - `replicated` deve ser `false`.
 - `fields.assetId` e obrigatorio, string e nao vazio.
+- `fields.atlasBindingId` e opcional, string nao vazia quando presente; ele aponta para `Atlas/Material Manifest v1` `sprites[].id` somente nos fluxos que recebem `atlasMaterialManifestPath`.
 - `fields.width` e `fields.height` sao opcionais; quando presentes, devem ser inteiros `>= 1`.
 - `fields.layer` e opcional; quando ausente, o render usa `0`.
 - campos extras em `fields` nao sao permitidos.
@@ -38,6 +40,8 @@ Regras:
 
 - `visual.sprite` e declarativo; ele nao carrega imagem sozinho.
 - com `Asset Manifest v1`, `buildRenderSnapshotV1` resolve `assetId` e pode emitir drawCall `sprite` com `assetSrc`.
+- com `Atlas/Material Manifest v1` opt-in na Browser Demo ou Portable HTML Export v2, `atlasBindingId` resolve `sprites[].id`; o consumo e sprite-only e nao altera `RenderSnapshot v1`.
+- o uso legado de `assetId` como binding logico de atlas permanece apenas para compatibilidade do slice anterior.
 - sem `Asset Manifest v1`, o comportamento continua usando fallback `rect`.
 - quando `sprite` legado e `visual.sprite` coexistem na mesma entidade, `visual.sprite` e a fonte preferida para `assetId`, `width`, `height` e `layer`.
 - se `width` ou `height` nao forem declarados no componente, o builder usa as dimensoes do asset manifest quando disponiveis.
@@ -50,5 +54,6 @@ Regras:
 - editor visual;
 - servidor ou backend de assets;
 - Pixi, Three ou WebGL;
-- atlas, animacao, UV, materiais e frame graph;
+- tiles atlas-backed;
+- animacao, UV, materiais completos e frame graph;
 - importacao ou validacao de bytes reais de imagem.

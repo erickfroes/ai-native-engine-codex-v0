@@ -16,6 +16,7 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - `metadata.playableSaveLoad` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede Playable Save/Load Lite local.
 - `metadata.audioLite` e um envelope interno opcional do HTML, gerado apenas quando o fluxo opt-in pede Audio Lite v1 diagnostico.
 - `metadata.spriteAnimation` e um envelope interno opcional do HTML, derivado de `SpriteAnimationReport v1` e gerado apenas quando o fluxo opt-in pede animacao local de sprites asset-backed.
+- `metadata.atlasMaterial` e um envelope interno opcional do HTML, derivado de `Atlas/Material Manifest v1` e gerado apenas quando o fluxo opt-in pede consumo sprite-only de atlas.
 - `metadata.uiSystem` e um envelope interno opcional do HTML, derivado de `UiSystemReport v1` e gerado apenas quando o fluxo opt-in pede UI System v1 visual.
 - o loop visual local usa `requestAnimationFrame` apenas para redraw continuo do estado atual.
 
@@ -51,6 +52,9 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - Audio Lite no browser nao forca autoplay; triggers so tentam emitir cue diagnostico apos gesto do usuario e usam fallback silencioso quando necessario;
 - com `spriteAnimation` opt-in, embute metadata de `visual.sprite.animation` e anima drawCalls `sprite` asset-backed por crop local de sprite-sheet;
 - sem `assetSrc` carregavel ou sem drawCall `sprite` compativel, Sprite Animation preserva o fallback visual atual;
+- com `atlasMaterial` opt-in, embute metadata de atlas/material e desenha drawCalls `sprite` por source rect do atlas, sem alterar `RenderSnapshot v1`;
+- Atlas Material v1 no browser e sprite-only neste slice; `tile.layer` continua renderizando os `rect` do snapshot;
+- Atlas Material v1 e Sprite Animation v1 nao se compoem neste slice; as interfaces publicas rejeitam a combinacao;
 - com `uiSystem` opt-in, embute metadata de `ui.screen` e renderiza um overlay DOM passivo em screen-space sobre o canvas;
 - UI System no browser renderiza apenas screens ativas, em ordem deterministica, sem input, binding, foco ou substituicao do HUD Lite;
 - `Pause rendering`, `Resume rendering` e `Reset` sao controles locais do HTML autocontido e nao alteram contratos v1 publicados;
@@ -62,8 +66,8 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 
 ## CLI e MCP
 
-- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--out <path>] [--json]`
-- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?, movementBlocking?, gameplayHud?, playableSaveLoad?, audioLite?, spriteAnimation?, uiSystem?)`
+- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--atlas-material-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--out <path>] [--json]`
+- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?, atlasMaterialManifestPath?, movementBlocking?, gameplayHud?, playableSaveLoad?, audioLite?, spriteAnimation?, uiSystem?)`
 
 Exemplo para gerar um arquivo HTML:
 
@@ -101,10 +105,16 @@ Exemplo com Sprite Animation v1 visual opt-in:
 node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/sprite-animation-idle.scene.json --asset-manifest ./fixtures/assets/valid.asset-manifest.json --sprite-animation --out ./tmp/sprite-animation-browser-demo.html --json
 ```
 
+Exemplo com Atlas/Material Manifest v1 sprite-only opt-in:
+
+```bash
+node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/atlas-material/atlas-sprite-consumption.scene.json --atlas-material-manifest ./engine/runtime/test/fixtures/atlas-material/starter.atlas-material.json --out ./tmp/atlas-browser-demo.html --json
+```
+
 Exemplo com UI System v1 visual opt-in:
 
 ```bash
-node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/ui-screen-prefab.scene.json --ui-system --out ./tmp/ui-system-browser-demo.html --json
+node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-browser-demo.html --json
 ```
 
 Depois de gerar com `--out`, abra o arquivo HTML diretamente no navegador. A demo sem `--asset-manifest` e autocontida: nao precisa de servidor local, assets reais ou runtime Node no cliente. Quando `--asset-manifest` e usado, o HTML continua single-file e deterministico, mas nao e portavel sozinho porque referencia imagens locais por `file:///...`; se o arquivo for movido sem os assets, o fallback `rect` preserva funcionamento basico.
@@ -174,14 +184,31 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 - o browser usa o timestamp do proprio `requestAnimationFrame` para avancar frame localmente, sem tocar no tick do engine.
 - sem opt-in, o HTML nao embute `metadata.spriteAnimation`.
 
+### Atlas/Material Local
+
+- `--atlas-material-manifest` no CLI e `atlasMaterialManifestPath` no MCP embutem metadata sprite-only de Atlas/Material Manifest v1.
+- O binding v1 usa `visual.sprite.fields.atlasBindingId` como id explicito para `sprites[].id` do manifesto atlas/material quando o opt-in esta presente.
+- `visual.sprite.fields.assetId` continua obrigatorio e preserva o fallback sem manifesto; o uso legado de `assetId` como binding logico permanece apenas para compatibilidade.
+- O runtime resolve o binding para o `assetId` do atlas, materializa `assetSrc` a partir do `Asset Manifest v1` referenciado e adiciona source rect em `metadata.atlasMaterial`.
+- `metadata.atlasMaterial` inclui `atlasRegionBindingContractVersion: 1`, `hashAlgorithm: "sha256"`, `bindingHash` e `bindingSource` por sprite para regressao estrutural do sidecar.
+- Se `atlasBindingId` for declarado e nao existir em `sprites[].id`, runtime/CLI/MCP falham de forma previsivel antes de gerar HTML.
+- O HTML desenha o recorte do atlas por `drawImage` com source rect e preserva fallback `rect` se a imagem local nao carregar.
+- `sampler: "nearest"` desliga `imageSmoothingEnabled` apenas durante o draw daquele sprite; materiais nao criam passes, shaders ou sort novo.
+- `--asset-manifest` e `--atlas-material-manifest` sao mutuamente exclusivos.
+- `--sprite-animation` e `--atlas-material-manifest` sao mutuamente exclusivos neste slice.
+- `tiles[]` do manifesto continuam report-only; `tile.layer` segue renderizando os `rect` do snapshot.
+- sem opt-in, o HTML nao embute `metadata.atlasMaterial`.
+
 ### UI System Local
 
 - `--ui-system` no CLI e `uiSystem: true` no MCP embutem metadata e overlay visual de UI System v1.
 - o overlay deriva de `UiSystemReport v1`, incluindo prefabs resolvidos quando a cena e carregada por path.
+- `scenes/ui-production-screens.scene.json` cobre o caso publico de menu/HUD ativos e pause autoravel inativo por `ui.screen`.
 - somente screens `active: true` geram DOM visual.
 - `panel` e `label` sao os unicos widgets renderizados.
 - coordenadas de UI sao screen-space e nao recebem offset de `camera.viewport`.
 - o overlay e passivo (`pointer-events: none`) e nao captura input.
+- HUD Lite, Playable Save/Load Lite e Audio Lite continuam blocos locais independentes e nao sao ativados implicitamente por `--ui-system`.
 - sem opt-in, o HTML nao embute `metadata.uiSystem` nem `browser-ui-system`.
 
 ### Asset Manifest Local

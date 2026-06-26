@@ -2,13 +2,14 @@
 
 UI System v1 abre o primeiro contrato formal de UI da engine sem transformar HUD Lite no runtime canonico de interface.
 
-O objetivo deste pacote e fechar um slice pequeno e AI-native:
+O objetivo deste pacote e manter um slice pequeno e AI-native para telas declarativas e telas pequenas de producao:
 
 - componente `ui.screen` versionado no Scene Document;
 - arvore de widgets serializavel dentro do proprio componente;
 - `UiSystemReport v1` deterministico;
 - runtime, CLI e MCP alinhados;
 - compatibilidade com `entity.prefab` por path;
+- fixture publica de menu/HUD/pause autoravel em `scenes/ui-production-screens.scene.json`;
 - HUD Lite preservado como diagnostico local da Browser Demo.
 
 ## Componente
@@ -85,7 +86,7 @@ Shape:
 ```json
 {
   "uiSystemReportVersion": 1,
-  "scene": "ui-screen-prefab-fixture",
+  "scene": "ui-production-screens",
   "screens": [
     {
       "screenId": "hud.main",
@@ -115,7 +116,7 @@ Schema formal do report: `docs/schemas/ui-system-report-v1.schema.json`.
 ## CLI
 
 ```bash
-node ./engine/runtime/src/cli.mjs inspect-ui-system ./engine/runtime/test/fixtures/ui-screen-prefab.scene.json --json
+node ./engine/runtime/src/cli.mjs inspect-ui-system ./scenes/ui-production-screens.scene.json --json
 ```
 
 Sem `--json`, o CLI imprime um resumo estavel por screen.
@@ -128,7 +129,7 @@ Input:
 
 ```json
 {
-  "path": "./engine/runtime/test/fixtures/ui-screen-prefab.scene.json"
+  "path": "./scenes/ui-production-screens.scene.json"
 }
 ```
 
@@ -142,6 +143,8 @@ UI System v1 tambem pode ser consumido visualmente de forma opt-in:
 - `render_browser_demo({ uiSystem: true })`
 - `export-html-game --ui-system`
 - `export_html_game({ uiSystem: true })`
+- `export-portable-html-game --ui-system`
+- `export_portable_html_game({ uiSystem: true })`
 
 Esse consumo embute `metadata.uiSystem` derivado do `UiSystemReport v1` e renderiza um overlay DOM passivo em screen-space sobre o canvas.
 
@@ -156,12 +159,33 @@ Regras:
 - sem `--ui-system` / `uiSystem: true`, Browser Demo e export nao embutem `metadata.uiSystem` nem overlay;
 - HUD Lite continua separado e nao e substituido por `ui.screen`.
 
+## Telas Pequenas De Producao
+
+`UI Production Screens v1` usa o mesmo contrato `ui.screen` sem adicionar campos ou widgets novos.
+
+Fixture publica:
+
+```bash
+node ./engine/runtime/src/cli.mjs inspect-ui-system ./scenes/ui-production-screens.scene.json --json
+node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-browser-demo.html --json
+node ./engine/runtime/src/cli.mjs export-html-game ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production.html --json
+node ./engine/runtime/src/cli.mjs export-portable-html-game ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-portable.html --json
+```
+
+Regras do slice:
+
+- `hud.main` e `menu.main` ficam ativos para demonstrar HUD persistente e menu estatico;
+- `pause.overlay` fica `active: false`, aparece no report e nao vira DOM visual ate um pacote de navegacao/foco ou estado local explicitamente versionado;
+- `RenderSnapshot v1` da fixture permanece com `drawCalls: []`, porque UI nao entra no render canonico;
+- Browser Demo, Simple HTML Export e Portable HTML Export mantem `uiSystem` como opt-in e nao ativam HUD Lite, Playable Save/Load Lite ou Audio Lite implicitamente;
+- o delta de HTML para `uiSystem` nesta fixture fica coberto por budget de teste pequeno.
+
 ## Compatibilidade
 
 - `HUD Lite` continua local ao HTML da Browser Demo.
 - `Playable Save/Load Lite` continua local ao HTML.
 - `RenderSnapshot v1`, `run-loop`, `save/load` e reports de colisao permanecem inalterados.
-- `render-browser-demo` e `export-html-game` consomem UI System v1 somente com opt-in explicito.
+- `render-browser-demo`, `export-html-game` e `export-portable-html-game` consomem UI System v1 somente com opt-in explicito.
 - `entity.prefab` continua opcional; quando presente por path, `ui.screen` pode vir do prefab.
 
 ## Fora de escopo
@@ -186,6 +210,7 @@ Cobertura dedicada:
 - `engine/runtime/test/ui-system-cross-interface.integration.test.mjs`;
 - `tools/mcp-server/test/ui-system.test.mjs`.
 - consumo visual opt-in em `engine/runtime/test/browser-playable-demo-runtime.test.mjs`, `engine/runtime/test/cli-render-browser-demo.test.mjs`, `engine/runtime/test/browser-playable-demo-cross-interface.integration.test.mjs`, `engine/runtime/test/simple-html-export-v1.test.mjs` e `tools/mcp-server/test/mcp-server.test.mjs`.
+- `engine/runtime/test/portable-html-export-v2.test.mjs` cobre `export_portable_html_game` com `uiSystem: true`.
 
 Rodar:
 
@@ -197,4 +222,4 @@ npm run smoke
 
 ## Continuidade
 
-UI System v1 esta fechado como contrato declarativo/report e agora possui consumo visual opt-in incremental na Browser Demo/export. Portable HTML Export v2 ja cobre assets inline com Sprite Animation v1 no caminho portatil. `entity.prefab` v1 fica congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta em `docs/V2_GAP_AUDIT.md` e recomenda `Visual Regression Baseline v1` como proximo pacote.
+UI System v1 esta fechado como contrato declarativo/report e agora possui uma fixture publica de telas pequenas de producao em `scenes/ui-production-screens.scene.json`. O proximo pacote seguro e `UI Navigation/Focus Lite v1`, mantendo navegacao/foco opt-in e sem acoplar HUD Lite, Playable Save/Load Lite, savegame canonico ou `RenderSnapshot v1`.

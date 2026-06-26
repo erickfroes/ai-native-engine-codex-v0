@@ -32,6 +32,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_atlas_material_manifest',
+    title: 'Inspect Atlas Material Manifest',
+    description: 'Build an AtlasMaterialManifestReport v1 from an opt-in atlas/material manifest and its referenced Asset Manifest v1 file.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root for an Atlas/Material Manifest v1 JSON file.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'validate_input_intent',
     title: 'Validate Input Intent',
     description: 'Validate an Input Intent v1 JSON file against the runtime contract.',
@@ -358,6 +374,10 @@ export const toolCatalog = [
           type: 'string',
           description: 'Optional repository-relative or absolute path to an Asset Manifest v1 JSON file.'
         },
+        atlasMaterialManifestPath: {
+          type: 'string',
+          description: 'Optional repository-relative or absolute path to an Atlas/Material Manifest v1 JSON file for atlas-backed sprite crop metadata.'
+        },
         movementBlocking: {
           type: 'boolean',
           description: 'When true, embed local Browser Demo movement blocking data from collision.bounds and solid tile.layer tiles.'
@@ -449,6 +469,10 @@ export const toolCatalog = [
         assetManifestPath: {
           type: 'string',
           description: 'Optional repository-relative or absolute path to an Asset Manifest v1 JSON file whose image assets will be embedded as data URLs.'
+        },
+        atlasMaterialManifestPath: {
+          type: 'string',
+          description: 'Optional repository-relative or absolute path to an Atlas/Material Manifest v1 JSON file whose referenced atlas image assets will be embedded as data URLs.'
         },
         movementBlocking: {
           type: 'boolean',

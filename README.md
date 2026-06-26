@@ -81,12 +81,13 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 
 A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1, Sprite Animation v1 diagnostico consumido de forma visual opt-in na Browser Demo para sprites asset-backed e Portable HTML Export v2 com assets inline e `Sprite Animation v1` no export portatil.
 
-Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. `entity.prefab` continua relativo a cena, exige alvo `.prefab.json` e rejeita URL, traversal e paths absolutos/UNC; Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export tambem falham de forma previsivel nesses casos. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface e consumo visual opt-in na Browser Demo/export por overlay passivo, preservando HUD Lite como diagnostico local. `AssetManifestValidationReport v1` agora expoe validacao direta minima de manifesto em runtime/CLI/MCP com erro previsivel para arquivo ausente e JSON malformado, sem mutar `RenderSnapshot v1`. `VisualRegressionBaselineReport v1` fecha uma linha minima de regressao visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`, sem pixel-diff obrigatorio. `SceneTransitionReport v1` fecha o primeiro slice multi-cena por dois paths explicitos em runtime/CLI/MCP. `Scene Composition Manifest v1` fecha a composicao multi-cena minima por manifesto externo com `entryScene` e refs explicitas. `PathfindingGridReport v1` fecha a primeira superficie de navegacao report-only por grid, derivada de `tile.layer` e `collision.bounds`, sem mutar `Scene Document v1`, `SceneValidationReport v1`, loop, render, Browser Demo, exports ou savegame.
+Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. `entity.prefab` continua relativo a cena, exige alvo `.prefab.json` e rejeita URL, traversal e paths absolutos/UNC; Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export tambem falham de forma previsivel nesses casos. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface, consumo visual opt-in na Browser Demo/export por overlay passivo e uma fixture publica de telas pequenas em `scenes/ui-production-screens.scene.json`, preservando HUD Lite como diagnostico local. `AssetManifestValidationReport v1` agora expoe validacao direta minima de manifesto em runtime/CLI/MCP com erro previsivel para arquivo ausente e JSON malformado, sem mutar `RenderSnapshot v1`. `VisualRegressionBaselineReport v1` fecha uma linha minima de regressao visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`, sem pixel-diff obrigatorio. `SceneTransitionReport v1` fecha o primeiro slice multi-cena por dois paths explicitos em runtime/CLI/MCP. `Scene Composition Manifest v1` fecha a composicao multi-cena minima por manifesto externo com `entryScene` e refs explicitas. `PathfindingGridReport v1` fecha a primeira superficie de navegacao report-only por grid, derivada de `tile.layer` e `collision.bounds`, sem mutar `Scene Document v1`, `SceneValidationReport v1`, loop, render, Browser Demo, exports ou savegame. `AtlasMaterialManifestReport v1` fecha o primeiro contrato atlas/material, ancorado em `Asset Manifest v1`, com regioes, materiais e bindings sprite/tile validados em runtime/CLI/MCP; Browser Demo e Portable HTML Export v2 agora consomem sprites atlas-backed por `visual.sprite.fields.atlasBindingId` opt-in, com sideband `metadata.atlasMaterial` versionado/hash, sem mutar `RenderSnapshot v1`.
 
 ## Comandos CLI principais
 
 - `validate-scene`: valida preflight minimo de cena para `SceneValidationReport v1` (arquivo/JSON e systems conhecidos)
 - `validate-asset-manifest`: valida um arquivo `Asset Manifest v1` diretamente
+- `inspect-atlas-material-manifest`: inspeciona um manifesto atlas/material ancorado em `Asset Manifest v1`
 - `validate-input-intent`: valida InputIntent v1
 - `keyboard-to-input-intent`: traduz teclas declaradas para InputIntent v1
 - `plan-loop`: planeja execucao sem rodar handlers
@@ -120,6 +121,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 
 - `validate_scene`
 - `validate_asset_manifest`
+- `inspect_atlas_material_manifest`
 - `validate_input_intent`
 - `validate_prefab`
 - `keyboard_to_input_intent`
@@ -220,10 +222,10 @@ node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene
 node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --audio-lite --out ./tmp/audio-lite-browser-demo.html --json
 
 # inspecionar UI System v1 declarativo
-node ./engine/runtime/src/cli.mjs inspect-ui-system ./engine/runtime/test/fixtures/ui-screen-prefab.scene.json --json
+node ./engine/runtime/src/cli.mjs inspect-ui-system ./scenes/ui-production-screens.scene.json --json
 
-# gerar Browser Playable Demo consumindo UI System v1 como overlay passivo
-node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/ui-screen-prefab.scene.json --ui-system --out ./tmp/ui-system-browser-demo.html --json
+# gerar Browser Playable Demo consumindo UI System v1 como telas pequenas passivas
+node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-browser-demo.html --json
 
 # inspecionar Sprite Animation v1 declarativo
 node ./engine/runtime/src/cli.mjs inspect-sprite-animation ./engine/runtime/test/fixtures/sprite-animation-idle.scene.json --json
@@ -233,6 +235,15 @@ node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixt
 
 # exportar HTML portatil com assets inline e Sprite Animation v1
 node ./engine/runtime/src/cli.mjs export-portable-html-game ./engine/runtime/test/fixtures/sprite-animation-idle.scene.json --asset-manifest ./fixtures/assets/valid.asset-manifest.json --sprite-animation --out ./tmp/sprite-animation-portable-export.html --json
+
+# gerar Browser Playable Demo consumindo Atlas/Material Manifest v1 sprite-only
+node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/atlas-material/atlas-sprite-consumption.scene.json --atlas-material-manifest ./engine/runtime/test/fixtures/atlas-material/starter.atlas-material.json --out ./tmp/atlas-browser-demo.html --json
+
+# exportar HTML portatil com atlas sprite inline
+node ./engine/runtime/src/cli.mjs export-portable-html-game ./engine/runtime/test/fixtures/atlas-material/atlas-sprite-consumption.scene.json --atlas-material-manifest ./engine/runtime/test/fixtures/atlas-material/starter.atlas-material.json --out ./tmp/atlas-portable-export.html --json
+
+# exportar HTML portatil com UI Production Screens v1
+node ./engine/runtime/src/cli.mjs export-portable-html-game ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-portable.html --json
 
 # inspecionar Prefab Usage Report v2 com rastreabilidade de origem e override
 node ./engine/runtime/src/cli.mjs inspect-prefab-usage-v2 ./scenes/prefab-instanced.scene.json --json
@@ -260,6 +271,7 @@ npm run smoke
 - `docs/V1_SMALL_2D_TEST_MATRIX.md`: matriz runtime/CLI/MCP/testes da cena consolidada
 - `docs/BROWSER_PLAYABLE_DEMO_LOCAL_STATE_V1.md`: formato local do Playable Save/Load Lite
 - `docs/ASSET_MANIFEST_VALIDATION_REPORT_V1.md`: contrato do report de validacao direta de asset manifest
+- `docs/ATLAS_MATERIAL_MANIFEST_V1.md`: contrato do manifesto/report atlas-material e consumo sprite-only opt-in
 - `docs/SIMPLE_HTML_EXPORT_V1.md`: contrato do export HTML jogavel simples
 - `docs/PREFAB_SYSTEM_V1.md`: contrato do Prefab System v1
 - `docs/PREFAB_USAGE_REPORT_V2.md`: contrato do report diagnostico detalhado de prefab

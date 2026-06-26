@@ -15,6 +15,7 @@ import {
   buildPathfindingGridReportV1,
   buildSceneTransitionReportV1,
   buildSceneCompositionManifestReportV1,
+  buildAtlasMaterialManifestReportV1,
   buildVisualRegressionBaselineReportV1
 } from '../src/index.mjs';
 import { assertLoopReportV1 } from './helpers/assertLoopReportV1.mjs';
@@ -28,6 +29,7 @@ import { assertTileCollisionReportV1 } from './helpers/assertTileCollisionReport
 import { assertPathfindingGridReportV1 } from './helpers/assertPathfindingGridReportV1.mjs';
 import { assertSceneTransitionReportV1 } from './helpers/assertSceneTransitionReportV1.mjs';
 import { assertSceneCompositionManifestReportV1 } from './helpers/assertSceneCompositionManifestReportV1.mjs';
+import { assertAtlasMaterialManifestReportV1 } from './helpers/assertAtlasMaterialManifestReportV1.mjs';
 import { assertVisualRegressionBaselineReportV1 } from './helpers/assertVisualRegressionBaselineReportV1.mjs';
 import { simulateStateV1WithMutationTrace } from '../src/index.mjs';
 
@@ -58,6 +60,15 @@ const sceneCompositionManifestPath = path.join(
   'fixtures',
   'scene-composition',
   'three-scene-composition.manifest.json'
+);
+const atlasMaterialManifestPath = path.join(
+  repoRoot,
+  'engine',
+  'runtime',
+  'test',
+  'fixtures',
+  'atlas-material',
+  'starter.atlas-material.json'
 );
 
 test('contract governance: v1 contract shapes remain strict and aligned', async () => {
@@ -109,6 +120,9 @@ test('contract governance: v1 contract shapes remain strict and aligned', async 
 
   const sceneCompositionReport = await buildSceneCompositionManifestReportV1(sceneCompositionManifestPath);
   assertSceneCompositionManifestReportV1(sceneCompositionReport);
+
+  const atlasMaterialReport = await buildAtlasMaterialManifestReportV1(atlasMaterialManifestPath);
+  assertAtlasMaterialManifestReportV1(atlasMaterialReport);
 
   const visualRegressionBaselineReport = await buildVisualRegressionBaselineReportV1(
     path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json')

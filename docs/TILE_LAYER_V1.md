@@ -73,6 +73,7 @@ Depois da expansao, as draw calls continuam ordenadas por `layer` e depois por `
 - o HTML da Browser Demo continua autocontido, sem `fetch`, rede, scripts externos, servidor ou WebGL.
 - `tile.layer` v1 e intencionalmente pequeno; nao define budget validado para mapas densos grandes nem modelo de chunks.
 - Tile Collision v1 pode inspecionar entries `rect` com `solid: true`, mas isso nao altera drawCalls nem renderers.
+- `Atlas/Material Manifest v1` pode validar `tiles[]`, mas `tile.layer v1` permanece report-only para atlas por decisao deste contrato e continua renderizando apenas `rect`/`empty`.
 
 ## Fora de escopo
 
@@ -83,5 +84,6 @@ Depois da expansao, as draw calls continuam ordenadas por `layer` e depois por `
 - pathfinding;
 - chunks ou chunk streaming;
 - atlas/UV/materials;
+- tile atlas-backed;
 - importacao de assets reais;
 - backend grafico externo.

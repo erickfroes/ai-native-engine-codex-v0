@@ -209,6 +209,15 @@ test('validates ui.screen prefab fixture successfully', async () => {
   assert.equal(report.summary.replicatedComponentCount, 0);
 });
 
+test('validates ui production screens scene successfully', async () => {
+  const report = await validateSceneFile(scenePath('ui-production-screens.scene.json'));
+
+  assert.equal(report.ok, true);
+  assert.equal(report.errors.length, 0);
+  assert.equal(report.summary.entityCount, 3);
+  assert.equal(report.summary.replicatedComponentCount, 0);
+});
+
 test('loadSceneFile throws when the scene is invalid', async () => {
   await assert.rejects(() => loadSceneFile(fixturePath('invalid_duplicate_id.scene.json')), {
     name: 'SceneValidationError'
@@ -307,6 +316,33 @@ test('visual.sprite rejects empty assetId predictably', () => {
         (error) =>
           error.path === '$.entities[0].components[1].fields.assetId' &&
           error.message === 'visual.sprite assetId must be a non-empty string'
+      )
+    );
+  }
+});
+
+test('visual.sprite accepts explicit atlasBindingId and rejects empty values predictably', () => {
+  const valid = validateVisualSpriteFields({
+    assetId: 'player.sprite',
+    atlasBindingId: 'player.hero',
+    width: 16,
+    height: 16
+  });
+  assert.equal(valid.errors.some((error) => error.path.endsWith('.fields.atlasBindingId')), false);
+
+  for (const atlasBindingId of ['', '   ']) {
+    const report = validateVisualSpriteFields({
+      assetId: 'player.sprite',
+      atlasBindingId,
+      width: 16,
+      height: 16
+    });
+
+    assert.ok(
+      report.errors.some(
+        (error) =>
+          error.path === '$.entities[0].components[1].fields.atlasBindingId' &&
+          error.message === 'visual.sprite atlasBindingId must be a non-empty string when provided'
       )
     );
   }

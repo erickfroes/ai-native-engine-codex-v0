@@ -32,6 +32,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - Browser Runtime Loop v1;
 - Asset Manifest v1;
 - AssetManifestValidationReport v1;
+- AtlasMaterialManifestReport v1;
 - sprite drawCall;
 - `visual.sprite`;
 - `tile.layer`;
@@ -50,6 +51,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - V1 Small 2D Release Checkpoint;
 - Audio Lite v1 como primeiro incremento pos-checkpoint;
 - UI System v1 como contrato declarativo/report para screens e widget tree, com consumo visual opt-in na Browser Demo/export;
+- UI Production Screens v1 com `scenes/ui-production-screens.scene.json`, menu/HUD ativos, pause autoravel inativo, paridade Browser Demo/export e budget de HTML;
 - Sprite Animation v1 como diagnostico declarativo runtime/CLI/MCP, com consumo visual opt-in na Browser Demo para sprites asset-backed;
 - Portable HTML Export v2 com assets inline e Sprite Animation v1 opt-in no caminho portatil;
 - Prefab System v1 como resolucao declarativa minima e report diagnostico runtime/CLI/MCP;
@@ -61,6 +63,9 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - SceneTransitionReport v1 em runtime/CLI/MCP para diagnosticar transicao explicita entre duas cenas por path;
 - SceneCompositionManifestReport v1 em runtime/CLI/MCP para validar manifesto externo opt-in com `entryScene` e refs explicitas;
 - PathfindingGridReport v1 em runtime/CLI/MCP para diagnosticar ocupacao de grids derivados de `tile.layer` e `collision.bounds`;
+- AtlasMaterialManifestReport v1 em runtime/CLI/MCP para validar manifesto atlas/material ancorado em `Asset Manifest v1`;
+- Atlas Region Consumption v1 sprite-only opt-in na Browser Demo e no Portable HTML Export v2, preservando fallback sem opt-in e `RenderSnapshot v1`;
+- Atlas Region Binding Contract v1 para sprites via `visual.sprite.fields.atlasBindingId`, com `metadata.atlasMaterial` versionado/hash e tiles atlas report-only;
 - Prefab follow-up baseline sem `components` explicitos em entidade prefab-backed;
 - V1 Small 2D Capability Matrix;
 - V1 Small 2D Release Validation;
@@ -71,10 +76,10 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. Manter `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `Atlas/Material Manifest v1` como menor proximo passo seguro, em superficie declarativa/diagnostica opt-in nova.
+1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
+2. Abrir `UI Navigation/Focus Lite v1` como menor proximo passo seguro, usando `ui.screen` sem acoplar HUD Lite, Playable Save/Load Lite ou savegame canonico.
 3. Se a lacuna de validacao estrita for atacada, criar superficie opt-in nova em vez de mutar `validate-scene` / `SceneValidationReport v1`.
-4. Adiar editor-lite, particle-lite e 3D ate `Atlas/Material Manifest v1` estar validado end-to-end.
+4. Adiar editor-lite, particle-lite, route solving e 3D ate UI pequena e V2 estarem mais demonstradas.
 
 ## Versoes de produto
 

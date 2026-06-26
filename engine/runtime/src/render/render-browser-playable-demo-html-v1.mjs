@@ -233,6 +233,16 @@ function validateMetadata(metadata) {
     validateSpriteAnimationMetadata(metadata.spriteAnimation);
   }
 
+  if (metadata.atlasMaterial !== undefined) {
+    validateAtlasMaterialMetadata(metadata.atlasMaterial);
+  }
+
+  if (metadata.spriteAnimation?.enabled === true && metadata.atlasMaterial?.enabled === true) {
+    throw new Error(
+      'renderBrowserPlayableDemoHtmlV1: `metadata.spriteAnimation` cannot be combined with `metadata.atlasMaterial`'
+    );
+  }
+
   if (metadata.uiSystem !== undefined) {
     validateUiSystemMetadata(metadata.uiSystem);
   }
@@ -267,6 +277,16 @@ function validateMetadataOverrides(overrides) {
 
   if (overrides.spriteAnimation !== undefined && typeof overrides.spriteAnimation !== 'boolean') {
     throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.spriteAnimation` override must be a boolean');
+  }
+
+  if (overrides.atlasMaterial !== undefined) {
+    validateAtlasMaterialMetadata(overrides.atlasMaterial);
+  }
+
+  if (overrides.spriteAnimation === true && overrides.atlasMaterial !== undefined) {
+    throw new Error(
+      'renderBrowserPlayableDemoHtmlV1: `metadata.spriteAnimation` cannot be combined with `metadata.atlasMaterial`'
+    );
   }
 
   if (overrides.uiSystem !== undefined && typeof overrides.uiSystem !== 'boolean') {
@@ -456,6 +476,69 @@ function validateSpriteAnimationMetadata(spriteAnimation) {
 
   if (!Array.isArray(spriteAnimation.invalidRefs)) {
     throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.spriteAnimation.invalidRefs` must be an array');
+  }
+}
+
+function validateAtlasMaterialMetadata(atlasMaterial) {
+  assertObject(atlasMaterial, 'metadata.atlasMaterial');
+
+  if (atlasMaterial.enabled !== true) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.atlasMaterial.enabled` must be exactly true');
+  }
+
+  if (atlasMaterial.atlasRegionBindingContractVersion !== 1) {
+    throw new Error(
+      'renderBrowserPlayableDemoHtmlV1: `metadata.atlasMaterial.atlasRegionBindingContractVersion` must be exactly 1'
+    );
+  }
+
+  if (atlasMaterial.atlasMaterialManifestReportVersion !== 1) {
+    throw new Error(
+      'renderBrowserPlayableDemoHtmlV1: `metadata.atlasMaterial.atlasMaterialManifestReportVersion` must be exactly 1'
+    );
+  }
+
+  if (atlasMaterial.hashAlgorithm !== 'sha256') {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.atlasMaterial.hashAlgorithm` must be `sha256`');
+  }
+
+  if (typeof atlasMaterial.bindingHash !== 'string' || !/^[a-f0-9]{64}$/.test(atlasMaterial.bindingHash)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.atlasMaterial.bindingHash` must be a sha256 hex string');
+  }
+
+  assertNonEmptyString('metadata.atlasMaterial.scene', atlasMaterial.scene);
+
+  if (!Array.isArray(atlasMaterial.sprites)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.atlasMaterial.sprites` must be an array');
+  }
+
+  atlasMaterial.sprites.forEach((sprite, spriteIndex) => {
+    const name = `metadata.atlasMaterial.sprites[${spriteIndex}]`;
+    assertObject(sprite, name);
+    for (const key of ['drawCallId', 'entityId', 'bindingId', 'atlasId', 'regionId', 'materialId', 'assetId']) {
+      assertNonEmptyString(`${name}.${key}`, sprite[key]);
+    }
+    if (sprite.bindingSource !== 'atlasBindingId' && sprite.bindingSource !== 'assetId') {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.bindingSource\` must be \`atlasBindingId\` or \`assetId\``);
+    }
+    assertInteger(`${name}.sourceX`, sprite.sourceX, 0);
+    assertInteger(`${name}.sourceY`, sprite.sourceY, 0);
+    assertInteger(`${name}.sourceWidth`, sprite.sourceWidth, 1);
+    assertInteger(`${name}.sourceHeight`, sprite.sourceHeight, 1);
+    if (sprite.sampler !== 'nearest' && sprite.sampler !== 'linear') {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.sampler\` must be \`nearest\` or \`linear\``);
+    }
+    if (sprite.alphaMode !== 'opaque' && sprite.alphaMode !== 'blend' && sprite.alphaMode !== 'mask') {
+      throw new Error(`renderBrowserPlayableDemoHtmlV1: \`${name}.alphaMode\` must be \`opaque\`, \`blend\` or \`mask\``);
+    }
+  });
+
+  if (!Array.isArray(atlasMaterial.warnings)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.atlasMaterial.warnings` must be an array');
+  }
+
+  if (!Array.isArray(atlasMaterial.invalidRefs)) {
+    throw new Error('renderBrowserPlayableDemoHtmlV1: `metadata.atlasMaterial.invalidRefs` must be an array');
   }
 }
 
@@ -932,6 +1015,9 @@ export function createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, overr
     ...(overrides.spriteAnimation === true
       ? { spriteAnimation: createSpriteAnimationMetadata(scene) }
       : {}),
+    ...(overrides.atlasMaterial !== undefined
+      ? { atlasMaterial: overrides.atlasMaterial }
+      : {}),
     ...(overrides.uiSystem === true
       ? { uiSystem: createUiSystemMetadata(scene) }
       : {})
@@ -948,6 +1034,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
   const playableSaveLoadEnabled = Boolean(metadata.playableSaveLoad && typeof controllableEntityId === 'string');
   const audioLiteEnabled = metadata.audioLite?.enabled === true;
   const spriteAnimationEnabled = metadata.spriteAnimation?.enabled === true;
+  const atlasMaterialEnabled = metadata.atlasMaterial?.enabled === true;
   const uiSystemEnabled = metadata.uiSystem?.enabled === true;
   const stepPx = metadata.stepPx ?? DEFAULT_BROWSER_PLAYABLE_STEP_PX;
   const normalizedMetadata = {
@@ -958,6 +1045,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     ...(playableSaveLoadEnabled ? { playableSaveLoad: metadata.playableSaveLoad } : {}),
     ...(audioLiteEnabled ? { audioLite: metadata.audioLite } : {}),
     ...(spriteAnimationEnabled ? { spriteAnimation: metadata.spriteAnimation } : {}),
+    ...(atlasMaterialEnabled ? { atlasMaterial: metadata.atlasMaterial } : {}),
     ...(uiSystemEnabled ? { uiSystem: metadata.uiSystem } : {})
   };
   const metadataEntries = normalizeMetadataEntries({
@@ -1154,6 +1242,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     ...(spriteAnimationEnabled
       ? ['      const spriteAnimationEnabled = payload.metadata.spriteAnimation?.enabled === true;']
       : ['      const spriteAnimationEnabled = false;']),
+    '      const atlasMaterialEnabled = payload.metadata.atlasMaterial?.enabled === true;',
     '      const context = canvas.getContext("2d");',
     '      if (!context) {',
     '        if (resetButton) {',
@@ -1165,6 +1254,7 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '      const initialDrawCalls = payload.renderSnapshot.drawCalls.map((drawCall) => ({ ...drawCall }));',
     '      const drawCalls = initialDrawCalls.map((drawCall) => ({ ...drawCall }));',
     '      const spriteImageStateById = new Map();',
+    '      const spriteImageStateByAssetSrc = new Map();',
     '      function makeSpriteImageState(assetSrc) {',
     '        if (typeof Image !== "function") {',
     '          return { image: null, loaded: false, failed: true };',
@@ -1188,11 +1278,46 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
     '        image.src = assetSrc;',
     '        return state;',
     '      }',
+    '      function getSpriteImageState(assetSrc) {',
+    '        let state = spriteImageStateByAssetSrc.get(assetSrc);',
+    '        if (!state) {',
+    '          state = makeSpriteImageState(assetSrc);',
+    '          spriteImageStateByAssetSrc.set(assetSrc, state);',
+    '        }',
+    '        return state;',
+    '      }',
     '      for (let index = 0; index < drawCalls.length; index += 1) {',
     '        const drawCall = drawCalls[index];',
     '        if (drawCall.kind === "sprite" && typeof drawCall.assetSrc === "string") {',
-    '          spriteImageStateById.set(drawCall.id, makeSpriteImageState(drawCall.assetSrc));',
+    '          spriteImageStateById.set(drawCall.id, getSpriteImageState(drawCall.assetSrc));',
     '        }',
+    '      }',
+    '      const atlasSpriteByDrawCallId = new Map();',
+    '      if (atlasMaterialEnabled) {',
+    '        for (const sprite of payload.metadata.atlasMaterial.sprites) {',
+    '          const drawCall = drawCalls.find((candidate) =>',
+    '            candidate.kind === "sprite" && candidate.id === sprite.drawCallId && candidate.assetId === sprite.assetId',
+    '          );',
+    '          if (drawCall) {',
+    '            atlasSpriteByDrawCallId.set(drawCall.id, sprite);',
+    '          }',
+    '        }',
+    '      }',
+    '      function drawAtlasSpriteImage(image, sprite, drawCall) {',
+    '        const previousImageSmoothingEnabled = context.imageSmoothingEnabled;',
+    '        context.imageSmoothingEnabled = sprite.sampler !== "nearest";',
+    '        context.drawImage(',
+    '          image,',
+    '          sprite.sourceX,',
+    '          sprite.sourceY,',
+    '          sprite.sourceWidth,',
+    '          sprite.sourceHeight,',
+    '          drawCall.x,',
+    '          drawCall.y,',
+    '          drawCall.width,',
+    '          drawCall.height',
+    '        );',
+    '        context.imageSmoothingEnabled = previousImageSmoothingEnabled;',
     '      }',
     ...(spriteAnimationEnabled
       ? [
@@ -1538,6 +1663,10 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
           '                  drawCall.height',
           '                );',
           '              } else {',
+          '                const atlasSprite = drawCall.kind === "sprite" ? atlasSpriteByDrawCallId.get(drawCall.id) : undefined;',
+          '                if (atlasSprite) {',
+          '                  drawAtlasSpriteImage(spriteImageState.image, atlasSprite, drawCall);',
+          '                } else {',
           '                context.drawImage(',
           '                  spriteImageState.image,',
           '                  drawCall.x,',
@@ -1545,16 +1674,22 @@ export function renderBrowserPlayableDemoHtmlV1({ title, renderSnapshot, metadat
           '                  drawCall.width,',
           '                  drawCall.height',
           '                );',
+          '                }',
           '              }'
         ]
       : [
+          '              const atlasSprite = drawCall.kind === "sprite" ? atlasSpriteByDrawCallId.get(drawCall.id) : undefined;',
+          '              if (atlasSprite) {',
+          '                drawAtlasSpriteImage(spriteImageState.image, atlasSprite, drawCall);',
+          '              } else {',
           '              context.drawImage(',
           '                spriteImageState.image,',
           '                drawCall.x,',
           '                drawCall.y,',
           '                drawCall.width,',
           '                drawCall.height',
-          '              );'
+          '              );',
+          '              }'
         ]),
     '              context.strokeRect(drawCall.x, drawCall.y, drawCall.width, drawCall.height);',
     '              continue;',

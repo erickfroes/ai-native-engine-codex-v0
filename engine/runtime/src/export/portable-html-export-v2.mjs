@@ -8,6 +8,7 @@ import {
   renderBrowserPlayableDemoHtmlV1
 } from '../render/render-browser-playable-demo-html-v1.mjs';
 import { materializePortableExportAssetSrcV2 } from '../render/materialize-portable-export-asset-src-v2.mjs';
+import { resolveAtlasMaterialRenderInputsV1 } from '../render/resolve-atlas-material-render-inputs-v1.mjs';
 import { sha256Hex } from '../save/canonical-json.mjs';
 
 export const PORTABLE_HTML_EXPORT_VERSION = 2;
@@ -37,8 +38,25 @@ function normalizeExportOptions(options) {
     assertNonEmptyString('options.assetManifestPath', options.assetManifestPath);
   }
 
+  if (options.atlasMaterialManifestPath !== undefined) {
+    assertNonEmptyString('options.atlasMaterialManifestPath', options.atlasMaterialManifestPath);
+  }
+
+  if (options.assetManifestPath !== undefined && options.atlasMaterialManifestPath !== undefined) {
+    throw new Error(
+      'exportPortableHtmlGameV2: provide only one of `options.assetManifestPath` or `options.atlasMaterialManifestPath`'
+    );
+  }
+
+  if (options.spriteAnimation === true && options.atlasMaterialManifestPath !== undefined) {
+    throw new Error(
+      'exportPortableHtmlGameV2: `options.spriteAnimation` cannot be combined with `options.atlasMaterialManifestPath` in Portable HTML Export v2'
+    );
+  }
+
   return {
     assetManifestPath: options.assetManifestPath,
+    atlasMaterialManifestPath: options.atlasMaterialManifestPath,
     movementBlocking: options.movementBlocking === true,
     gameplayHud: options.gameplayHud === true,
     playableSaveLoad: options.playableSaveLoad === true,
@@ -69,16 +87,21 @@ function countEmbeddedSpriteAssets(renderSnapshot) {
 export async function buildPortableHtmlGameExportV2(sceneOrPath, options = {}) {
   const scene = await resolveScene(sceneOrPath);
   const exportOptions = normalizeExportOptions(options);
-  const rawSnapshot = await buildRenderSnapshotV1(scene, {
-    assetManifestPath: exportOptions.assetManifestPath
+  const atlasInputs = await resolveAtlasMaterialRenderInputsV1(scene, {
+    assetManifestPath: exportOptions.assetManifestPath,
+    atlasMaterialManifestPath: exportOptions.atlasMaterialManifestPath
   });
-  const snapshot = await materializePortableExportAssetSrcV2(rawSnapshot, exportOptions.assetManifestPath);
-  const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+  const rawSnapshot = await buildRenderSnapshotV1(atlasInputs.scene, {
+    assetManifestPath: atlasInputs.assetManifestPath
+  });
+  const snapshot = await materializePortableExportAssetSrcV2(rawSnapshot, atlasInputs.assetManifestPath);
+  const metadata = createBrowserPlayableDemoMetadataV1(atlasInputs.scene, snapshot, {
     movementBlocking: exportOptions.movementBlocking,
     gameplayHud: exportOptions.gameplayHud,
     playableSaveLoad: exportOptions.playableSaveLoad,
     audioLite: exportOptions.audioLite,
     spriteAnimation: exportOptions.spriteAnimation,
+    atlasMaterial: atlasInputs.atlasMaterial,
     uiSystem: exportOptions.uiSystem
   });
   const html = renderBrowserPlayableDemoHtmlV1({
@@ -92,7 +115,7 @@ export async function buildPortableHtmlGameExportV2(sceneOrPath, options = {}) {
     exportVersion: PORTABLE_HTML_EXPORT_VERSION,
     scene: snapshot.scene,
     options: {
-      assetManifest: exportOptions.assetManifestPath !== undefined,
+      assetManifest: atlasInputs.assetManifestPath !== undefined,
       movementBlocking: exportOptions.movementBlocking,
       gameplayHud: exportOptions.gameplayHud,
       playableSaveLoad: exportOptions.playableSaveLoad,

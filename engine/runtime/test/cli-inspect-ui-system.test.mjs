@@ -9,6 +9,7 @@ const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const fixtureDir = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures');
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
+const productionScenePath = path.join(repoRoot, 'scenes', 'ui-production-screens.scene.json');
 const prefabScenePath = path.join(fixtureDir, 'ui-screen-prefab.scene.json');
 const invalidScenePath = path.join(fixtureDir, 'invalid_ui_screen_widget.scene.json');
 
@@ -56,6 +57,19 @@ test('inspect-ui-system prints stable readable output without --json', () => {
   assert.match(result.stdout, /Screens: 1/);
   assert.match(result.stdout, /- hud\.main: entity=ui\.hud active=true layer=100 widgets=3/);
   assert.match(result.stdout, /Warnings: 0/);
+});
+
+test('inspect-ui-system summarizes production screens in deterministic layer order', () => {
+  const result = runCli(['inspect-ui-system', productionScenePath]);
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Scene: ui-production-screens/);
+  assert.match(result.stdout, /Screens: 3/);
+  assert.match(result.stdout, /- hud\.main: entity=ui\.hud active=true layer=100 widgets=3/);
+  assert.match(result.stdout, /- menu\.main: entity=ui\.menu active=true layer=200 widgets=4/);
+  assert.match(result.stdout, /- pause\.overlay: entity=ui\.pause active=false layer=300 widgets=3/);
+  assert.ok(result.stdout.indexOf('hud.main') < result.stdout.indexOf('menu.main'));
+  assert.ok(result.stdout.indexOf('menu.main') < result.stdout.indexOf('pause.overlay'));
 });
 
 test('inspect-ui-system fails predictably for invalid ui.screen scenes', () => {

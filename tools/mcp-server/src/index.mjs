@@ -6,6 +6,7 @@ import {
   validateLoopScene,
   formatSceneValidationReportV1,
   buildAssetManifestValidationReportV1,
+  buildAtlasMaterialManifestReportV1,
   validateInputIntentV1,
   buildPrefabValidationReportV1,
   validateSaveFile,
@@ -34,6 +35,7 @@ import {
   createBrowserPlayableDemoMetadataV1,
   BROWSER_PLAYABLE_DEMO_VERSION,
   materializeBrowserDemoAssetSrcV1,
+  resolveAtlasMaterialRenderInputsV1,
   exportHtmlGameV1,
   exportPortableHtmlGameV2,
   runDeterministicReplay,
@@ -125,6 +127,7 @@ async function handleToolCall(params) {
   if (
     params.name !== 'validate_scene' &&
     params.name !== 'validate_asset_manifest' &&
+    params.name !== 'inspect_atlas_material_manifest' &&
     params.name !== 'validate_input_intent' &&
     params.name !== 'validate_prefab' &&
     params.name !== 'keyboard_to_input_intent' &&
@@ -332,6 +335,7 @@ async function handleToolCall(params) {
           'scenePath',
           'outputPath',
           'assetManifestPath',
+          'atlasMaterialManifestPath',
           'movementBlocking',
           'gameplayHud',
           'playableSaveLoad',
@@ -368,6 +372,36 @@ async function handleToolCall(params) {
         return {
           content: toTextContent(
             'export_portable_html_game: `assetManifestPath` must be a non-empty string when provided.'
+          ),
+          isError: true
+        };
+      }
+
+      if (
+        args.atlasMaterialManifestPath !== undefined &&
+        (typeof args.atlasMaterialManifestPath !== 'string' || args.atlasMaterialManifestPath.trim().length === 0)
+      ) {
+        return {
+          content: toTextContent(
+            'export_portable_html_game: `atlasMaterialManifestPath` must be a non-empty string when provided.'
+          ),
+          isError: true
+        };
+      }
+
+      if (args.assetManifestPath !== undefined && args.atlasMaterialManifestPath !== undefined) {
+        return {
+          content: toTextContent(
+            'export_portable_html_game: provide only one of `assetManifestPath` or `atlasMaterialManifestPath`.'
+          ),
+          isError: true
+        };
+      }
+
+      if (args.spriteAnimation === true && args.atlasMaterialManifestPath !== undefined) {
+        return {
+          content: toTextContent(
+            'export_portable_html_game: `spriteAnimation` cannot be combined with `atlasMaterialManifestPath` in Portable HTML Export v2.'
           ),
           isError: true
         };
@@ -420,6 +454,9 @@ async function handleToolCall(params) {
         assetManifestPath: args.assetManifestPath === undefined
           ? undefined
           : resolveRepoPath(args.assetManifestPath),
+        atlasMaterialManifestPath: args.atlasMaterialManifestPath === undefined
+          ? undefined
+          : resolveRepoPath(args.atlasMaterialManifestPath),
         movementBlocking: args.movementBlocking === true,
         gameplayHud: args.gameplayHud === true,
         playableSaveLoad: args.playableSaveLoad === true,
@@ -496,6 +533,28 @@ async function handleToolCall(params) {
           report.ok
             ? `Scene composition inspected for ${report.entryScene} with ${report.scenes.length} scene(s).`
             : 'Scene composition inspection failed validation.'
+        ),
+        structuredContent: report,
+        isError: !report.ok
+      };
+    }
+
+    if (params.name === 'inspect_atlas_material_manifest') {
+      const unexpectedArgument = findUnexpectedArgument(args, new Set(['path']));
+      if (unexpectedArgument !== undefined) {
+        return {
+          content: toTextContent(`inspect_atlas_material_manifest: unexpected argument \`${unexpectedArgument}\`.`),
+          isError: true
+        };
+      }
+
+      const report = await buildAtlasMaterialManifestReportV1(resolveRepoPath(args.path));
+
+      return {
+        content: toTextContent(
+          report.ok
+            ? `Atlas/material manifest inspected with ${report.summary.regionCount} region(s).`
+            : 'Atlas/material manifest inspection failed validation.'
         ),
         structuredContent: report,
         isError: !report.ok
@@ -1143,6 +1202,7 @@ async function handleToolCall(params) {
           'width',
           'height',
           'assetManifestPath',
+          'atlasMaterialManifestPath',
           'movementBlocking',
           'gameplayHud',
           'playableSaveLoad',
@@ -1219,9 +1279,39 @@ async function handleToolCall(params) {
         };
       }
 
+      if (
+        args.atlasMaterialManifestPath !== undefined &&
+        (typeof args.atlasMaterialManifestPath !== 'string' || args.atlasMaterialManifestPath.trim().length === 0)
+      ) {
+        return {
+          content: toTextContent(
+            'render_browser_demo: `atlasMaterialManifestPath` must be a non-empty string when provided.'
+          ),
+          isError: true
+        };
+      }
+
+      if (args.assetManifestPath !== undefined && args.atlasMaterialManifestPath !== undefined) {
+        return {
+          content: toTextContent(
+            'render_browser_demo: provide only one of `assetManifestPath` or `atlasMaterialManifestPath`.'
+          ),
+          isError: true
+        };
+      }
+
       if (args.spriteAnimation !== undefined && typeof args.spriteAnimation !== 'boolean') {
         return {
           content: toTextContent('render_browser_demo: `spriteAnimation` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.spriteAnimation === true && args.atlasMaterialManifestPath !== undefined) {
+        return {
+          content: toTextContent(
+            'render_browser_demo: `spriteAnimation` cannot be combined with `atlasMaterialManifestPath` in Browser Playable Demo v1.'
+          ),
           isError: true
         };
       }
@@ -1237,20 +1327,28 @@ async function handleToolCall(params) {
       const resolvedAssetManifestPath = args.assetManifestPath === undefined
         ? undefined
         : resolveRepoPath(args.assetManifestPath);
-      const rawSnapshot = await buildRenderSnapshotV1(scene, {
+      const resolvedAtlasMaterialManifestPath = args.atlasMaterialManifestPath === undefined
+        ? undefined
+        : resolveRepoPath(args.atlasMaterialManifestPath);
+      const atlasInputs = await resolveAtlasMaterialRenderInputsV1(scene, {
+        assetManifestPath: resolvedAssetManifestPath,
+        atlasMaterialManifestPath: resolvedAtlasMaterialManifestPath
+      });
+      const rawSnapshot = await buildRenderSnapshotV1(atlasInputs.scene, {
         tick: args.tick,
         width: args.width,
         height: args.height,
-        assetManifestPath: resolvedAssetManifestPath
+        assetManifestPath: atlasInputs.assetManifestPath
       });
-      const snapshot = materializeBrowserDemoAssetSrcV1(rawSnapshot, resolvedAssetManifestPath);
+      const snapshot = materializeBrowserDemoAssetSrcV1(rawSnapshot, atlasInputs.assetManifestPath);
       const title = `${snapshot.scene} Browser Playable Demo`;
-      const metadata = createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+      const metadata = createBrowserPlayableDemoMetadataV1(atlasInputs.scene, snapshot, {
         movementBlocking: args.movementBlocking === true,
         gameplayHud: args.gameplayHud === true,
         playableSaveLoad: args.playableSaveLoad === true,
         audioLite: args.audioLite === true,
         spriteAnimation: args.spriteAnimation === true,
+        atlasMaterial: atlasInputs.atlasMaterial,
         uiSystem: args.uiSystem === true
       });
       const html = renderBrowserPlayableDemoHtmlV1({
@@ -1350,7 +1448,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_asset_manifest, validate_input_intent, validate_prefab, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, inspect_scene_transition, inspect_scene_composition, render_snapshot, render_svg, inspect_visual_regression_baseline, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_pathfinding_grid, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_asset_manifest, inspect_atlas_material_manifest, validate_input_intent, validate_prefab, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, inspect_scene_transition, inspect_scene_composition, render_snapshot, render_svg, inspect_visual_regression_baseline, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_pathfinding_grid, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }

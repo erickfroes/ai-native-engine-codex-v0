@@ -33,7 +33,7 @@ function hasSafePrefabReference(entity) {
 
 function validateVisualSpriteComponent(component, componentPath, errors) {
   const fields = component.fields;
-  const allowedFieldNames = new Set(['assetId', 'width', 'height', 'layer']);
+  const allowedFieldNames = new Set(['assetId', 'atlasBindingId', 'width', 'height', 'layer']);
 
   if (component.version !== 1) {
     pushMessage(errors, `${componentPath}.version`, 'visual.sprite version must be exactly 1');
@@ -56,6 +56,13 @@ function validateVisualSpriteComponent(component, componentPath, errors) {
 
   if (typeof fields.assetId !== 'string' || fields.assetId.trim().length === 0) {
     pushMessage(errors, `${componentPath}.fields.assetId`, 'visual.sprite assetId must be a non-empty string');
+  }
+
+  if (
+    fields.atlasBindingId !== undefined &&
+    (typeof fields.atlasBindingId !== 'string' || fields.atlasBindingId.trim().length === 0)
+  ) {
+    pushMessage(errors, `${componentPath}.fields.atlasBindingId`, 'visual.sprite atlasBindingId must be a non-empty string when provided');
   }
 
   for (const dimensionName of ['width', 'height']) {

@@ -17,6 +17,7 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
+const UI_SYSTEM_EXPORT_DELTA_BUDGET_BYTES = 5 * 1024;
 const scenePath = path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json');
 const sceneMcpPath = './scenes/v1-small-2d.scene.json';
 const portableEmptyVisualScenePath = path.join(
@@ -28,7 +29,8 @@ const portableEmptyVisualScenePath = path.join(
   'portable-empty-visual.scene.json'
 );
 const portableEmptyVisualSceneMcpPath = './engine/runtime/test/fixtures/portable-empty-visual.scene.json';
-const uiScreenPrefabScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'ui-screen-prefab.scene.json');
+const uiProductionScenePath = path.join(repoRoot, 'scenes', 'ui-production-screens.scene.json');
+const uiProductionSceneMcpPath = './scenes/ui-production-screens.scene.json';
 const prefabOnlyScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'prefab-usage-prefab-only.scene.json');
 const prefabOnlySceneMcpPath = './engine/runtime/test/fixtures/prefab-usage-prefab-only.scene.json';
 const unsafePrefabPathsScenePath = path.join(
@@ -183,6 +185,21 @@ test('Simple HTML Export v1 builds a deterministic Browser Demo artifact without
   assert.doesNotMatch(baseline.html, /browser-audio-lite/);
   assert.doesNotMatch(baseline.html, /browser-ui-system/);
   assertNoForbiddenExportHtmlSurface(baseline.html);
+});
+
+test('Simple HTML Export v1 keeps production UI overlay size bounded', async () => {
+  const baseline = await buildHtmlGameExportV1(uiProductionScenePath);
+  const withUiSystem = await buildHtmlGameExportV1(uiProductionScenePath, { uiSystem: true });
+  const deltaBytes = withUiSystem.sizeBytes - baseline.sizeBytes;
+
+  assert.equal(baseline.scene, 'ui-production-screens');
+  assert.equal(withUiSystem.scene, 'ui-production-screens');
+  assert.equal(deltaBytes > 0, true);
+  assert.equal(deltaBytes <= UI_SYSTEM_EXPORT_DELTA_BUDGET_BYTES, true);
+  assert.match(withUiSystem.html, /data-screen-id="hud\.main"/);
+  assert.match(withUiSystem.html, /data-screen-id="menu\.main"/);
+  assert.doesNotMatch(withUiSystem.html, /data-screen-id="pause\.overlay"/);
+  assertNoForbiddenExportHtmlSurface(withUiSystem.html);
 });
 
 test('Simple HTML Export v1 keeps empty drawCalls aligned across runtime, CLI and MCP for scenes without visual components', async (t) => {
@@ -384,11 +401,11 @@ test('export-html-game CLI writes deterministic files for each supported option 
     {
       name: 'ui-system',
       flags: ['--ui-system'],
-      scenePath: uiScreenPrefabScenePath,
-      expectedScene: 'ui-screen-prefab-fixture',
+      scenePath: uiProductionScenePath,
+      expectedScene: 'ui-production-screens',
       options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: false, audioLite: false, uiSystem: true },
-      present: [/id="browser-ui-system"/, /"uiSystem":\{"enabled":true,"scene":"ui-screen-prefab-fixture"/, />Score: 000<\/div>/],
-      absent: [/"movementBlocking":/, /"gameplayHud":/, /"playableSaveLoad":/, /"audioLite":/]
+      present: [/id="browser-ui-system"/, /"uiSystem":\{"enabled":true,"scene":"ui-production-screens"/, />Skyline Rescue<\/div>/, />Score 000<\/div>/],
+      absent: [/"movementBlocking":/, /"gameplayHud":/, /"playableSaveLoad":/, /"audioLite":/, /data-screen-id="pause\.overlay"/, /id="browser-gameplay-hud"/]
     },
     {
       name: 'all-options',
@@ -544,6 +561,65 @@ test('export_html_game MCP writes the same all-options HTML export as CLI', asyn
     assert.equal(mcpResponse.result.isError, false);
     const mcpEnvelope = mcpResponse.result.structuredContent;
     assertExportEnvelopeShape(mcpEnvelope);
+    assert.equal(mcpEnvelope.outputPath, mcpOutPath);
+    assert.deepEqual(
+      { ...mcpEnvelope, outputPath: '<normalized>' },
+      { ...cliEnvelope, outputPath: '<normalized>' }
+    );
+
+    const mcpHtml = await readFile(mcpEnvelope.outputPath, 'utf8');
+    assert.equal(mcpHtml, cliHtml);
+    assertNoForbiddenExportHtmlSurface(mcpHtml);
+  } finally {
+    await client.close();
+  }
+});
+
+test('export_html_game MCP writes the same production UI overlay export as CLI', async (t) => {
+  const repoTempDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(repoTempDir, 'cli-ui-production.html');
+  const mcpOutPath = path.join(repoTempDir, 'mcp-ui-production.html');
+  const cliResult = runCli([
+    'export-html-game',
+    uiProductionScenePath,
+    '--out',
+    cliOutPath,
+    '--ui-system',
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+  assert.deepEqual(cliEnvelope.options, {
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    uiSystem: true
+  });
+  const cliHtml = await readFile(cliEnvelope.outputPath, 'utf8');
+  assert.match(cliHtml, /"uiSystem":\{"enabled":true,"scene":"ui-production-screens"/);
+  assert.match(cliHtml, />Skyline Rescue<\/div>/);
+  assert.match(cliHtml, />Score 000<\/div>/);
+  assert.doesNotMatch(cliHtml, /data-screen-id="pause\.overlay"/);
+  assert.doesNotMatch(cliHtml, /id="browser-gameplay-hud"/);
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_html_game',
+      arguments: {
+        scenePath: uiProductionSceneMcpPath,
+        outputPath: path.relative(repoRoot, mcpOutPath),
+        uiSystem: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+    assertExportEnvelopeShape(mcpEnvelope, { expectedScene: 'ui-production-screens' });
     assert.equal(mcpEnvelope.outputPath, mcpOutPath);
     assert.deepEqual(
       { ...mcpEnvelope, outputPath: '<normalized>' },

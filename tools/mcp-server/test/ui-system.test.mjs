@@ -168,6 +168,25 @@ test('mcp inspect_ui_system is listed and returns deterministic widget trees', a
       ],
       warnings: []
     });
+
+    const productionReportResponse = await client.request('tools/call', {
+      name: 'inspect_ui_system',
+      arguments: {
+        path: './scenes/ui-production-screens.scene.json'
+      }
+    });
+
+    assert.equal(productionReportResponse.result.isError, false);
+    const productionReport = productionReportResponse.result.structuredContent;
+    assert.equal(productionReport.uiSystemReportVersion, 1);
+    assert.equal(productionReport.scene, 'ui-production-screens');
+    assert.deepEqual(productionReport.screens.map((screen) => screen.screenId), [
+      'hud.main',
+      'menu.main',
+      'pause.overlay'
+    ]);
+    assert.deepEqual(productionReport.screens.map((screen) => screen.active), [true, true, false]);
+    assert.deepEqual(productionReport.screens.map((screen) => screen.widgets.length), [3, 4, 3]);
   } finally {
     await client.close();
   }

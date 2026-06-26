@@ -1,0 +1,379 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas-material-manifest-report-v1.schema.json",
+  "title": "AtlasMaterialManifestReportV1",
+  "type": "object",
+  "required": [
+    "atlasMaterialManifestReportVersion",
+    "ok",
+    "absolutePath",
+    "assetManifestPath",
+    "assetManifestAbsolutePath",
+    "manifest",
+    "summary",
+    "atlases",
+    "regions",
+    "materials",
+    "spriteBindings",
+    "tileBindings",
+    "errors",
+    "warnings"
+  ],
+  "properties": {
+    "atlasMaterialManifestReportVersion": {
+      "enum": [1]
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "absolutePath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assetManifestPath": {
+      "type": ["string", "null"]
+    },
+    "assetManifestAbsolutePath": {
+      "type": ["string", "null"]
+    },
+    "manifest": {
+      "type": ["object", "null"]
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "assetCount",
+        "atlasCount",
+        "regionCount",
+        "materialCount",
+        "spriteBindingCount",
+        "tileBindingCount",
+        "referencedAssetIds",
+        "referencedMaterialIds"
+      ],
+      "properties": {
+        "assetCount": { "type": "integer", "minimum": 0 },
+        "atlasCount": { "type": "integer", "minimum": 0 },
+        "regionCount": { "type": "integer", "minimum": 0 },
+        "materialCount": { "type": "integer", "minimum": 0 },
+        "spriteBindingCount": { "type": "integer", "minimum": 0 },
+        "tileBindingCount": { "type": "integer", "minimum": 0 },
+        "referencedAssetIds": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "referencedMaterialIds": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "atlases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "assetId",
+          "assetFound",
+          "assetWidth",
+          "assetHeight",
+          "regionCount",
+          "ok",
+          "errors",
+          "warnings"
+        ],
+        "properties": {
+          "id": { "type": ["string", "null"] },
+          "assetId": { "type": ["string", "null"] },
+          "assetFound": { "type": "boolean" },
+          "assetWidth": { "type": ["integer", "null"] },
+          "assetHeight": { "type": ["integer", "null"] },
+          "regionCount": { "type": "integer", "minimum": 0 },
+          "ok": { "type": "boolean" },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "message"],
+              "properties": {
+                "path": { "type": "string", "minLength": 1 },
+                "message": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "message"],
+              "properties": {
+                "path": { "type": "string", "minLength": 1 },
+                "message": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "atlasId",
+          "id",
+          "assetId",
+          "x",
+          "y",
+          "width",
+          "height",
+          "ok",
+          "errors",
+          "warnings"
+        ],
+        "properties": {
+          "atlasId": { "type": ["string", "null"] },
+          "id": { "type": ["string", "null"] },
+          "assetId": { "type": ["string", "null"] },
+          "x": { "type": ["integer", "null"] },
+          "y": { "type": ["integer", "null"] },
+          "width": { "type": ["integer", "null"] },
+          "height": { "type": ["integer", "null"] },
+          "ok": { "type": "boolean" },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "message"],
+              "properties": {
+                "path": { "type": "string", "minLength": 1 },
+                "message": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "message"],
+              "properties": {
+                "path": { "type": "string", "minLength": 1 },
+                "message": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "sampler",
+          "alphaMode",
+          "ok",
+          "errors",
+          "warnings"
+        ],
+        "properties": {
+          "id": { "type": ["string", "null"] },
+          "kind": { "type": ["string", "null"] },
+          "sampler": { "type": ["string", "null"] },
+          "alphaMode": { "type": ["string", "null"] },
+          "ok": { "type": "boolean" },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "message"],
+              "properties": {
+                "path": { "type": "string", "minLength": 1 },
+                "message": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "message"],
+              "properties": {
+                "path": { "type": "string", "minLength": 1 },
+                "message": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "spriteBindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "atlasId",
+          "regionId",
+          "materialId",
+          "atlasFound",
+          "regionFound",
+          "materialFound",
+          "ok",
+          "errors",
+          "warnings"
+        ],
+        "properties": {
+          "id": { "type": ["string", "null"] },
+          "atlasId": { "type": ["string", "null"] },
+          "regionId": { "type": ["string", "null"] },
+          "materialId": { "type": ["string", "null"] },
+          "atlasFound": { "type": "boolean" },
+          "regionFound": { "type": "boolean" },
+          "materialFound": { "type": "boolean" },
+          "ok": { "type": "boolean" },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "message"],
+              "properties": {
+                "path": { "type": "string", "minLength": 1 },
+                "message": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "message"],
+              "properties": {
+                "path": { "type": "string", "minLength": 1 },
+                "message": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "tileBindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "atlasId",
+          "regionId",
+          "materialId",
+          "atlasFound",
+          "regionFound",
+          "materialFound",
+          "ok",
+          "errors",
+          "warnings"
+        ],
+        "properties": {
+          "id": { "type": ["string", "null"] },
+          "atlasId": { "type": ["string", "null"] },
+          "regionId": { "type": ["string", "null"] },
+          "materialId": { "type": ["string", "null"] },
+          "atlasFound": { "type": "boolean" },
+          "regionFound": { "type": "boolean" },
+          "materialFound": { "type": "boolean" },
+          "ok": { "type": "boolean" },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "message"],
+              "properties": {
+                "path": { "type": "string", "minLength": 1 },
+                "message": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "message"],
+              "properties": {
+                "path": { "type": "string", "minLength": 1 },
+                "message": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["target", "ref", "path", "message"],
+        "properties": {
+          "target": {
+            "enum": [
+              "manifest",
+              "assetManifest",
+              "atlas",
+              "region",
+              "material",
+              "spriteBinding",
+              "tileBinding"
+            ]
+          },
+          "ref": { "type": ["string", "null"] },
+          "path": { "type": "string", "minLength": 1 },
+          "message": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["target", "ref", "path", "message"],
+        "properties": {
+          "target": {
+            "enum": [
+              "manifest",
+              "assetManifest",
+              "atlas",
+              "region",
+              "material",
+              "spriteBinding",
+              "tileBinding"
+            ]
+          },
+          "ref": { "type": ["string", "null"] },
+          "path": { "type": "string", "minLength": 1 },
+          "message": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

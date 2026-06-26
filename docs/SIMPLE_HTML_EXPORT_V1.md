@@ -24,6 +24,12 @@ Opcoes:
 - `--ui-system` embute UI System v1 como overlay visual passivo.
 - `--json` retorna envelope estavel.
 
+Exemplo com telas pequenas de producao:
+
+```bash
+node ./engine/runtime/src/cli.mjs export-html-game ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production.html --json
+```
+
 Envelope JSON:
 
 ```json
@@ -92,7 +98,7 @@ O MCP valida `scenePath` e `outputPath` dentro do repo, escreve o arquivo HTML e
 - Com `--gameplay-hud`, o HUD Lite local aparece no HTML.
 - Com `--playable-save-load`, os controles locais de export/import aparecem no HTML.
 - Com `--audio-lite`, metadata e controles diagnosticos de Audio Lite v1 aparecem no HTML sem autoplay forcado.
-- Com `--ui-system`, metadata e overlay passivo de UI System v1 aparecem no HTML.
+- Com `--ui-system`, metadata e overlay passivo de UI System v1 aparecem no HTML; `scenes/ui-production-screens.scene.json` cobre menu/HUD ativos e pause inativo como fixture publica.
 - Com todas as opcoes, blocking, HUD, save/load local, Audio Lite e UI System coexistem no mesmo HTML.
 
 ## Fora de escopo
@@ -116,6 +122,6 @@ O MCP valida `scenePath` e `outputPath` dentro do repo, escreve o arquivo HTML e
 
 `Game Templates v1`, `V1 Small 2D Game Creation Guide / Codex package` e `V1 Small 2D Release Checkpoint` ja foram concluidos sobre este export simples.
 
-Audio Lite v1 e UI System v1 visual opt-in foram entregues como incrementos diagnosticos/visuais pos-checkpoint sobre este export simples.
+Audio Lite v1, UI System v1 visual opt-in e UI Production Screens v1 foram entregues como incrementos diagnosticos/visuais pos-checkpoint sobre este export simples.
 
 `Portable HTML Export v2` agora cobre assets inline e `Sprite Animation v1` no caminho portatil, preservando `RenderSnapshot v1` e mantendo `export-html-game` como contrato v1 estavel.

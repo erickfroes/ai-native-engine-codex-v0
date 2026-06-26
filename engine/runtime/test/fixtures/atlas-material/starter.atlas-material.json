@@ -1,0 +1,59 @@
+{
+  "atlasMaterialManifestVersion": 1,
+  "metadata": {
+    "name": "starter atlas material pack"
+  },
+  "assetManifestPath": "./atlas-material.asset-manifest.json",
+  "atlases": [
+    {
+      "id": "world.main",
+      "assetId": "atlas.world",
+      "regions": [
+        {
+          "id": "player.idle",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "tile.grass",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "id": "pixel.sprite",
+      "kind": "sprite",
+      "sampler": "nearest",
+      "alphaMode": "blend"
+    },
+    {
+      "id": "pixel.tile",
+      "kind": "tile",
+      "sampler": "nearest",
+      "alphaMode": "opaque"
+    }
+  ],
+  "sprites": [
+    {
+      "id": "player.hero",
+      "atlasId": "world.main",
+      "regionId": "player.idle",
+      "materialId": "pixel.sprite"
+    }
+  ],
+  "tiles": [
+    {
+      "id": "ground.grass",
+      "atlasId": "world.main",
+      "regionId": "tile.grass",
+      "materialId": "pixel.tile"
+    }
+  ]
+}

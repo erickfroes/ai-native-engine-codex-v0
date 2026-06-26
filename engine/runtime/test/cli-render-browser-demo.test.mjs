@@ -53,6 +53,7 @@ const uiScreenPrefabScenePath = path.join(
   'fixtures',
   'ui-screen-prefab.scene.json'
 );
+const uiProductionScenePath = path.join(repoRoot, 'scenes', 'ui-production-screens.scene.json');
 const invalidVisualSpriteScenePath = path.join(
   repoRoot,
   'engine',
@@ -592,6 +593,32 @@ test('render-browser-demo --ui-system embeds UI System v1 metadata and overlay',
   assert.match(payload.html, /data-screen-id="hud\.main"/);
   assert.match(payload.html, />Score: 000<\/div>/);
   assert.match(payload.html, />Lives: 3<\/div>/);
+  assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
+});
+
+test('render-browser-demo --ui-system renders production screens without HUD Lite coupling', () => {
+  const result = runCli([
+    'render-browser-demo',
+    uiProductionScenePath,
+    '--ui-system',
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'ui-production-screens');
+  assert.match(payload.html, /"uiSystem":\{"enabled":true,"scene":"ui-production-screens"/);
+  assert.match(payload.html, /data-screen-id="hud\.main"/);
+  assert.match(payload.html, /data-screen-id="menu\.main"/);
+  assert.match(payload.html, />Skyline Rescue<\/div>/);
+  assert.match(payload.html, />Start Mission<\/div>/);
+  assert.match(payload.html, />Score 000<\/div>/);
+  assert.doesNotMatch(payload.html, /data-screen-id="pause\.overlay"/);
+  assert.doesNotMatch(payload.html, />Paused<\/div>/);
+  assert.doesNotMatch(payload.html, /id="browser-gameplay-hud"/);
+  assert.doesNotMatch(payload.html, /id="browser-playable-save-load"/);
   assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
 });
 

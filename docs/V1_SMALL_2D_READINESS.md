@@ -100,4 +100,4 @@ Playable Save/Load Lite tambem continua opt-in, local ao HTML e nao substitui `s
 - `docs/V1_SMALL_2D_CAPABILITY_MATRIX.md`
 - `docs/V1_SMALL_2D_RELEASE_VALIDATION.md`
 
-Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1 e Portable HTML Export v2 foram entregues como incrementos pos-checkpoint. `entity.prefab` v1 fica congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta em `docs/V2_GAP_AUDIT.md` e recomenda `Visual Regression Baseline v1` como proximo pacote.
+Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, Sprite Animation v1 e Portable HTML Export v2 foram entregues como incrementos pos-checkpoint. `entity.prefab` v1 fica congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta em `docs/V2_GAP_AUDIT.md` e a continuidade atual fica em `docs/CODEX_HANDOFF.md`.

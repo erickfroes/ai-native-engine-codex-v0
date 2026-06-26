@@ -1,0 +1,12 @@
+{
+  "assetManifestVersion": 1,
+  "assets": [
+    {
+      "id": "atlas.world",
+      "type": "image",
+      "src": "images/atlas-world.png",
+      "width": 64,
+      "height": 32
+    }
+  ]
+}

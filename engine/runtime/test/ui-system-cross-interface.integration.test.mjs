@@ -124,6 +124,19 @@ test('UiSystemReport v1 stays aligned across runtime, CLI and MCP for prefab-bac
   assert.equal(report.screens[0].widgetTree[0].children[0].widgetId, 'score.label');
 });
 
+test('UiSystemReport v1 stays aligned for production menu, HUD and inactive pause screens', async () => {
+  const report = await assertUiSystemInterfacesAligned('scenes/ui-production-screens.scene.json');
+
+  assert.deepEqual(report.screens.map((screen) => screen.screenId), [
+    'hud.main',
+    'menu.main',
+    'pause.overlay'
+  ]);
+  assert.deepEqual(report.screens.map((screen) => screen.active), [true, true, false]);
+  assert.deepEqual(report.screens.map((screen) => screen.widgets.length), [3, 4, 3]);
+  assert.equal(report.screens[1].widgetTree[0].children[0].text, 'Skyline Rescue');
+});
+
 test('UiSystemReport v1 invalid ui.screen scenes fail predictably across runtime, CLI and MCP', async () => {
   const relativePath = 'engine/runtime/test/fixtures/invalid_ui_screen_widget.scene.json';
   const absolutePath = path.join(repoRoot, relativePath);

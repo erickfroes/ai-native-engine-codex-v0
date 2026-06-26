@@ -21,6 +21,11 @@ export { loadValidatedInputIntentV1 } from './input/load-validated-input-intent-
 export { createInputIntentFromKeyboardV1 } from './input/create-input-intent-from-keyboard-v1.mjs';
 export { validateAssetManifestV1, validateAssetManifestV1File } from './assets/validate-asset-manifest-v1.mjs';
 export { buildAssetManifestValidationReportV1 } from './assets/build-asset-manifest-validation-report-v1.mjs';
+export {
+  buildAtlasMaterialManifestReportV1,
+  ATLAS_MATERIAL_MANIFEST_VERSION,
+  ATLAS_MATERIAL_MANIFEST_REPORT_VERSION
+} from './assets/build-atlas-material-manifest-report-v1.mjs';
 export { loadValidatedAssetManifestV1 } from './assets/load-validated-asset-manifest-v1.mjs';
 export {
   validateKeyboardInputScriptV1,
@@ -55,6 +60,7 @@ export {
   BROWSER_PLAYABLE_DEMO_VERSION,
   DEFAULT_BROWSER_PLAYABLE_STEP_PX
 } from './render/render-browser-playable-demo-html-v1.mjs';
+export { resolveAtlasMaterialRenderInputsV1 } from './render/resolve-atlas-material-render-inputs-v1.mjs';
 export { materializeBrowserDemoAssetSrcV1 } from './render/materialize-browser-demo-asset-src-v1.mjs';
 export {
   buildHtmlGameExportV1,

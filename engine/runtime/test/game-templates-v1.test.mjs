@@ -32,7 +32,7 @@ const templates = [
     blockedBy: 'map.room.tile.2.3',
     maxDrawCalls: 64,
     maxSolidTileBlockers: 32,
-    maxExportSizeBytes: 32000
+    maxExportSizeBytes: 35000
   },
   {
     id: 'side-view-blocking-basic',

@@ -1,0 +1,39 @@
+{
+  "atlasMaterialManifestVersion": 1,
+  "metadata": {
+    "name": "unsafe asset manifest path fixture"
+  },
+  "assetManifestPath": "../escape.asset-manifest.json",
+  "atlases": [
+    {
+      "id": "world.main",
+      "assetId": "atlas.world",
+      "regions": [
+        {
+          "id": "player.idle",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "id": "pixel.sprite",
+      "kind": "sprite",
+      "sampler": "nearest",
+      "alphaMode": "blend"
+    }
+  ],
+  "sprites": [
+    {
+      "id": "player.hero",
+      "atlasId": "world.main",
+      "regionId": "player.idle",
+      "materialId": "pixel.sprite"
+    }
+  ],
+  "tiles": []
+}

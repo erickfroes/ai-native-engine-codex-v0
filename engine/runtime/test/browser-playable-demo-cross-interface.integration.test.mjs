@@ -59,6 +59,8 @@ const uiScreenPrefabScenePath = path.join(
   'fixtures',
   'ui-screen-prefab.scene.json'
 );
+const uiProductionScenePath = path.join(repoRoot, 'scenes', 'ui-production-screens.scene.json');
+const uiProductionSceneMcpPath = './scenes/ui-production-screens.scene.json';
 const spriteAnimationIdleScenePath = path.join(
   repoRoot,
   'engine',
@@ -806,6 +808,78 @@ test('browser playable demo UI System v1 stays opt-in and aligned across runtime
     assert.match(runtimeEnvelope.html, />Lives: 3<\/div>/);
     assert.doesNotMatch(defaultCliEnvelope.html, /"uiSystem":/);
     assert.doesNotMatch(defaultCliEnvelope.html, /browser-ui-system/);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('browser playable demo renders production UI screens without coupling HUD Lite or inactive pause', async () => {
+  const scene = await loadSceneFile(uiProductionScenePath);
+  const snapshot = await buildRenderSnapshotV1(scene);
+  const runtimeEnvelope = {
+    browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderBrowserPlayableDemoHtmlV1({
+      title: `${snapshot.scene} Browser Playable Demo`,
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { uiSystem: true })
+    })
+  };
+
+  const cliResult = runCli([
+    'render-browser-demo',
+    uiProductionScenePath,
+    '--ui-system',
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: uiProductionSceneMcpPath,
+        uiSystem: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+
+    assertBrowserDemoEnvelope(runtimeEnvelope, {
+      expectedScene: 'ui-production-screens',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(cliEnvelope, {
+      expectedScene: 'ui-production-screens',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(mcpEnvelope, {
+      expectedScene: 'ui-production-screens',
+      expectedTick: 0
+    });
+    assert.deepEqual(runtimeEnvelope, cliEnvelope);
+    assert.deepEqual(runtimeEnvelope, mcpEnvelope);
+    assert.match(runtimeEnvelope.html, /"uiSystem":\{"enabled":true,"scene":"ui-production-screens"/);
+    assert.match(runtimeEnvelope.html, /data-screen-id="hud\.main"/);
+    assert.match(runtimeEnvelope.html, /data-screen-id="menu\.main"/);
+    assert.match(runtimeEnvelope.html, />Skyline Rescue<\/div>/);
+    assert.match(runtimeEnvelope.html, />Score 000<\/div>/);
+    assert.doesNotMatch(runtimeEnvelope.html, /data-screen-id="pause\.overlay"/);
+    assert.doesNotMatch(runtimeEnvelope.html, /id="browser-gameplay-hud"/);
+    assert.doesNotMatch(runtimeEnvelope.html, /id="browser-playable-save-load"/);
   } finally {
     await mcp.close();
   }

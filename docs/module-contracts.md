@@ -161,6 +161,7 @@ Compatibilidade:
 - declarativo e opt-in;
 - sem `Asset Manifest v1`, o render continua com fallback `rect`;
 - com `Asset Manifest v1`, `visual.sprite.fields.assetId` pode gerar drawCall `sprite` com `assetSrc`;
+- `visual.sprite.fields.atlasBindingId` e opcional e so tem efeito nos fluxos que recebem `atlasMaterialManifestPath`;
 - `tile.layer` compila uma grade declarativa para drawCalls `rect` deterministicas;
 - nao cria editor, servidor, WebGL, Pixi, Three ou pipeline pesado de assets.
 
@@ -267,6 +268,7 @@ Compatibilidade:
 - Browser Playable Demo pode expor Playable Save/Load Lite local opt-in com `render-browser-demo --playable-save-load` ou `render_browser_demo({ playableSaveLoad: true })`;
 - Browser Playable Demo pode expor Audio Lite v1 diagnostico local opt-in com `render-browser-demo --audio-lite` ou `render_browser_demo({ audioLite: true })`;
 - Browser Playable Demo pode expor Sprite Animation v1 visual local opt-in com `render-browser-demo --sprite-animation` ou `render_browser_demo({ spriteAnimation: true })`;
+- Browser Playable Demo pode expor Atlas/Material Manifest v1 sprite-only opt-in com `render-browser-demo --atlas-material-manifest` ou `render_browser_demo({ atlasMaterialManifestPath })`;
 - Browser Playable Demo pode expor UI System v1 visual local opt-in com `render-browser-demo --ui-system` ou `render_browser_demo({ uiSystem: true })`;
 - sem essas flags/opcoes, Browser Playable Demo permanece igual;
 - `InputIntent v1`, `KeyboardInputScript v1`, RenderSnapshot v1, Save/Load v1 e renderers permanecem inalterados;
@@ -331,6 +333,32 @@ Contrato minimo para validar um arquivo `Asset Manifest v1` diretamente, sem dep
 - preserva o manifesto parseado quando o JSON existe mas o contrato falha;
 - retorna `assetManifest: null` para arquivo ausente ou JSON malformado, com mensagens estaveis;
 - nao altera `Asset Manifest v1`, `RenderSnapshot v1`, Browser Demo, Canvas2D Demo ou exports HTML.
+
+## Atlas/Material Manifest v1 (atlas e materiais)
+
+Contrato externo para declarar regioes de atlas, materiais e bindings sprite/tile acima de um `Asset Manifest v1`:
+
+- ver `docs/ATLAS_MATERIAL_MANIFEST_V1.md`.
+- schema formal do manifesto: `docs/schemas/atlas-material-manifest-v1.schema.json`.
+- schema formal do report: `docs/schemas/atlas-material-manifest-report-v1.schema.json`.
+- runtime: `buildAtlasMaterialManifestReportV1(path)`.
+- runtime visual opt-in: `resolveAtlasMaterialRenderInputsV1(scene, { atlasMaterialManifestPath })`.
+- CLI: `inspect-atlas-material-manifest <path> [--json]`.
+- CLI visual opt-in: `render-browser-demo --atlas-material-manifest <path>` e `export-portable-html-game --atlas-material-manifest <path>`.
+- MCP: `inspect_atlas_material_manifest({ path })`.
+- MCP visual opt-in: `render_browser_demo({ atlasMaterialManifestPath })` e `export_portable_html_game({ atlasMaterialManifestPath })`.
+- `assetManifestPath` e relativo seguro ao diretorio do manifesto, deve apontar para `.asset-manifest.json` e nao pode usar URL, path absoluto, drive letter, glob ou `..`.
+- cada `atlases[].assetId` deve existir no `Asset Manifest v1` referenciado.
+- `atlases[].regions[]` valida bounds inteiros e garante que cada regiao cabe em `assets[].width/height`.
+- `materials[]` valida `kind`, `sampler` e `alphaMode`.
+- `sprites[]` e `tiles[]` validam atlas, region e material; sprites exigem material `kind: "sprite"` e tiles exigem material `kind: "tile"`.
+- regioes ou materiais validos sem uso entram como warnings.
+- consumo visual v1 e sprite-only: `visual.sprite.fields.atlasBindingId` resolve `sprites[].id` quando `atlasMaterialManifestPath` e fornecido.
+- o fallback legado `visual.sprite.fields.assetId -> sprites[].id` permanece apenas por compatibilidade.
+- Browser Demo e Portable HTML Export v2 consomem source rect por `metadata.atlasMaterial`, com `atlasRegionBindingContractVersion`, `bindingHash` e `bindingSource`, sem alterar o shape de `RenderSnapshot v1`.
+- `tiles[]` permanece report-only por decisao deste contrato porque `tile.layer v1` ainda nao recebe binding atlas explicito.
+- nao altera `Asset Manifest v1`, `RenderSnapshot v1`, Canvas2D Demo, Simple HTML Export, loop ou savegame.
+- nao e importador/packer de atlas, renderer novo, material system completo, editor visual, tile animation ou pipeline pesado.
 
 ## Render Snapshot v1 (render headless declarativo)
 
@@ -430,7 +458,7 @@ Contrato declarativo minimo para audio simples em cenas pequenas:
 
 ## UI System v1
 
-Contrato declarativo minimo para screens de UI com arvore serializavel de widgets:
+Contrato declarativo minimo para screens de UI com arvore serializavel de widgets, usado tambem como base pequena de telas de producao:
 
 - ver `docs/UI_SYSTEM_V1.md`.
 - schema formal do report: `docs/schemas/ui-system-report-v1.schema.json`.
@@ -446,6 +474,8 @@ Contrato declarativo minimo para screens de UI com arvore serializavel de widget
 - cena sem `ui.screen` retorna `screens: []` e `warnings: []`.
 - Browser Demo: `render-browser-demo --ui-system` ou `render_browser_demo({ uiSystem: true })` embute `metadata.uiSystem` e um overlay DOM passivo em screen-space.
 - Simple HTML Export: `export-html-game --ui-system` ou `export_html_game({ uiSystem: true })` escreve HTML autocontido com o mesmo overlay passivo.
+- Portable HTML Export: `export-portable-html-game --ui-system` ou `export_portable_html_game({ uiSystem: true })` escreve HTML portatil com o mesmo overlay passivo.
+- fixture publica de producao pequena: `scenes/ui-production-screens.scene.json`, com `hud.main` e `menu.main` ativos e `pause.overlay` inativo/autoravel.
 - sem opt-in visual, Browser Demo e export nao embutem `metadata.uiSystem`.
 - nao altera `RenderSnapshot v1`, HUD Lite, Audio Lite, Sprite Animation, InputIntent ou Save/Load.
 - nao e layout engine completo, binding, navegacao, renderer formal de UI, editor de UI ou HUD canonico de jogo.
@@ -671,18 +701,21 @@ Contrato de export simples para escrever uma cena jogavel pequena como arquivo H
 
 ## Portable HTML Export v2
 
-Contrato versionado para escrever HTML jogavel portatil com assets inline e consumo visual de Sprite Animation v1:
+Contrato versionado para escrever HTML jogavel portatil com assets inline e consumo visual de Sprite Animation v1 ou Atlas/Material Manifest v1 sprite-only:
 
 - ver `docs/PORTABLE_HTML_EXPORT_V2.md`.
 - schema formal do envelope escrito: `docs/schemas/portable-html-export-v2.schema.json`.
-- CLI: `export-portable-html-game <scene> --out <file> [--asset-manifest <file>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--json]`.
-- MCP: `export_portable_html_game({ scenePath, outputPath, assetManifestPath?, movementBlocking?, gameplayHud?, playableSaveLoad?, audioLite?, spriteAnimation?, uiSystem? })`.
+- CLI: `export-portable-html-game <scene> --out <file> [--asset-manifest <file>] [--atlas-material-manifest <file>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--json]`.
+- MCP: `export_portable_html_game({ scenePath, outputPath, assetManifestPath?, atlasMaterialManifestPath?, movementBlocking?, gameplayHud?, playableSaveLoad?, audioLite?, spriteAnimation?, uiSystem? })`.
 - Runtime: `buildPortableHtmlGameExportV2(sceneOrPath, options)` e `exportPortableHtmlGameV2(sceneOrPath, options)`.
 - reutiliza `RenderSnapshot v1`, Browser Playable Demo v1 e `Sprite Animation v1` sem alterar os contratos v1.
 - com `assetManifestPath`, drawCalls `sprite` recebem `assetSrc` inline como `data:` URL.
+- com `atlasMaterialManifestPath`, sprites atlas-backed por `atlasBindingId` recebem `assetSrc` inline como `data:` URL e source rect em metadata interna.
+- `assetManifestPath` e `atlasMaterialManifestPath` sao mutuamente exclusivos.
 - extensoes inline suportadas neste slice: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`, `.bmp`, `.svg`.
 - se um sprite do manifesto apontar para extensao fora dessa lista, runtime/CLI/MCP falham de forma previsivel no contrato v2 sem mutar `Asset Manifest v1`.
 - com `spriteAnimation`, o HTML exportado pode animar sprite-sheets embutidos localmente.
+- `spriteAnimation` e `atlasMaterialManifestPath` nao se compoem neste slice.
 - sem `assetManifestPath`, o fallback visual atual permanece.
 - sem `assetManifestPath`, `spriteAnimation` pode permanecer no metadata, mas os drawCalls continuam no fallback atual `rect`, sem `data:` URL inline e sem `file:///`.
 - sem `assetManifestPath`, se a cena nao tiver qualquer componente visual renderizavel e o snapshot final ficar com `drawCalls: []`, `spriteAnimation` permanece no-op completo: metadata pode existir com arrays vazios, `embeddedAssetCount` fica `0` e o HTML preserva `drawCalls` vazios, sem `data:` URL inline e sem `file:///`.
@@ -691,7 +724,7 @@ Contrato versionado para escrever HTML jogavel portatil com assets inline e cons
 - mesmo com `assetManifestPath`, se a cena for puramente `rect` e nao tiver qualquer componente de sprite (ex.: `tile.layer` sem `sprite`, `visual.sprite` ou `visual.sprite.animation`), `spriteAnimation` permanece no-op completo: metadata pode existir com arrays vazios, `embeddedAssetCount` fica `0` e o HTML preserva apenas drawCalls `rect`, sem `data:` URL inline e sem `file:///`.
 - mesmo com `assetManifestPath`, se a cena nao tiver qualquer componente visual renderizavel e o snapshot final ficar com `drawCalls: []`, `spriteAnimation` permanece no-op completo: metadata pode existir com arrays vazios, `embeddedAssetCount` fica `0` e o HTML preserva `drawCalls` vazios, sem `data:` URL inline e sem `file:///`.
 - mesmo com `assetManifestPath`, se a cena tiver `visual.sprite` asset-backed mas nao declarar `visual.sprite.animation`, `spriteAnimation` permanece no-op de animacao: metadata pode existir com `animations: []`, `embeddedAssetCount` continua contando os sprites inline e o HTML preserva drawCalls `sprite` normais, sem `file:///`.
-- `Simple HTML Export v1` continua sem consumo visual de Sprite Animation neste slice; a evolucao acontece no contrato v2 separado.
+- `Simple HTML Export v1` continua sem consumo visual de Sprite Animation ou Atlas/Material Manifest neste slice; a evolucao acontece no contrato v2 separado.
 - nao e bundler, servidor, atlas pipeline, editor ou runtime canonico amplo de gameplay.
 
 ## Game Templates v1
@@ -772,4 +805,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1 e Pathfinding Grid v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `Atlas/Material Manifest v1`.
+- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `UI Navigation/Focus Lite v1`.

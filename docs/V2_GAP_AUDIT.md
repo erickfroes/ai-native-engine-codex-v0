@@ -4,12 +4,12 @@
 
 Registrar o audit pequeno pedido apos o congelamento de `entity.prefab` v1 e a decisao do menor pacote seguro que abriu V2.
 
-Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, o follow-up imediato foi fechado como `SceneTransitionReport v1`, a composicao minima foi fechada como `Scene Composition Manifest v1` e o primeiro diagnostico de grid foi fechado como `Pathfinding Grid v1`; a continuidade agora aponta para `Atlas/Material Manifest v1`.
+Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, o follow-up imediato foi fechado como `SceneTransitionReport v1`, a composicao minima foi fechada como `Scene Composition Manifest v1`, o primeiro diagnostico de grid foi fechado como `Pathfinding Grid v1`, o manifesto atlas/material foi fechado como `Atlas/Material Manifest v1`, o consumo visual sprite-only foi fechado como `Atlas Region Consumption v1`, o binding explicito de sprites foi fechado como `Atlas Region Binding Contract v1` e telas pequenas de producao foram fechadas como `UI Production Screens v1`; a continuidade agora aponta para `UI Navigation/Focus Lite v1`.
 
 ## Estado consolidado
 
 - V1 Small 2D esta release-checkpointed e permanece aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, AssetManifestValidationReport v1, Visual Regression Baseline v1, SceneTransitionReport v1, Scene Composition Manifest v1 e Pathfinding Grid v1 ja iniciam V2 em slices pequenos.
+- Audio Lite v1, UI System v1, UI Production Screens v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, AssetManifestValidationReport v1, Visual Regression Baseline v1, SceneTransitionReport v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja iniciam V2 em slices pequenos.
 - `entity.prefab` v1 esta congelado: sem nested prefab, prefab hierarchy, hot reload, editor ou template engine.
 - O hardening de prefab inseguro ja cobre consumidores visuais/export por path, incluindo Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export.
 
@@ -20,7 +20,9 @@ Este documento e historico. A decisao principal ja foi executada por `Visual Reg
 | Visual regression basica | pequeno | baixo/medio | Executado como `VisualRegressionBaselineReport v1`. |
 | Scene transitions / composition | medio | medio | `SceneTransitionReport v1` e `Scene Composition Manifest v1` executados como superficies report-only. |
 | Particle-lite | medio | medio | Deixar para depois; toca render/tempo/fixtures. |
-| Atlas/material manifest | medio/grande | medio/alto | Proximo menor pacote recomendado, mantendo superficie declarativa/diagnostica opt-in. |
+| Atlas/material manifest | medio/grande | medio/alto | Executado como `Atlas/Material Manifest v1`, ancorado em `Asset Manifest v1`. |
+| Atlas region consumption | medio | medio/alto | Executado como consumo sprite-only opt-in em Browser Demo e Portable Export v2. |
+| Atlas region binding contract | medio | medio/alto | Executado para sprites via `atlasBindingId`, sideband versionado/hash e tiles report-only. |
 | Editor-lite automatizavel | grande | alto | Nao iniciar antes de contratos V2 menores. |
 | Pathfinding grid v1 | medio | medio | Executado como `PathfindingGridReport v1`, report-only e sem route solving. |
 
@@ -83,7 +85,33 @@ Escopo executado:
 - cobrir fixture minima, cena sem grids, multiplas layers, cena invalida, limite de celulas e paridade cross-interface;
 - preservar loop, render, Browser Demo, exports HTML, `savegame v1` e route solving fora do escopo.
 
-Proximo pacote recomendado: **Atlas/Material Manifest v1**, em superficie declarativa/diagnostica opt-in nova e sem acoplar editor-lite ou pipeline pesado obrigatorio.
+**Atlas/Material Manifest v1** foi fechado como contrato atlas/material, **Atlas Region Consumption v1** fechou o consumo sprite-only opt-in em Browser Demo e Portable HTML Export v2, e **Atlas Region Binding Contract v1** fechou o binding explicito de sprites.
+
+Escopo executado:
+
+- criar manifesto versionado com `assetManifestPath`, `atlases[].regions`, `materials[]`, `sprites[]` e `tiles[]`;
+- validar path seguro para `Asset Manifest v1`;
+- validar refs de asset, atlas, region e material;
+- validar bounds de regioes contra `assets[].width/height`;
+- expor runtime, CLI e MCP com shape alinhado;
+- cobrir fixture minima, duplicidade, path inseguro, refs ausentes, region fora de bounds, warnings de orfaos, arquivo ausente/malformado e paridade cross-interface;
+- preservar `RenderSnapshot v1`, loop, savegame e pipeline visual amplo fora do escopo; Browser Demo e Portable HTML Export v2 consomem apenas sprites atlas-backed por opt-in.
+- adicionar `visual.sprite.fields.atlasBindingId` como referencia explicita para `sprites[].id`;
+- versionar/hashar o sideband `metadata.atlasMaterial` com `atlasRegionBindingContractVersion`, `bindingHash` e `bindingSource`;
+- manter `tiles[]` validado/report-only ate contrato proprio de tile atlas-backed.
+
+**UI Production Screens v1** foi fechado como base pequena de telas declarativas.
+
+Escopo executado:
+
+- criar `scenes/ui-production-screens.scene.json` com `hud.main` e `menu.main` ativos e `pause.overlay` inativo/autoravel;
+- manter `ui.screen` v1 sem novos campos, widgets, navegacao, foco ou binding;
+- garantir paridade runtime/CLI/MCP para `UiSystemReport v1`;
+- garantir Browser Demo, Simple HTML Export e Portable HTML Export com `uiSystem` opt-in;
+- preservar `RenderSnapshot v1` sem drawCalls de UI, HUD Lite, Playable Save/Load Lite, Audio Lite, loop e save/load sem acoplamento;
+- adicionar budget pequeno para delta de HTML do overlay.
+
+Proximo pacote recomendado: **UI Navigation/Focus Lite v1**, para avaliar foco/navegacao opt-in sobre `ui.screen` sem acoplar HUD Lite, Playable Save/Load Lite ou savegame canonico.
 
 Fora de escopo:
 

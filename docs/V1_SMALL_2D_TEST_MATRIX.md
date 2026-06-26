@@ -112,7 +112,7 @@ Para jogos criados fora de `./scenes`, rode tambem o gate explicito do jogo: `va
 - O guia separa baseline do repositorio de gate do jogo criado; `npm run validate:scenes` nao descobre prototipos fora de `./scenes`.
 - V1 Small 2D Release Checkpoint esta concluido e registra a matriz de capacidades, evidencia de release e sequencia canonica de validacao.
 - Sprite Animation v1 visual opt-in cobre `visual.sprite.animation` via Browser Demo com asset-backed sprites, sem alterar `RenderSnapshot v1`.
-- UI System v1 visual opt-in cobre `ui.screen` via fixture prefab-backed em Browser Demo, Simple HTML Export e MCP, sem alterar `RenderSnapshot v1`.
+- UI System v1 visual opt-in cobre `ui.screen` via fixture publica `scenes/ui-production-screens.scene.json`, fixture prefab-backed tecnica, Browser Demo, Simple HTML Export, Portable HTML Export e MCP, sem alterar `RenderSnapshot v1`.
 
 ## Proximo Pacote Recomendado
 

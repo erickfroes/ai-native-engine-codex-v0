@@ -31,7 +31,7 @@ Handoff operacional: `docs/CODEX_HANDOFF.md`.
 - [ ] Meta 6 / V4 runtime/editor AA ainda nao iniciada.
 - [ ] Meta 7 / V5-V6 AAA aspiracional ainda nao iniciada.
 
-Proximo pacote recomendado: **Atlas/Material Manifest v1**.
+Proximo pacote recomendado: **UI Navigation/Focus Lite v1**.
 
 ---
 
@@ -60,7 +60,7 @@ Sem pendencias de produto nesta meta. Renderer real, editor, servidor, pipeline 
 Status: release-checkpointed.
 
 - [x] Colisao/gameplay 2D, movement blocking, tile collision, camera/viewport, HUD, save/load jogavel, HTML export, templates/guias, release checkpoint e matriz V1.
-- [x] Slices pos-checkpoint que iniciam V2 sem reabrir V1: audio, UI, sprite animation, portable export, prefab, asset validation, visual regression, scene transition/composition e pathfinding grid.
+- [x] Slices pos-checkpoint que iniciam V2 sem reabrir V1: audio, UI, sprite animation, portable export, prefab, asset validation, visual regression, scene transition/composition, pathfinding grid e atlas/material manifest report-only.
 
 Pendencias nesta meta:
 
@@ -78,6 +78,7 @@ Objetivo: sair de demo e chegar a uma base de producao pequena para jogos 2D/2.5
 - [x] Prefab/templates baseline.
 - [x] Scene Transition Report v1 e Scene Composition Manifest v1.
 - [x] UI System v1 declarativo/report-only com consumo visual opt-in.
+- [x] UI Production Screens v1 com fixture publica de menu/HUD/pause declarativos e paridade Browser Demo/export.
 - [x] Audio Lite v1.
 - [x] Sprite Animation v1 diagnostico e consumo visual opt-in inicial.
 - [x] Portable HTML Export v2.
@@ -86,21 +87,23 @@ Objetivo: sair de demo e chegar a uma base de producao pequena para jogos 2D/2.5
 
 ### Assets e materiais
 
-- [ ] Atlas/Material Manifest v1 como proximo pacote.
-- [ ] Schema e doc curta para atlas/material sem pipeline pesado obrigatorio.
-- [ ] Fixture minima com sprite/tile/material refs.
-- [ ] Runtime report/validator deterministico.
-- [ ] CLI e MCP para validar/inspecionar manifesto.
-- [ ] Cross-interface runtime/CLI/MCP.
-- [ ] Integracao opt-in com render/export apenas depois do manifesto validar.
+- [x] Atlas/Material Manifest v1.
+- [x] Schema e doc curta para atlas/material sem pipeline pesado obrigatorio.
+- [x] Fixture minima com atlas/region/material/sprite/tile bindings.
+- [x] Runtime report/validator deterministico.
+- [x] CLI e MCP para inspecionar manifesto.
+- [x] Cross-interface runtime/CLI/MCP.
+- [x] Atlas Region Consumption v1 sprite-only opt-in em Browser Demo/Portable Export, preservando fallback atual.
+- [x] Atlas Region Binding Contract v1 para sprites via `visual.sprite.fields.atlasBindingId`, sideband versionado/hash e decisao de tiles report-only.
 - [ ] Atualizar skill/import workflow se o manifesto mudar o fluxo de assets.
 
 ### UI de producao pequena
 
-- [ ] Menus, HUD e mensagens usando `ui.screen`, sem acoplar ao HUD Lite.
+- [x] Menus, HUD e mensagens usando `ui.screen`, sem acoplar ao HUD Lite.
+- [x] Fixture publica `scenes/ui-production-screens.scene.json` com menu/HUD ativos e pause/game-over autoravel inativo.
+- [x] Browser Demo, Simple HTML Export e Portable HTML Export com paridade runtime/CLI/MCP para UI de producao pequena.
+- [x] Preservar `RenderSnapshot v1`, HUD Lite e Playable Save/Load Lite sem acoplamento.
 - [ ] Navegacao/foco minimo e estados de tela serializaveis.
-- [ ] Fixtures de menu, pause/game-over e HUD.
-- [ ] Browser Demo/export com paridade CLI/MCP.
 - [ ] Matriz de regressao UI.
 
 ### Animacao 2D
@@ -303,27 +306,27 @@ Criterio realista:
 
 ## Proximo pacote recomendado
 
-**Atlas/Material Manifest v1**
+**UI Navigation/Focus Lite v1**
 
 Checklist minimo do pacote:
 
 - [ ] Ler `README.md`, `docs/CODEX_HANDOFF.md`, `SPEC.md`, `docs/module-contracts.md`, `schemas/`, `ROADMAP.md` e `docs/ENGINE_VERSION_ROADMAP.md`.
-- [ ] Usar subagentes: `explorer`, `asset_pipeline_architect`, `render_architect`, `qa_contract_auditor`, `perf_auditor` e `docs_handoff_auditor`.
-- [ ] Definir contrato/schema sem abrir pipeline pesado.
-- [ ] Criar fixture minima de atlas/material.
-- [ ] Implementar runtime report/validator.
-- [ ] Expor CLI e MCP.
-- [ ] Criar testes runtime/CLI/MCP/cross-interface.
+- [ ] Usar subagentes: `explorer`, `engine_architect`, `tooling_editor_architect`, `qa_contract_auditor`, `perf_auditor` e `docs_handoff_auditor`.
+- [ ] Decidir se navegacao/foco cabe como contrato pequeno opt-in ou deve ficar em backlog.
+- [ ] Preservar `ui.screen` v1 declarativo e congelado, salvo contrato novo explicitamente versionado.
+- [ ] Garantir Browser Demo/export com opt-in e paridade CLI/MCP quando aplicavel.
+- [ ] Preservar `RenderSnapshot v1`, HUD Lite, Playable Save/Load Lite, replay e save/load.
+- [ ] Criar testes runtime/CLI/MCP/cross-interface quando aplicavel.
 - [ ] Atualizar docs e handoff.
 - [ ] Rodar `npm test`, `npm run validate:scenes` e `npm run smoke`.
 
 Fora do pacote inicial:
 
-- [ ] Editor visual.
-- [ ] Importador completo de atlas.
+- [ ] Editor visual completo.
+- [ ] Layout engine completo.
+- [ ] Sistema de widgets interativos amplo.
 - [ ] Renderer novo.
 - [ ] 3D/glTF.
-- [ ] Material system completo.
 
 ---
 

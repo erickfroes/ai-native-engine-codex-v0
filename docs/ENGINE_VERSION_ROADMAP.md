@@ -57,7 +57,7 @@ Capacidades alvo:
 - Game Templates v1;
 - V1 Small 2D Game Creation Guide / Codex package;
 - V1 Small 2D Release Checkpoint;
-- UI System v1 entregue como contrato declarativo/report de V2 e consumo visual opt-in na Browser Demo/export;
+- UI System v1 entregue como contrato declarativo/report de V2, consumo visual opt-in na Browser Demo/export e fixture publica de telas pequenas de producao;
 - Audio Lite v1 como primeiro pacote incremental pos-checkpoint;
 - Sprite Animation v1 concluido como diagnostico declarativo runtime/CLI/MCP;
 - `AssetManifestValidationReport v1` concluido como validacao direta minima de manifesto em runtime/CLI/MCP, com report versionado e erros previsiveis;
@@ -65,6 +65,8 @@ Capacidades alvo:
 - `SceneTransitionReport v1` concluido como diagnostico opt-in entre dois paths de cena explicitos, sem mutar Scene Document, loop ou savegame;
 - `Scene Composition Manifest v1` concluido como manifesto externo opt-in com `entryScene`, refs explicitas e report runtime/CLI/MCP;
 - `Pathfinding Grid v1` concluido como report-only opt-in derivado de `tile.layer` e `collision.bounds`;
+- `Atlas/Material Manifest v1` concluido como manifesto opt-in ancorado em `Asset Manifest v1`, com consumo sprite-only na Browser Demo e Portable HTML Export v2;
+- `Atlas Region Binding Contract v1` concluido para sprites via `visual.sprite.fields.atlasBindingId`, com sideband versionado/hash e tiles mantidos report-only;
 - save/load jogavel formal futuro, se ainda necessario;
 - release checkpoint V1 Small 2D concluido como gate de fechamento.
 
@@ -88,11 +90,11 @@ Capacidades alvo:
 
 - prefab/templates;
 - scene transition report e scene composition minima concluidos;
-- UI system v1;
+- UI system v1 e telas pequenas de producao com `ui.screen`;
 - audio v1;
 - sprite animation v1;
 - particle-lite;
-- atlas/material manifest;
+- atlas/material manifest concluido com consumo visual sprite-only opt-in e binding explicito de sprites; tiles permanecem report-only ate contrato proprio;
 - editor-lite automatizavel;
 - asset pipeline repetivel;
 - visual regression;
@@ -217,6 +219,6 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Manter `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `Atlas/Material Manifest v1` como menor proximo passo seguro em superficie declarativa/diagnostica opt-in nova.
-3. Manter editor-lite e 3D indie para depois de V1/V2 demonstradas.
+1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
+2. Abrir `UI Navigation/Focus Lite v1` como menor proximo passo seguro para foco/navegacao opt-in sobre `ui.screen`, sem acoplar HUD Lite, Playable Save/Load Lite ou savegame canonico.
+3. Manter editor-lite, particle-lite, route solving e 3D indie para depois de UI pequena e V2 demonstradas.

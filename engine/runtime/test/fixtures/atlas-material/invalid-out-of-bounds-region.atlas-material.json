@@ -1,0 +1,39 @@
+{
+  "atlasMaterialManifestVersion": 1,
+  "metadata": {
+    "name": "out of bounds region fixture"
+  },
+  "assetManifestPath": "./atlas-material.asset-manifest.json",
+  "atlases": [
+    {
+      "id": "world.main",
+      "assetId": "atlas.world",
+      "regions": [
+        {
+          "id": "player.big",
+          "x": 48,
+          "y": 0,
+          "width": 32,
+          "height": 16
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "id": "pixel.sprite",
+      "kind": "sprite",
+      "sampler": "nearest",
+      "alphaMode": "blend"
+    }
+  ],
+  "sprites": [
+    {
+      "id": "player.hero",
+      "atlasId": "world.main",
+      "regionId": "player.big",
+      "materialId": "pixel.sprite"
+    }
+  ],
+  "tiles": []
+}
