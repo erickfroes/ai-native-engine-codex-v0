@@ -500,7 +500,8 @@ Contrato report-only para derivar foco/navegacao sequencial minima a partir de `
 Contrato autorado/report-only para declarar quais widgets de `ui.screen` sao acionaveis e qual foco inicial deve ser usado na scope ativa:
 
 - ver `docs/UI_ACTION_SEMANTICS_LITE_V1.md`.
-- schema formal: `docs/schemas/ui-action-semantics-report-v1.schema.json`.
+- shape formal do componente: `schemas/component.schema.json`.
+- schema formal do report: `docs/schemas/ui-action-semantics-report-v1.schema.json`.
 - componente: `ui.action.semantics` v1.
 - runtime: `buildUiActionSemanticsReportV1(sceneOrPath)`.
 - CLI: `inspect-ui-action-semantics <scene> [--json]`.

@@ -35,6 +35,8 @@ O objetivo deste slice e pequeno:
 }
 ```
 
+Shape formal do componente: `schemas/component.schema.json`.
+
 Campos:
 
 - `screenId`: string nao vazia, obrigatoria e igual ao `screenId` do `ui.screen` co-localizado.
@@ -72,7 +74,7 @@ Shape:
 }
 ```
 
-Schema formal: `docs/schemas/ui-action-semantics-report-v1.schema.json`.
+Schema formal do report: `docs/schemas/ui-action-semantics-report-v1.schema.json`.
 
 ## Regras
 
