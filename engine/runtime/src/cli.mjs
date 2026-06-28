@@ -52,6 +52,7 @@ import {
   buildAudioLiteReportV1,
   buildUiSystemReportV1,
   buildUiNavigationFocusReportV1,
+  buildUiActionSemanticsReportV1,
   buildSpriteAnimationReportV1,
   buildPrefabValidationReportV1,
   buildPrefabUsageReportV1,
@@ -92,6 +93,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-audio-lite <path> [--json]
   node engine/runtime/src/cli.mjs inspect-ui-system <path> [--json]
   node engine/runtime/src/cli.mjs inspect-ui-navigation-focus <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-ui-action-semantics <path> [--json]
   node engine/runtime/src/cli.mjs inspect-sprite-animation <path> [--json]
   node engine/runtime/src/cli.mjs inspect-prefab-usage <path> [--json]
   node engine/runtime/src/cli.mjs inspect-prefab-usage-v2 <path> [--json]
@@ -1268,6 +1270,35 @@ async function run() {
       for (const candidate of report.candidates) {
         console.log(
           `- ${candidate.widgetId}: screen=${candidate.screenId} index=${candidate.candidateIndex} previous=${candidate.previousCandidateWidgetId ?? '(none)'} next=${candidate.nextCandidateWidgetId ?? '(none)'}`
+        );
+      }
+      console.log(`Warnings: ${report.warnings.length}`);
+    }
+
+    return;
+  }
+
+  if (command === 'inspect-ui-action-semantics') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildUiActionSemanticsReportV1(maybePath);
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`UI action semantics report version: ${report.uiActionSemanticsReportVersion}`);
+      console.log(`Scope policy: ${report.scopePolicy}`);
+      console.log(`Focused screen: ${report.focusedScreenId ?? '(none)'}`);
+      console.log(`Initial focus widget: ${report.initialFocusWidgetId ?? '(none)'}`);
+      console.log(`Actions: ${report.actions.length}`);
+      for (const action of report.actions) {
+        console.log(
+          `- ${action.widgetId}: screen=${action.screenId} action=${action.actionId} index=${action.actionIndex} previous=${action.previousActionWidgetId ?? '(none)'} next=${action.nextActionWidgetId ?? '(none)'}`
         );
       }
       console.log(`Warnings: ${report.warnings.length}`);

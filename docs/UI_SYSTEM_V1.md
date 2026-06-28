@@ -163,6 +163,8 @@ Regras:
 
 `UI Production Screens v1` usa o mesmo contrato `ui.screen` sem adicionar campos ou widgets novos.
 
+A fixture separada `scenes/ui-action-semantics.scene.json` adiciona somente `ui.action.semantics` co-localizado a `ui.screen`, preservando este contrato base sem novos campos em `ui.screen`.
+
 Fixture publica:
 
 ```bash
@@ -187,6 +189,7 @@ Regras do slice:
 - `RenderSnapshot v1`, `run-loop`, `save/load` e reports de colisao permanecem inalterados.
 - `render-browser-demo`, `export-html-game` e `export-portable-html-game` consomem UI System v1 somente com opt-in explicito.
 - `entity.prefab` continua opcional; quando presente por path, `ui.screen` pode vir do prefab.
+- `ui.action.semantics`, quando presente na mesma entidade, nao altera o shape de `ui.screen` nem o `UiSystemReport v1`.
 
 ## Fora de escopo
 
@@ -212,6 +215,7 @@ Cobertura dedicada:
 - consumo visual opt-in em `engine/runtime/test/browser-playable-demo-runtime.test.mjs`, `engine/runtime/test/cli-render-browser-demo.test.mjs`, `engine/runtime/test/browser-playable-demo-cross-interface.integration.test.mjs`, `engine/runtime/test/simple-html-export-v1.test.mjs` e `tools/mcp-server/test/mcp-server.test.mjs`.
 - `engine/runtime/test/portable-html-export-v2.test.mjs` cobre `export_portable_html_game` com `uiSystem: true`.
 - `UiNavigationFocusReport v1` agora vive em contrato derivado separado, com testes dedicados em `engine/runtime/test/ui-navigation-focus-*.mjs` e `tools/mcp-server/test/ui-navigation-focus.test.mjs`.
+- `UiActionSemanticsReport v1` agora vive em contrato derivado separado, com testes dedicados em `engine/runtime/test/ui-action-semantics-*.mjs`, `engine/runtime/test/cli-inspect-ui-action-semantics.test.mjs` e `tools/mcp-server/test/ui-action-semantics.test.mjs`.
 
 Rodar:
 
@@ -223,4 +227,4 @@ npm run smoke
 
 ## Continuidade
 
-UI System v1 esta fechado como contrato declarativo/report e agora possui uma fixture publica de telas pequenas de producao em `scenes/ui-production-screens.scene.json`. `UI Navigation/Focus Lite v1` tambem esta fechado como report-only derivado de `UiSystemReport v1`, sem consumo visual. O proximo pacote seguro e `UI Action Semantics Lite v1`, para explicitar acao/foco autorado antes de qualquer interacao no Browser Demo/export.
+UI System v1 esta fechado como contrato declarativo/report e agora possui uma fixture publica de telas pequenas de producao em `scenes/ui-production-screens.scene.json`. `UI Navigation/Focus Lite v1` e `UI Action Semantics Lite v1` tambem estao fechados como contratos derivados separados, sem consumo visual. O proximo pacote seguro e `UI Local Screen State Lite v1`, para explicitar estado local de telas antes de qualquer interacao no Browser Demo/export.

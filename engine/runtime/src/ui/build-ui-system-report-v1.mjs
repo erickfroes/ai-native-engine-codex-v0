@@ -1,5 +1,4 @@
-import { validateSceneFile } from '../scene/validate-scene.mjs';
-import { validateSceneInvariants } from '../scene/invariants.mjs';
+import { resolveUiSceneV1 } from './resolve-ui-scene-v1.mjs';
 
 const UI_SCREEN_COMPONENT_KIND = 'ui.screen';
 
@@ -9,91 +8,6 @@ function compareStableString(left, right) {
 
 function compareStableInteger(left, right) {
   return left - right;
-}
-
-function pushSceneStructureError(errors, errorPath, message) {
-  errors.push(`${errorPath}: ${message}`);
-}
-
-function validateSceneObject(scene) {
-  const errors = [];
-
-  if (!scene || typeof scene !== 'object' || Array.isArray(scene)) {
-    throw new Error('buildUiSystemReportV1: `sceneOrPath` must be a scene object or path string');
-  }
-
-  if (!scene.metadata || typeof scene.metadata !== 'object' || Array.isArray(scene.metadata)) {
-    pushSceneStructureError(errors, '$.metadata', 'must be an object');
-  } else if (typeof scene.metadata.name !== 'string' || scene.metadata.name.trim().length === 0) {
-    pushSceneStructureError(errors, '$.metadata.name', 'must be a non-empty string');
-  }
-
-  if (!Array.isArray(scene.entities)) {
-    pushSceneStructureError(errors, '$.entities', 'must be an array');
-  } else {
-    for (const [entityIndex, entity] of scene.entities.entries()) {
-      const entityPath = `$.entities[${entityIndex}]`;
-
-      if (!entity || typeof entity !== 'object' || Array.isArray(entity)) {
-        pushSceneStructureError(errors, entityPath, 'must be an object');
-        continue;
-      }
-
-      if (typeof entity.id !== 'string' || entity.id.trim().length === 0) {
-        pushSceneStructureError(errors, `${entityPath}.id`, 'must be a non-empty string');
-      }
-
-      if (!Array.isArray(entity.components)) {
-        pushSceneStructureError(errors, `${entityPath}.components`, 'must be an array');
-        continue;
-      }
-
-      for (const [componentIndex, component] of entity.components.entries()) {
-        const componentPath = `${entityPath}.components[${componentIndex}]`;
-
-        if (!component || typeof component !== 'object' || Array.isArray(component)) {
-          pushSceneStructureError(errors, componentPath, 'must be an object');
-          continue;
-        }
-
-        if (typeof component.kind !== 'string' || component.kind.trim().length === 0) {
-          pushSceneStructureError(errors, `${componentPath}.kind`, 'must be a non-empty string');
-        }
-      }
-    }
-  }
-
-  if (errors.length === 0) {
-    const invariantReport = validateSceneInvariants(scene);
-    for (const error of invariantReport.errors) {
-      pushSceneStructureError(errors, error.path, error.message);
-    }
-  }
-
-  if (errors.length > 0) {
-    throw new Error(`buildUiSystemReportV1: scene object is invalid: ${errors.join('; ')}`);
-  }
-}
-
-async function resolveScene(sceneOrPath) {
-  if (typeof sceneOrPath === 'string') {
-    const report = await validateSceneFile(sceneOrPath);
-    if (!report.ok) {
-      const error = new Error(`Scene validation failed for ${report.absolutePath}`);
-      error.name = 'SceneValidationError';
-      error.report = report;
-      throw error;
-    }
-
-    return {
-      scene: report.scene
-    };
-  }
-
-  validateSceneObject(sceneOrPath);
-  return {
-    scene: sceneOrPath
-  };
 }
 
 function normalizeWidget(widget, parentWidgetId, depth) {
@@ -170,6 +84,6 @@ export function createUiSystemReportV1FromScene(scene) {
 }
 
 export async function buildUiSystemReportV1(sceneOrPath) {
-  const { scene } = await resolveScene(sceneOrPath);
+  const { scene } = await resolveUiSceneV1(sceneOrPath, 'buildUiSystemReportV1');
   return createUiSystemReportV1FromScene(scene);
 }

@@ -44,6 +44,7 @@ Schema formal: `docs/schemas/ui-navigation-focus-report-v1.schema.json`.
 - `candidates[]` lista apenas candidatos da scope ativa.
 - Candidatos v1 sao widgets `label` folha, em ordem de pre-ordem do `UiSystemReport v1`.
 - Navegacao v1 e sequencial report-only, com `previousCandidateWidgetId` e `nextCandidateWidgetId`.
+- `UiActionSemanticsReport v1` agora vive em contrato separado; este report continua heuristico e pode divergir do `initialFocusWidgetId` autorado em `ui.action.semantics`.
 - Se nao houver screen ativa, `focusedScreenId`, `focusedEntityId` e `initialFocusWidgetId` ficam `null`.
 
 Warnings esperados:
@@ -79,6 +80,7 @@ Output: o mesmo shape do `UiNavigationFocusReport v1` em `structuredContent`.
 
 - `ui.screen` v1 permanece congelado.
 - `UiSystemReport v1` permanece inalterado.
+- `UiActionSemanticsReport v1` nao altera este report e deve ser consultado separadamente quando o consumidor precisar de semantica autorada.
 - Browser Demo, Simple HTML Export e Portable HTML Export nao consomem foco neste slice.
 - `RenderSnapshot v1` nao recebe drawCalls de UI.
 - `run-loop`, replay, save/load, HUD Lite, Playable Save/Load Lite, Audio Lite e Movement Blocking permanecem inalterados.
@@ -97,6 +99,7 @@ Menus maiores podem ser diagnosticados, mas devem motivar um contrato explicito 
 
 - componente `ui.navigation` explicito;
 - ordem de foco autorada;
+- consumir `ui.action.semantics` para reordenar candidatos v1;
 - widgets interativos;
 - ativacao por Enter/Espaco;
 - navegacao por setas/WASD;
@@ -126,4 +129,4 @@ npm run smoke
 
 ## Continuidade
 
-O proximo passo seguro e `UI Action Semantics Lite v1`: adicionar um contrato pequeno e opt-in para declarar semantica de acao/foco, sem transformar o overlay da Browser Demo em runtime canonico de UI.
+O proximo passo seguro e `UI Local Screen State Lite v1`: adicionar um contrato pequeno e opt-in para estado local de telas, sem transformar o overlay da Browser Demo em runtime canonico de UI.

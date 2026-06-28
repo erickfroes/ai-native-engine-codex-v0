@@ -1,0 +1,179 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "ui-action-semantics",
+    "tags": ["v2", "ui", "action-semantics"]
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "ui.hud",
+      "name": "Persistent HUD Screen",
+      "components": [
+        {
+          "kind": "ui.screen",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "screenId": "hud.main",
+            "active": true,
+            "layer": 100,
+            "widgets": [
+              {
+                "id": "hud.root",
+                "kind": "panel",
+                "x": 0,
+                "y": 0,
+                "width": 320,
+                "height": 40,
+                "children": [
+                  {
+                    "id": "hud.score",
+                    "kind": "label",
+                    "text": "Score 000",
+                    "x": 8,
+                    "y": 8
+                  },
+                  {
+                    "id": "hud.goal",
+                    "kind": "label",
+                    "text": "Find the gate",
+                    "x": 176,
+                    "y": 8
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ui.menu",
+      "name": "Main Menu Screen With Actions",
+      "components": [
+        {
+          "kind": "ui.screen",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "screenId": "menu.main",
+            "active": true,
+            "layer": 200,
+            "widgets": [
+              {
+                "id": "menu.root",
+                "kind": "panel",
+                "x": 48,
+                "y": 48,
+                "width": 224,
+                "height": 136,
+                "children": [
+                  {
+                    "id": "menu.title",
+                    "kind": "label",
+                    "text": "Skyline Rescue",
+                    "x": 24,
+                    "y": 16
+                  },
+                  {
+                    "id": "menu.start",
+                    "kind": "label",
+                    "text": "Start Mission",
+                    "x": 32,
+                    "y": 56
+                  },
+                  {
+                    "id": "menu.continue",
+                    "kind": "label",
+                    "text": "Continue Mission",
+                    "x": 32,
+                    "y": 80
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "ui.action.semantics",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "screenId": "menu.main",
+            "initialFocusWidgetId": "menu.start",
+            "actions": [
+              {
+                "widgetId": "menu.start",
+                "actionId": "menu.start-mission"
+              },
+              {
+                "widgetId": "menu.continue",
+                "actionId": "menu.continue-mission"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ui.pause",
+      "name": "Inactive Pause Overlay Screen With Action",
+      "components": [
+        {
+          "kind": "ui.screen",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "screenId": "pause.overlay",
+            "active": false,
+            "layer": 300,
+            "widgets": [
+              {
+                "id": "pause.root",
+                "kind": "panel",
+                "x": 40,
+                "y": 44,
+                "width": 240,
+                "height": 120,
+                "children": [
+                  {
+                    "id": "pause.title",
+                    "kind": "label",
+                    "text": "Paused",
+                    "x": 32,
+                    "y": 24
+                  },
+                  {
+                    "id": "pause.resume",
+                    "kind": "label",
+                    "text": "Resume Mission",
+                    "x": 32,
+                    "y": 64
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "ui.action.semantics",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "screenId": "pause.overlay",
+            "initialFocusWidgetId": "pause.resume",
+            "actions": [
+              {
+                "widgetId": "pause.resume",
+                "actionId": "pause.resume-mission"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

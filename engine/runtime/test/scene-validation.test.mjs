@@ -162,6 +162,55 @@ function validateUiScreenFields(fields, componentOverrides = {}) {
   });
 }
 
+function validateUiActionSemanticsFields(fields, componentOverrides = {}, entityOverrides = {}) {
+  return validateSceneInvariants({
+    version: 1,
+    metadata: { name: 'ui-action-semantics-negative' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'ui.main',
+        components: [
+          {
+            kind: 'ui.screen',
+            version: 1,
+            replicated: false,
+            fields: {
+              screenId: 'menu.main',
+              widgets: [
+                {
+                  id: 'menu.root',
+                  kind: 'panel',
+                  children: [
+                    {
+                      id: 'menu.start',
+                      kind: 'label',
+                      text: 'Start'
+                    },
+                    {
+                      id: 'menu.continue',
+                      kind: 'label',
+                      text: 'Continue'
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            kind: 'ui.action.semantics',
+            version: 1,
+            replicated: false,
+            fields,
+            ...componentOverrides
+          }
+        ],
+        ...entityOverrides
+      }
+    ]
+  });
+}
+
 test('validates tutorial scene successfully', async () => {
   const report = await validateSceneFile(scenePath('tutorial.scene.json'));
 
@@ -211,6 +260,15 @@ test('validates ui.screen prefab fixture successfully', async () => {
 
 test('validates ui production screens scene successfully', async () => {
   const report = await validateSceneFile(scenePath('ui-production-screens.scene.json'));
+
+  assert.equal(report.ok, true);
+  assert.equal(report.errors.length, 0);
+  assert.equal(report.summary.entityCount, 3);
+  assert.equal(report.summary.replicatedComponentCount, 0);
+});
+
+test('validates ui action semantics scene successfully', async () => {
+  const report = await validateSceneFile(scenePath('ui-action-semantics.scene.json'));
 
   assert.equal(report.ok, true);
   assert.equal(report.errors.length, 0);
@@ -1277,5 +1335,190 @@ test('ui.screen screenId must be unique per scene', () => {
         'ui.screen screenId must be unique per scene; found multiple owners for `hud.main`: ui.primary, ui.secondary'
     ).length,
     2
+  );
+});
+
+test('ui.action.semantics component invariants are validated predictably', () => {
+  const report = validateUiActionSemanticsFields(
+    {
+      screenId: ' ',
+      initialFocusWidgetId: ' ',
+      actions: [
+        {
+          widgetId: 'menu.start',
+          actionId: 'menu.start'
+        },
+        {
+          widgetId: 'menu.start',
+          actionId: 'menu.start'
+        }
+      ],
+      fallback: 'first'
+    },
+    {
+      version: 2,
+      replicated: true
+    }
+  );
+
+  assert.ok(report.errors.some((error) => error.path.endsWith('.version') && error.message.includes('version')));
+  assert.ok(report.errors.some((error) => error.path.endsWith('.replicated') && error.message.includes('must not be replicated')));
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.screenId' &&
+        error.message === 'ui.action.semantics screenId must be a non-empty string'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.initialFocusWidgetId' &&
+        error.message === 'ui.action.semantics initialFocusWidgetId must be a non-empty string when provided'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.fallback' &&
+        error.message === 'is not allowed for ui.action.semantics'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.actions[1].widgetId' &&
+        error.message === 'duplicate ui.action.semantics widgetId: menu.start'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.actions[1].actionId' &&
+        error.message === 'duplicate ui.action.semantics actionId: menu.start'
+    )
+  );
+});
+
+test('ui.action.semantics rejects missing actions and non-object fields predictably', () => {
+  const missingFields = validateUiActionSemanticsFields(undefined);
+  const nonObjectFields = validateUiActionSemanticsFields('invalid');
+  const missingActions = validateUiActionSemanticsFields({
+    screenId: 'menu.main'
+  });
+
+  assert.ok(missingFields.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
+  assert.equal(missingFields.errors.some((error) => error.path.endsWith('.fields.screenId')), false);
+  assert.ok(nonObjectFields.errors.some((error) => error.path.endsWith('.fields') && error.message.includes('must be an object')));
+  assert.equal(nonObjectFields.errors.some((error) => error.path.endsWith('.fields.screenId')), false);
+  assert.ok(
+    missingActions.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.actions' &&
+        error.message === 'ui.action.semantics actions must be a non-empty array'
+    )
+  );
+});
+
+test('ui.action.semantics must stay co-located with ui.screen and reference declared leaf labels', () => {
+  const report = validateSceneInvariants({
+    version: 1,
+    metadata: { name: 'ui-action-semantics-linkage' },
+    systems: ['core.loop'],
+    entities: [
+      {
+        id: 'ui.main',
+        components: [
+          {
+            kind: 'ui.screen',
+            version: 1,
+            replicated: false,
+            fields: {
+              screenId: 'menu.main',
+              widgets: [
+                {
+                  id: 'menu.root',
+                  kind: 'panel',
+                  children: [
+                    {
+                      id: 'menu.start',
+                      kind: 'label',
+                      text: 'Start'
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            kind: 'ui.action.semantics',
+            version: 1,
+            replicated: false,
+            fields: {
+              screenId: 'pause.overlay',
+              initialFocusWidgetId: 'menu.missing',
+              actions: [
+                {
+                  widgetId: 'menu.root',
+                  actionId: 'menu.root-action'
+                },
+                {
+                  widgetId: 'menu.missing',
+                  actionId: 'menu.missing-action'
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        id: 'ui.orphan',
+        components: [
+          {
+            kind: 'ui.action.semantics',
+            version: 1,
+            replicated: false,
+            fields: {
+              screenId: 'orphan.screen',
+              actions: [
+                {
+                  widgetId: 'orphan.action',
+                  actionId: 'orphan.action'
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  });
+
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.screenId' &&
+        error.message === 'ui.action.semantics screenId must match the co-located ui.screen screenId'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.actions[0].widgetId' &&
+        error.message === 'ui.action.semantics action widgetId must reference a leaf label widget'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[0].components[1].fields.actions[1].widgetId' &&
+        error.message === 'ui.action.semantics action widgetId must reference a widget on the co-located ui.screen'
+    )
+  );
+  assert.ok(
+    report.errors.some(
+      (error) =>
+        error.path === '$.entities[1].components[0]' &&
+        error.message === 'ui.action.semantics must share an entity with ui.screen'
+    )
   );
 });

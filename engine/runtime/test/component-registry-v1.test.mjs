@@ -21,6 +21,7 @@ test('Component Registry v1 has stable known components and lookup APIs', () => 
     'camera.viewport',
     'collision.bounds',
     'ui.screen',
+    'ui.action.semantics',
     'visual.sprite.animation',
     'audio.clip'
   ]);
@@ -31,6 +32,7 @@ test('Component Registry v1 has stable known components and lookup APIs', () => 
   assert.equal(isKnownComponent('camera.viewport'), true);
   assert.equal(isKnownComponent('collision.bounds'), true);
   assert.equal(isKnownComponent('ui.screen'), true);
+  assert.equal(isKnownComponent('ui.action.semantics'), true);
   assert.equal(isKnownComponent('audio.clip'), true);
   assert.equal(isKnownComponent('unknown'), false);
 
@@ -57,6 +59,10 @@ test('Component Registry v1 has stable known components and lookup APIs', () => 
   const uiScreen = getKnownComponent('ui.screen');
   assert.equal(uiScreen?.name, 'ui.screen');
   assert.equal(uiScreen?.version, 1);
+
+  const uiActionSemantics = getKnownComponent('ui.action.semantics');
+  assert.equal(uiActionSemantics?.name, 'ui.action.semantics');
+  assert.equal(uiActionSemantics?.version, 1);
 
   const audioClip = getKnownComponent('audio.clip');
   assert.equal(audioClip?.name, 'audio.clip');

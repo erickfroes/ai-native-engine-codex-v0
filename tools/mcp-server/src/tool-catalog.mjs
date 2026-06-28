@@ -732,6 +732,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_ui_action_semantics',
+    title: 'Inspect UI Action Semantics',
+    description: 'Build UiActionSemanticsReport v1 from authored ui.action.semantics components without mutating ui.screen or Browser Demo state.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'inspect_sprite_animation',
     title: 'Inspect Sprite Animation',
     description: 'Build SpriteAnimationReport v1 from visual.sprite.animation components.',

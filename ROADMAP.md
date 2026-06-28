@@ -31,7 +31,7 @@ Handoff operacional: `docs/CODEX_HANDOFF.md`.
 - [ ] Meta 6 / V4 runtime/editor AA ainda nao iniciada.
 - [ ] Meta 7 / V5-V6 AAA aspiracional ainda nao iniciada.
 
-Proximo pacote recomendado: **UI Action Semantics Lite v1**.
+Proximo pacote recomendado: **UI Local Screen State Lite v1**.
 
 ---
 
@@ -104,7 +104,7 @@ Objetivo: sair de demo e chegar a uma base de producao pequena para jogos 2D/2.5
 - [x] Browser Demo, Simple HTML Export e Portable HTML Export com paridade runtime/CLI/MCP para UI de producao pequena.
 - [x] Preservar `RenderSnapshot v1`, HUD Lite e Playable Save/Load Lite sem acoplamento.
 - [x] UI Navigation/Focus Lite v1 report-only, derivado de `UiSystemReport v1`, com paridade runtime/CLI/MCP.
-- [ ] Semantica de acao/foco autorada para widgets, antes de consumo interativo.
+- [x] UI Action Semantics Lite v1 report-only, via `ui.action.semantics` e `UiActionSemanticsReport v1`, sem consumo interativo no Browser Demo/export.
 - [ ] Estados de tela serializaveis.
 - [ ] Matriz de regressao UI.
 
@@ -308,22 +308,23 @@ Criterio realista:
 
 ## Proximo pacote recomendado
 
-**UI Action Semantics Lite v1**
+**UI Local Screen State Lite v1**
 
 Checklist minimo do pacote:
 
 - [ ] Ler `README.md`, `docs/CODEX_HANDOFF.md`, `SPEC.md`, `docs/module-contracts.md`, `schemas/`, `ROADMAP.md` e `docs/ENGINE_VERSION_ROADMAP.md`.
 - [ ] Usar subagentes: `explorer`, `engine_architect`, `tooling_editor_architect`, `qa_contract_auditor`, `perf_auditor` e `docs_handoff_auditor`.
-- [ ] Definir contrato pequeno e opt-in para acao/foco autorado, sem mutar `UiNavigationFocusReport v1`.
-- [ ] Preservar `ui.screen` v1 declarativo e congelado ou criar contrato explicitamente versionado separado.
+- [ ] Decidir se o estado local minimo cabe em contrato separado e opt-in, preservando `ui.screen` v1, `ui.action.semantics` v1 e `UiNavigationFocusReport v1`.
 - [ ] Manter Browser Demo/export passivos neste pacote, salvo se houver contrato visual separado.
-- [ ] Preservar `RenderSnapshot v1`, HUD Lite, Playable Save/Load Lite, replay e save/load.
-- [ ] Criar testes runtime/CLI/MCP/cross-interface quando aplicavel.
+- [ ] Preservar `RenderSnapshot v1`, HUD Lite, Playable Save/Load Lite, replay, save/load e `UiActionSemanticsReport v1`.
+- [ ] Criar fixture minima, runtime, CLI, MCP e testes cross-interface quando aplicavel.
 - [ ] Atualizar docs e handoff.
 - [ ] Rodar `npm test`, `npm run validate:scenes` e `npm run smoke`.
 
 Fora do pacote inicial:
 
+- [ ] Ativacao interativa por Enter/Espaco, setas/WASD ou mouse.
+- [ ] Savegame canonico de UI.
 - [ ] Editor visual completo.
 - [ ] Layout engine completo.
 - [ ] Sistema de widgets interativos amplo.

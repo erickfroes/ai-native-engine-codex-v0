@@ -44,6 +44,12 @@ const COMPONENT_REGISTRY_V1 = Object.freeze({
       description: 'Declarative UI screen component with widget tree data'
     }),
     Object.freeze({
+      name: 'ui.action.semantics',
+      version: 1,
+      deterministic: true,
+      description: 'Declarative UI action semantics component for authored focus and actions'
+    }),
+    Object.freeze({
       name: 'visual.sprite.animation',
       version: 1,
       deterministic: true,

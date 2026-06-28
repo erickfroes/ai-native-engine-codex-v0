@@ -59,6 +59,7 @@ Capacidades alvo:
 - V1 Small 2D Release Checkpoint;
 - UI System v1 entregue como contrato declarativo/report de V2, consumo visual opt-in na Browser Demo/export e fixture publica de telas pequenas de producao;
 - UI Navigation/Focus Lite v1 entregue como report-only derivado de `UiSystemReport v1`, sem consumo visual ou estado persistido;
+- UI Action Semantics Lite v1 entregue como contrato autorado/report-only por `ui.action.semantics`, sem consumo visual, estado persistido ou mutacao de `UiNavigationFocusReport v1`;
 - Audio Lite v1 como primeiro pacote incremental pos-checkpoint;
 - Sprite Animation v1 concluido como diagnostico declarativo runtime/CLI/MCP;
 - `AssetManifestValidationReport v1` concluido como validacao direta minima de manifesto em runtime/CLI/MCP, com report versionado e erros previsiveis;
@@ -221,5 +222,5 @@ Criterio realista:
 A partir do estado atual, seguir:
 
 1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `UI Action Semantics Lite v1` como menor proximo passo seguro para explicitar acao/foco autorado antes de qualquer consumo interativo, sem acoplar HUD Lite, Playable Save/Load Lite ou savegame canonico.
+2. Abrir `UI Local Screen State Lite v1` como menor proximo passo seguro para explicitar estado local de telas antes de qualquer consumo interativo, sem acoplar HUD Lite, Playable Save/Load Lite ou savegame canonico.
 3. Manter editor-lite, particle-lite, route solving e 3D indie para depois de UI pequena e V2 demonstradas.

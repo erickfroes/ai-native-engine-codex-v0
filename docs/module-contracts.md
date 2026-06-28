@@ -495,6 +495,25 @@ Contrato report-only para derivar foco/navegacao sequencial minima a partir de `
 - nao altera `ui.screen`, `UiSystemReport v1`, Browser Demo, Simple HTML Export, Portable HTML Export, `RenderSnapshot v1`, loop, replay, save/load, HUD Lite ou Playable Save/Load Lite.
 - nao adiciona componente `ui.navigation`, widgets interativos, binding, ordem de foco autorada, ativacao, input de UI, estado persistido, editor ou consumo visual.
 
+## UI Action Semantics Lite v1
+
+Contrato autorado/report-only para declarar quais widgets de `ui.screen` sao acionaveis e qual foco inicial deve ser usado na scope ativa:
+
+- ver `docs/UI_ACTION_SEMANTICS_LITE_V1.md`.
+- schema formal: `docs/schemas/ui-action-semantics-report-v1.schema.json`.
+- componente: `ui.action.semantics` v1.
+- runtime: `buildUiActionSemanticsReportV1(sceneOrPath)`.
+- CLI: `inspect-ui-action-semantics <scene> [--json]`.
+- MCP: `inspect_ui_action_semantics({ path })`.
+- o componente e opt-in, nao replicado e deve compartilhar entidade com `ui.screen`.
+- `fields.screenId` deve ser string nao vazia e igual ao `screenId` do `ui.screen` co-localizado.
+- `fields.actions` deve ser array nao vazio de `{ widgetId, actionId }`, com ambos os ids unicos dentro do componente.
+- `widgetId` so pode apontar para widgets `label` folha da arvore declarada no `ui.screen` co-localizado.
+- `fields.initialFocusWidgetId`, quando presente, deve referenciar um `widgetId` declarado em `actions`.
+- o report usa `scopePolicy: "topmost-active-screen"` e lista apenas `actions[]` da screen ativa do topo, sem mutar `UiNavigationFocusReport v1`.
+- Browser Demo, Simple HTML Export e Portable HTML Export permanecem passivos neste slice.
+- nao altera `RenderSnapshot v1`, loop, replay, save/load, HUD Lite ou Playable Save/Load Lite.
+
 ## Sprite Animation v1
 
 Contrato declarativo minimo para animacao sprite inspecionavel:
@@ -820,4 +839,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `UI Action Semantics Lite v1`.
+- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, UI Action Semantics Lite v1 report-only, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `UI Local Screen State Lite v1`.

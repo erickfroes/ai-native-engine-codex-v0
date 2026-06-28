@@ -107,6 +107,12 @@ export {
   buildUiNavigationFocusReportV1,
   UI_NAVIGATION_FOCUS_REPORT_VERSION
 } from './ui/build-ui-navigation-focus-report-v1.mjs';
+export {
+  buildUiActionSemanticsReportV1,
+  createUiActionSemanticsReportV1FromScene,
+  UI_ACTION_SEMANTICS_COMPONENT_KIND,
+  UI_ACTION_SEMANTICS_REPORT_VERSION
+} from './ui/build-ui-action-semantics-report-v1.mjs';
 export { getSystemRegistryV1, getKnownSystemDefinition } from './systems/system-registry.mjs';
 export {
   getSystemPhaseRegistryV1,

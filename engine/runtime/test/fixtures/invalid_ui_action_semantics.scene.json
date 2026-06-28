@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "invalid-ui-action-semantics-fixture"
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "ui.menu",
+      "components": [
+        {
+          "kind": "ui.screen",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "screenId": "menu.main",
+            "widgets": [
+              {
+                "id": "menu.root",
+                "kind": "panel",
+                "children": [
+                  {
+                    "id": "menu.start",
+                    "kind": "label",
+                    "text": "Start"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "ui.action.semantics",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "screenId": "menu.main",
+            "actions": [
+              {
+                "widgetId": "menu.missing",
+                "actionId": "menu.start-mission"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

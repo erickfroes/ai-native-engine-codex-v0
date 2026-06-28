@@ -521,6 +521,19 @@ function validateUiScreenWidget(widget, widgetPath, errors, seenWidgetIds) {
   }
 }
 
+function collectUiScreenWidgetMetadata(widgets, widgetMetadata = new Map()) {
+  for (const widget of widgets ?? []) {
+    const children = Array.isArray(widget.children) ? widget.children : [];
+    widgetMetadata.set(widget.id, {
+      kind: widget.kind,
+      isLeafLabel: widget.kind === 'label' && children.length === 0
+    });
+    collectUiScreenWidgetMetadata(children, widgetMetadata);
+  }
+
+  return widgetMetadata;
+}
+
 function validateUiScreenComponent(component, componentPath, errors) {
   const fields = component.fields;
   const allowedFieldNames = new Set(['screenId', 'active', 'layer', 'widgets']);
@@ -567,6 +580,162 @@ function validateUiScreenComponent(component, componentPath, errors) {
   }
 }
 
+function validateUiActionSemanticsAction(action, actionPath, errors, seenWidgetIds, seenActionIds) {
+  const allowedFieldNames = new Set(['widgetId', 'actionId']);
+
+  if (!isPlainObject(action)) {
+    pushMessage(errors, actionPath, 'ui.action.semantics action must be an object');
+    return;
+  }
+
+  for (const fieldName of Object.keys(action)) {
+    if (!allowedFieldNames.has(fieldName)) {
+      pushMessage(errors, `${actionPath}.${fieldName}`, 'is not allowed for ui.action.semantics action');
+    }
+  }
+
+  if (typeof action.widgetId !== 'string' || action.widgetId.trim().length === 0) {
+    pushMessage(errors, `${actionPath}.widgetId`, 'ui.action.semantics action widgetId must be a non-empty string');
+  } else if (seenWidgetIds.has(action.widgetId)) {
+    pushMessage(errors, `${actionPath}.widgetId`, `duplicate ui.action.semantics widgetId: ${action.widgetId}`);
+  } else {
+    seenWidgetIds.add(action.widgetId);
+  }
+
+  if (typeof action.actionId !== 'string' || action.actionId.trim().length === 0) {
+    pushMessage(errors, `${actionPath}.actionId`, 'ui.action.semantics actionId must be a non-empty string');
+  } else if (seenActionIds.has(action.actionId)) {
+    pushMessage(errors, `${actionPath}.actionId`, `duplicate ui.action.semantics actionId: ${action.actionId}`);
+  } else {
+    seenActionIds.add(action.actionId);
+  }
+}
+
+function validateUiActionSemanticsComponent(component, componentPath, errors) {
+  const fields = component.fields;
+  const allowedFieldNames = new Set(['screenId', 'initialFocusWidgetId', 'actions']);
+
+  if (component.version !== 1) {
+    pushMessage(errors, `${componentPath}.version`, 'ui.action.semantics version must be exactly 1');
+  }
+
+  if (component.replicated !== false) {
+    pushMessage(errors, `${componentPath}.replicated`, 'ui.action.semantics must not be replicated');
+  }
+
+  if (!isPlainObject(fields)) {
+    pushMessage(errors, `${componentPath}.fields`, 'ui.action.semantics fields must be an object');
+    return;
+  }
+
+  for (const fieldName of Object.keys(fields)) {
+    if (!allowedFieldNames.has(fieldName)) {
+      pushMessage(errors, `${componentPath}.fields.${fieldName}`, 'is not allowed for ui.action.semantics');
+    }
+  }
+
+  if (typeof fields.screenId !== 'string' || fields.screenId.trim().length === 0) {
+    pushMessage(errors, `${componentPath}.fields.screenId`, 'ui.action.semantics screenId must be a non-empty string');
+  }
+
+  if (
+    fields.initialFocusWidgetId !== undefined &&
+    (typeof fields.initialFocusWidgetId !== 'string' || fields.initialFocusWidgetId.trim().length === 0)
+  ) {
+    pushMessage(
+      errors,
+      `${componentPath}.fields.initialFocusWidgetId`,
+      'ui.action.semantics initialFocusWidgetId must be a non-empty string when provided'
+    );
+  }
+
+  if (!Array.isArray(fields.actions) || fields.actions.length === 0) {
+    pushMessage(errors, `${componentPath}.fields.actions`, 'ui.action.semantics actions must be a non-empty array');
+    return;
+  }
+
+  const seenWidgetIds = new Set();
+  const seenActionIds = new Set();
+  for (const [actionIndex, action] of fields.actions.entries()) {
+    validateUiActionSemanticsAction(
+      action,
+      `${componentPath}.fields.actions[${actionIndex}]`,
+      errors,
+      seenWidgetIds,
+      seenActionIds
+    );
+  }
+}
+
+function validateUiActionSemanticsOwnership(component, componentPath, uiScreenComponent, errors) {
+  if (!uiScreenComponent) {
+    pushMessage(errors, componentPath, 'ui.action.semantics must share an entity with ui.screen');
+    return;
+  }
+
+  if (
+    typeof component.fields?.screenId === 'string' &&
+    typeof uiScreenComponent.fields?.screenId === 'string' &&
+    component.fields.screenId !== uiScreenComponent.fields.screenId
+  ) {
+    pushMessage(
+      errors,
+      `${componentPath}.fields.screenId`,
+      'ui.action.semantics screenId must match the co-located ui.screen screenId'
+    );
+  }
+
+  if (!isPlainObject(component.fields) || !isPlainObject(uiScreenComponent.fields)) {
+    return;
+  }
+
+  if (!Array.isArray(component.fields.actions) || !Array.isArray(uiScreenComponent.fields.widgets)) {
+    return;
+  }
+
+  const widgetMetadata = collectUiScreenWidgetMetadata(uiScreenComponent.fields.widgets);
+  const actionWidgetIds = new Set(
+    component.fields.actions
+      .map((action) => action?.widgetId)
+      .filter((widgetId) => typeof widgetId === 'string' && widgetId.trim().length > 0)
+  );
+
+  for (const [actionIndex, action] of component.fields.actions.entries()) {
+    if (!isPlainObject(action) || typeof action.widgetId !== 'string' || action.widgetId.trim().length === 0) {
+      continue;
+    }
+
+    const widget = widgetMetadata.get(action.widgetId);
+    if (!widget) {
+      pushMessage(
+        errors,
+        `${componentPath}.fields.actions[${actionIndex}].widgetId`,
+        'ui.action.semantics action widgetId must reference a widget on the co-located ui.screen'
+      );
+      continue;
+    }
+
+    if (!widget.isLeafLabel) {
+      pushMessage(
+        errors,
+        `${componentPath}.fields.actions[${actionIndex}].widgetId`,
+        'ui.action.semantics action widgetId must reference a leaf label widget'
+      );
+    }
+  }
+
+  if (
+    typeof component.fields.initialFocusWidgetId === 'string' &&
+    !actionWidgetIds.has(component.fields.initialFocusWidgetId)
+  ) {
+    pushMessage(
+      errors,
+      `${componentPath}.fields.initialFocusWidgetId`,
+      'ui.action.semantics initialFocusWidgetId must reference a widgetId declared in actions'
+    );
+  }
+}
+
 export function validateSceneInvariants(scene) {
   const errors = [];
   const warnings = [];
@@ -576,6 +745,7 @@ export function validateSceneInvariants(scene) {
   let hasReplicatedComponent = false;
   const cameraViewportOwners = [];
   const uiScreenIds = new Map();
+  const uiActionSemanticsOwners = [];
 
   for (const [entityIndex, entity] of scene.entities.entries()) {
     const entityPath = `$.entities[${entityIndex}]`;
@@ -613,6 +783,7 @@ export function validateSceneInvariants(scene) {
     }
 
     const componentKinds = new Set();
+    const uiScreenComponent = (entity.components ?? []).find((component) => component?.kind === 'ui.screen') ?? null;
 
     for (const [componentIndex, component] of (entity.components ?? []).entries()) {
       const componentPath = `${entityPath}.components[${componentIndex}]`;
@@ -661,6 +832,15 @@ export function validateSceneInvariants(scene) {
         validateUiScreenComponent(component, componentPath, errors);
       }
 
+      if (component.kind === 'ui.action.semantics') {
+        uiActionSemanticsOwners.push({
+          component,
+          componentPath,
+          uiScreenComponent
+        });
+        validateUiActionSemanticsComponent(component, componentPath, errors);
+      }
+
       if (component.kind === 'visual.sprite.animation') {
         validateSpriteAnimationComponent(component, componentPath, errors);
       }
@@ -670,6 +850,15 @@ export function validateSceneInvariants(scene) {
       }
     }
 
+  }
+
+  for (const owner of uiActionSemanticsOwners) {
+    validateUiActionSemanticsOwnership(
+      owner.component,
+      owner.componentPath,
+      owner.uiScreenComponent,
+      errors
+    );
   }
 
   if (cameraViewportOwners.length > 1) {

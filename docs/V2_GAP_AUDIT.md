@@ -4,12 +4,12 @@
 
 Registrar o audit pequeno pedido apos o congelamento de `entity.prefab` v1 e a decisao do menor pacote seguro que abriu V2.
 
-Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, o follow-up imediato foi fechado como `SceneTransitionReport v1`, a composicao minima foi fechada como `Scene Composition Manifest v1`, o primeiro diagnostico de grid foi fechado como `Pathfinding Grid v1`, o manifesto atlas/material foi fechado como `Atlas/Material Manifest v1`, o consumo visual sprite-only foi fechado como `Atlas Region Consumption v1`, o binding explicito de sprites foi fechado como `Atlas Region Binding Contract v1`, telas pequenas de producao foram fechadas como `UI Production Screens v1` e foco/navegacao minima foi fechado como `UI Navigation/Focus Lite v1` report-only; a continuidade agora aponta para `UI Action Semantics Lite v1`.
+Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, o follow-up imediato foi fechado como `SceneTransitionReport v1`, a composicao minima foi fechada como `Scene Composition Manifest v1`, o primeiro diagnostico de grid foi fechado como `Pathfinding Grid v1`, o manifesto atlas/material foi fechado como `Atlas/Material Manifest v1`, o consumo visual sprite-only foi fechado como `Atlas Region Consumption v1`, o binding explicito de sprites foi fechado como `Atlas Region Binding Contract v1`, telas pequenas de producao foram fechadas como `UI Production Screens v1`, foco/navegacao minima foi fechado como `UI Navigation/Focus Lite v1` report-only e a semantica autorada foi fechada como `UI Action Semantics Lite v1`; a continuidade agora aponta para `UI Local Screen State Lite v1`.
 
 ## Estado consolidado
 
 - V1 Small 2D esta release-checkpointed e permanece aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, AssetManifestValidationReport v1, Visual Regression Baseline v1, SceneTransitionReport v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja iniciam V2 em slices pequenos.
+- Audio Lite v1, UI System v1, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, UI Action Semantics Lite v1 report-only, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, AssetManifestValidationReport v1, Visual Regression Baseline v1, SceneTransitionReport v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja iniciam V2 em slices pequenos.
 - `entity.prefab` v1 esta congelado: sem nested prefab, prefab hierarchy, hot reload, editor ou template engine.
 - O hardening de prefab inseguro ja cobre consumidores visuais/export por path, incluindo Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export.
 
@@ -111,7 +111,17 @@ Escopo executado:
 - preservar `RenderSnapshot v1` sem drawCalls de UI, HUD Lite, Playable Save/Load Lite, Audio Lite, loop e save/load sem acoplamento;
 - adicionar budget pequeno para delta de HTML do overlay.
 
-Proximo pacote recomendado: **UI Action Semantics Lite v1**, para declarar semantica de acao/foco antes de qualquer consumo interativo no Browser Demo/export.
+**UI Action Semantics Lite v1** foi fechado como primeiro contrato autorado de acao/foco para UI pequena.
+
+Escopo executado:
+
+- criar o componente opt-in `ui.action.semantics` v1, co-localizado a `ui.screen`;
+- validar `screenId`, `initialFocusWidgetId` e `actions[]` com ownership explicito, ids unicos e restricao a widgets `label` folha;
+- expor `UiActionSemanticsReport v1` em runtime, CLI e MCP com `scopePolicy: "topmost-active-screen"`;
+- cobrir fixture publica `scenes/ui-action-semantics.scene.json`, fixture invalida, paridade cross-interface e compatibilidade com `UiNavigationFocusReport v1`;
+- preservar Browser Demo/export, `RenderSnapshot v1`, loop, replay, save/load e HUD Lite sem mutacao de contrato.
+
+Proximo pacote recomendado: **UI Local Screen State Lite v1**, para explicitar estado local de telas antes de qualquer consumo interativo no Browser Demo/export.
 
 Fora de escopo:
 
