@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ui-navigation-focus-report-v1.schema.json",
+  "title": "UiNavigationFocusReportV1",
+  "type": "object",
+  "required": [
+    "uiNavigationFocusReportVersion",
+    "scene",
+    "sourceUiSystemReportVersion",
+    "scopePolicy",
+    "focusedScreenId",
+    "focusedEntityId",
+    "initialFocusWidgetId",
+    "screens",
+    "candidates",
+    "warnings"
+  ],
+  "properties": {
+    "uiNavigationFocusReportVersion": {
+      "const": 1
+    },
+    "scene": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceUiSystemReportVersion": {
+      "const": 1
+    },
+    "scopePolicy": {
+      "const": "topmost-active-screen"
+    },
+    "focusedScreenId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "focusedEntityId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "initialFocusWidgetId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "screens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "screenId",
+          "entityId",
+          "active",
+          "layer",
+          "inFocusScope",
+          "candidateCount"
+        ],
+        "properties": {
+          "screenId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "entityId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "layer": {
+            "type": "integer"
+          },
+          "inFocusScope": {
+            "type": "boolean"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "screenId",
+          "entityId",
+          "widgetId",
+          "kind",
+          "text",
+          "parentWidgetId",
+          "depth",
+          "x",
+          "y",
+          "width",
+          "height",
+          "candidateIndex",
+          "previousCandidateWidgetId",
+          "nextCandidateWidgetId"
+        ],
+        "properties": {
+          "screenId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "entityId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "widgetId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "const": "label"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "parentWidgetId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "depth": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "x": {
+            "type": "integer"
+          },
+          "y": {
+            "type": "integer"
+          },
+          "width": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "height": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "candidateIndex": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "previousCandidateWidgetId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "nextCandidateWidgetId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

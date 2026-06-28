@@ -7,8 +7,9 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - Versao atual: V1 Small 2D release-checkpointed.
 - Politica atual: V1 apenas bugfix, hardening e compatibilidade.
 - Meta em andamento: Meta 4 / V2 2D-2.5D indie production.
-- Proximo pacote recomendado: `UI Navigation/Focus Lite v1`.
-- Nao iniciar editor-lite, particle-lite, 3D, route solving ou pipeline pesado antes de fechar navegacao/foco minimo sobre `ui.screen` sem acoplar HUD Lite ou savegame.
+- Slice fechado: `UI Navigation/Focus Lite v1` report-only.
+- Proximo pacote recomendado: `UI Action Semantics Lite v1`.
+- Nao iniciar editor-lite, particle-lite, 3D, route solving ou pipeline pesado antes de explicitar semantica de acao/foco para UI sem acoplar HUD Lite, Browser Demo/export, savegame ou render canonico.
 
 ## Estado
 
@@ -20,7 +21,8 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - [x] Atlas Region Consumption v1 sprite-only opt-in fechado para Browser Demo e Portable HTML Export v2.
 - [x] Atlas Region Binding Contract v1 fechado para sprites via `visual.sprite.fields.atlasBindingId`, sideband versionado/hash e tiles report-only.
 - [x] UI Production Screens v1 fechado com `scenes/ui-production-screens.scene.json`, menu/HUD ativos, pause autoravel inativo, paridade Browser Demo/export e budgets de HTML.
-- [x] Validacao final do slice: `npm test` (715), `npm run validate:scenes` (6/6) e `npm run smoke` passaram.
+- [x] UI Navigation/Focus Lite v1 fechado como `UiNavigationFocusReport v1` derivado de `UiSystemReport v1`, com runtime/CLI/MCP e sem consumo visual.
+- [x] Validacao final do slice: `npm test` (732), `npm run validate:scenes` (6/6) e `npm run smoke` passaram.
 
 Inventario completo: `docs/STATUS.md`.
 Checklist por meta: `ROADMAP.md`.
@@ -28,16 +30,16 @@ Detalhe por versao: `docs/ENGINE_VERSION_ROADMAP.md`.
 
 ## Proximo passo
 
-### `UI Navigation/Focus Lite v1`
+### `UI Action Semantics Lite v1`
 
-Objetivo: adicionar foco/navegacao minima opt-in sobre `ui.screen`, sem transformar HUD Lite em UI canonica, sem salvar estado de UI em `savegame v1` e sem mutar `RenderSnapshot v1`, loop ou defaults de Browser Demo/export.
+Objetivo: declarar semantica minima de acao/foco para UI, sem tratar labels derivados como acionaveis por heuristica, sem transformar HUD Lite em UI canonica, sem salvar estado de UI em `savegame v1` e sem mutar `RenderSnapshot v1`, loop ou defaults de Browser Demo/export.
 
 Escopo do pacote:
 
-- [ ] decidir se foco/navegacao cabe como contrato pequeno novo ou se exige backlog separado;
-- [ ] manter `ui.screen` v1 declarativo e congelado, salvo contrato novo explicitamente versionado;
+- [ ] decidir se a semantica cabe em contrato separado ou componente opt-in pequeno, preservando `ui.screen` v1;
+- [ ] manter `UiNavigationFocusReport v1` como diagnostico derivado e nao mutar seu shape sem novo versionamento;
 - [ ] preservar HUD Lite, Playable Save/Load Lite, Audio Lite e UI Production Screens v1 sem acoplamento;
-- [ ] garantir que Browser Demo/export continuem opt-in e que telas sem foco/navegacao mantenham HTML estavel;
+- [ ] manter Browser Demo/export passivos neste pacote, salvo contrato visual separado;
 - [ ] validar que `RenderSnapshot v1`, run-loop, replay e save/load nao mudam;
 - [ ] docs curtas e atualizacao deste handoff/roadmap.
 
@@ -47,12 +49,13 @@ Fora do pacote:
 - layout engine completo;
 - widget system amplo;
 - binding de dados e HUD reativo;
+- consumo visual/interativo no Browser Demo/export;
 - estado de UI persistido em savegame canonico;
 - renderer novo;
 - glTF/3D;
 - particle-lite.
 
-Criterio de pronto: foco/navegacao minima, se implementada, roda por Browser Demo/export como opt-in sem mutar contratos V1; UI System v1 continua declarativo; paridade aplicavel passa; `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
+Criterio de pronto: semantica de acao/foco minima fica explicita, versionada e inspecionavel por runtime/CLI/MCP; UI System v1 continua declarativo; `UiNavigationFocusReport v1` permanece compativel; `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
 
 ## Como continuar
 
@@ -115,6 +118,7 @@ node ./engine/runtime/src/cli.mjs inspect-atlas-material-manifest ./engine/runti
 node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/atlas-material/atlas-sprite-consumption.scene.json --atlas-material-manifest ./engine/runtime/test/fixtures/atlas-material/starter.atlas-material.json --json
 node ./engine/runtime/src/cli.mjs export-portable-html-game ./engine/runtime/test/fixtures/atlas-material/atlas-sprite-consumption.scene.json --atlas-material-manifest ./engine/runtime/test/fixtures/atlas-material/starter.atlas-material.json --out ./tmp/atlas-portable-export.html --json
 node ./engine/runtime/src/cli.mjs inspect-ui-system ./scenes/ui-production-screens.scene.json --json
+node ./engine/runtime/src/cli.mjs inspect-ui-navigation-focus ./scenes/ui-production-screens.scene.json --json
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-browser-demo.html --json
 node ./engine/runtime/src/cli.mjs export-portable-html-game ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-portable.html --json
 node ./engine/runtime/src/cli.mjs export-html-game ./scenes/v1-small-2d.scene.json --movement-blocking --gameplay-hud --playable-save-load --out ./tmp/v1-small-2d.html --json
@@ -131,6 +135,7 @@ Use as tools MCP equivalentes quando estiver validando cenas, contratos ou repor
 - `docs/module-contracts.md`: contratos por modulo.
 - `docs/ATLAS_MATERIAL_MANIFEST_V1.md`: contrato atlas/material e consumo sprite-only opt-in.
 - `docs/UI_SYSTEM_V1.md`: contrato de screens/widgets declarativos.
+- `docs/UI_NAVIGATION_FOCUS_LITE_V1.md`: contrato report-only de foco/navegacao derivados de UI System v1.
 - `docs/V2_GAP_AUDIT.md`: lacunas V2.
 - `docs/CODEX_SUBAGENT_STRATEGY.md`: estrategia de subagentes.
 

@@ -716,6 +716,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_ui_navigation_focus',
+    title: 'Inspect UI Navigation Focus',
+    description: 'Build UiNavigationFocusReport v1 from UiSystemReport v1 without mutating ui.screen or runtime state.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'inspect_sprite_animation',
     title: 'Inspect Sprite Animation',
     description: 'Build SpriteAnimationReport v1 from visual.sprite.animation components.',

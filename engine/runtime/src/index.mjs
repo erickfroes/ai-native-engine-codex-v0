@@ -103,6 +103,10 @@ export {
 } from './pathfinding/build-pathfinding-grid-report-v1.mjs';
 export { buildAudioLiteReportV1 } from './audio/build-audio-lite-report-v1.mjs';
 export { buildUiSystemReportV1 } from './ui/build-ui-system-report-v1.mjs';
+export {
+  buildUiNavigationFocusReportV1,
+  UI_NAVIGATION_FOCUS_REPORT_VERSION
+} from './ui/build-ui-navigation-focus-report-v1.mjs';
 export { getSystemRegistryV1, getKnownSystemDefinition } from './systems/system-registry.mjs';
 export {
   getSystemPhaseRegistryV1,

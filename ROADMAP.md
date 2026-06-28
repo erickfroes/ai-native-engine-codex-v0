@@ -31,7 +31,7 @@ Handoff operacional: `docs/CODEX_HANDOFF.md`.
 - [ ] Meta 6 / V4 runtime/editor AA ainda nao iniciada.
 - [ ] Meta 7 / V5-V6 AAA aspiracional ainda nao iniciada.
 
-Proximo pacote recomendado: **UI Navigation/Focus Lite v1**.
+Proximo pacote recomendado: **UI Action Semantics Lite v1**.
 
 ---
 
@@ -103,7 +103,9 @@ Objetivo: sair de demo e chegar a uma base de producao pequena para jogos 2D/2.5
 - [x] Fixture publica `scenes/ui-production-screens.scene.json` com menu/HUD ativos e pause/game-over autoravel inativo.
 - [x] Browser Demo, Simple HTML Export e Portable HTML Export com paridade runtime/CLI/MCP para UI de producao pequena.
 - [x] Preservar `RenderSnapshot v1`, HUD Lite e Playable Save/Load Lite sem acoplamento.
-- [ ] Navegacao/foco minimo e estados de tela serializaveis.
+- [x] UI Navigation/Focus Lite v1 report-only, derivado de `UiSystemReport v1`, com paridade runtime/CLI/MCP.
+- [ ] Semantica de acao/foco autorada para widgets, antes de consumo interativo.
+- [ ] Estados de tela serializaveis.
 - [ ] Matriz de regressao UI.
 
 ### Animacao 2D
@@ -306,15 +308,15 @@ Criterio realista:
 
 ## Proximo pacote recomendado
 
-**UI Navigation/Focus Lite v1**
+**UI Action Semantics Lite v1**
 
 Checklist minimo do pacote:
 
 - [ ] Ler `README.md`, `docs/CODEX_HANDOFF.md`, `SPEC.md`, `docs/module-contracts.md`, `schemas/`, `ROADMAP.md` e `docs/ENGINE_VERSION_ROADMAP.md`.
 - [ ] Usar subagentes: `explorer`, `engine_architect`, `tooling_editor_architect`, `qa_contract_auditor`, `perf_auditor` e `docs_handoff_auditor`.
-- [ ] Decidir se navegacao/foco cabe como contrato pequeno opt-in ou deve ficar em backlog.
-- [ ] Preservar `ui.screen` v1 declarativo e congelado, salvo contrato novo explicitamente versionado.
-- [ ] Garantir Browser Demo/export com opt-in e paridade CLI/MCP quando aplicavel.
+- [ ] Definir contrato pequeno e opt-in para acao/foco autorado, sem mutar `UiNavigationFocusReport v1`.
+- [ ] Preservar `ui.screen` v1 declarativo e congelado ou criar contrato explicitamente versionado separado.
+- [ ] Manter Browser Demo/export passivos neste pacote, salvo se houver contrato visual separado.
 - [ ] Preservar `RenderSnapshot v1`, HUD Lite, Playable Save/Load Lite, replay e save/load.
 - [ ] Criar testes runtime/CLI/MCP/cross-interface quando aplicavel.
 - [ ] Atualizar docs e handoff.

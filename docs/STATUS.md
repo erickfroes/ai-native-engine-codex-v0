@@ -52,6 +52,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - Audio Lite v1 como primeiro incremento pos-checkpoint;
 - UI System v1 como contrato declarativo/report para screens e widget tree, com consumo visual opt-in na Browser Demo/export;
 - UI Production Screens v1 com `scenes/ui-production-screens.scene.json`, menu/HUD ativos, pause autoravel inativo, paridade Browser Demo/export e budget de HTML;
+- UI Navigation/Focus Lite v1 como report-only derivado de `UiSystemReport v1`, com runtime/CLI/MCP e sem consumo visual;
 - Sprite Animation v1 como diagnostico declarativo runtime/CLI/MCP, com consumo visual opt-in na Browser Demo para sprites asset-backed;
 - Portable HTML Export v2 com assets inline e Sprite Animation v1 opt-in no caminho portatil;
 - Prefab System v1 como resolucao declarativa minima e report diagnostico runtime/CLI/MCP;
@@ -77,7 +78,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 ## Foco atual recomendado
 
 1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `UI Navigation/Focus Lite v1` como menor proximo passo seguro, usando `ui.screen` sem acoplar HUD Lite, Playable Save/Load Lite ou savegame canonico.
+2. Abrir `UI Action Semantics Lite v1` como menor proximo passo seguro, para declarar semantica de acao/foco antes de qualquer consumo interativo de UI.
 3. Se a lacuna de validacao estrita for atacada, criar superficie opt-in nova em vez de mutar `validate-scene` / `SceneValidationReport v1`.
 4. Adiar editor-lite, particle-lite, route solving e 3D ate UI pequena e V2 estarem mais demonstradas.
 
@@ -97,6 +98,7 @@ Detalhes: `docs/ENGINE_VERSION_ROADMAP.md`.
 - acoplar Browser Demo ao runtime canonico como se fosse loop oficial;
 - transformar HUD browser lite em sistema de UI completo antes do pacote V2 apropriado;
 - acoplar UI System v1 ao HUD Lite ou aplicar `camera.viewport` em UI screen-space;
+- tratar candidatos derivados de `UiNavigationFocusReport v1` como acionaveis sem contrato explicito de acao;
 - confundir Playable Save/Load Lite browser-local com `savegame v1` ou `State Snapshot v1`;
 - transformar Simple HTML Export v1 em bundler, servidor ou build pipeline V2;
 - transformar Game Templates v1 em template engine, prefab system ou editor;

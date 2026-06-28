@@ -480,6 +480,21 @@ Contrato declarativo minimo para screens de UI com arvore serializavel de widget
 - nao altera `RenderSnapshot v1`, HUD Lite, Audio Lite, Sprite Animation, InputIntent ou Save/Load.
 - nao e layout engine completo, binding, navegacao, renderer formal de UI, editor de UI ou HUD canonico de jogo.
 
+## UI Navigation/Focus Lite v1
+
+Contrato report-only para derivar foco/navegacao sequencial minima a partir de `UiSystemReport v1`:
+
+- ver `docs/UI_NAVIGATION_FOCUS_LITE_V1.md`.
+- schema formal: `docs/schemas/ui-navigation-focus-report-v1.schema.json`.
+- runtime: `buildUiNavigationFocusReportV1(sceneOrPath)`.
+- CLI: `inspect-ui-navigation-focus <scene> [--json]`.
+- MCP: `inspect_ui_navigation_focus({ path })`.
+- o report usa `scopePolicy: "topmost-active-screen"` e escolhe uma unica screen ativa pela ordem canonica de `UiSystemReport v1`.
+- candidatos v1 sao widgets `label` folha da screen focada, em pre-ordem, com `previousCandidateWidgetId` e `nextCandidateWidgetId`.
+- warnings tornam explicitos os limites atuais: sem screen ativa, sem candidatos, geometria parcial e ausencia de semantica de acao.
+- nao altera `ui.screen`, `UiSystemReport v1`, Browser Demo, Simple HTML Export, Portable HTML Export, `RenderSnapshot v1`, loop, replay, save/load, HUD Lite ou Playable Save/Load Lite.
+- nao adiciona componente `ui.navigation`, widgets interativos, binding, ordem de foco autorada, ativacao, input de UI, estado persistido, editor ou consumo visual.
+
 ## Sprite Animation v1
 
 Contrato declarativo minimo para animacao sprite inspecionavel:
@@ -805,4 +820,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `UI Navigation/Focus Lite v1`.
+- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `UI Action Semantics Lite v1`.

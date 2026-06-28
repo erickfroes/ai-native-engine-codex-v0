@@ -175,7 +175,7 @@ node ./engine/runtime/src/cli.mjs export-portable-html-game ./scenes/ui-producti
 Regras do slice:
 
 - `hud.main` e `menu.main` ficam ativos para demonstrar HUD persistente e menu estatico;
-- `pause.overlay` fica `active: false`, aparece no report e nao vira DOM visual ate um pacote de navegacao/foco ou estado local explicitamente versionado;
+- `pause.overlay` fica `active: false`, aparece no report e nao vira DOM visual ate um pacote de estado local explicitamente versionado;
 - `RenderSnapshot v1` da fixture permanece com `drawCalls: []`, porque UI nao entra no render canonico;
 - Browser Demo, Simple HTML Export e Portable HTML Export mantem `uiSystem` como opt-in e nao ativam HUD Lite, Playable Save/Load Lite ou Audio Lite implicitamente;
 - o delta de HTML para `uiSystem` nesta fixture fica coberto por budget de teste pequeno.
@@ -211,6 +211,7 @@ Cobertura dedicada:
 - `tools/mcp-server/test/ui-system.test.mjs`.
 - consumo visual opt-in em `engine/runtime/test/browser-playable-demo-runtime.test.mjs`, `engine/runtime/test/cli-render-browser-demo.test.mjs`, `engine/runtime/test/browser-playable-demo-cross-interface.integration.test.mjs`, `engine/runtime/test/simple-html-export-v1.test.mjs` e `tools/mcp-server/test/mcp-server.test.mjs`.
 - `engine/runtime/test/portable-html-export-v2.test.mjs` cobre `export_portable_html_game` com `uiSystem: true`.
+- `UiNavigationFocusReport v1` agora vive em contrato derivado separado, com testes dedicados em `engine/runtime/test/ui-navigation-focus-*.mjs` e `tools/mcp-server/test/ui-navigation-focus.test.mjs`.
 
 Rodar:
 
@@ -222,4 +223,4 @@ npm run smoke
 
 ## Continuidade
 
-UI System v1 esta fechado como contrato declarativo/report e agora possui uma fixture publica de telas pequenas de producao em `scenes/ui-production-screens.scene.json`. O proximo pacote seguro e `UI Navigation/Focus Lite v1`, mantendo navegacao/foco opt-in e sem acoplar HUD Lite, Playable Save/Load Lite, savegame canonico ou `RenderSnapshot v1`.
+UI System v1 esta fechado como contrato declarativo/report e agora possui uma fixture publica de telas pequenas de producao em `scenes/ui-production-screens.scene.json`. `UI Navigation/Focus Lite v1` tambem esta fechado como report-only derivado de `UiSystemReport v1`, sem consumo visual. O proximo pacote seguro e `UI Action Semantics Lite v1`, para explicitar acao/foco autorado antes de qualquer interacao no Browser Demo/export.
