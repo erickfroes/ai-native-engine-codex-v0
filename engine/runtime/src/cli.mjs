@@ -53,6 +53,7 @@ import {
   buildUiSystemReportV1,
   buildUiNavigationFocusReportV1,
   buildUiActionSemanticsReportV1,
+  buildUiInputStepReportV1,
   buildUiLocalScreenStateReportV1,
   buildSpriteAnimationReportV1,
   buildPrefabValidationReportV1,
@@ -91,6 +92,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-tile-collision <path> [--json]
   node engine/runtime/src/cli.mjs inspect-pathfinding-grid <path> [--json]
   node engine/runtime/src/cli.mjs inspect-movement-blocking <path> --input-intent <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-ui-input-step <path> --input-intent <path> [--json]
   node engine/runtime/src/cli.mjs inspect-audio-lite <path> [--json]
   node engine/runtime/src/cli.mjs inspect-ui-system <path> [--json]
   node engine/runtime/src/cli.mjs inspect-ui-navigation-focus <path> [--json]
@@ -1145,6 +1147,53 @@ async function run() {
       console.log(`Final: ${report.final.x},${report.final.y}`);
       console.log(`Blocked: ${report.blocked}`);
       console.log(`Blocking entities: ${report.blockingEntities.length === 0 ? '(none)' : report.blockingEntities.join(', ')}`);
+    }
+
+    return;
+  }
+
+  if (command === 'inspect-ui-input-step') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    if (!hasFlag('--input-intent')) {
+      throw new Error('inspect-ui-input-step: --input-intent is required');
+    }
+
+    const inputIntentPath = readStringFlag('inspect-ui-input-step', '--input-intent', undefined);
+    const inputIntent = await loadValidatedInputIntentV1(inputIntentPath);
+    const report = await buildUiInputStepReportV1(maybePath, { inputIntent });
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`UI input step report version: ${report.uiInputStepReportVersion}`);
+      console.log(`Scope policy: ${report.scopePolicy}`);
+      console.log(`Input intent version: ${report.inputIntentVersion}`);
+      console.log(`Input intent tick: ${report.inputIntentTick}`);
+      console.log(`Input intent entity: ${report.inputIntentEntityId}`);
+      console.log(`Attempted move: ${report.attemptedMove.x},${report.attemptedMove.y}`);
+      console.log(`Direction: ${report.direction}`);
+      console.log(`Step type: ${report.stepType}`);
+      console.log(`Input handled: ${report.inputHandled}`);
+      console.log(`Focused screen: ${report.focusedScreenId ?? '(none)'}`);
+      console.log(`Focused widget: ${report.focusedWidgetIdBefore ?? '(none)'}`);
+      console.log(`Focused action: ${report.focusedActionIdBefore ?? report.activatedActionId ?? '(none)'}`);
+      const focusSource = report.focusedActionIdBefore !== null
+        ? 'ui.action.semantics'
+        : report.focusedWidgetIdBefore !== null
+          ? 'ui.navigation.focus'
+          : 'none';
+      console.log(`Focus source: ${focusSource}`);
+      console.log(`Action candidates: ${report.actionCandidates.length}`);
+      if (report.activatedActionId !== null) {
+        console.log(`Activated action: ${report.activatedActionId}`);
+      }
+      console.log(`Warnings: ${report.warnings.length}`);
     }
 
     return;

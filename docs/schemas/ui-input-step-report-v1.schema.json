@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ui-input-step-report-v1.schema.json",
+  "title": "UiInputStepReportV1",
+  "type": "object",
+  "required": [
+    "uiInputStepReportVersion",
+    "scene",
+    "sourceUiSystemReportVersion",
+    "sourceUiNavigationFocusReportVersion",
+    "sourceUiActionSemanticsReportVersion",
+    "sourceUiLocalScreenStateReportVersion",
+    "scopePolicy",
+    "inputIntentVersion",
+    "inputIntentTick",
+    "inputIntentEntityId",
+    "attemptedMove",
+    "direction",
+    "focusedScreenId",
+    "focusedEntityId",
+    "stepType",
+    "inputHandled",
+    "focusedActionIndexBefore",
+    "focusedActionIdBefore",
+    "focusedWidgetIdBefore",
+    "focusedActionIndexAfter",
+    "focusedActionIdAfter",
+    "focusedWidgetIdAfter",
+    "actionCandidates",
+    "activatedActionId",
+    "warnings"
+  ],
+  "properties": {
+    "uiInputStepReportVersion": {
+      "const": 1
+    },
+    "scene": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceUiSystemReportVersion": {
+      "const": 1
+    },
+    "sourceUiNavigationFocusReportVersion": {
+      "const": 1
+    },
+    "sourceUiActionSemanticsReportVersion": {
+      "const": 1
+    },
+    "sourceUiLocalScreenStateReportVersion": {
+      "const": 1
+    },
+    "scopePolicy": {
+      "const": "topmost-active-screen"
+    },
+    "inputIntentVersion": {
+      "const": 1
+    },
+    "inputIntentTick": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "inputIntentEntityId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attemptedMove": {
+      "type": "object",
+      "required": ["x", "y"],
+      "properties": {
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "direction": {
+      "type": "integer",
+      "enum": [-1, 0, 1]
+    },
+    "focusedScreenId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "focusedEntityId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stepType": {
+      "enum": [
+        "noop",
+        "activate",
+        "focus",
+        "focus-move"
+      ]
+    },
+    "inputHandled": {
+      "type": "boolean"
+    },
+    "focusedActionIndexBefore": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "focusedActionIdBefore": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "focusedWidgetIdBefore": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "focusedActionIndexAfter": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "focusedActionIdAfter": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "focusedWidgetIdAfter": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "actionCandidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "actionIndex",
+          "actionId",
+          "widgetId"
+        ],
+        "properties": {
+          "actionIndex": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "actionId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "widgetId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "activatedActionId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

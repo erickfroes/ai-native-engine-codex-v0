@@ -8,7 +8,8 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - Politica atual: V1 apenas bugfix, hardening e compatibilidade.
 - Meta em andamento: Meta 4 / V2 2D-2.5D indie production.
 - Slice fechado: `UI Local Screen State Lite v1` report-only.
-- Proximo pacote recomendado: `UI Input Step Lite v1`.
+- Proximo pacote recomendado: consolidar `UI Input Step Lite v1` e fechar o slice.
+- Slice atual em andamento: `UI Input Step Lite v1` report-only, em validação de contratos entre runtime/CLI/MCP.
 - Nao iniciar editor-lite, particle-lite, 3D, route solving ou pipeline pesado antes de avaliar um passo local de input para UI sem acoplar HUD Lite, Browser Demo/export, savegame ou render canonico.
 
 ## Estado
@@ -24,7 +25,8 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - [x] UI Navigation/Focus Lite v1 fechado como `UiNavigationFocusReport v1` derivado de `UiSystemReport v1`, com runtime/CLI/MCP e sem consumo visual.
 - [x] UI Action Semantics Lite v1 fechado como `UiActionSemanticsReport v1`, via `ui.action.semantics` co-localizado a `ui.screen`, formalizado em `schemas/component.schema.json`, com fixture publica em `scenes/ui-action-semantics.scene.json` e Browser Demo/export ainda passivos.
 - [x] UI Local Screen State Lite v1 fechado como `UiLocalScreenStateReport v1`, derivado de `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`, sem novo componente de cena e sem consumo no Browser Demo/export.
-- [x] Validacao final do slice: `npm test`, `npm run validate:scenes` e `npm run smoke` passaram.
+- [ ] `UI Input Step Lite v1` em validação final (report/CLI/MCP/cross-interface).
+- [ ] Validacao final do slice: `npm test`, `npm run validate:scenes` e `npm run smoke` em andamento.
 
 Inventario completo: `docs/STATUS.md`.
 Checklist por meta: `ROADMAP.md`.
@@ -34,16 +36,15 @@ Detalhe por versao: `docs/ENGINE_VERSION_ROADMAP.md`.
 
 ### `UI Input Step Lite v1`
 
-Objetivo: avaliar um passo local minimo de navegacao/ativacao de UI a partir de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, sem transformar Browser Demo/export no runtime canonico de interacao e sem salvar estado de UI em `savegame v1`.
+Objetivo: concluir a valida\u00e7\u00e3o final de `UI Input Step Lite v1` em runtime/CLI/MCP e fechar este pacote com contratos alinhados.
 
-Escopo do pacote:
+Escopo final do fechamento:
 
-- [ ] manter `UiLocalScreenStateReport v1` como estado local diagnostico/report-only, sem mutar `ui.screen` v1, `UiNavigationFocusReport v1` ou `UiActionSemanticsReport v1`;
-- [ ] avaliar um passo local deterministico de input/foco/acao a partir de `InputIntent v1`, sem novo componente de cena;
-- [ ] preservar HUD Lite, Playable Save/Load Lite, Audio Lite, UI Production Screens v1, UI Action Semantics Lite v1 e UI Local Screen State Lite v1 sem acoplamento;
-- [ ] manter Browser Demo/export passivos neste pacote, salvo contrato visual separado;
-- [ ] validar que `RenderSnapshot v1`, run-loop, replay e save/load nao mudam;
-- [ ] docs curtas e atualizacao deste handoff/roadmap.
+- [x] validar contratos (`UiInputStepReport v1`) em runtime, CLI e MCP para cen\u00e1rios com e sem a\u00e7\u00f5es;
+- [x] fechar a cobertura de cross-interface para runtime/CLI/MCP com cen\u00e1rios de sucesso e erro;
+- [x] adicionar documento curto do contrato: `docs/UI_INPUT_STEP_LITE_V1.md`;
+- [x] manter `UiSystemReport v1`/`UiNavigationFocusReport v1`/`UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1` sem muta\u00e7\u00e3o funcional;
+- [x] manter Browser Demo/export passivos neste pacote.
 
 Fora do pacote:
 
@@ -59,7 +60,7 @@ Fora do pacote:
 - glTF/3D;
 - particle-lite.
 
-Criterio de pronto: um passo local minimo de input/foco/acao fica explicito, versionado e inspecionavel por runtime/CLI/MCP; `UiSystemReport v1`, `UiNavigationFocusReport v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1` permanecem compativeis; `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
+Criterio de pronto: passo local minimo de input/foco/acao fica explicito, versionado e inspecionavel por runtime/CLI/MCP; `UiSystemReport v1`, `UiNavigationFocusReport v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1` permanecem compativeis; `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
 
 ## Como continuar
 
@@ -106,6 +107,15 @@ Subagentes recomendados para o proximo pacote:
 - hardening;
 - handoff.
 
+Subagentes para esta rodada:
+
+- `explorer`: mapeamento de código/contratos e pontos de integração.
+- `engine_architect`: validação de fronteiras arquitetura/runtime/CLI/MCP.
+- `gameplay_worker`: implementação minimalista do passo local report-only.
+- `qa_contract_auditor`: schema, fixtures e paridade runtime/CLI/MCP.
+- `perf_auditor`: checagem de custo e ausência de regressão nos caminhos atuais.
+- `docs_handoff_auditor`: alinhamento de handoff/roadmap/STATUS.
+
 5. Fechar com:
 
 ```bash
@@ -147,6 +157,7 @@ Use as tools MCP equivalentes quando estiver validando cenas, contratos ou repor
 - `docs/UI_NAVIGATION_FOCUS_LITE_V1.md`: contrato report-only de foco/navegacao derivados de UI System v1.
 - `docs/UI_ACTION_SEMANTICS_LITE_V1.md`: contrato report-only de semantica autorada para `ui.action.semantics`.
 - `docs/UI_LOCAL_SCREEN_STATE_LITE_V1.md`: contrato report-only de estado local minimo de telas.
+- `docs/UI_INPUT_STEP_LITE_V1.md`: contrato report-only para passo local de entrada de UI.
 - `docs/V2_GAP_AUDIT.md`: lacunas V2.
 - `docs/CODEX_SUBAGENT_STRATEGY.md`: estrategia de subagentes.
 

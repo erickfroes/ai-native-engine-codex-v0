@@ -114,6 +114,11 @@ export {
   UI_ACTION_SEMANTICS_REPORT_VERSION
 } from './ui/build-ui-action-semantics-report-v1.mjs';
 export {
+  buildUiInputStepReportV1,
+  UI_INPUT_STEP_REPORT_VERSION,
+  UI_INPUT_STEP_SCOPE_POLICY
+} from './ui/build-ui-input-step-report-v1.mjs';
+export {
   buildUiLocalScreenStateReportV1,
   createUiLocalScreenStateReportV1FromReports,
   UI_LOCAL_SCREEN_STATE_REPORT_VERSION,

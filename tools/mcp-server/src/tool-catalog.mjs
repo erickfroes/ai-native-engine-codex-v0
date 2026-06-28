@@ -765,6 +765,27 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_ui_input_step',
+    title: 'Inspect UI Input Step',
+    description:
+      'Build UiInputStepReport v1 from UiSystemReport v1, UiNavigationFocusReport v1, UiActionSemanticsReport v1 and an InputIntent v1.',
+    inputSchema: {
+      type: 'object',
+      required: ['path', 'inputIntentPath'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root for a scene.'
+        },
+        inputIntentPath: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root for an Input Intent v1 JSON file.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'inspect_sprite_animation',
     title: 'Inspect Sprite Animation',
     description: 'Build SpriteAnimationReport v1 from visual.sprite.animation components.',
