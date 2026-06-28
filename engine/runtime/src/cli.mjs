@@ -53,6 +53,7 @@ import {
   buildUiSystemReportV1,
   buildUiNavigationFocusReportV1,
   buildUiActionSemanticsReportV1,
+  buildUiLocalScreenStateReportV1,
   buildSpriteAnimationReportV1,
   buildPrefabValidationReportV1,
   buildPrefabUsageReportV1,
@@ -94,6 +95,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-ui-system <path> [--json]
   node engine/runtime/src/cli.mjs inspect-ui-navigation-focus <path> [--json]
   node engine/runtime/src/cli.mjs inspect-ui-action-semantics <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-ui-local-screen-state <path> [--json]
   node engine/runtime/src/cli.mjs inspect-sprite-animation <path> [--json]
   node engine/runtime/src/cli.mjs inspect-prefab-usage <path> [--json]
   node engine/runtime/src/cli.mjs inspect-prefab-usage-v2 <path> [--json]
@@ -1299,6 +1301,37 @@ async function run() {
       for (const action of report.actions) {
         console.log(
           `- ${action.widgetId}: screen=${action.screenId} action=${action.actionId} index=${action.actionIndex} previous=${action.previousActionWidgetId ?? '(none)'} next=${action.nextActionWidgetId ?? '(none)'}`
+        );
+      }
+      console.log(`Warnings: ${report.warnings.length}`);
+    }
+
+    return;
+  }
+
+  if (command === 'inspect-ui-local-screen-state') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildUiLocalScreenStateReportV1(maybePath);
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`UI local screen state report version: ${report.uiLocalScreenStateReportVersion}`);
+      console.log(`Scope policy: ${report.scopePolicy}`);
+      console.log(`Focus resolution policy: ${report.focusResolutionPolicy}`);
+      console.log(`Focused screen: ${report.focusedScreenId ?? '(none)'}`);
+      console.log(`Focused widget: ${report.focusedWidgetId ?? '(none)'}`);
+      console.log(`Focus source: ${report.focusSource}`);
+      console.log(`Screens: ${report.screens.length}`);
+      for (const screen of report.screens) {
+        console.log(
+          `- ${screen.screenId}: state=${screen.localState} stackIndex=${screen.stackIndex ?? '(none)'} focusSource=${screen.focusSource} focusedWidget=${screen.focusedWidgetId ?? '(none)'}`
         );
       }
       console.log(`Warnings: ${report.warnings.length}`);

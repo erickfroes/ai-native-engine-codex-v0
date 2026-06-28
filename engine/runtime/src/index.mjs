@@ -113,6 +113,12 @@ export {
   UI_ACTION_SEMANTICS_COMPONENT_KIND,
   UI_ACTION_SEMANTICS_REPORT_VERSION
 } from './ui/build-ui-action-semantics-report-v1.mjs';
+export {
+  buildUiLocalScreenStateReportV1,
+  createUiLocalScreenStateReportV1FromReports,
+  UI_LOCAL_SCREEN_STATE_REPORT_VERSION,
+  UI_LOCAL_SCREEN_FOCUS_RESOLUTION_POLICY
+} from './ui/build-ui-local-screen-state-report-v1.mjs';
 export { getSystemRegistryV1, getKnownSystemDefinition } from './systems/system-registry.mjs';
 export {
   getSystemPhaseRegistryV1,

@@ -227,4 +227,4 @@ npm run smoke
 
 ## Continuidade
 
-UI System v1 esta fechado como contrato declarativo/report e agora possui uma fixture publica de telas pequenas de producao em `scenes/ui-production-screens.scene.json`. `UI Navigation/Focus Lite v1` e `UI Action Semantics Lite v1` tambem estao fechados como contratos derivados separados, sem consumo visual. O proximo pacote seguro e `UI Local Screen State Lite v1`, para explicitar estado local de telas antes de qualquer interacao no Browser Demo/export.
+UI System v1 esta fechado como contrato declarativo/report e agora possui uma fixture publica de telas pequenas de producao em `scenes/ui-production-screens.scene.json`. `UI Navigation/Focus Lite v1`, `UI Action Semantics Lite v1` e `UI Local Screen State Lite v1` tambem estao fechados como contratos derivados separados, sem consumo visual/interativo no Browser Demo/export. O proximo pacote seguro e `UI Input Step Lite v1`, para avaliar um passo local de navegacao/ativacao de UI sem transformar o overlay HTML no runtime canonico.

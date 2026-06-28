@@ -31,7 +31,7 @@ Handoff operacional: `docs/CODEX_HANDOFF.md`.
 - [ ] Meta 6 / V4 runtime/editor AA ainda nao iniciada.
 - [ ] Meta 7 / V5-V6 AAA aspiracional ainda nao iniciada.
 
-Proximo pacote recomendado: **UI Local Screen State Lite v1**.
+Proximo pacote recomendado: **UI Input Step Lite v1**.
 
 ---
 
@@ -105,7 +105,8 @@ Objetivo: sair de demo e chegar a uma base de producao pequena para jogos 2D/2.5
 - [x] Preservar `RenderSnapshot v1`, HUD Lite e Playable Save/Load Lite sem acoplamento.
 - [x] UI Navigation/Focus Lite v1 report-only, derivado de `UiSystemReport v1`, com paridade runtime/CLI/MCP.
 - [x] UI Action Semantics Lite v1 report-only, via `ui.action.semantics` e `UiActionSemanticsReport v1`, sem consumo interativo no Browser Demo/export.
-- [ ] Estados de tela serializaveis.
+- [x] UI Local Screen State Lite v1 report-only, opt-in, derivado de `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`, sem novo componente de cena e sem consumo no Browser Demo/export.
+- [ ] Persistencia/savegame canonico de UI continua fora do V2 inicial.
 - [ ] Matriz de regressao UI.
 
 ### Animacao 2D
@@ -308,23 +309,25 @@ Criterio realista:
 
 ## Proximo pacote recomendado
 
-**UI Local Screen State Lite v1**
+**UI Input Step Lite v1**
 
 Checklist minimo do pacote:
 
 - [ ] Ler `README.md`, `docs/CODEX_HANDOFF.md`, `SPEC.md`, `docs/module-contracts.md`, `schemas/`, `ROADMAP.md` e `docs/ENGINE_VERSION_ROADMAP.md`.
 - [ ] Usar subagentes: `explorer`, `engine_architect`, `tooling_editor_architect`, `qa_contract_auditor`, `perf_auditor` e `docs_handoff_auditor`.
-- [ ] Decidir se o estado local minimo cabe em contrato separado e opt-in, preservando `ui.screen` v1, `ui.action.semantics` v1 e `UiNavigationFocusReport v1`.
-- [ ] Manter Browser Demo/export passivos neste pacote, salvo se houver contrato visual separado.
-- [ ] Preservar `RenderSnapshot v1`, HUD Lite, Playable Save/Load Lite, replay, save/load e `UiActionSemanticsReport v1`.
-- [ ] Criar fixture minima, runtime, CLI, MCP e testes cross-interface quando aplicavel.
+- [ ] Avaliar um passo local de navegacao/ativacao a partir de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`.
+- [ ] Manter o pacote como report-only, sem novo componente de cena e sem consumo no Browser Demo/export.
+- [ ] Preservar `RenderSnapshot v1`, HUD Lite, Playable Save/Load Lite, replay, save/load, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`.
+- [ ] Criar fixture minima ou reuse de fixtures publicas, runtime, CLI, MCP e testes cross-interface quando aplicavel.
 - [ ] Atualizar docs e handoff.
 - [ ] Rodar `npm test`, `npm run validate:scenes` e `npm run smoke`.
 
 Fora do pacote inicial:
 
-- [ ] Ativacao interativa por Enter/Espaco, setas/WASD ou mouse.
+- [ ] Consumo interativo no Browser Demo/export.
+- [ ] Mouse/touch, hit-testing e click.
 - [ ] Savegame canonico de UI.
+- [ ] Novo componente de cena para input/estado de UI.
 - [ ] Editor visual completo.
 - [ ] Layout engine completo.
 - [ ] Sistema de widgets interativos amplo.

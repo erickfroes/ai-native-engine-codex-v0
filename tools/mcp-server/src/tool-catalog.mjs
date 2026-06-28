@@ -748,6 +748,23 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_ui_local_screen_state',
+    title: 'Inspect UI Local Screen State',
+    description:
+      'Build UiLocalScreenStateReport v1 from UiSystemReport v1, UiNavigationFocusReport v1 and UiActionSemanticsReport v1 without mutating Browser Demo state.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'inspect_sprite_animation',
     title: 'Inspect Sprite Animation',
     description: 'Build SpriteAnimationReport v1 from visual.sprite.animation components.',

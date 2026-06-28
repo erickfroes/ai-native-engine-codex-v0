@@ -514,6 +514,24 @@ Contrato autorado/report-only para declarar quais widgets de `ui.screen` sao aci
 - Browser Demo, Simple HTML Export e Portable HTML Export permanecem passivos neste slice.
 - nao altera `RenderSnapshot v1`, loop, replay, save/load, HUD Lite ou Playable Save/Load Lite.
 
+## UI Local Screen State Lite v1
+
+Contrato report-only para explicitar estado local minimo de telas a partir dos contratos de UI ja existentes:
+
+- ver `docs/UI_LOCAL_SCREEN_STATE_LITE_V1.md`.
+- schema formal: `docs/schemas/ui-local-screen-state-report-v1.schema.json`.
+- runtime: `buildUiLocalScreenStateReportV1(sceneOrPath)`.
+- CLI: `inspect-ui-local-screen-state <scene> [--json]`.
+- MCP: `inspect_ui_local_screen_state({ path })`.
+- o report deriva de `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`.
+- `scopePolicy` continua `topmost-active-screen`.
+- `focusResolutionPolicy` v1 usa `ui.action.semantics` antes de `UiNavigationFocusReport v1`.
+- `screens[]` preserva a ordem canonica de `UiSystemReport v1` e adiciona `localState`, `inActiveStack`, `stackIndex`, `candidateCount`, `actionCount` e foco resolvido por screen.
+- `localState` v1 usa apenas `inactive`, `active-background` e `active-scope`.
+- nao adiciona componente novo de cena, nao altera `ui.screen` v1 e nao muta `UiNavigationFocusReport v1` ou `UiActionSemanticsReport v1`.
+- Browser Demo, Simple HTML Export e Portable HTML Export permanecem passivos neste slice.
+- nao altera `RenderSnapshot v1`, loop, replay, save/load, HUD Lite ou Playable Save/Load Lite.
+
 ## Sprite Animation v1
 
 Contrato declarativo minimo para animacao sprite inspecionavel:
@@ -839,4 +857,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, UI Action Semantics Lite v1 report-only, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `UI Local Screen State Lite v1`.
+- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, UI Action Semantics Lite v1 report-only, UI Local Screen State Lite v1 report-only, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `UI Input Step Lite v1`.

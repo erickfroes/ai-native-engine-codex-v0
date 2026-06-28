@@ -7,9 +7,9 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - Versao atual: V1 Small 2D release-checkpointed.
 - Politica atual: V1 apenas bugfix, hardening e compatibilidade.
 - Meta em andamento: Meta 4 / V2 2D-2.5D indie production.
-- Slice fechado: `UI Action Semantics Lite v1` report-only.
-- Proximo pacote recomendado: `UI Local Screen State Lite v1`.
-- Nao iniciar editor-lite, particle-lite, 3D, route solving ou pipeline pesado antes de explicitar estado local de telas para UI sem acoplar HUD Lite, Browser Demo/export, savegame ou render canonico.
+- Slice fechado: `UI Local Screen State Lite v1` report-only.
+- Proximo pacote recomendado: `UI Input Step Lite v1`.
+- Nao iniciar editor-lite, particle-lite, 3D, route solving ou pipeline pesado antes de avaliar um passo local de input para UI sem acoplar HUD Lite, Browser Demo/export, savegame ou render canonico.
 
 ## Estado
 
@@ -23,7 +23,8 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - [x] UI Production Screens v1 fechado com `scenes/ui-production-screens.scene.json`, menu/HUD ativos, pause autoravel inativo, paridade Browser Demo/export e budgets de HTML.
 - [x] UI Navigation/Focus Lite v1 fechado como `UiNavigationFocusReport v1` derivado de `UiSystemReport v1`, com runtime/CLI/MCP e sem consumo visual.
 - [x] UI Action Semantics Lite v1 fechado como `UiActionSemanticsReport v1`, via `ui.action.semantics` co-localizado a `ui.screen`, com fixture publica em `scenes/ui-action-semantics.scene.json` e Browser Demo/export ainda passivos.
-- [x] Validacao final do slice: `npm test` (775), `npm run validate:scenes` (7/7) e `npm run smoke` passaram.
+- [x] UI Local Screen State Lite v1 fechado como `UiLocalScreenStateReport v1`, derivado de `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`, sem novo componente de cena e sem consumo no Browser Demo/export.
+- [x] Validacao final do slice: `npm test`, `npm run validate:scenes` e `npm run smoke` passaram.
 
 Inventario completo: `docs/STATUS.md`.
 Checklist por meta: `ROADMAP.md`.
@@ -31,33 +32,34 @@ Detalhe por versao: `docs/ENGINE_VERSION_ROADMAP.md`.
 
 ## Proximo passo
 
-### `UI Local Screen State Lite v1`
+### `UI Input Step Lite v1`
 
-Objetivo: explicitar estado local minimo de telas para a UI pequena atual, preservando `ui.screen` v1 e `ui.action.semantics` v1, sem transformar Browser Demo/export no runtime canonico de interacao e sem salvar estado de UI em `savegame v1`.
+Objetivo: avaliar um passo local minimo de navegacao/ativacao de UI a partir de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, sem transformar Browser Demo/export no runtime canonico de interacao e sem salvar estado de UI em `savegame v1`.
 
 Escopo do pacote:
 
-- [ ] decidir se o estado local minimo cabe em contrato separado e opt-in, preservando `ui.screen` v1, `ui.action.semantics` v1 e a compatibilidade de `UiNavigationFocusReport v1`;
-- [ ] manter `UiNavigationFocusReport v1` como diagnostico heuristico e `UiActionSemanticsReport v1` como semantica autorada, sem mutar seus shapes sem novo versionamento;
-- [ ] preservar HUD Lite, Playable Save/Load Lite, Audio Lite, UI Production Screens v1 e UI Action Semantics Lite v1 sem acoplamento;
+- [ ] manter `UiLocalScreenStateReport v1` como estado local diagnostico/report-only, sem mutar `ui.screen` v1, `UiNavigationFocusReport v1` ou `UiActionSemanticsReport v1`;
+- [ ] avaliar um passo local deterministico de input/foco/acao a partir de `InputIntent v1`, sem novo componente de cena;
+- [ ] preservar HUD Lite, Playable Save/Load Lite, Audio Lite, UI Production Screens v1, UI Action Semantics Lite v1 e UI Local Screen State Lite v1 sem acoplamento;
 - [ ] manter Browser Demo/export passivos neste pacote, salvo contrato visual separado;
 - [ ] validar que `RenderSnapshot v1`, run-loop, replay e save/load nao mudam;
 - [ ] docs curtas e atualizacao deste handoff/roadmap.
 
 Fora do pacote:
 
-- ativacao interativa por Enter/Espaco, setas/WASD ou mouse/touch;
+- consumo interativo no Browser Demo/export;
+- mouse/touch, hit-testing e click;
 - estado de UI persistido em savegame canonico;
+- novo componente de cena para input/estado de UI;
 - layout engine completo;
 - widget system amplo;
 - binding de dados e HUD reativo;
-- consumo visual/interativo no Browser Demo/export;
 - editor visual;
 - renderer novo;
 - glTF/3D;
 - particle-lite.
 
-Criterio de pronto: estado local minimo de telas fica explicito, versionado e inspecionavel por runtime/CLI/MCP; `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1` permanecem compativeis; `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
+Criterio de pronto: um passo local minimo de input/foco/acao fica explicito, versionado e inspecionavel por runtime/CLI/MCP; `UiSystemReport v1`, `UiNavigationFocusReport v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1` permanecem compativeis; `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
 
 ## Como continuar
 
@@ -125,6 +127,7 @@ node ./engine/runtime/src/cli.mjs export-portable-html-game ./engine/runtime/tes
 node ./engine/runtime/src/cli.mjs inspect-ui-system ./scenes/ui-production-screens.scene.json --json
 node ./engine/runtime/src/cli.mjs inspect-ui-navigation-focus ./scenes/ui-production-screens.scene.json --json
 node ./engine/runtime/src/cli.mjs inspect-ui-action-semantics ./scenes/ui-action-semantics.scene.json --json
+node ./engine/runtime/src/cli.mjs inspect-ui-local-screen-state ./scenes/ui-action-semantics.scene.json --json
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-browser-demo.html --json
 node ./engine/runtime/src/cli.mjs export-portable-html-game ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-portable.html --json
 node ./engine/runtime/src/cli.mjs export-html-game ./scenes/v1-small-2d.scene.json --movement-blocking --gameplay-hud --playable-save-load --out ./tmp/v1-small-2d.html --json
@@ -143,6 +146,7 @@ Use as tools MCP equivalentes quando estiver validando cenas, contratos ou repor
 - `docs/UI_SYSTEM_V1.md`: contrato de screens/widgets declarativos.
 - `docs/UI_NAVIGATION_FOCUS_LITE_V1.md`: contrato report-only de foco/navegacao derivados de UI System v1.
 - `docs/UI_ACTION_SEMANTICS_LITE_V1.md`: contrato report-only de semantica autorada para `ui.action.semantics`.
+- `docs/UI_LOCAL_SCREEN_STATE_LITE_V1.md`: contrato report-only de estado local minimo de telas.
 - `docs/V2_GAP_AUDIT.md`: lacunas V2.
 - `docs/CODEX_SUBAGENT_STRATEGY.md`: estrategia de subagentes.
 

@@ -129,4 +129,4 @@ npm run smoke
 
 ## Continuidade
 
-O proximo passo seguro e `UI Local Screen State Lite v1`: adicionar um contrato pequeno e opt-in para estado local de telas, sem transformar o overlay da Browser Demo em runtime canonico de UI.
+`UI Local Screen State Lite v1` agora fecha a explicacao do estado local minimo de telas sem mutar este report. O proximo passo seguro e `UI Input Step Lite v1`: avaliar um passo local de navegacao/ativacao de UI a partir de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, ainda sem consumo no Browser Demo/export.

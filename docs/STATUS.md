@@ -54,6 +54,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - UI Production Screens v1 com `scenes/ui-production-screens.scene.json`, menu/HUD ativos, pause autoravel inativo, paridade Browser Demo/export e budget de HTML;
 - UI Navigation/Focus Lite v1 como report-only derivado de `UiSystemReport v1`, com runtime/CLI/MCP e sem consumo visual;
 - UI Action Semantics Lite v1 como contrato autorado/report-only via `ui.action.semantics`, `UiActionSemanticsReport v1` e fixture publica `scenes/ui-action-semantics.scene.json`, sem consumo visual;
+- UI Local Screen State Lite v1 como `UiLocalScreenStateReport v1` opt-in/report-only derivado de `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`, sem novo componente de cena e sem consumo no Browser Demo/export;
 - Sprite Animation v1 como diagnostico declarativo runtime/CLI/MCP, com consumo visual opt-in na Browser Demo para sprites asset-backed;
 - Portable HTML Export v2 com assets inline e Sprite Animation v1 opt-in no caminho portatil;
 - Prefab System v1 como resolucao declarativa minima e report diagnostico runtime/CLI/MCP;
@@ -78,8 +79,8 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 
 ## Foco atual recomendado
 
-1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1`, `UI Action Semantics Lite v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `UI Local Screen State Lite v1` como menor proximo passo seguro, para explicitar estado local de telas antes de qualquer consumo interativo de UI ou acoplamento a savegame canonico.
+1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1`, `UI Action Semantics Lite v1`, `UI Local Screen State Lite v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
+2. Abrir `UI Input Step Lite v1` como menor proximo passo seguro, para avaliar um passo local de navegacao/ativacao a partir de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, ainda como report opt-in e sem consumo no Browser Demo/export.
 3. Se a lacuna de validacao estrita for atacada, criar superficie opt-in nova em vez de mutar `validate-scene` / `SceneValidationReport v1`.
 4. Adiar editor-lite, particle-lite, route solving e 3D ate UI pequena e V2 estarem mais demonstradas.
 
@@ -101,6 +102,7 @@ Detalhes: `docs/ENGINE_VERSION_ROADMAP.md`.
 - acoplar UI System v1 ao HUD Lite ou aplicar `camera.viewport` em UI screen-space;
 - tratar `UiNavigationFocusReport v1` heuristico como ordem canonica de acao depois que `ui.action.semantics` passou a existir;
 - acoplar `ui.action.semantics` ao Browser Demo/export sem contrato visual ou de estado local separado;
+- tratar `UiLocalScreenStateReport v1` como estado persistido, runtime canonico ou renderer interativo de UI;
 - confundir Playable Save/Load Lite browser-local com `savegame v1` ou `State Snapshot v1`;
 - transformar Simple HTML Export v1 em bundler, servidor ou build pipeline V2;
 - transformar Game Templates v1 em template engine, prefab system ou editor;

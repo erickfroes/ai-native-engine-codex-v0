@@ -4,7 +4,7 @@
 
 Registrar o audit pequeno pedido apos o congelamento de `entity.prefab` v1 e a decisao do menor pacote seguro que abriu V2.
 
-Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, o follow-up imediato foi fechado como `SceneTransitionReport v1`, a composicao minima foi fechada como `Scene Composition Manifest v1`, o primeiro diagnostico de grid foi fechado como `Pathfinding Grid v1`, o manifesto atlas/material foi fechado como `Atlas/Material Manifest v1`, o consumo visual sprite-only foi fechado como `Atlas Region Consumption v1`, o binding explicito de sprites foi fechado como `Atlas Region Binding Contract v1`, telas pequenas de producao foram fechadas como `UI Production Screens v1`, foco/navegacao minima foi fechado como `UI Navigation/Focus Lite v1` report-only e a semantica autorada foi fechada como `UI Action Semantics Lite v1`; a continuidade agora aponta para `UI Local Screen State Lite v1`.
+Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, o follow-up imediato foi fechado como `SceneTransitionReport v1`, a composicao minima foi fechada como `Scene Composition Manifest v1`, o primeiro diagnostico de grid foi fechado como `Pathfinding Grid v1`, o manifesto atlas/material foi fechado como `Atlas/Material Manifest v1`, o consumo visual sprite-only foi fechado como `Atlas Region Consumption v1`, o binding explicito de sprites foi fechado como `Atlas Region Binding Contract v1`, telas pequenas de producao foram fechadas como `UI Production Screens v1`, foco/navegacao minima foi fechado como `UI Navigation/Focus Lite v1` report-only, a semantica autorada foi fechada como `UI Action Semantics Lite v1` e o estado local minimo foi fechado como `UI Local Screen State Lite v1`; a continuidade agora aponta para `UI Input Step Lite v1`.
 
 ## Estado consolidado
 
@@ -121,7 +121,7 @@ Escopo executado:
 - cobrir fixture publica `scenes/ui-action-semantics.scene.json`, fixture invalida, paridade cross-interface e compatibilidade com `UiNavigationFocusReport v1`;
 - preservar Browser Demo/export, `RenderSnapshot v1`, loop, replay, save/load e HUD Lite sem mutacao de contrato.
 
-Proximo pacote recomendado: **UI Local Screen State Lite v1**, para explicitar estado local de telas antes de qualquer consumo interativo no Browser Demo/export.
+`UI Local Screen State Lite v1` agora fecha a explicacao do estado local minimo de telas como report-only e sem novo componente de cena. Proximo pacote recomendado: **UI Input Step Lite v1**, para avaliar um passo local de navegacao/ativacao a partir de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, ainda sem consumo no Browser Demo/export.
 
 Fora de escopo:
 

@@ -52,6 +52,7 @@ import {
   buildUiSystemReportV1,
   buildUiNavigationFocusReportV1,
   buildUiActionSemanticsReportV1,
+  buildUiLocalScreenStateReportV1,
   buildSpriteAnimationReportV1,
   buildPrefabUsageReportV1,
   buildPrefabUsageReportV2
@@ -159,6 +160,7 @@ async function handleToolCall(params) {
     params.name !== 'inspect_ui_system' &&
     params.name !== 'inspect_ui_navigation_focus' &&
     params.name !== 'inspect_ui_action_semantics' &&
+    params.name !== 'inspect_ui_local_screen_state' &&
     params.name !== 'inspect_sprite_animation' &&
     params.name !== 'inspect_prefab_usage' &&
     params.name !== 'inspect_prefab_usage_v2' &&
@@ -893,6 +895,26 @@ async function handleToolCall(params) {
       return {
         content: toTextContent(
           `UI action semantics report built for ${report.scene} with ${report.actions.length} action(s).`
+        ),
+        structuredContent: report,
+        isError: false
+      };
+    }
+
+    if (params.name === 'inspect_ui_local_screen_state') {
+      const unexpectedArgument = findUnexpectedArgument(args, new Set(['path']));
+      if (unexpectedArgument !== undefined) {
+        return {
+          content: toTextContent(`inspect_ui_local_screen_state: unexpected argument \`${unexpectedArgument}\`.`),
+          isError: true
+        };
+      }
+
+      const report = await buildUiLocalScreenStateReportV1(targetPath);
+      const activeScreenCount = report.screens.filter((screen) => screen.inActiveStack).length;
+      return {
+        content: toTextContent(
+          `UI local screen state report built for ${report.scene} with ${activeScreenCount} active screen(s).`
         ),
         structuredContent: report,
         isError: false

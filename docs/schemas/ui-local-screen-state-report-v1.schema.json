@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ui-local-screen-state-report-v1.schema.json",
+  "title": "UiLocalScreenStateReportV1",
+  "type": "object",
+  "required": [
+    "uiLocalScreenStateReportVersion",
+    "scene",
+    "sourceUiSystemReportVersion",
+    "sourceUiNavigationFocusReportVersion",
+    "sourceUiActionSemanticsReportVersion",
+    "scopePolicy",
+    "focusResolutionPolicy",
+    "focusedScreenId",
+    "focusedEntityId",
+    "focusedWidgetId",
+    "focusedActionId",
+    "heuristicFocusedWidgetId",
+    "focusSource",
+    "screens",
+    "warnings"
+  ],
+  "properties": {
+    "uiLocalScreenStateReportVersion": {
+      "const": 1
+    },
+    "scene": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceUiSystemReportVersion": {
+      "const": 1
+    },
+    "sourceUiNavigationFocusReportVersion": {
+      "const": 1
+    },
+    "sourceUiActionSemanticsReportVersion": {
+      "const": 1
+    },
+    "scopePolicy": {
+      "const": "topmost-active-screen"
+    },
+    "focusResolutionPolicy": {
+      "const": "action-semantics-then-navigation-focus"
+    },
+    "focusedScreenId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "focusedEntityId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "focusedWidgetId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "focusedActionId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "heuristicFocusedWidgetId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "focusSource": {
+      "enum": [
+        "ui.action.semantics",
+        "ui.navigation.focus",
+        "none"
+      ]
+    },
+    "screens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "screenId",
+          "entityId",
+          "active",
+          "layer",
+          "localState",
+          "inActiveStack",
+          "stackIndex",
+          "inFocusScope",
+          "hasActionSemantics",
+          "candidateCount",
+          "actionCount",
+          "focusedWidgetId",
+          "focusedActionId",
+          "focusSource"
+        ],
+        "properties": {
+          "screenId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "entityId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "layer": {
+            "type": "integer"
+          },
+          "localState": {
+            "enum": [
+              "inactive",
+              "active-background",
+              "active-scope"
+            ]
+          },
+          "inActiveStack": {
+            "type": "boolean"
+          },
+          "stackIndex": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "inFocusScope": {
+            "type": "boolean"
+          },
+          "hasActionSemantics": {
+            "type": "boolean"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "actionCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "focusedWidgetId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "focusedActionId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "focusSource": {
+            "enum": [
+              "ui.action.semantics",
+              "ui.navigation.focus",
+              "none"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}
