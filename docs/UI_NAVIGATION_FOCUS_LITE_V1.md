@@ -129,4 +129,4 @@ npm run smoke
 
 ## Continuidade
 
-`UI Local Screen State Lite v1`, `UI Input Step Lite v1` e `UI Explicit Input Lite v1` ja fecham a trilha report-only de foco/estado/input local. O proximo passo seguro e `UI Regression Matrix v1`, ainda sem consumo interativo no Browser Demo/export.
+`UI Local Screen State Lite v1`, `UI Input Step Lite v1`, `UI Explicit Input Lite v1` e `UI Regression Matrix v1` ja fecham a trilha report-only de foco/estado/input local. A matriz consolidada vive em `docs/UI_REGRESSION_MATRIX_V1.md`; o proximo passo seguro e `Browser UI Input Preview v1`, ainda restrito a Browser Demo.

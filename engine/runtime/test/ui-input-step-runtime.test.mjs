@@ -3,7 +3,11 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { buildUiInputStepReportV1 } from '../src/index.mjs';
+import {
+  buildRenderSnapshotV1,
+  buildUiInputStepReportV1,
+  loadSceneFile
+} from '../src/index.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
@@ -178,4 +182,26 @@ test('buildUiInputStepReportV1 validates inputIntent and fails for invalid input
     }),
     /buildUiInputStepReportV1: invalid inputIntent/
   );
+});
+
+test('legacy input step remains compact and report-only', async () => {
+  const scene = await loadSceneFile(actionScenePath);
+  const beforeSnapshot = await buildRenderSnapshotV1(scene);
+  const report = await buildUiInputStepReportV1(scene, {
+    inputIntent: {
+      inputIntentVersion: 1,
+      tick: 1,
+      entityId: 'player.hero',
+      actions: [
+        {
+          type: 'move',
+          axis: { x: 1, y: 0 }
+        }
+      ]
+    }
+  });
+  const afterSnapshot = await buildRenderSnapshotV1(scene);
+
+  assert.deepEqual(afterSnapshot, beforeSnapshot);
+  assert.ok(JSON.stringify(report).length <= 2048);
 });

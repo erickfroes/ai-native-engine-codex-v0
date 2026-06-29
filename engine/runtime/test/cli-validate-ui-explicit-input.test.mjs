@@ -9,6 +9,7 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const validInputPath = path.join(repoRoot, 'fixtures', 'ui-input', 'navigate-next.ui-explicit-input.json');
+const validPreviousInputPath = path.join(repoRoot, 'fixtures', 'ui-input', 'navigate-previous.ui-explicit-input.json');
 const invalidInputPath = path.join(repoRoot, 'fixtures', 'ui-input', 'invalid.version.ui-explicit-input.json');
 const validInputFixture = JSON.parse(readFileSync(validInputPath, 'utf8'));
 
@@ -25,6 +26,14 @@ test('validate-ui-explicit-input valid fixture passes', () => {
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /Status: OK/);
   assert.match(result.stdout, /Action: navigate\(next\)/);
+});
+
+test('validate-ui-explicit-input accepts navigate previous fixtures', () => {
+  const result = runCli(['validate-ui-explicit-input', validPreviousInputPath]);
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Status: OK/);
+  assert.match(result.stdout, /Action: navigate\(previous\)/);
 });
 
 test('validate-ui-explicit-input invalid fixture fails predictably', () => {
@@ -65,10 +74,17 @@ test('keyboard-to-ui-explicit-input prints valid UI explicit input JSON', () => 
     '--keys',
     'ArrowRight'
   ]);
-  const activateResult = runCli([
+  const previousResult = runCli([
     'keyboard-to-ui-explicit-input',
     '--tick',
     '2',
+    '--keys',
+    'ArrowUp'
+  ]);
+  const activateResult = runCli([
+    'keyboard-to-ui-explicit-input',
+    '--tick',
+    '3',
     '--keys',
     'Enter'
   ]);
@@ -83,10 +99,20 @@ test('keyboard-to-ui-explicit-input prints valid UI explicit input JSON', () => 
     }
   });
 
+  assert.equal(previousResult.status, 0, previousResult.stderr);
+  assert.deepEqual(JSON.parse(previousResult.stdout), {
+    uiExplicitInputVersion: 1,
+    tick: 2,
+    action: {
+      type: 'navigate',
+      direction: 'previous'
+    }
+  });
+
   assert.equal(activateResult.status, 0, activateResult.stderr);
   assert.deepEqual(JSON.parse(activateResult.stdout), {
     uiExplicitInputVersion: 1,
-    tick: 2,
+    tick: 3,
     action: {
       type: 'activate'
     }

@@ -98,6 +98,12 @@ test('mcp UI explicit input tools are listed and validate explicit input payload
         path: './fixtures/ui-input/navigate-next.ui-explicit-input.json'
       }
     });
+    const previousResponse = await client.request('tools/call', {
+      name: 'validate_ui_explicit_input',
+      arguments: {
+        path: './fixtures/ui-input/navigate-previous.ui-explicit-input.json'
+      }
+    });
     const invalidResponse = await client.request('tools/call', {
       name: 'validate_ui_explicit_input',
       arguments: {
@@ -108,6 +114,9 @@ test('mcp UI explicit input tools are listed and validate explicit input payload
     assert.equal(validResponse.result.isError, false);
     assert.equal(validResponse.result.structuredContent.ok, true);
     assert.deepEqual(validResponse.result.structuredContent.errors, []);
+    assert.equal(previousResponse.result.isError, false);
+    assert.equal(previousResponse.result.structuredContent.ok, true);
+    assert.equal(previousResponse.result.structuredContent.uiExplicitInput.action.direction, 'previous');
     assert.equal(invalidResponse.result.isError, true);
     assert.equal(invalidResponse.result.structuredContent.ok, false);
     assert.ok(
@@ -127,10 +136,17 @@ test('mcp keyboard_to_ui_explicit_input returns deterministic payloads and error
         keys: ['ArrowRight']
       }
     });
-    const activateResponse = await client.request('tools/call', {
+    const previousResponse = await client.request('tools/call', {
       name: 'keyboard_to_ui_explicit_input',
       arguments: {
         tick: 2,
+        keys: ['ArrowUp']
+      }
+    });
+    const activateResponse = await client.request('tools/call', {
+      name: 'keyboard_to_ui_explicit_input',
+      arguments: {
+        tick: 3,
         keys: ['Enter']
       }
     });
@@ -151,10 +167,19 @@ test('mcp keyboard_to_ui_explicit_input returns deterministic payloads and error
         direction: 'next'
       }
     });
+    assert.equal(previousResponse.result.isError, false);
+    assert.deepEqual(previousResponse.result.structuredContent, {
+      uiExplicitInputVersion: 1,
+      tick: 2,
+      action: {
+        type: 'navigate',
+        direction: 'previous'
+      }
+    });
     assert.equal(activateResponse.result.isError, false);
     assert.deepEqual(activateResponse.result.structuredContent, {
       uiExplicitInputVersion: 1,
-      tick: 2,
+      tick: 3,
       action: {
         type: 'activate'
       }

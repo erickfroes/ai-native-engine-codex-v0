@@ -225,5 +225,5 @@ Criterio realista:
 A partir do estado atual, seguir:
 
 1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1`, `UI Local Screen State Lite v1`, `UI Input Step Lite v1`, `UI Explicit Input Lite v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `UI Regression Matrix v1` como menor proximo passo seguro para consolidar input UI explicito, step legado e passividade de Browser Demo/export antes de qualquer consumo interativo.
+2. Abrir `Browser UI Input Preview v1` como menor proximo passo seguro para consumir `UiExplicitInput v1` so na Browser Demo, mantendo exports passivos.
 3. Manter editor-lite, particle-lite, route solving e 3D indie para depois de UI pequena e V2 demonstradas.

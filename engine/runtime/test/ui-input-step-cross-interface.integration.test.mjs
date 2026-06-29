@@ -128,6 +128,23 @@ test('UiInputStepReport v1 stays aligned across runtime, CLI and MCP for authore
   assert.equal(report.focusedActionIdBefore, 'menu.start-mission');
 });
 
+test('UiInputStepReport v1 stays aligned across runtime, CLI and MCP for previous boundary navigation', async () => {
+  const report = await assertUiInputStepInterfacesAligned('scenes/ui-action-semantics.scene.json', 'fixtures/input/move-player-left.intent.json');
+
+  assert.equal(report.stepType, 'focus');
+  assert.equal(report.direction, -1);
+  assert.equal(report.focusedActionIdAfter, 'menu.start-mission');
+  assert.equal(report.warnings.some((warning) => warning.code === 'UI_ACTION_FOCUS_BOUNDARY'), true);
+});
+
+test('UiInputStepReport v1 stays aligned across runtime, CLI and MCP for activate on authored actions', async () => {
+  const report = await assertUiInputStepInterfacesAligned('scenes/ui-action-semantics.scene.json', 'fixtures/input/no-player-move.intent.json');
+
+  assert.equal(report.stepType, 'activate');
+  assert.equal(report.direction, 0);
+  assert.equal(report.activatedActionId, 'menu.start-mission');
+});
+
 test('UiInputStepReport v1 stays aligned across runtime, CLI and MCP for scenes without action semantics', async () => {
   const report = await assertUiInputStepInterfacesAligned('scenes/ui-production-screens.scene.json', 'fixtures/input/move-player-right.intent.json');
 
@@ -178,4 +195,33 @@ test('UiInputStepReport v1 invalid scenes fail predictably across runtime, CLI a
   });
   assert.equal(mcpResponse.result.isError, true);
   assert.match(mcpResponse.result.content[0].text, /Scene validation failed/);
+});
+
+test('UiInputStepReport v1 invalid input files fail predictably across runtime, CLI and MCP', async () => {
+  const relativeScenePath = 'scenes/ui-action-semantics.scene.json';
+  const relativeIntentPath = 'fixtures/input/invalid.extra-field.intent.json';
+  const absoluteScenePath = path.join(repoRoot, relativeScenePath);
+  const absoluteIntentPath = path.join(repoRoot, relativeIntentPath);
+
+  await assert.rejects(
+    () => loadValidatedInputIntentV1(absoluteIntentPath),
+    /input intent is invalid/
+  );
+
+  const cliResult = runCli([
+    'inspect-ui-input-step',
+    absoluteScenePath,
+    '--input-intent',
+    absoluteIntentPath,
+    '--json'
+  ]);
+  assert.notEqual(cliResult.status, 0);
+  assert.match(cliResult.stderr, /input intent is invalid/);
+
+  const mcpResponse = await callMcpTool('inspect_ui_input_step', {
+    path: `./${relativeScenePath}`,
+    inputIntentPath: `./${relativeIntentPath}`
+  });
+  assert.equal(mcpResponse.result.isError, true);
+  assert.match(mcpResponse.result.content[0].text, /input intent is invalid/);
 });

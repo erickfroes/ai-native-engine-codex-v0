@@ -4,7 +4,7 @@
 
 Registrar o audit pequeno pedido apos o congelamento de `entity.prefab` v1 e a decisao do menor pacote seguro que abriu V2.
 
-Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, o follow-up imediato foi fechado como `SceneTransitionReport v1`, a composicao minima foi fechada como `Scene Composition Manifest v1`, o primeiro diagnostico de grid foi fechado como `Pathfinding Grid v1`, o manifesto atlas/material foi fechado como `Atlas/Material Manifest v1`, o consumo visual sprite-only foi fechado como `Atlas Region Consumption v1`, o binding explicito de sprites foi fechado como `Atlas Region Binding Contract v1`, telas pequenas de producao foram fechadas como `UI Production Screens v1`, foco/navegacao minima foi fechado como `UI Navigation/Focus Lite v1` report-only, a semantica autorada foi fechada como `UI Action Semantics Lite v1`, o estado local minimo foi fechado como `UI Local Screen State Lite v1`, o passo local de input foi fechado como `UI Input Step Lite v1` e input UI explicito foi fechado como `UI Explicit Input Lite v1`; a continuidade agora aponta para `UI Regression Matrix v1` antes de qualquer consumo interativo.
+Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, o follow-up imediato foi fechado como `SceneTransitionReport v1`, a composicao minima foi fechada como `Scene Composition Manifest v1`, o primeiro diagnostico de grid foi fechado como `Pathfinding Grid v1`, o manifesto atlas/material foi fechado como `Atlas/Material Manifest v1`, o consumo visual sprite-only foi fechado como `Atlas Region Consumption v1`, o binding explicito de sprites foi fechado como `Atlas Region Binding Contract v1`, telas pequenas de producao foram fechadas como `UI Production Screens v1`, foco/navegacao minima foi fechado como `UI Navigation/Focus Lite v1` report-only, a semantica autorada foi fechada como `UI Action Semantics Lite v1`, o estado local minimo foi fechado como `UI Local Screen State Lite v1`, o passo local de input foi fechado como `UI Input Step Lite v1`, input UI explicito foi fechado como `UI Explicit Input Lite v1` e a consolidacao de regressao foi fechada como `UI Regression Matrix v1`; a continuidade agora aponta para `Browser UI Input Preview v1`.
 
 ## Estado consolidado
 
@@ -143,7 +143,7 @@ Escopo executado:
 - cobrir fixtures validas/invalidas, paridade cross-interface, budget compacto e garantia report-only;
 - preservar Browser Demo/export, loop, replay, save/load e `InputIntent v1` sem consumo interativo.
 
-Proximo pacote recomendado: **UI Regression Matrix v1**, para consolidar cobertura de input UI explicito, step legado e passividade de Browser Demo/export antes de qualquer consumo interativo.
+Proximo pacote recomendado: **Browser UI Input Preview v1**, para consumir `UiExplicitInput v1` so na Browser Demo, preservando exports passivos e sem tocar loop/savegame.
 
 Fora de escopo:
 

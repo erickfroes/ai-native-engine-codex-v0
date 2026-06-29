@@ -108,4 +108,4 @@ npm run smoke
 
 ## Continuidade
 
-O proximo passo seguro e `UI Regression Matrix v1`, cobrindo `UiExplicitInput v1`, `UiExplicitInputStepReport v1`, convivencia com `UiInputStepReport v1` legado e a garantia de que Browser Demo/export continuam passivos.
+`UI Regression Matrix v1` ja consolida `UiExplicitInput v1`, `UiExplicitInputStepReport v1`, convivencia com `UiInputStepReport v1` legado e a garantia de que Browser Demo/export continuam passivos. A matriz dedicada vive em `docs/UI_REGRESSION_MATRIX_V1.md`; o proximo passo seguro e `Browser UI Input Preview v1`, ainda restrito a Browser Demo.

@@ -165,6 +165,18 @@ test('UiExplicitInputStepReport v1 stays aligned across runtime, CLI and MCP for
   assert.equal(report.focusedActionIdBefore, 'menu.start-mission');
 });
 
+test('UiExplicitInputStepReport v1 stays aligned across runtime, CLI and MCP for navigate previous', async () => {
+  const report = await assertUiExplicitInputStepAligned(
+    'scenes/ui-action-semantics.scene.json',
+    'fixtures/ui-input/navigate-previous.ui-explicit-input.json'
+  );
+
+  assert.equal(report.stepType, 'focus');
+  assert.equal(report.direction, -1);
+  assert.equal(report.focusedActionIdAfter, 'menu.start-mission');
+  assert.equal(report.warnings.some((warning) => warning.code === 'UI_ACTION_FOCUS_BOUNDARY'), true);
+});
+
 test('UiExplicitInputStepReport v1 stays aligned across runtime, CLI and MCP for activate', async () => {
   const report = await assertUiExplicitInputStepAligned(
     'scenes/ui-action-semantics.scene.json',

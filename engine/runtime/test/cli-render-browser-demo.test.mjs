@@ -53,6 +53,7 @@ const uiScreenPrefabScenePath = path.join(
   'fixtures',
   'ui-screen-prefab.scene.json'
 );
+const uiActionSemanticsScenePath = path.join(repoRoot, 'scenes', 'ui-action-semantics.scene.json');
 const uiProductionScenePath = path.join(repoRoot, 'scenes', 'ui-production-screens.scene.json');
 const invalidVisualSpriteScenePath = path.join(
   repoRoot,
@@ -619,6 +620,31 @@ test('render-browser-demo --ui-system renders production screens without HUD Lit
   assert.doesNotMatch(payload.html, />Paused<\/div>/);
   assert.doesNotMatch(payload.html, /id="browser-gameplay-hud"/);
   assert.doesNotMatch(payload.html, /id="browser-playable-save-load"/);
+  assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
+});
+
+test('render-browser-demo --ui-system keeps authored action semantics passive in HTML', () => {
+  const result = runCli([
+    'render-browser-demo',
+    uiActionSemanticsScenePath,
+    '--ui-system',
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'ui-action-semantics');
+  assert.match(payload.html, /"uiSystem":\{"enabled":true,"scene":"ui-action-semantics"/);
+  assert.match(payload.html, />Start Mission<\/div>/);
+  assert.match(payload.html, />Continue Mission<\/div>/);
+  assert.doesNotMatch(payload.html, /"uiInputStepReportVersion":/);
+  assert.doesNotMatch(payload.html, /"uiExplicitInputStepReportVersion":/);
+  assert.doesNotMatch(payload.html, /"uiExplicitInputVersion":/);
+  assert.doesNotMatch(payload.html, /focusedActionIdBefore/);
+  assert.doesNotMatch(payload.html, /activatedActionId/);
+  assert.doesNotMatch(payload.html, /actionCandidates/);
   assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
 });
 

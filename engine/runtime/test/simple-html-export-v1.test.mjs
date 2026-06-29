@@ -29,6 +29,7 @@ const portableEmptyVisualScenePath = path.join(
   'portable-empty-visual.scene.json'
 );
 const portableEmptyVisualSceneMcpPath = './engine/runtime/test/fixtures/portable-empty-visual.scene.json';
+const uiActionSemanticsScenePath = path.join(repoRoot, 'scenes', 'ui-action-semantics.scene.json');
 const uiProductionScenePath = path.join(repoRoot, 'scenes', 'ui-production-screens.scene.json');
 const uiProductionSceneMcpPath = './scenes/ui-production-screens.scene.json';
 const prefabOnlyScenePath = path.join(repoRoot, 'engine', 'runtime', 'test', 'fixtures', 'prefab-usage-prefab-only.scene.json');
@@ -199,6 +200,22 @@ test('Simple HTML Export v1 keeps production UI overlay size bounded', async () 
   assert.match(withUiSystem.html, /data-screen-id="hud\.main"/);
   assert.match(withUiSystem.html, /data-screen-id="menu\.main"/);
   assert.doesNotMatch(withUiSystem.html, /data-screen-id="pause\.overlay"/);
+  assertNoForbiddenExportHtmlSurface(withUiSystem.html);
+});
+
+test('Simple HTML Export v1 keeps action-semantics scenes passive when uiSystem is enabled', async () => {
+  const withUiSystem = await buildHtmlGameExportV1(uiActionSemanticsScenePath, { uiSystem: true });
+
+  assert.equal(withUiSystem.scene, 'ui-action-semantics');
+  assert.match(withUiSystem.html, /"uiSystem":\{"enabled":true,"scene":"ui-action-semantics"/);
+  assert.match(withUiSystem.html, />Start Mission<\/div>/);
+  assert.match(withUiSystem.html, />Continue Mission<\/div>/);
+  assert.doesNotMatch(withUiSystem.html, /"uiInputStepReportVersion":/);
+  assert.doesNotMatch(withUiSystem.html, /"uiExplicitInputStepReportVersion":/);
+  assert.doesNotMatch(withUiSystem.html, /"uiExplicitInputVersion":/);
+  assert.doesNotMatch(withUiSystem.html, /focusedActionIdBefore/);
+  assert.doesNotMatch(withUiSystem.html, /activatedActionId/);
+  assert.doesNotMatch(withUiSystem.html, /actionCandidates/);
   assertNoForbiddenExportHtmlSurface(withUiSystem.html);
 });
 
@@ -405,7 +422,7 @@ test('export-html-game CLI writes deterministic files for each supported option 
       expectedScene: 'ui-production-screens',
       options: { movementBlocking: false, gameplayHud: false, playableSaveLoad: false, audioLite: false, uiSystem: true },
       present: [/id="browser-ui-system"/, /"uiSystem":\{"enabled":true,"scene":"ui-production-screens"/, />Skyline Rescue<\/div>/, />Score 000<\/div>/],
-      absent: [/"movementBlocking":/, /"gameplayHud":/, /"playableSaveLoad":/, /"audioLite":/, /data-screen-id="pause\.overlay"/, /id="browser-gameplay-hud"/]
+      absent: [/"movementBlocking":/, /"gameplayHud":/, /"playableSaveLoad":/, /"audioLite":/, /"uiInputStepReportVersion":/, /"uiExplicitInputStepReportVersion":/, /"uiExplicitInputVersion":/, /data-screen-id="pause\.overlay"/, /id="browser-gameplay-hud"/]
     },
     {
       name: 'all-options',

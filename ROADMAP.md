@@ -31,7 +31,7 @@ Handoff operacional: `docs/CODEX_HANDOFF.md`.
 - [ ] Meta 6 / V4 runtime/editor AA ainda nao iniciada.
 - [ ] Meta 7 / V5-V6 AAA aspiracional ainda nao iniciada.
 
-Proximo pacote recomendado: **UI Regression Matrix v1**.
+Proximo pacote recomendado: **Browser UI Input Preview v1**.
 
 ---
 
@@ -108,9 +108,9 @@ Objetivo: sair de demo e chegar a uma base de producao pequena para jogos 2D/2.5
 - [x] UI Local Screen State Lite v1 report-only, opt-in, derivado de `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`, sem novo componente de cena e sem consumo no Browser Demo/export.
 - [x] UI Input Step Lite v1 report-only, opt-in, derivado de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, com paridade runtime/CLI/MCP e sem consumo interativo no Browser Demo/export.
 - [x] UI Explicit Input Lite v1 com `UiExplicitInput v1` e `UiExplicitInputStepReport v1`, separando `navigate`/`activate` de `InputIntent v1`, com paridade runtime/CLI/MCP e sem consumo interativo no Browser Demo/export.
-- [ ] UI Regression Matrix v1 para cobrir input UI explicito, step legado e passividade de Browser Demo/export antes de qualquer consumo interativo.
+- [x] UI Regression Matrix v1 para cobrir input UI explicito, step legado e passividade de Browser Demo/export antes de qualquer consumo interativo.
+- [ ] Browser UI Input Preview v1 para definir um preview local opt-in de `navigate`/`activate` so na Browser Demo, sem acoplar exports ao runtime canonico.
 - [ ] Persistencia/savegame canonico de UI continua fora do V2 inicial.
-- [ ] Matriz de regressao UI.
 
 ### Animacao 2D
 
@@ -312,22 +312,23 @@ Criterio realista:
 
 ## Proximo pacote recomendado
 
-**UI Regression Matrix v1**
+**Browser UI Input Preview v1**
 
 Checklist minimo do pacote:
 
 - [ ] Ler `README.md`, `docs/CODEX_HANDOFF.md`, `SPEC.md`, `docs/module-contracts.md`, `schemas/`, `ROADMAP.md`, `docs/UI_EXPLICIT_INPUT_LITE_V1.md` e `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`.
+- [ ] Ler `docs/UI_REGRESSION_MATRIX_V1.md` para preservar os guardrails fechados neste slice.
 - [ ] Usar subagentes: `explorer`, `engine_architect`, `tooling_editor_architect`, `qa_contract_auditor`, `perf_auditor` e `docs_handoff_auditor`.
-- [ ] Criar matriz curta cobrindo `UiExplicitInput v1`, `UiExplicitInputStepReport v1`, `UiInputStepReport v1` legado e passividade de Browser Demo/export.
-- [ ] Registrar fixtures/casos: `navigate next`, `navigate previous`, `activate`, input invalido, cena sem actions, cena sem UI e cena invalida.
-- [ ] Validar paridade runtime/CLI/MCP e budget compacto de reports.
-- [ ] Confirmar que Browser Demo/export continuam sem consumo interativo de input UI.
+- [ ] Definir contrato opt-in para consumir `UiExplicitInput v1` na Browser Demo sem tocar loop, replay, savegame ou `InputIntent v1`.
+- [ ] Reutilizar a semantica de `UiExplicitInputStepReport v1` para `navigate previous|next` e `activate`.
+- [ ] Manter `export-html-game` e `export-portable-html-game` passivos neste pacote.
+- [ ] Manter o delta de HTML com `uiSystem` dentro do gate atual de `5 * 1024` bytes.
 - [ ] Atualizar docs e handoff.
 - [ ] Rodar `npm test`, `npm run validate:scenes` e `npm run smoke`.
 
 Fora do pacote inicial:
 
-- [ ] Consumo interativo no Browser Demo/export.
+- [ ] Consumo interativo em Browser Demo e exports ao mesmo tempo.
 - [ ] Promover `move == 0` de `InputIntent v1` a semantica canonica de ativacao de UI.
 - [ ] Mouse/touch, hit-testing e click.
 - [ ] Savegame canonico de UI.

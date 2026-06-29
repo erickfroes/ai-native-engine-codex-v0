@@ -71,6 +71,7 @@ const spriteAnimationMissingVisualSpriteScenePath = path.join(
 );
 const spriteAnimationMissingVisualSpriteSceneMcpPath =
   './engine/runtime/test/fixtures/sprite-animation-missing-visual-sprite.scene.json';
+const uiActionSemanticsScenePath = path.join(repoRoot, 'scenes', 'ui-action-semantics.scene.json');
 const uiProductionScenePath = path.join(repoRoot, 'scenes', 'ui-production-screens.scene.json');
 const uiProductionSceneMcpPath = './scenes/ui-production-screens.scene.json';
 const validAssetManifestPath = path.join(repoRoot, 'fixtures', 'assets', 'valid.asset-manifest.json');
@@ -255,6 +256,23 @@ test('Portable HTML Export v2 keeps production UI overlay size bounded', async (
   assert.match(withUiSystem.html, /data-screen-id="hud\.main"/);
   assert.match(withUiSystem.html, /data-screen-id="menu\.main"/);
   assert.doesNotMatch(withUiSystem.html, /data-screen-id="pause\.overlay"/);
+  assertNoForbiddenPortableExportHtmlSurface(withUiSystem.html);
+});
+
+test('Portable HTML Export v2 keeps action-semantics scenes passive when uiSystem is enabled', async () => {
+  const withUiSystem = await buildPortableHtmlGameExportV2(uiActionSemanticsScenePath, { uiSystem: true });
+
+  assert.equal(withUiSystem.scene, 'ui-action-semantics');
+  assert.equal(withUiSystem.embeddedAssetCount, 0);
+  assert.match(withUiSystem.html, /"uiSystem":\{"enabled":true,"scene":"ui-action-semantics"/);
+  assert.match(withUiSystem.html, />Start Mission<\/div>/);
+  assert.match(withUiSystem.html, />Continue Mission<\/div>/);
+  assert.doesNotMatch(withUiSystem.html, /"uiInputStepReportVersion":/);
+  assert.doesNotMatch(withUiSystem.html, /"uiExplicitInputStepReportVersion":/);
+  assert.doesNotMatch(withUiSystem.html, /"uiExplicitInputVersion":/);
+  assert.doesNotMatch(withUiSystem.html, /focusedActionIdBefore/);
+  assert.doesNotMatch(withUiSystem.html, /activatedActionId/);
+  assert.doesNotMatch(withUiSystem.html, /actionCandidates/);
   assertNoForbiddenPortableExportHtmlSurface(withUiSystem.html);
 });
 
@@ -766,7 +784,7 @@ test('export-portable-html-game CLI writes deterministic files for inline assets
         uiSystem: true
       },
       present: [/id="browser-ui-system"/, /"uiSystem":\{"enabled":true,"scene":"ui-production-screens"/, />Skyline Rescue<\/div>/, />Score 000<\/div>/],
-      absent: [/file:\/\/\//, /"assetSrc":"data:image\/png;base64,/, /data-screen-id="pause\.overlay"/, /id="browser-gameplay-hud"/]
+      absent: [/file:\/\/\//, /"assetSrc":"data:image\/png;base64,/, /"uiInputStepReportVersion":/, /"uiExplicitInputStepReportVersion":/, /"uiExplicitInputVersion":/, /data-screen-id="pause\.overlay"/, /id="browser-gameplay-hud"/]
     }
   ];
 

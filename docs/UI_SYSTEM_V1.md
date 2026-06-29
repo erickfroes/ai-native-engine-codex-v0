@@ -227,4 +227,4 @@ npm run smoke
 
 ## Continuidade
 
-UI System v1 esta fechado como contrato declarativo/report e agora possui uma fixture publica de telas pequenas de producao em `scenes/ui-production-screens.scene.json`. `UI Navigation/Focus Lite v1`, `UI Action Semantics Lite v1`, `UI Local Screen State Lite v1`, `UI Input Step Lite v1` e `UI Explicit Input Lite v1` tambem estao fechados como contratos derivados separados, sem consumo visual/interativo no Browser Demo/export. O proximo pacote seguro e `UI Regression Matrix v1`, sem transformar o overlay HTML no runtime canonico.
+UI System v1 esta fechado como contrato declarativo/report e agora possui uma fixture publica de telas pequenas de producao em `scenes/ui-production-screens.scene.json`. `UI Navigation/Focus Lite v1`, `UI Action Semantics Lite v1`, `UI Local Screen State Lite v1`, `UI Input Step Lite v1`, `UI Explicit Input Lite v1` e `UI Regression Matrix v1` tambem estao fechados, sem consumo visual/interativo canonico no Browser Demo/export. A matriz consolidada vive em `docs/UI_REGRESSION_MATRIX_V1.md`; o proximo pacote seguro e `Browser UI Input Preview v1`, restrito a Browser Demo e ainda sem tocar exports.

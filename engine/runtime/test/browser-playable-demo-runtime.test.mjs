@@ -1853,6 +1853,9 @@ test('renderBrowserPlayableDemoHtmlV1 embeds UI System v1 as an opt-in screen-sp
   assert.doesNotMatch(uiHtml, /id="browser-ui-widget-hud\.hidden-hidden\.label"/);
   assert.ok(uiHtml.indexOf('data-screen-id="hud.title"') < uiHtml.indexOf('data-screen-id="hud.main"'));
   assert.match(uiHtml, /id="browser-ui-widget-hud\.title-title\.label"[^>]+left:12\.5%;top:8\.333333333333332%/);
+  assert.doesNotMatch(uiHtml, /"uiInputStepReportVersion":/);
+  assert.doesNotMatch(uiHtml, /"uiExplicitInputStepReportVersion":/);
+  assert.doesNotMatch(uiHtml, /"uiExplicitInputVersion":/);
 });
 
 test('renderBrowserPlayableDemoHtmlV1 blocks movement against solid entity bounds when movementBlocking is enabled', () => {

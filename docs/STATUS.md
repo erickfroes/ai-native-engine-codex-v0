@@ -57,6 +57,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - UI Local Screen State Lite v1 como `UiLocalScreenStateReport v1` opt-in/report-only derivado de `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`, sem novo componente de cena e sem consumo no Browser Demo/export;
 - UI Input Step Lite v1 como `UiInputStepReport v1` opt-in/report-only derivado de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, sem consumo interativo no Browser Demo/export;
 - UI Explicit Input Lite v1 como `UiExplicitInput v1` externo e `UiExplicitInputStepReport v1` report-only, separando `navigate`/`activate` de `InputIntent v1`, com runtime/CLI/MCP e sem consumo interativo no Browser Demo/export;
+- UI Regression Matrix v1 como consolidacao de casos `next/previous/activate`, budgets compactos e passividade de Browser Demo/export para input UI local;
 - Sprite Animation v1 como diagnostico declarativo runtime/CLI/MCP, com consumo visual opt-in na Browser Demo para sprites asset-backed;
 - Portable HTML Export v2 com assets inline e Sprite Animation v1 opt-in no caminho portatil;
 - Prefab System v1 como resolucao declarativa minima e report diagnostico runtime/CLI/MCP;
@@ -82,7 +83,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 ## Foco atual recomendado
 
 1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1`, `UI Action Semantics Lite v1`, `UI Local Screen State Lite v1`, `UI Input Step Lite v1`, `UI Explicit Input Lite v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `UI Regression Matrix v1` como menor proximo passo seguro para cobrir `UiExplicitInput v1`, `UiExplicitInputStepReport v1`, convivencia com `UiInputStepReport v1` legado e garantia de Browser Demo/export passivos antes de qualquer consumo interativo.
+2. Abrir `Browser UI Input Preview v1` como menor proximo passo seguro para consumir `UiExplicitInput v1` so na Browser Demo, mantendo `export-html-game` e `export-portable-html-game` passivos.
 3. Se a lacuna de validacao estrita for atacada, criar superficie opt-in nova em vez de mutar `validate-scene` / `SceneValidationReport v1`.
 4. Adiar editor-lite, particle-lite, route solving e 3D ate UI pequena e V2 estarem mais demonstradas.
 
@@ -105,8 +106,9 @@ Detalhes: `docs/ENGINE_VERSION_ROADMAP.md`.
 - tratar `UiNavigationFocusReport v1` heuristico como ordem canonica de acao depois que `ui.action.semantics` passou a existir;
 - acoplar `ui.action.semantics` ao Browser Demo/export sem contrato visual ou de estado local separado;
 - tratar `UiLocalScreenStateReport v1` como estado persistido, runtime canonico ou renderer interativo de UI;
-- tratar `UiInputStepReport v1` ou `UiExplicitInputStepReport v1` como runtime interativo canonico antes de matriz de regressao e contrato de consumo interativo;
+- tratar `UiInputStepReport v1` ou `UiExplicitInputStepReport v1` como runtime interativo canonico antes de `Browser UI Input Preview v1` e de um contrato explicito de consumo interativo;
 - promover `move == 0` de `InputIntent v1` a semantica canonica de `activate` fora da trilha compativel do `UiInputStepReport v1`;
+- expandir o overlay de UI alem do gate atual de `5 * 1024` bytes de delta HTML sem revisao explicita de budget;
 - confundir Playable Save/Load Lite browser-local com `savegame v1` ou `State Snapshot v1`;
 - transformar Simple HTML Export v1 em bundler, servidor ou build pipeline V2;
 - transformar Game Templates v1 em template engine, prefab system ou editor;

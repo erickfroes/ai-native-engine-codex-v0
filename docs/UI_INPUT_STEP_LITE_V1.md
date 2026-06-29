@@ -131,6 +131,7 @@ Output: o mesmo shape do `UiInputStepReport v1` em `structuredContent`.
 - `scenes/ui-action-semantics.scene.json`: cena com `ui.action.semantics` para focus/activate determin\u00edsticos.
 - `scenes/ui-production-screens.scene.json`: cena sem `ui.action.semantics` no foco atual (sem a\u00e7\u00f5es).
 - `scenes/tutorial.scene.json`: cena sem `ui.screen`.
+- `fixtures/input/move-player-left.intent.json`: move negativo em eixo X para cenarios de `navigate previous`.
 - `fixtures/input/move-player-right.intent.json`: move positivo em eixo X.
 - `fixtures/input/no-player-move.intent.json`: move zero para cen\u00e1rios de `activate`/`noop`.
 
@@ -162,4 +163,4 @@ npm run smoke
 
 ## Continuidade
 
-`UI Input Step Lite v1` fica preservado como report-only compativel baseado em `InputIntent v1`. `UI Explicit Input Lite v1` e `UI Explicit Input Step Lite v1` agora separam `navigate`/`activate` de `InputIntent v1`; o proximo passo seguro e `UI Regression Matrix v1` antes de qualquer consumo interativo no Browser Demo/export.
+`UI Input Step Lite v1` fica preservado como report-only compativel baseado em `InputIntent v1`. `UI Explicit Input Lite v1`, `UI Explicit Input Step Lite v1` e `UI Regression Matrix v1` agora consolidam a trilha local de navegacao/ativacao sem mutar `InputIntent v1`; a matriz dedicada vive em `docs/UI_REGRESSION_MATRIX_V1.md`. O proximo passo seguro e `Browser UI Input Preview v1`, ainda restrito a Browser Demo.

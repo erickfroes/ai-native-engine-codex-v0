@@ -7,10 +7,10 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - Versao atual: V1 Small 2D release-checkpointed.
 - Politica atual: V1 apenas bugfix, hardening e compatibilidade.
 - Meta em andamento: Meta 4 / V2 2D-2.5D indie production.
-- Slice fechado: `UI Explicit Input Lite v1` + `UI Explicit Input Step Lite v1` report-only.
-- Proximo pacote recomendado: abrir `UI Regression Matrix v1` para consolidar input UI explicito, step legado e passividade de Browser Demo/export antes de qualquer consumo interativo.
+- Slice fechado: `UI Regression Matrix v1`.
+- Proximo pacote recomendado: abrir `Browser UI Input Preview v1` para definir o menor consumo local opt-in de `UiExplicitInput v1` na Browser Demo, mantendo exports passivos.
 - Slice atual em andamento: nenhum; o foco volta para hardening e continuidade documental ate abrir o proximo contrato.
-- Nao iniciar consumo interativo no Browser Demo/export, editor-lite, particle-lite, 3D, route solving ou pipeline pesado antes de fechar a matriz de regressao UI.
+- Nao iniciar consumo interativo amplo no Browser Demo/export, editor-lite, particle-lite, 3D, route solving ou pipeline pesado antes de fechar um contrato explicito de preview local para UI.
 
 ## Estado
 
@@ -28,6 +28,7 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - [x] UI Input Step Lite v1 fechado como `UiInputStepReport v1`, derivado de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, com runtime/CLI/MCP alinhados e Browser Demo/export ainda passivos.
 - [x] UI Explicit Input Lite v1 fechado como `UiExplicitInput v1` externo para `navigate`/`activate`, separado de `InputIntent v1`, com runtime/CLI/MCP e fixtures proprias.
 - [x] UI Explicit Input Step Lite v1 fechado como `UiExplicitInputStepReport v1`, derivado de `UiExplicitInput v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, com runtime/CLI/MCP alinhados e Browser Demo/export ainda passivos.
+- [x] UI Regression Matrix v1 fechada com doc dedicada, casos `next/previous/activate`, budget compacto e guardrails de passividade para Browser Demo/export.
 - [x] Validacao final do slice: `npm test`, `npm run validate:scenes` e `npm run smoke`.
 
 Inventario completo: `docs/STATUS.md`.
@@ -36,23 +37,24 @@ Detalhe por versao: `docs/ENGINE_VERSION_ROADMAP.md`.
 
 ## Proximo passo
 
-### `UI Regression Matrix v1`
+### `Browser UI Input Preview v1`
 
-Objetivo: consolidar uma matriz curta de regressao para os contratos de UI input antes de qualquer consumo interativo no Browser Demo/export.
+Objetivo: abrir o menor contrato seguro para preview local de input UI na Browser Demo, reutilizando `UiExplicitInput v1` e preservando exports HTML como superficies passivas.
 
 Escopo minimo do pacote:
 
-- [ ] criar doc/matriz curta para `UiExplicitInput v1`, `UiExplicitInputStepReport v1` e `UiInputStepReport v1` legado;
-- [ ] cobrir `navigate next`, `navigate previous`, `activate`, input invalido, cena sem actions, cena sem UI e cena invalida;
-- [ ] explicitar paridade runtime/CLI/MCP e budget compacto dos reports;
-- [ ] confirmar que Browser Demo, Simple HTML Export e Portable HTML Export continuam passivos;
-- [ ] manter o pacote como regressao/contrato, sem consumo interativo novo.
+- [ ] definir contrato opt-in e local para consumir `UiExplicitInput v1` apenas na Browser Demo;
+- [ ] reutilizar a semantica de `UiExplicitInputStepReport v1`, sem reabrir `UiInputStepReport v1` legado;
+- [ ] manter o `canvas` como unico listener de teclado e o overlay `uiSystem` passivo por padrao;
+- [ ] manter `export-html-game` e `export-portable-html-game` fora do pacote, ainda passivos para input UI;
+- [ ] registrar budgets e guardrails para nao ultrapassar o delta atual de HTML com `uiSystem`.
 
 Fora do pacote:
 
-- consumo interativo no Browser Demo/export;
+- consumo interativo em `export-html-game` ou `export-portable-html-game`;
 - promover `move == 0` a semantica canonica de ativacao de UI;
 - acoplar input UI ao `InputIntent v1` de gameplay como contrato definitivo;
+- tocar loop canonico, replay, savegame ou `RenderSnapshot v1`;
 - mouse/touch, hit-testing e click;
 - estado de UI persistido em savegame canonico;
 - novo componente de cena para input/estado de UI;
@@ -64,7 +66,7 @@ Fora do pacote:
 - glTF/3D;
 - particle-lite.
 
-Criterio de pronto: matriz publicada, casos principais cobertos por testes/commands, Browser Demo/export confirmados passivos, `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
+Criterio de pronto: contrato/documentacao publicados, Browser Demo com preview local opt-in validado sem drift de budget, exports HTML ainda passivos, `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
 
 ## Como continuar
 
@@ -83,6 +85,7 @@ git status -sb
 - `schemas/`
 - `AGENTS.md`
 - `ROADMAP.md`
+- `docs/UI_REGRESSION_MATRIX_V1.md`
 - `docs/UI_SYSTEM_V1.md`
 - `docs/UI_NAVIGATION_FOCUS_LITE_V1.md`
 - `docs/UI_ACTION_SEMANTICS_LITE_V1.md`
@@ -117,7 +120,7 @@ Subagentes para esta rodada:
 
 - `explorer`: mapeamento de código/contratos e pontos de integração.
 - `engine_architect`: validação de fronteiras arquitetura/runtime/CLI/MCP.
-- `gameplay_worker`: implementação minimalista do passo local report-only.
+- `tooling_editor_architect`: desenho da Browser Demo como preview local sem acoplar editor/export.
 - `qa_contract_auditor`: schema, fixtures e paridade runtime/CLI/MCP.
 - `perf_auditor`: checagem de custo e ausência de regressão nos caminhos atuais.
 - `docs_handoff_auditor`: alinhamento de handoff/roadmap/STATUS.
@@ -169,6 +172,7 @@ Use as tools MCP equivalentes quando estiver validando cenas, contratos ou repor
 - `docs/UI_INPUT_STEP_LITE_V1.md`: contrato report-only para passo local de entrada de UI.
 - `docs/UI_EXPLICIT_INPUT_LITE_V1.md`: contrato de input UI explicito separado de `InputIntent v1`.
 - `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`: contrato report-only para passo local com `UiExplicitInput v1`.
+- `docs/UI_REGRESSION_MATRIX_V1.md`: matriz curta de regressao para input UI local e passividade de Browser Demo/export.
 - `docs/V2_GAP_AUDIT.md`: lacunas V2.
 - `docs/CODEX_SUBAGENT_STRATEGY.md`: estrategia de subagentes.
 
