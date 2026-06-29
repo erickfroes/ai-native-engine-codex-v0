@@ -53,6 +53,11 @@ Shape:
       "actionIndex": 0,
       "actionId": "menu.start-mission",
       "widgetId": "menu.start"
+    },
+    {
+      "actionIndex": 1,
+      "actionId": "menu.continue-mission",
+      "widgetId": "menu.continue"
     }
   ],
   "activatedActionId": null,
@@ -114,7 +119,7 @@ Output: o mesmo shape do `UiInputStepReport v1` em `structuredContent`.
 
 ## Compatibilidade
 
-- `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1` permanecem inalterados e seg\u00f3m efeito colateral.
+- `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1` permanecem inalterados e sem efeito colateral.
 - `RenderSnapshot v1`, loop, replay e save/load permanecem inalterados.
 - `Browser Demo`/`HTML Export` continuam passivos para este step (sem ativar UI interativa).
 - Scene validation continua obrigat\u00f3ria antes de produzir qualquer report.
@@ -152,3 +157,7 @@ npm test
 npm run validate:scenes
 npm run smoke
 ```
+
+## Continuidade
+
+`UI Input Step Lite v1` fecha o passo local minimo de navegacao/ativacao de UI como report-only. O proximo passo seguro e separar input UI explicito (`navigate`/`activate`) de `InputIntent v1` antes de qualquer consumo interativo no Browser Demo/export.

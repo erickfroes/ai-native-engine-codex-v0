@@ -34,8 +34,8 @@ test('inspect-ui-input-step returns deterministic noop step for scenes without u
   assert.equal(report.focusedScreenId, null);
   assert.equal(report.focusedActionIndexBefore, null);
   assert.deepEqual(report.warnings.map((warning) => warning.code).sort(), [
-    'NO_ACTIVE_SCREEN',
-    'NO_ACTIONS_AVAILABLE'
+    'NO_ACTIONS_AVAILABLE',
+    'NO_ACTIVE_SCREEN'
   ]);
   assert.equal(report.actionCandidates.length, 0);
 });

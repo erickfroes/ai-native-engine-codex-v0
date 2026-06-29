@@ -145,8 +145,8 @@ test('UiInputStepReport v1 stays aligned across runtime, CLI and MCP for no acti
   assert.equal(report.focusedScreenId, null);
   assert.equal(report.stepType, 'noop');
   assert.deepEqual(report.warnings.map((warning) => warning.code).sort(), [
-    'NO_ACTIVE_SCREEN',
-    'NO_ACTIONS_AVAILABLE'
+    'NO_ACTIONS_AVAILABLE',
+    'NO_ACTIVE_SCREEN'
   ]);
 });
 

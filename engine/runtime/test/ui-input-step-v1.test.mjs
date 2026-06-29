@@ -83,3 +83,34 @@ test('UiInputStepReport v1 schema accepts zero-move/no-ui-screen reports', async
 
   assert.deepEqual(errors, []);
 });
+
+test('UiInputStepReport v1 schema rejects extra fields at controlled levels', async () => {
+  const schema = await loadSchema();
+  const report = await buildUiInputStepReportV1(actionScenePath, {
+    inputIntent: {
+      inputIntentVersion: 1,
+      tick: 1,
+      entityId: 'player.hero',
+      actions: [
+        {
+          type: 'move',
+          axis: { x: 1, y: 0 }
+        }
+      ]
+    }
+  });
+
+  report.debug = true;
+  report.attemptedMove.z = 0;
+  report.actionCandidates[0].label = 'debug';
+
+  const errors = validateWithSchema(report, schema, {
+    'ui-input-step-report-v1.schema.json': { schema }
+  });
+
+  assert.ok(errors.some((error) => error.path === '$.debug' && error.message === 'is not allowed by schema'));
+  assert.ok(errors.some((error) => error.path === '$.attemptedMove.z' && error.message === 'is not allowed by schema'));
+  assert.ok(
+    errors.some((error) => error.path === '$.actionCandidates[0].label' && error.message === 'is not allowed by schema')
+  );
+});

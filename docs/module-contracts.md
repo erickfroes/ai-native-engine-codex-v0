@@ -533,6 +533,22 @@ Contrato report-only para explicitar estado local minimo de telas a partir dos c
 - Browser Demo, Simple HTML Export e Portable HTML Export permanecem passivos neste slice.
 - nao altera `RenderSnapshot v1`, loop, replay, save/load, HUD Lite ou Playable Save/Load Lite.
 
+## UI Input Step Lite v1
+
+Contrato report-only para derivar um passo local minimo de navegacao/ativacao de UI a partir de input ja validado:
+
+- ver `docs/UI_INPUT_STEP_LITE_V1.md`.
+- schema formal: `docs/schemas/ui-input-step-report-v1.schema.json`.
+- runtime: `buildUiInputStepReportV1(sceneOrPath, { inputIntent })`.
+- CLI: `inspect-ui-input-step <scene> --input-intent <path> [--json]`.
+- MCP: `inspect_ui_input_step({ path, inputIntentPath })`.
+- o report deriva de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`.
+- `attemptedMove` agrega todas as actions `move` do input e `direction` colapsa o resultado para `-1 | 0 | 1`.
+- `stepType` v1 usa `focus`, `focus-move`, `activate` e `noop` para tornar o passo local inspecionavel sem mutar cena ou runtime canonico.
+- `move == 0` pode resultar em `activate` apenas dentro deste report local; isso nao redefine a semantica canonica de `InputIntent v1`.
+- nao altera `UiSystemReport v1`, `UiNavigationFocusReport v1`, `UiActionSemanticsReport v1`, `UiLocalScreenStateReport v1`, loop, replay, save/load, Browser Demo, Simple HTML Export ou Portable HTML Export.
+- nao adiciona contrato separado de input UI, widgets interativos amplos, mouse/touch, hit-testing, persistencia de foco ou consumo interativo de UI.
+
 ## Sprite Animation v1
 
 Contrato declarativo minimo para animacao sprite inspecionavel:
@@ -858,4 +874,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, UI Action Semantics Lite v1 report-only, UI Local Screen State Lite v1 report-only, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `UI Input Step Lite v1`.
+- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, UI Action Semantics Lite v1 report-only, UI Local Screen State Lite v1 report-only, UI Input Step Lite v1 report-only, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e separar input UI explicito (`navigate`/`activate`) de `InputIntent v1` antes de qualquer consumo interativo.

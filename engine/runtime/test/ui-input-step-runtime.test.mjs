@@ -134,7 +134,15 @@ test('buildUiInputStepReportV1 returns noop with no active UI scope', async () =
       actions: [
         {
           type: 'move',
-          axis: { x: 2, y: 3 }
+          axis: { x: 1, y: 1 }
+        },
+        {
+          type: 'move',
+          axis: { x: 1, y: 1 }
+        },
+        {
+          type: 'move',
+          axis: { x: 0, y: 1 }
         }
       ]
     }
@@ -149,8 +157,8 @@ test('buildUiInputStepReportV1 returns noop with no active UI scope', async () =
   assert.equal(report.activatedActionId, null);
   assert.deepEqual(report.attemptedMove, { x: 2, y: 3 });
   assert.deepEqual(report.warnings.map((warning) => warning.code).sort(), [
-    'NO_ACTIVE_SCREEN',
-    'NO_ACTIONS_AVAILABLE'
+    'NO_ACTIONS_AVAILABLE',
+    'NO_ACTIVE_SCREEN'
   ]);
 });
 
