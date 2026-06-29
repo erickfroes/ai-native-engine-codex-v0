@@ -547,7 +547,42 @@ Contrato report-only para derivar um passo local minimo de navegacao/ativacao de
 - `stepType` v1 usa `focus`, `focus-move`, `activate` e `noop` para tornar o passo local inspecionavel sem mutar cena ou runtime canonico.
 - `move == 0` pode resultar em `activate` apenas dentro deste report local; isso nao redefine a semantica canonica de `InputIntent v1`.
 - nao altera `UiSystemReport v1`, `UiNavigationFocusReport v1`, `UiActionSemanticsReport v1`, `UiLocalScreenStateReport v1`, loop, replay, save/load, Browser Demo, Simple HTML Export ou Portable HTML Export.
-- nao adiciona contrato separado de input UI, widgets interativos amplos, mouse/touch, hit-testing, persistencia de foco ou consumo interativo de UI.
+- permanece como superficie compativel baseada em `InputIntent v1`; novos passos locais de UI devem preferir `UiExplicitInput v1`.
+- nao adiciona widgets interativos amplos, mouse/touch, hit-testing, persistencia de foco ou consumo interativo de UI.
+
+## UI Explicit Input Lite v1
+
+Contrato externo e versionado para separar input UI explicito de `InputIntent v1`:
+
+- ver `docs/UI_EXPLICIT_INPUT_LITE_V1.md`.
+- schema formal: `docs/schemas/ui-explicit-input-v1.schema.json`.
+- runtime: `validateUiExplicitInputV1(input)` e `validateUiExplicitInputV1File(path)`.
+- runtime auxiliar: `createUiExplicitInputFromKeyboardV1({ tick, keys })`.
+- CLI: `validate-ui-explicit-input <path> [--json]`.
+- CLI auxiliar: `keyboard-to-ui-explicit-input --tick <n> --keys <comma-list> [--json]`.
+- MCP: `validate_ui_explicit_input({ path })`.
+- MCP auxiliar: `keyboard_to_ui_explicit_input({ tick, keys })`.
+- payload v1 usa `uiExplicitInputVersion`, `tick` e uma unica `action`.
+- `action.type` pode ser `navigate` ou `activate`.
+- `navigate` exige `direction: "previous" | "next"`.
+- `activate` nao aceita `direction`.
+- nao possui `entityId`, `screenId`, `widgetId` ou `actionId`; foco/scope continuam derivados dos reports de UI.
+- nao altera `InputIntent v1`, loop, replay, save/load, Browser Demo, Simple HTML Export ou Portable HTML Export.
+
+## UI Explicit Input Step Lite v1
+
+Contrato report-only para derivar um passo local de UI a partir de `UiExplicitInput v1`:
+
+- ver `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`.
+- schema formal: `docs/schemas/ui-explicit-input-step-report-v1.schema.json`.
+- runtime: `buildUiExplicitInputStepReportV1(sceneOrPath, { uiExplicitInput })`.
+- CLI: `inspect-ui-explicit-input-step <scene> --ui-explicit-input <path> [--json]`.
+- MCP: `inspect_ui_explicit_input_step({ path, uiExplicitInputPath })`.
+- o report deriva de `UiExplicitInput v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`.
+- `navigate next` vira `direction: 1`, `navigate previous` vira `direction: -1` e `activate` vira `direction: 0`.
+- foco, candidatos, boundary warnings e ativacao reutilizam a mesma logica pura de `UiInputStepReport v1`.
+- nao inclui `inputIntentEntityId` nem `attemptedMove`.
+- Browser Demo, Simple HTML Export e Portable HTML Export permanecem passivos neste slice.
 
 ## Sprite Animation v1
 
@@ -874,4 +909,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, UI Action Semantics Lite v1 report-only, UI Local Screen State Lite v1 report-only, UI Input Step Lite v1 report-only, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e separar input UI explicito (`navigate`/`activate`) de `InputIntent v1` antes de qualquer consumo interativo.
+- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, UI Action Semantics Lite v1 report-only, UI Local Screen State Lite v1 report-only, UI Input Step Lite v1 report-only, UI Explicit Input Lite v1, UI Explicit Input Step Lite v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `UI Regression Matrix v1` antes de qualquer consumo interativo.

@@ -62,6 +62,7 @@ Capacidades alvo:
 - UI Action Semantics Lite v1 entregue como contrato autorado/report-only por `ui.action.semantics`, sem consumo visual, estado persistido ou mutacao de `UiNavigationFocusReport v1`;
 - UI Local Screen State Lite v1 entregue como report-only opt-in derivado de `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`, sem novo componente de cena e sem consumo no Browser Demo/export;
 - UI Input Step Lite v1 entregue como report-only opt-in derivado de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, sem consumo interativo, sem mutar `InputIntent v1` e sem tocar loop/savegame;
+- UI Explicit Input Lite v1 entregue como contrato externo de `navigate`/`activate` e `UiExplicitInputStepReport v1`, separado de `InputIntent v1`, com runtime/CLI/MCP e sem consumo interativo no Browser Demo/export;
 - Audio Lite v1 como primeiro pacote incremental pos-checkpoint;
 - Sprite Animation v1 concluido como diagnostico declarativo runtime/CLI/MCP;
 - `AssetManifestValidationReport v1` concluido como validacao direta minima de manifesto em runtime/CLI/MCP, com report versionado e erros previsiveis;
@@ -223,6 +224,6 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1`, `UI Local Screen State Lite v1`, `UI Input Step Lite v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `UI Explicit Input Lite v1` como menor proximo passo seguro para separar input UI explicito (`navigate`/`activate`) de `InputIntent v1` antes de qualquer consumo interativo, ainda sem acoplar HUD Lite, Playable Save/Load Lite ou savegame canonico.
+1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1`, `UI Local Screen State Lite v1`, `UI Input Step Lite v1`, `UI Explicit Input Lite v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
+2. Abrir `UI Regression Matrix v1` como menor proximo passo seguro para consolidar input UI explicito, step legado e passividade de Browser Demo/export antes de qualquer consumo interativo.
 3. Manter editor-lite, particle-lite, route solving e 3D indie para depois de UI pequena e V2 demonstradas.

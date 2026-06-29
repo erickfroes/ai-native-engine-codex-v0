@@ -7,10 +7,10 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - Versao atual: V1 Small 2D release-checkpointed.
 - Politica atual: V1 apenas bugfix, hardening e compatibilidade.
 - Meta em andamento: Meta 4 / V2 2D-2.5D indie production.
-- Slice fechado: `UI Input Step Lite v1` report-only.
-- Proximo pacote recomendado: abrir `UI Explicit Input Lite v1` como contrato separado de input UI explicito (`navigate`/`activate`) antes de qualquer consumo interativo.
+- Slice fechado: `UI Explicit Input Lite v1` + `UI Explicit Input Step Lite v1` report-only.
+- Proximo pacote recomendado: abrir `UI Regression Matrix v1` para consolidar input UI explicito, step legado e passividade de Browser Demo/export antes de qualquer consumo interativo.
 - Slice atual em andamento: nenhum; o foco volta para hardening e continuidade documental ate abrir o proximo contrato.
-- Nao iniciar consumo interativo no Browser Demo/export, editor-lite, particle-lite, 3D, route solving ou pipeline pesado antes de separar input UI explicito de `InputIntent v1`.
+- Nao iniciar consumo interativo no Browser Demo/export, editor-lite, particle-lite, 3D, route solving ou pipeline pesado antes de fechar a matriz de regressao UI.
 
 ## Estado
 
@@ -26,6 +26,8 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - [x] UI Action Semantics Lite v1 fechado como `UiActionSemanticsReport v1`, via `ui.action.semantics` co-localizado a `ui.screen`, formalizado em `schemas/component.schema.json`, com fixture publica em `scenes/ui-action-semantics.scene.json` e Browser Demo/export ainda passivos.
 - [x] UI Local Screen State Lite v1 fechado como `UiLocalScreenStateReport v1`, derivado de `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`, sem novo componente de cena e sem consumo no Browser Demo/export.
 - [x] UI Input Step Lite v1 fechado como `UiInputStepReport v1`, derivado de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, com runtime/CLI/MCP alinhados e Browser Demo/export ainda passivos.
+- [x] UI Explicit Input Lite v1 fechado como `UiExplicitInput v1` externo para `navigate`/`activate`, separado de `InputIntent v1`, com runtime/CLI/MCP e fixtures proprias.
+- [x] UI Explicit Input Step Lite v1 fechado como `UiExplicitInputStepReport v1`, derivado de `UiExplicitInput v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, com runtime/CLI/MCP alinhados e Browser Demo/export ainda passivos.
 - [x] Validacao final do slice: `npm test`, `npm run validate:scenes` e `npm run smoke`.
 
 Inventario completo: `docs/STATUS.md`.
@@ -34,17 +36,17 @@ Detalhe por versao: `docs/ENGINE_VERSION_ROADMAP.md`.
 
 ## Proximo passo
 
-### `UI Explicit Input Lite v1`
+### `UI Regression Matrix v1`
 
-Objetivo: formalizar um contrato separado de input UI explicito (`navigate`/`activate`) antes de qualquer consumo interativo de `UiInputStepReport v1`.
+Objetivo: consolidar uma matriz curta de regressao para os contratos de UI input antes de qualquer consumo interativo no Browser Demo/export.
 
 Escopo minimo do pacote:
 
-- [ ] definir um payload/contrato versionado de input UI explicito para `navigate` e `activate`, separado de `InputIntent v1`;
-- [ ] cobrir fixture minima e casos invalidos previsiveis para o novo contrato;
-- [ ] expor runtime, CLI e MCP alinhados sem reimplementar logica entre adapters;
-- [ ] manter `UiInputStepReport v1`, `UiSystemReport v1`, `UiNavigationFocusReport v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1` sem mutacao funcional;
-- [ ] manter Browser Demo/export passivos neste pacote.
+- [ ] criar doc/matriz curta para `UiExplicitInput v1`, `UiExplicitInputStepReport v1` e `UiInputStepReport v1` legado;
+- [ ] cobrir `navigate next`, `navigate previous`, `activate`, input invalido, cena sem actions, cena sem UI e cena invalida;
+- [ ] explicitar paridade runtime/CLI/MCP e budget compacto dos reports;
+- [ ] confirmar que Browser Demo, Simple HTML Export e Portable HTML Export continuam passivos;
+- [ ] manter o pacote como regressao/contrato, sem consumo interativo novo.
 
 Fora do pacote:
 
@@ -62,7 +64,7 @@ Fora do pacote:
 - glTF/3D;
 - particle-lite.
 
-Criterio de pronto: semantica de input UI local fica explicita, versionada e separada de `InputIntent v1`; `UiInputStepReport v1` e os contratos de UI existentes permanecem compativeis; Browser Demo/export continuam passivos; `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
+Criterio de pronto: matriz publicada, casos principais cobertos por testes/commands, Browser Demo/export confirmados passivos, `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
 
 ## Como continuar
 
@@ -84,6 +86,8 @@ git status -sb
 - `docs/UI_SYSTEM_V1.md`
 - `docs/UI_NAVIGATION_FOCUS_LITE_V1.md`
 - `docs/UI_ACTION_SEMANTICS_LITE_V1.md`
+- `docs/UI_EXPLICIT_INPUT_LITE_V1.md`
+- `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`
 - doc especifica do contrato tocado
 
 3. Para pacote medio/grande, usar subagentes antes de editar.
@@ -141,6 +145,8 @@ node ./engine/runtime/src/cli.mjs inspect-ui-navigation-focus ./scenes/ui-produc
 node ./engine/runtime/src/cli.mjs inspect-ui-action-semantics ./scenes/ui-action-semantics.scene.json --json
 node ./engine/runtime/src/cli.mjs inspect-ui-local-screen-state ./scenes/ui-action-semantics.scene.json --json
 node ./engine/runtime/src/cli.mjs inspect-ui-input-step ./scenes/ui-action-semantics.scene.json --input-intent ./fixtures/input/move-player-right.intent.json --json
+node ./engine/runtime/src/cli.mjs validate-ui-explicit-input ./fixtures/ui-input/navigate-next.ui-explicit-input.json --json
+node ./engine/runtime/src/cli.mjs inspect-ui-explicit-input-step ./scenes/ui-action-semantics.scene.json --ui-explicit-input ./fixtures/ui-input/navigate-next.ui-explicit-input.json --json
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-browser-demo.html --json
 node ./engine/runtime/src/cli.mjs export-portable-html-game ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-portable.html --json
 node ./engine/runtime/src/cli.mjs export-html-game ./scenes/v1-small-2d.scene.json --movement-blocking --gameplay-hud --playable-save-load --out ./tmp/v1-small-2d.html --json
@@ -161,6 +167,8 @@ Use as tools MCP equivalentes quando estiver validando cenas, contratos ou repor
 - `docs/UI_ACTION_SEMANTICS_LITE_V1.md`: contrato report-only de semantica autorada para `ui.action.semantics`.
 - `docs/UI_LOCAL_SCREEN_STATE_LITE_V1.md`: contrato report-only de estado local minimo de telas.
 - `docs/UI_INPUT_STEP_LITE_V1.md`: contrato report-only para passo local de entrada de UI.
+- `docs/UI_EXPLICIT_INPUT_LITE_V1.md`: contrato de input UI explicito separado de `InputIntent v1`.
+- `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`: contrato report-only para passo local com `UiExplicitInput v1`.
 - `docs/V2_GAP_AUDIT.md`: lacunas V2.
 - `docs/CODEX_SUBAGENT_STRATEGY.md`: estrategia de subagentes.
 

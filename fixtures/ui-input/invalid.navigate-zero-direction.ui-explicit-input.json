@@ -1,0 +1,8 @@
+{
+  "uiExplicitInputVersion": 1,
+  "tick": 1,
+  "action": {
+    "type": "navigate",
+    "direction": "none"
+  }
+}

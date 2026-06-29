@@ -8,13 +8,17 @@ import {
   buildAssetManifestValidationReportV1,
   buildAtlasMaterialManifestReportV1,
   validateInputIntentV1,
+  validateUiExplicitInputV1,
   buildPrefabValidationReportV1,
   validateSaveFile,
   loadStateSnapshotSaveV1,
   saveStateSnapshotV1,
   validateInputIntentV1File,
+  validateUiExplicitInputV1File,
   createInputIntentFromKeyboardV1,
+  createUiExplicitInputFromKeyboardV1,
   loadValidatedInputIntentV1,
+  loadValidatedUiExplicitInputV1,
   loadValidatedKeyboardInputScriptV1,
   createKeyboardInputIntentResolverFromScriptV1,
   loadSceneFile,
@@ -54,6 +58,7 @@ import {
   buildUiActionSemanticsReportV1,
   buildUiLocalScreenStateReportV1,
   buildUiInputStepReportV1,
+  buildUiExplicitInputStepReportV1,
   buildSpriteAnimationReportV1,
   buildPrefabUsageReportV1,
   buildPrefabUsageReportV2
@@ -133,8 +138,10 @@ async function handleToolCall(params) {
     params.name !== 'validate_asset_manifest' &&
     params.name !== 'inspect_atlas_material_manifest' &&
     params.name !== 'validate_input_intent' &&
+    params.name !== 'validate_ui_explicit_input' &&
     params.name !== 'validate_prefab' &&
     params.name !== 'keyboard_to_input_intent' &&
+    params.name !== 'keyboard_to_ui_explicit_input' &&
     params.name !== 'validate_save' &&
     params.name !== 'save_state_snapshot' &&
     params.name !== 'load_save' &&
@@ -163,6 +170,7 @@ async function handleToolCall(params) {
     params.name !== 'inspect_ui_action_semantics' &&
     params.name !== 'inspect_ui_local_screen_state' &&
     params.name !== 'inspect_ui_input_step' &&
+    params.name !== 'inspect_ui_explicit_input_step' &&
     params.name !== 'inspect_sprite_animation' &&
     params.name !== 'inspect_prefab_usage' &&
     params.name !== 'inspect_prefab_usage_v2' &&
@@ -175,6 +183,7 @@ async function handleToolCall(params) {
   const args = params.arguments ?? {};
   if (
     params.name !== 'keyboard_to_input_intent' &&
+    params.name !== 'keyboard_to_ui_explicit_input' &&
     params.name !== 'export_html_game' &&
     params.name !== 'export_portable_html_game' &&
     params.name !== 'inspect_scene_transition' &&
@@ -233,6 +242,48 @@ async function handleToolCall(params) {
       return {
         content: toTextContent(`Input intent generated for ${inputIntent.entityId} at tick ${inputIntent.tick}.`),
         structuredContent: inputIntent,
+        isError: false
+      };
+    }
+
+    if (params.name === 'keyboard_to_ui_explicit_input') {
+      if (!Number.isInteger(args.tick) || args.tick < 1) {
+        return {
+          content: toTextContent('keyboard_to_ui_explicit_input: `tick` is required and must be an integer >= 1.'),
+          isError: true
+        };
+      }
+
+      if (
+        !Array.isArray(args.keys) ||
+        args.keys.length === 0 ||
+        args.keys.some((key) => typeof key !== 'string' || key.trim().length === 0)
+      ) {
+        return {
+          content: toTextContent(
+            'keyboard_to_ui_explicit_input: `keys` is required and must be a non-empty array of strings.'
+          ),
+          isError: true
+        };
+      }
+
+      const uiExplicitInput = createUiExplicitInputFromKeyboardV1({
+        tick: args.tick,
+        keys: args.keys
+      });
+      const report = await validateUiExplicitInputV1(uiExplicitInput);
+
+      if (!report.ok) {
+        return {
+          content: toTextContent('keyboard_to_ui_explicit_input: generated UI explicit input failed validation.'),
+          structuredContent: report,
+          isError: true
+        };
+      }
+
+      return {
+        content: toTextContent(`UI explicit input generated at tick ${uiExplicitInput.tick}.`),
+        structuredContent: uiExplicitInput,
         isError: false
       };
     }
@@ -955,6 +1006,40 @@ async function handleToolCall(params) {
       };
     }
 
+    if (params.name === 'inspect_ui_explicit_input_step') {
+      const unexpectedArgument = findUnexpectedArgument(args, new Set(['path', 'uiExplicitInputPath']));
+      if (unexpectedArgument !== undefined) {
+        return {
+          content: toTextContent(`inspect_ui_explicit_input_step: unexpected argument \`${unexpectedArgument}\`.`),
+          isError: true
+        };
+      }
+
+      if (typeof args.uiExplicitInputPath !== 'string' || args.uiExplicitInputPath.trim().length === 0) {
+        return {
+          content: toTextContent(
+            'inspect_ui_explicit_input_step: `uiExplicitInputPath` is required and must be a non-empty string.'
+          ),
+          isError: true
+        };
+      }
+
+      const uiExplicitInput = await loadValidatedUiExplicitInputV1(resolveRepoPath(args.uiExplicitInputPath));
+      const report = await buildUiExplicitInputStepReportV1(targetPath, { uiExplicitInput });
+      const activatedAction = report.activatedActionId === null ? 'none' : report.activatedActionId;
+      const focusTransition =
+        report.focusedActionIdBefore === null
+          ? report.focusedWidgetIdBefore ?? '(none)'
+          : report.focusedActionIdBefore;
+      return {
+        content: toTextContent(
+          `UI explicit input step report built for ${report.scene} (action=${report.actionType}, step=${report.stepType}, direction=${report.direction}, inputHandled=${report.inputHandled}, activatedAction=${activatedAction}, focusedAction=${focusTransition}).`
+        ),
+        structuredContent: report,
+        isError: false
+      };
+    }
+
     if (params.name === 'inspect_sprite_animation') {
       const report = await buildSpriteAnimationReportV1(resolveRepoPath(args.path));
       return { content: toTextContent('Sprite Animation report generated.'), structuredContent: report, isError: false };
@@ -1503,6 +1588,17 @@ async function handleToolCall(params) {
       };
     }
 
+    if (params.name === 'validate_ui_explicit_input') {
+      const report = await validateUiExplicitInputV1File(targetPath);
+      return {
+        content: toTextContent(
+          report.ok ? 'UI explicit input validation passed.' : 'UI explicit input validation failed.'
+        ),
+        structuredContent: report,
+        isError: !report.ok
+      };
+    }
+
     const report = await validateLoopScene(targetPath);
     return {
       content: toTextContent(formatSceneValidationReportV1(report)),
@@ -1546,7 +1642,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_asset_manifest, inspect_atlas_material_manifest, validate_input_intent, validate_prefab, keyboard_to_input_intent, validate_save, save_state_snapshot, load_save, emit_world_snapshot, inspect_scene_transition, inspect_scene_composition, render_snapshot, render_svg, inspect_visual_regression_baseline, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_pathfinding_grid, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_ui_navigation_focus, inspect_ui_action_semantics, inspect_ui_local_screen_state, inspect_ui_input_step, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_asset_manifest, inspect_atlas_material_manifest, validate_input_intent, validate_ui_explicit_input, validate_prefab, keyboard_to_input_intent, keyboard_to_ui_explicit_input, validate_save, save_state_snapshot, load_save, emit_world_snapshot, inspect_scene_transition, inspect_scene_composition, render_snapshot, render_svg, inspect_visual_regression_baseline, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_pathfinding_grid, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_ui_navigation_focus, inspect_ui_action_semantics, inspect_ui_local_screen_state, inspect_ui_input_step, inspect_ui_explicit_input_step, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }

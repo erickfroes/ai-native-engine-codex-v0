@@ -6,49 +6,26 @@ import {
 import { createUiSystemReportV1FromScene } from './build-ui-system-report-v1.mjs';
 import { buildUiStepSummaryV1 } from './build-ui-step-summary-v1.mjs';
 import { resolveUiSceneV1 } from './resolve-ui-scene-v1.mjs';
-import { validateInputIntentV1 } from '../input/validate-input-intent-v1.mjs';
+import { validateUiExplicitInputV1 } from '../input/validate-ui-explicit-input-v1.mjs';
 
-export const UI_INPUT_STEP_REPORT_VERSION = 1;
-export const UI_INPUT_STEP_SCOPE_POLICY = 'topmost-active-screen';
+export const UI_EXPLICIT_INPUT_STEP_REPORT_VERSION = 1;
+export const UI_EXPLICIT_INPUT_STEP_SCOPE_POLICY = 'topmost-active-screen';
 
-function toInteger(value, fallback) {
-  return Number.isInteger(value) ? value : fallback;
-}
+function resolveDirection(uiExplicitInput) {
+  if (uiExplicitInput.action.type === 'activate') {
+    return 0;
+  }
 
-function resolveAttemptedMove(inputIntent) {
-  return (inputIntent.actions ?? []).filter((action) => action?.type === 'move').reduce(
-    (accumulator, action) => ({
-      x: accumulator.x + toInteger(action.axis?.x, 0),
-      y: accumulator.y + toInteger(action.axis?.y, 0)
-    }),
-    { x: 0, y: 0 }
-  );
-}
-
-function resolveDirection(attemptedMove) {
-  if (attemptedMove.x > 0) {
-    return 1;
-  }
-  if (attemptedMove.x < 0) {
-    return -1;
-  }
-  if (attemptedMove.y > 0) {
-    return 1;
-  }
-  if (attemptedMove.y < 0) {
-    return -1;
-  }
-  return 0;
+  return uiExplicitInput.action.direction === 'next' ? 1 : -1;
 }
 
 function buildReportV1({
   sourceScene,
   uiActionSemanticsReport,
   uiLocalScreenStateReport,
-  inputIntent,
-  attemptedMove
+  uiExplicitInput
 }) {
-  const actionDirection = resolveDirection(attemptedMove);
+  const actionDirection = resolveDirection(uiExplicitInput);
   const stepSummary = buildUiStepSummaryV1(
     uiActionSemanticsReport.actions,
     uiLocalScreenStateReport,
@@ -60,17 +37,16 @@ function buildReportV1({
   ];
 
   return {
-    uiInputStepReportVersion: UI_INPUT_STEP_REPORT_VERSION,
+    uiExplicitInputStepReportVersion: UI_EXPLICIT_INPUT_STEP_REPORT_VERSION,
     scene: sourceScene.metadata.name,
     sourceUiSystemReportVersion: uiLocalScreenStateReport.sourceUiSystemReportVersion,
     sourceUiNavigationFocusReportVersion: uiLocalScreenStateReport.sourceUiNavigationFocusReportVersion,
     sourceUiActionSemanticsReportVersion: uiActionSemanticsReport.uiActionSemanticsReportVersion,
     sourceUiLocalScreenStateReportVersion: uiLocalScreenStateReport.uiLocalScreenStateReportVersion,
-    scopePolicy: UI_INPUT_STEP_SCOPE_POLICY,
-    inputIntentVersion: inputIntent.inputIntentVersion,
-    inputIntentTick: inputIntent.tick,
-    inputIntentEntityId: inputIntent.entityId,
-    attemptedMove,
+    scopePolicy: UI_EXPLICIT_INPUT_STEP_SCOPE_POLICY,
+    uiExplicitInputVersion: uiExplicitInput.uiExplicitInputVersion,
+    uiExplicitInputTick: uiExplicitInput.tick,
+    actionType: uiExplicitInput.action.type,
     direction: actionDirection,
     focusedScreenId: uiLocalScreenStateReport.focusedScreenId,
     focusedEntityId: uiLocalScreenStateReport.focusedEntityId,
@@ -88,20 +64,20 @@ function buildReportV1({
   };
 }
 
-export async function buildUiInputStepReportV1(sceneOrPath, options = {}) {
-  const { inputIntent } = options;
-  if (!inputIntent || typeof inputIntent !== 'object' || Array.isArray(inputIntent)) {
-    throw new Error('buildUiInputStepReportV1: `inputIntent` option is required');
+export async function buildUiExplicitInputStepReportV1(sceneOrPath, options = {}) {
+  const { uiExplicitInput } = options;
+  if (!uiExplicitInput || typeof uiExplicitInput !== 'object' || Array.isArray(uiExplicitInput)) {
+    throw new Error('buildUiExplicitInputStepReportV1: `uiExplicitInput` option is required');
   }
 
-  const report = await validateInputIntentV1(inputIntent);
+  const report = await validateUiExplicitInputV1(uiExplicitInput);
   if (!report.ok) {
     const summary = report.errors.map((error) => `${error.path}: ${error.message}`).join('; ');
-    throw new Error(`buildUiInputStepReportV1: invalid inputIntent: ${summary}`);
+    throw new Error(`buildUiExplicitInputStepReportV1: invalid uiExplicitInput: ${summary}`);
   }
 
-  const validInputIntent = report.inputIntent;
-  const { scene } = await resolveUiSceneV1(sceneOrPath, 'buildUiInputStepReportV1');
+  const validUiExplicitInput = report.uiExplicitInput;
+  const { scene } = await resolveUiSceneV1(sceneOrPath, 'buildUiExplicitInputStepReportV1');
   const uiSystemReport = createUiSystemReportV1FromScene(scene);
   const uiNavigationFocusReport = createUiNavigationFocusReportV1FromUiSystemReport(uiSystemReport);
   const uiActionSemanticsReport = createUiActionSemanticsReportV1FromScene(scene);
@@ -110,13 +86,11 @@ export async function buildUiInputStepReportV1(sceneOrPath, options = {}) {
     uiNavigationFocusReport,
     uiActionSemanticsReport
   });
-  const attemptedMove = resolveAttemptedMove(validInputIntent);
 
   return buildReportV1({
     sourceScene: scene,
     uiActionSemanticsReport,
     uiLocalScreenStateReport,
-    inputIntent: validInputIntent,
-    attemptedMove
+    uiExplicitInput: validUiExplicitInput
   });
 }

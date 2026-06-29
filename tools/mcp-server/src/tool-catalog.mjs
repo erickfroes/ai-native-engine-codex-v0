@@ -64,6 +64,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'validate_ui_explicit_input',
+    title: 'Validate UI Explicit Input',
+    description: 'Validate a UI Explicit Input v1 JSON file against the runtime contract.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'validate_prefab',
     title: 'Validate Prefab',
     description: 'Validate a declarative prefab JSON file against the prefab schema and prefab invariants.',
@@ -101,6 +117,29 @@ export const toolCatalog = [
             type: 'string'
           },
           description: 'Ordered list of declared keyboard keys such as ArrowRight or KeyW.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
+    name: 'keyboard_to_ui_explicit_input',
+    title: 'Keyboard To UI Explicit Input',
+    description: 'Translate declared keyboard keys into a deterministic UI Explicit Input v1 payload.',
+    inputSchema: {
+      type: 'object',
+      required: ['tick', 'keys'],
+      properties: {
+        tick: {
+          type: 'integer',
+          description: 'Target tick for the generated UI input.'
+        },
+        keys: {
+          type: 'array',
+          items: {
+            type: 'string'
+          },
+          description: 'Ordered list of declared keyboard keys such as ArrowRight, ArrowLeft, Enter or Space.'
         }
       },
       additionalProperties: false
@@ -780,6 +819,27 @@ export const toolCatalog = [
         inputIntentPath: {
           type: 'string',
           description: 'Absolute path or path relative to the repository root for an Input Intent v1 JSON file.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
+    name: 'inspect_ui_explicit_input_step',
+    title: 'Inspect UI Explicit Input Step',
+    description:
+      'Build UiExplicitInputStepReport v1 from UiSystemReport v1, UiNavigationFocusReport v1, UiActionSemanticsReport v1 and a UI Explicit Input v1.',
+    inputSchema: {
+      type: 'object',
+      required: ['path', 'uiExplicitInputPath'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root for a scene.'
+        },
+        uiExplicitInputPath: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root for a UI Explicit Input v1 JSON file.'
         }
       },
       additionalProperties: false

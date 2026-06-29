@@ -81,7 +81,7 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 
 A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1, Sprite Animation v1 diagnostico consumido de forma visual opt-in na Browser Demo para sprites asset-backed e Portable HTML Export v2 com assets inline e `Sprite Animation v1` no export portatil.
 
-Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. `entity.prefab` continua relativo a cena, exige alvo `.prefab.json` e rejeita URL, traversal e paths absolutos/UNC; Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export tambem falham de forma previsivel nesses casos. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface, consumo visual opt-in na Browser Demo/export por overlay passivo e uma fixture publica de telas pequenas em `scenes/ui-production-screens.scene.json`, preservando HUD Lite como diagnostico local. `UiNavigationFocusReport v1` deriva foco/navegacao sequencial report-only de `UiSystemReport v1` em runtime/CLI/MCP, sem mutar `ui.screen`, Browser Demo/export, `RenderSnapshot v1`, loop, replay ou savegame. `UiActionSemanticsReport v1` agora adiciona `ui.action.semantics` opt-in co-localizado com `ui.screen`, com `initialFocusWidgetId` e `actions[]` autorados, fixture publica em `scenes/ui-action-semantics.scene.json` e runtime/CLI/MCP alinhados, preservando `UiNavigationFocusReport v1` como heuristica derivada e mantendo Browser Demo/export passivos. `UiLocalScreenStateReport v1` agora explicita estado local minimo de telas em runtime/CLI/MCP como report opt-in e report-only, derivado de `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`, sem novo componente de cena, sem mutar os contratos anteriores e sem consumo no Browser Demo/export. `UiInputStepReport v1` agora fecha o primeiro passo local de navegacao/ativacao de UI como report opt-in, derivado de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, ainda sem consumo interativo no Browser Demo/export. `AssetManifestValidationReport v1` agora expoe validacao direta minima de manifesto em runtime/CLI/MCP com erro previsivel para arquivo ausente e JSON malformado, sem mutar `RenderSnapshot v1`. `VisualRegressionBaselineReport v1` fecha uma linha minima de regressao visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`, sem pixel-diff obrigatorio. `SceneTransitionReport v1` fecha o primeiro slice multi-cena por dois paths explicitos em runtime/CLI/MCP. `Scene Composition Manifest v1` fecha a composicao multi-cena minima por manifesto externo com `entryScene` e refs explicitas. `PathfindingGridReport v1` fecha a primeira superficie de navegacao report-only por grid, derivada de `tile.layer` e `collision.bounds`, sem mutar `Scene Document v1`, `SceneValidationReport v1`, loop, render, Browser Demo, exports ou savegame. `AtlasMaterialManifestReport v1` fecha o primeiro contrato atlas/material, ancorado em `Asset Manifest v1`, com regioes, materiais e bindings sprite/tile validados em runtime/CLI/MCP; Browser Demo e Portable HTML Export v2 agora consomem sprites atlas-backed por `visual.sprite.fields.atlasBindingId` opt-in, com sideband `metadata.atlasMaterial` versionado/hash, sem mutar `RenderSnapshot v1`.
+Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. `entity.prefab` continua relativo a cena, exige alvo `.prefab.json` e rejeita URL, traversal e paths absolutos/UNC; Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export tambem falham de forma previsivel nesses casos. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface, consumo visual opt-in na Browser Demo/export por overlay passivo e uma fixture publica de telas pequenas em `scenes/ui-production-screens.scene.json`, preservando HUD Lite como diagnostico local. `UiNavigationFocusReport v1` deriva foco/navegacao sequencial report-only de `UiSystemReport v1` em runtime/CLI/MCP, sem mutar `ui.screen`, Browser Demo/export, `RenderSnapshot v1`, loop, replay ou savegame. `UiActionSemanticsReport v1` agora adiciona `ui.action.semantics` opt-in co-localizado com `ui.screen`, com `initialFocusWidgetId` e `actions[]` autorados, fixture publica em `scenes/ui-action-semantics.scene.json` e runtime/CLI/MCP alinhados, preservando `UiNavigationFocusReport v1` como heuristica derivada e mantendo Browser Demo/export passivos. `UiLocalScreenStateReport v1` agora explicita estado local minimo de telas em runtime/CLI/MCP como report opt-in e report-only, derivado de `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`, sem novo componente de cena, sem mutar os contratos anteriores e sem consumo no Browser Demo/export. `UiInputStepReport v1` agora fecha o primeiro passo local de navegacao/ativacao de UI como report opt-in, derivado de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, ainda sem consumo interativo no Browser Demo/export. `UiExplicitInput v1` e `UiExplicitInputStepReport v1` agora separam input UI explicito (`navigate`/`activate`) de `InputIntent v1`, com runtime/CLI/MCP e fixtures proprias em `fixtures/ui-input/`, mantendo Browser Demo/export passivos. `AssetManifestValidationReport v1` agora expoe validacao direta minima de manifesto em runtime/CLI/MCP com erro previsivel para arquivo ausente e JSON malformado, sem mutar `RenderSnapshot v1`. `VisualRegressionBaselineReport v1` fecha uma linha minima de regressao visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`, sem pixel-diff obrigatorio. `SceneTransitionReport v1` fecha o primeiro slice multi-cena por dois paths explicitos em runtime/CLI/MCP. `Scene Composition Manifest v1` fecha a composicao multi-cena minima por manifesto externo com `entryScene` e refs explicitas. `PathfindingGridReport v1` fecha a primeira superficie de navegacao report-only por grid, derivada de `tile.layer` e `collision.bounds`, sem mutar `Scene Document v1`, `SceneValidationReport v1`, loop, render, Browser Demo, exports ou savegame. `AtlasMaterialManifestReport v1` fecha o primeiro contrato atlas/material, ancorado em `Asset Manifest v1`, com regioes, materiais e bindings sprite/tile validados em runtime/CLI/MCP; Browser Demo e Portable HTML Export v2 agora consomem sprites atlas-backed por `visual.sprite.fields.atlasBindingId` opt-in, com sideband `metadata.atlasMaterial` versionado/hash, sem mutar `RenderSnapshot v1`.
 
 ## Comandos CLI principais
 
@@ -90,6 +90,8 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `inspect-atlas-material-manifest`: inspeciona um manifesto atlas/material ancorado em `Asset Manifest v1`
 - `validate-input-intent`: valida InputIntent v1
 - `keyboard-to-input-intent`: traduz teclas declaradas para InputIntent v1
+- `validate-ui-explicit-input`: valida UiExplicitInput v1
+- `keyboard-to-ui-explicit-input`: traduz teclas declaradas para UiExplicitInput v1
 - `plan-loop`: planeja execucao sem rodar handlers
 - `run-loop`: executa loop headless com suporte opt-in a input intent e keyboard script
 - `run-replay` e `run-replay-artifact`: executam replay deterministico
@@ -108,6 +110,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `inspect-ui-action-semantics`: inspeciona semantica autorada de acao/foco em `ui.action.semantics`
 - `inspect-ui-local-screen-state`: inspeciona estado local minimo de telas derivado de UI System, UI Navigation/Focus e UI Action Semantics
 - `inspect-ui-input-step`: inspeciona um passo local de input de UI a partir de `InputIntent v1`
+- `inspect-ui-explicit-input-step`: inspeciona um passo local de input UI explicito a partir de `UiExplicitInput v1`
 - `inspect-sprite-animation`: inspeciona animacoes declarativas de Sprite Animation v1
 - `inspect-scene-transition`: inspeciona uma transicao explicita entre duas cenas por path
 - `inspect-scene-composition`: inspeciona um manifesto externo de composicao multi-cena
@@ -127,8 +130,10 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `validate_asset_manifest`
 - `inspect_atlas_material_manifest`
 - `validate_input_intent`
+- `validate_ui_explicit_input`
 - `validate_prefab`
 - `keyboard_to_input_intent`
+- `keyboard_to_ui_explicit_input`
 - `validate_save`
 - `save_state_snapshot`
 - `load_save`
@@ -161,6 +166,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `inspect_ui_action_semantics`
 - `inspect_ui_local_screen_state`
 - `inspect_ui_input_step`
+- `inspect_ui_explicit_input_step`
 - `inspect_sprite_animation`
 
 Observacao: `render-svg-demo` e um fluxo de CLI/runtime. A Meta 2 nao define uma tool MCP dedicada para a demo HTML de SVG.
@@ -244,6 +250,10 @@ node ./engine/runtime/src/cli.mjs inspect-ui-local-screen-state ./scenes/ui-acti
 # inspecionar um passo local de input de UI
 node ./engine/runtime/src/cli.mjs inspect-ui-input-step ./scenes/ui-action-semantics.scene.json --input-intent ./fixtures/input/move-player-right.intent.json --json
 
+# validar input UI explicito e inspecionar um passo local separado de InputIntent v1
+node ./engine/runtime/src/cli.mjs validate-ui-explicit-input ./fixtures/ui-input/navigate-next.ui-explicit-input.json --json
+node ./engine/runtime/src/cli.mjs inspect-ui-explicit-input-step ./scenes/ui-action-semantics.scene.json --ui-explicit-input ./fixtures/ui-input/navigate-next.ui-explicit-input.json --json
+
 # gerar Browser Playable Demo consumindo UI System v1 como telas pequenas passivas
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-browser-demo.html --json
 
@@ -304,6 +314,8 @@ npm run smoke
 - `docs/UI_ACTION_SEMANTICS_LITE_V1.md`: contrato report-only de semantica autorada para `ui.action.semantics`
 - `docs/UI_LOCAL_SCREEN_STATE_LITE_V1.md`: contrato do report opt-in de estado local minimo de telas
 - `docs/UI_INPUT_STEP_LITE_V1.md`: contrato do report opt-in para passo local de input de UI
+- `docs/UI_EXPLICIT_INPUT_LITE_V1.md`: contrato de input UI explicito separado de `InputIntent v1`
+- `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`: contrato do report opt-in para passo local com `UiExplicitInput v1`
 - `docs/GAME_TEMPLATES_V1.md`: templates V1 Small 2D copiar-e-adaptar
 - `docs/AUDIO_LITE_V1.md`: contrato de Audio Lite v1 diagnostico
 - `docs/SPRITE_ANIMATION_V1.md`: contrato de Sprite Animation v1 diagnostico e consumo visual opt-in na Browser Demo

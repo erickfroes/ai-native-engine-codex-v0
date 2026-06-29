@@ -136,6 +136,10 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(validateInputIntentTool);
     assert.equal(validateInputIntentTool.title, 'Validate Input Intent');
     assert.deepEqual(validateInputIntentTool.inputSchema.required, ['path']);
+    const validateUiExplicitInputTool = toolsResponse.result.tools.find((tool) => tool.name === 'validate_ui_explicit_input');
+    assert.ok(validateUiExplicitInputTool);
+    assert.equal(validateUiExplicitInputTool.title, 'Validate UI Explicit Input');
+    assert.deepEqual(validateUiExplicitInputTool.inputSchema.required, ['path']);
     const validatePrefabTool = toolsResponse.result.tools.find((tool) => tool.name === 'validate_prefab');
     assert.ok(validatePrefabTool);
     assert.equal(validatePrefabTool.title, 'Validate Prefab');
@@ -144,6 +148,12 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(keyboardToInputIntentTool);
     assert.equal(keyboardToInputIntentTool.title, 'Keyboard To Input Intent');
     assert.deepEqual(keyboardToInputIntentTool.inputSchema.required, ['tick', 'entityId', 'keys']);
+    const keyboardToUiExplicitInputTool = toolsResponse.result.tools.find(
+      (tool) => tool.name === 'keyboard_to_ui_explicit_input'
+    );
+    assert.ok(keyboardToUiExplicitInputTool);
+    assert.equal(keyboardToUiExplicitInputTool.title, 'Keyboard To UI Explicit Input');
+    assert.deepEqual(keyboardToUiExplicitInputTool.inputSchema.required, ['tick', 'keys']);
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'validate_save'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'emit_world_snapshot'));
     const inspectSceneTransitionTool = toolsResponse.result.tools.find(

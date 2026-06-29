@@ -15,6 +15,10 @@ import {
   validateInputIntentV1File,
   createInputIntentFromKeyboardV1,
   loadValidatedInputIntentV1,
+  validateUiExplicitInputV1,
+  validateUiExplicitInputV1File,
+  createUiExplicitInputFromKeyboardV1,
+  loadValidatedUiExplicitInputV1,
   loadSceneFile,
   buildWorldSnapshotMessage,
   buildSceneTransitionReportV1,
@@ -54,6 +58,7 @@ import {
   buildUiNavigationFocusReportV1,
   buildUiActionSemanticsReportV1,
   buildUiInputStepReportV1,
+  buildUiExplicitInputStepReportV1,
   buildUiLocalScreenStateReportV1,
   buildSpriteAnimationReportV1,
   buildPrefabValidationReportV1,
@@ -70,6 +75,8 @@ function printUsage() {
   node engine/runtime/src/cli.mjs validate-save <path> [--json]
   node engine/runtime/src/cli.mjs validate-input-intent <path> [--json]
   node engine/runtime/src/cli.mjs keyboard-to-input-intent --tick <n> --entity <id> --keys <comma-list> [--json]
+  node engine/runtime/src/cli.mjs validate-ui-explicit-input <path> [--json]
+  node engine/runtime/src/cli.mjs keyboard-to-ui-explicit-input --tick <n> --keys <comma-list> [--json]
   node engine/runtime/src/cli.mjs describe-scene <path> [--json]
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs inspect-scene-transition <from> <to> [--json]
@@ -93,6 +100,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-pathfinding-grid <path> [--json]
   node engine/runtime/src/cli.mjs inspect-movement-blocking <path> --input-intent <path> [--json]
   node engine/runtime/src/cli.mjs inspect-ui-input-step <path> --input-intent <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-ui-explicit-input-step <path> --ui-explicit-input <path> [--json]
   node engine/runtime/src/cli.mjs inspect-audio-lite <path> [--json]
   node engine/runtime/src/cli.mjs inspect-ui-system <path> [--json]
   node engine/runtime/src/cli.mjs inspect-ui-navigation-focus <path> [--json]
@@ -193,6 +201,18 @@ function formatInputIntentAction(action) {
 }
 
 function formatInputIntentErrors(errors) {
+  return errors.map((error) => `${error.path}: ${error.message}`).join('; ');
+}
+
+function formatUiExplicitInputAction(action) {
+  if (action?.type === 'navigate') {
+    return `navigate(${action.direction ?? 'missing'})`;
+  }
+
+  return action?.type ?? 'unknown';
+}
+
+function formatUiExplicitInputErrors(errors) {
   return errors.map((error) => `${error.path}: ${error.message}`).join('; ');
 }
 
@@ -380,6 +400,59 @@ async function run() {
     }
 
     console.log(JSON.stringify(inputIntent, null, 2));
+    return;
+  }
+
+  if (command === 'validate-ui-explicit-input') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await validateUiExplicitInputV1File(maybePath);
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`UI explicit input: ${report.absolutePath}`);
+      console.log(`Version: ${report.uiExplicitInput?.uiExplicitInputVersion ?? '(missing)'}`);
+      console.log(`Tick: ${report.uiExplicitInput?.tick ?? '(missing)'}`);
+      console.log(`Action: ${formatUiExplicitInputAction(report.uiExplicitInput?.action)}`);
+      console.log('');
+      console.log(report.ok ? 'Status: OK' : 'Status: INVALID');
+      if (report.errors.length > 0) {
+        console.log('');
+        console.log('Errors:');
+        for (const error of report.errors) {
+          console.log(`- ${error.path}: ${error.message}`);
+        }
+      }
+    }
+    process.exitCode = report.ok ? 0 : 1;
+    return;
+  }
+
+  if (command === 'keyboard-to-ui-explicit-input') {
+    if (!hasFlag('--tick')) {
+      throw new Error('keyboard-to-ui-explicit-input: --tick is required');
+    }
+
+    if (!hasFlag('--keys')) {
+      throw new Error('keyboard-to-ui-explicit-input: --keys is required');
+    }
+
+    const tick = readNumberFlag('keyboard-to-ui-explicit-input', '--tick', 1);
+    const keys = readCommaListFlag('keyboard-to-ui-explicit-input', '--keys');
+    const uiExplicitInput = createUiExplicitInputFromKeyboardV1({ tick, keys });
+    const validationReport = await validateUiExplicitInputV1(uiExplicitInput);
+
+    if (!validationReport.ok) {
+      throw new Error(
+        `keyboard-to-ui-explicit-input produced invalid ui explicit input: ${formatUiExplicitInputErrors(validationReport.errors)}`
+      );
+    }
+
+    console.log(JSON.stringify(uiExplicitInput, null, 2));
     return;
   }
 
@@ -1177,6 +1250,56 @@ async function run() {
       console.log(`Input intent tick: ${report.inputIntentTick}`);
       console.log(`Input intent entity: ${report.inputIntentEntityId}`);
       console.log(`Attempted move: ${report.attemptedMove.x},${report.attemptedMove.y}`);
+      console.log(`Direction: ${report.direction}`);
+      console.log(`Step type: ${report.stepType}`);
+      console.log(`Input handled: ${report.inputHandled}`);
+      console.log(`Focused screen: ${report.focusedScreenId ?? '(none)'}`);
+      console.log(`Focused widget: ${report.focusedWidgetIdBefore ?? '(none)'}`);
+      console.log(`Focused action: ${report.focusedActionIdBefore ?? report.activatedActionId ?? '(none)'}`);
+      const focusSource = report.focusedActionIdBefore !== null
+        ? 'ui.action.semantics'
+        : report.focusedWidgetIdBefore !== null
+          ? 'ui.navigation.focus'
+          : 'none';
+      console.log(`Focus source: ${focusSource}`);
+      console.log(`Action candidates: ${report.actionCandidates.length}`);
+      if (report.activatedActionId !== null) {
+        console.log(`Activated action: ${report.activatedActionId}`);
+      }
+      console.log(`Warnings: ${report.warnings.length}`);
+    }
+
+    return;
+  }
+
+  if (command === 'inspect-ui-explicit-input-step') {
+    if (!maybePath) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    if (!hasFlag('--ui-explicit-input')) {
+      throw new Error('inspect-ui-explicit-input-step: --ui-explicit-input is required');
+    }
+
+    const uiExplicitInputPath = readStringFlag(
+      'inspect-ui-explicit-input-step',
+      '--ui-explicit-input',
+      undefined
+    );
+    const uiExplicitInput = await loadValidatedUiExplicitInputV1(uiExplicitInputPath);
+    const report = await buildUiExplicitInputStepReportV1(maybePath, { uiExplicitInput });
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Scene: ${report.scene}`);
+      console.log(`UI explicit input step report version: ${report.uiExplicitInputStepReportVersion}`);
+      console.log(`Scope policy: ${report.scopePolicy}`);
+      console.log(`UI explicit input version: ${report.uiExplicitInputVersion}`);
+      console.log(`UI explicit input tick: ${report.uiExplicitInputTick}`);
+      console.log(`Action type: ${report.actionType}`);
       console.log(`Direction: ${report.direction}`);
       console.log(`Step type: ${report.stepType}`);
       console.log(`Input handled: ${report.inputHandled}`);

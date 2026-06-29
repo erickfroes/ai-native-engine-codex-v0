@@ -4,6 +4,8 @@
 
 Definir um contrato isolado para input headless orientado a intencao, sem alterar `input.keyboard`, `run-loop`, `simulate-state`, `Scene Document v1` ou contratos de saida ja publicados.
 
+`InputIntent v1` permanece voltado a gameplay/movimento. Entrada explicita de UI (`navigate`/`activate`) agora vive no contrato separado `UiExplicitInput v1`, documentado em `docs/UI_EXPLICIT_INPUT_LITE_V1.md`.
+
 ## Shape minimo
 
 ```json
@@ -60,6 +62,7 @@ Mapeamento v1:
 
 ## Fora deste slice
 
+- semantica canonica de UI `navigate`/`activate` (ver `UiExplicitInput v1`);
 - integracao com `Scene Document v1`;
 - integracao com `run-loop`;
 - integracao com `simulate-state`;

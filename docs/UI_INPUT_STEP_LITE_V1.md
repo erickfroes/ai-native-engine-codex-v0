@@ -2,6 +2,8 @@
 
 UI Input Step Lite v1 fecha um passo local minimalista de navega\u00e7\u00e3o/ativa\u00e7\u00e3o da UI sem alterar `ui.screen` nem o fluxo can\u00f4nico do loop.
 
+Este report permanece como trilha compativel baseada em `InputIntent v1`. Para novos fluxos de UI, a superficie preferencial e `UiExplicitInput v1` + `UiExplicitInputStepReport v1`, documentada em `docs/UI_EXPLICIT_INPUT_LITE_V1.md` e `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`.
+
 O objetivo deste slice \u00e9 pequeno:
 
 - derivar um passo determin\u00edstico de UI a partir de `InputIntent v1` e `UiLocalScreenStateReport v1`/`UiActionSemanticsReport v1`;
@@ -160,4 +162,4 @@ npm run smoke
 
 ## Continuidade
 
-`UI Input Step Lite v1` fecha o passo local minimo de navegacao/ativacao de UI como report-only. O proximo passo seguro e separar input UI explicito (`navigate`/`activate`) de `InputIntent v1` antes de qualquer consumo interativo no Browser Demo/export.
+`UI Input Step Lite v1` fica preservado como report-only compativel baseado em `InputIntent v1`. `UI Explicit Input Lite v1` e `UI Explicit Input Step Lite v1` agora separam `navigate`/`activate` de `InputIntent v1`; o proximo passo seguro e `UI Regression Matrix v1` antes de qualquer consumo interativo no Browser Demo/export.

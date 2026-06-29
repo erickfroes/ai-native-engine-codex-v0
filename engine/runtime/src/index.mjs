@@ -19,6 +19,12 @@ export { saveStateSnapshotV1, loadStateSnapshotSaveV1 } from './save/state-snaps
 export { validateInputIntentV1, validateInputIntentV1File } from './input/validate-input-intent-v1.mjs';
 export { loadValidatedInputIntentV1 } from './input/load-validated-input-intent-v1.mjs';
 export { createInputIntentFromKeyboardV1 } from './input/create-input-intent-from-keyboard-v1.mjs';
+export {
+  validateUiExplicitInputV1,
+  validateUiExplicitInputV1File
+} from './input/validate-ui-explicit-input-v1.mjs';
+export { loadValidatedUiExplicitInputV1 } from './input/load-validated-ui-explicit-input-v1.mjs';
+export { createUiExplicitInputFromKeyboardV1 } from './input/create-ui-explicit-input-from-keyboard-v1.mjs';
 export { validateAssetManifestV1, validateAssetManifestV1File } from './assets/validate-asset-manifest-v1.mjs';
 export { buildAssetManifestValidationReportV1 } from './assets/build-asset-manifest-validation-report-v1.mjs';
 export {
@@ -118,6 +124,11 @@ export {
   UI_INPUT_STEP_REPORT_VERSION,
   UI_INPUT_STEP_SCOPE_POLICY
 } from './ui/build-ui-input-step-report-v1.mjs';
+export {
+  buildUiExplicitInputStepReportV1,
+  UI_EXPLICIT_INPUT_STEP_REPORT_VERSION,
+  UI_EXPLICIT_INPUT_STEP_SCOPE_POLICY
+} from './ui/build-ui-explicit-input-step-report-v1.mjs';
 export {
   buildUiLocalScreenStateReportV1,
   createUiLocalScreenStateReportV1FromReports,

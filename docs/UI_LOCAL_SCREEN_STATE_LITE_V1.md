@@ -137,4 +137,4 @@ npm run smoke
 
 ## Continuidade
 
-`UI Input Step Lite v1` agora fecha o passo local minimo de navegacao/ativacao de UI. O proximo passo seguro e separar input UI explicito (`navigate`/`activate`) de `InputIntent v1` antes de qualquer consumo interativo no Browser Demo/export.
+`UI Input Step Lite v1` e `UI Explicit Input Lite v1` agora fecham os passos locais report-only de navegacao/ativacao de UI. O proximo passo seguro e `UI Regression Matrix v1` antes de qualquer consumo interativo no Browser Demo/export.

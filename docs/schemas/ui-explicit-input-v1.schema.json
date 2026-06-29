@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ui-explicit-input-v1.schema.json",
+  "title": "UiExplicitInputV1",
+  "type": "object",
+  "required": [
+    "uiExplicitInputVersion",
+    "tick",
+    "action"
+  ],
+  "properties": {
+    "uiExplicitInputVersion": {
+      "type": "integer"
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "action": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "navigate",
+            "activate"
+          ]
+        },
+        "direction": {
+          "enum": [
+            "previous",
+            "next"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
