@@ -7,7 +7,7 @@ O objetivo deste slice e pequeno:
 - derivar um passo local de UI a partir de `UiExplicitInput v1`;
 - reutilizar `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`;
 - expor runtime, CLI e MCP alinhados;
-- manter tudo como report-only, sem consumo interativo no Browser Demo/export.
+- manter tudo como report-only neste contrato; o consumo posterior fica restrito ao Browser UI Input Preview v1.
 
 ## Report
 
@@ -84,7 +84,8 @@ Output: o mesmo shape do `UiExplicitInputStepReport v1` em `structuredContent`.
 
 - `UiInputStepReport v1` permanece como superficie compativel baseada em `InputIntent v1`.
 - `UiExplicitInputStepReport v1` e a superficie preferencial para novos passos locais de UI.
-- Browser Demo/export, loop, replay, save/load e `RenderSnapshot v1` permanecem inalterados.
+- Browser Demo permanece passiva por padrao; Browser UI Input Preview v1 reutiliza a mesma semantica de step apenas quando `--ui-system --ui-input-preview` esta ativo.
+- exports, loop, replay, save/load e `RenderSnapshot v1` permanecem inalterados.
 
 ## Validacao
 
@@ -108,4 +109,4 @@ npm run smoke
 
 ## Continuidade
 
-`UI Regression Matrix v1` ja consolida `UiExplicitInput v1`, `UiExplicitInputStepReport v1`, convivencia com `UiInputStepReport v1` legado e a garantia de que Browser Demo/export continuam passivos. A matriz dedicada vive em `docs/UI_REGRESSION_MATRIX_V1.md`; o proximo passo seguro e `Browser UI Input Preview v1`, ainda restrito a Browser Demo.
+`UI Regression Matrix v1` ja consolida `UiExplicitInput v1`, `UiExplicitInputStepReport v1`, convivencia com `UiInputStepReport v1` legado e a garantia de passividade por padrao. `Browser UI Input Preview v1` fecha o primeiro consumo local opt-in restrito a Browser Demo. A matriz dedicada vive em `docs/UI_REGRESSION_MATRIX_V1.md`; o proximo passo seguro e `Browser UI Input Preview Hardening Matrix v1`.

@@ -7,10 +7,10 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - Versao atual: V1 Small 2D release-checkpointed.
 - Politica atual: V1 apenas bugfix, hardening e compatibilidade.
 - Meta em andamento: Meta 4 / V2 2D-2.5D indie production.
-- Slice fechado: `UI Regression Matrix v1`.
-- Proximo pacote recomendado: abrir `Browser UI Input Preview v1` para definir o menor consumo local opt-in de `UiExplicitInput v1` na Browser Demo, mantendo exports passivos.
+- Slice fechado: `Browser UI Input Preview v1`.
+- Proximo pacote recomendado: abrir `Browser UI Input Preview Hardening Matrix v1` para consolidar regressao/performance do preview sem ampliar interatividade para exports.
 - Slice atual em andamento: nenhum; o foco volta para hardening e continuidade documental ate abrir o proximo contrato.
-- Nao iniciar consumo interativo amplo no Browser Demo/export, editor-lite, particle-lite, 3D, route solving ou pipeline pesado antes de fechar um contrato explicito de preview local para UI.
+- Nao iniciar consumo interativo em exports, editor-lite, particle-lite, 3D, route solving ou pipeline pesado antes de fechar a matriz de hardening do preview local de UI.
 
 ## Estado
 
@@ -29,6 +29,7 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - [x] UI Explicit Input Lite v1 fechado como `UiExplicitInput v1` externo para `navigate`/`activate`, separado de `InputIntent v1`, com runtime/CLI/MCP e fixtures proprias.
 - [x] UI Explicit Input Step Lite v1 fechado como `UiExplicitInputStepReport v1`, derivado de `UiExplicitInput v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, com runtime/CLI/MCP alinhados e Browser Demo/export ainda passivos.
 - [x] UI Regression Matrix v1 fechada com doc dedicada, casos `next/previous/activate`, budget compacto e guardrails de passividade para Browser Demo/export.
+- [x] Browser UI Input Preview v1 fechado como consumo local opt-in so na Browser Demo, com `--ui-system --ui-input-preview`, MCP `uiInputPreview`, budget de `3 * 1024` bytes e exports passivos.
 - [x] Validacao final do slice: `npm test`, `npm run validate:scenes` e `npm run smoke`.
 
 Inventario completo: `docs/STATUS.md`.
@@ -37,17 +38,17 @@ Detalhe por versao: `docs/ENGINE_VERSION_ROADMAP.md`.
 
 ## Proximo passo
 
-### `Browser UI Input Preview v1`
+### `Browser UI Input Preview Hardening Matrix v1`
 
-Objetivo: abrir o menor contrato seguro para preview local de input UI na Browser Demo, reutilizando `UiExplicitInput v1` e preservando exports HTML como superficies passivas.
+Objetivo: consolidar a regressao do preview local de input UI ja entregue, sem adicionar comportamento novo e preservando exports HTML como superficies passivas.
 
 Escopo minimo do pacote:
 
-- [ ] definir contrato opt-in e local para consumir `UiExplicitInput v1` apenas na Browser Demo;
-- [ ] reutilizar a semantica de `UiExplicitInputStepReport v1`, sem reabrir `UiInputStepReport v1` legado;
-- [ ] manter o `canvas` como unico listener de teclado e o overlay `uiSystem` passivo por padrao;
-- [ ] manter `export-html-game` e `export-portable-html-game` fora do pacote, ainda passivos para input UI;
-- [ ] registrar budgets e guardrails para nao ultrapassar o delta atual de HTML com `uiSystem`.
+- [ ] adicionar/confirmar golden tests de preview off sem `browserUiInputPreview`, status DOM ou helper JS em Browser Demo/export;
+- [ ] consolidar budget de preview on em `<= 3 * 1024` bytes sobre Browser Demo com `--ui-system`;
+- [ ] cobrir paridade CLI/MCP para `uiInputPreview: true` e erro previsivel quando `uiSystem` nao esta ativo;
+- [ ] preservar o `canvas` como unico listener de teclado e o overlay `uiSystem` passivo;
+- [ ] manter `export-html-game` e `export-portable-html-game` sem preview.
 
 Fora do pacote:
 
@@ -66,7 +67,7 @@ Fora do pacote:
 - glTF/3D;
 - particle-lite.
 
-Criterio de pronto: contrato/documentacao publicados, Browser Demo com preview local opt-in validado sem drift de budget, exports HTML ainda passivos, `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
+Criterio de pronto: matriz/documentacao publicadas, drift de preview off fechado, budget de preview on guardado, exports HTML ainda passivos, `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
 
 ## Como continuar
 
@@ -91,6 +92,7 @@ git status -sb
 - `docs/UI_ACTION_SEMANTICS_LITE_V1.md`
 - `docs/UI_EXPLICIT_INPUT_LITE_V1.md`
 - `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`
+- `docs/BROWSER_UI_INPUT_PREVIEW_V1.md`
 - doc especifica do contrato tocado
 
 3. Para pacote medio/grande, usar subagentes antes de editar.
@@ -98,8 +100,6 @@ git status -sb
 Subagentes recomendados para o proximo pacote:
 
 - `explorer`
-- `engine_architect`
-- `tooling_editor_architect`
 - `qa_contract_auditor`
 - `perf_auditor`
 - `docs_handoff_auditor`
@@ -150,6 +150,7 @@ node ./engine/runtime/src/cli.mjs inspect-ui-local-screen-state ./scenes/ui-acti
 node ./engine/runtime/src/cli.mjs inspect-ui-input-step ./scenes/ui-action-semantics.scene.json --input-intent ./fixtures/input/move-player-right.intent.json --json
 node ./engine/runtime/src/cli.mjs validate-ui-explicit-input ./fixtures/ui-input/navigate-next.ui-explicit-input.json --json
 node ./engine/runtime/src/cli.mjs inspect-ui-explicit-input-step ./scenes/ui-action-semantics.scene.json --ui-explicit-input ./fixtures/ui-input/navigate-next.ui-explicit-input.json --json
+node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/ui-action-semantics.scene.json --ui-system --ui-input-preview --out ./tmp/ui-input-preview-browser-demo.html --json
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-browser-demo.html --json
 node ./engine/runtime/src/cli.mjs export-portable-html-game ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-portable.html --json
 node ./engine/runtime/src/cli.mjs export-html-game ./scenes/v1-small-2d.scene.json --movement-blocking --gameplay-hud --playable-save-load --out ./tmp/v1-small-2d.html --json
@@ -173,6 +174,7 @@ Use as tools MCP equivalentes quando estiver validando cenas, contratos ou repor
 - `docs/UI_EXPLICIT_INPUT_LITE_V1.md`: contrato de input UI explicito separado de `InputIntent v1`.
 - `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`: contrato report-only para passo local com `UiExplicitInput v1`.
 - `docs/UI_REGRESSION_MATRIX_V1.md`: matriz curta de regressao para input UI local e passividade de Browser Demo/export.
+- `docs/BROWSER_UI_INPUT_PREVIEW_V1.md`: contrato do preview local opt-in de input UI na Browser Demo.
 - `docs/V2_GAP_AUDIT.md`: lacunas V2.
 - `docs/CODEX_SUBAGENT_STRATEGY.md`: estrategia de subagentes.
 

@@ -137,4 +137,4 @@ npm run smoke
 
 ## Continuidade
 
-`UI Input Step Lite v1`, `UI Explicit Input Lite v1` e `UI Regression Matrix v1` agora fecham os passos locais report-only de navegacao/ativacao de UI. A matriz consolidada vive em `docs/UI_REGRESSION_MATRIX_V1.md`; o proximo passo seguro e `Browser UI Input Preview v1`, ainda restrito a Browser Demo.
+`UI Input Step Lite v1`, `UI Explicit Input Lite v1`, `UI Regression Matrix v1` e `Browser UI Input Preview v1` agora fecham os passos locais minimos de navegacao/ativacao de UI. A matriz consolidada vive em `docs/UI_REGRESSION_MATRIX_V1.md`; o proximo passo seguro e `Browser UI Input Preview Hardening Matrix v1`.

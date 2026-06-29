@@ -158,6 +158,7 @@ Regras:
 - `camera.viewport` nao desloca UI;
 - sem `--ui-system` / `uiSystem: true`, Browser Demo e export nao embutem `metadata.uiSystem` nem overlay;
 - HUD Lite continua separado e nao e substituido por `ui.screen`.
+- `render-browser-demo --ui-system --ui-input-preview` pode adicionar Browser UI Input Preview v1 local, mas `--ui-system` sozinho e os exports continuam passivos.
 
 ## Telas Pequenas De Producao
 
@@ -188,6 +189,7 @@ Regras do slice:
 - `Playable Save/Load Lite` continua local ao HTML.
 - `RenderSnapshot v1`, `run-loop`, `save/load` e reports de colisao permanecem inalterados.
 - `render-browser-demo`, `export-html-game` e `export-portable-html-game` consomem UI System v1 somente com opt-in explicito.
+- Browser UI Input Preview v1 consome input UI somente na Browser Demo e exige `uiSystem`; exports permanecem passivos.
 - `entity.prefab` continua opcional; quando presente por path, `ui.screen` pode vir do prefab.
 - `ui.action.semantics`, quando presente na mesma entidade, nao altera o shape de `ui.screen` nem o `UiSystemReport v1`.
 
@@ -227,4 +229,4 @@ npm run smoke
 
 ## Continuidade
 
-UI System v1 esta fechado como contrato declarativo/report e agora possui uma fixture publica de telas pequenas de producao em `scenes/ui-production-screens.scene.json`. `UI Navigation/Focus Lite v1`, `UI Action Semantics Lite v1`, `UI Local Screen State Lite v1`, `UI Input Step Lite v1`, `UI Explicit Input Lite v1` e `UI Regression Matrix v1` tambem estao fechados, sem consumo visual/interativo canonico no Browser Demo/export. A matriz consolidada vive em `docs/UI_REGRESSION_MATRIX_V1.md`; o proximo pacote seguro e `Browser UI Input Preview v1`, restrito a Browser Demo e ainda sem tocar exports.
+UI System v1 esta fechado como contrato declarativo/report e agora possui uma fixture publica de telas pequenas de producao em `scenes/ui-production-screens.scene.json`. `UI Navigation/Focus Lite v1`, `UI Action Semantics Lite v1`, `UI Local Screen State Lite v1`, `UI Input Step Lite v1`, `UI Explicit Input Lite v1`, `UI Regression Matrix v1` e `Browser UI Input Preview v1` tambem estao fechados. O preview fica restrito a Browser Demo opt-in; exports continuam passivos. A matriz consolidada vive em `docs/UI_REGRESSION_MATRIX_V1.md`; o proximo pacote seguro e `Browser UI Input Preview Hardening Matrix v1`.

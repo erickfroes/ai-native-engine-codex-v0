@@ -18,6 +18,8 @@ import {
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const v1Small2dScenePath = path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json');
+const uiActionSemanticsScenePath = path.join(repoRoot, 'scenes', 'ui-action-semantics.scene.json');
+const uiProductionScenePath = path.join(repoRoot, 'scenes', 'ui-production-screens.scene.json');
 const prefabOnlyScenePath = path.join(
   repoRoot,
   'engine',
@@ -60,6 +62,10 @@ function createTrackedTextElement(initialValue = '') {
   };
 }
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function getTextElementWriteCounts(elements) {
   return Object.fromEntries(Object.entries(elements).map(([key, element]) => [key, element.writeCount]));
 }
@@ -84,6 +90,7 @@ function createCanvasHarness(html) {
   const saveLoadStatusElement = createTrackedTextElement('No local state exported.');
   const audioLiteStatusElement = createTrackedTextElement('Audio Lite disabled until user gesture.');
   const audioLiteEventCountElement = createTrackedTextElement('Audio events: 0');
+  const genericElements = new Map();
   const gameplayHudElements = {
     entity: createTrackedTextElement(),
     tick: createTrackedTextElement(),
@@ -96,6 +103,45 @@ function createCanvasHarness(html) {
     movementBlocking: createTrackedTextElement()
   };
   const dataElement = { textContent: extractInlineJson(html) };
+  function readElementOpeningTag(id) {
+    return html.match(new RegExp(`<[^>]*id="${escapeRegExp(id)}"[^>]*>`))?.[0] ?? '';
+  }
+  function readElementText(id) {
+    const pattern = new RegExp(`<[^>]*id="${escapeRegExp(id)}"[^>]*>([^<]*)<\\/[^>]+>`);
+    return html.match(pattern)?.[1] ?? '';
+  }
+  function createGenericElement(id) {
+    const attributes = new Map();
+    const openingTag = readElementOpeningTag(id);
+    for (const match of openingTag.matchAll(/\s([a-zA-Z0-9:-]+)(?:="([^"]*)")?/g)) {
+      if (match[1] !== 'id') {
+        attributes.set(match[1], match[2] ?? '');
+      }
+    }
+    return {
+      textContent: readElementText(id),
+      setAttribute(name, value) {
+        attributes.set(name, String(value));
+      },
+      removeAttribute(name) {
+        attributes.delete(name);
+      },
+      getAttribute(name) {
+        return attributes.get(name) ?? null;
+      },
+      hasAttribute(name) {
+        return attributes.has(name);
+      }
+    };
+  }
+  function getGenericElementById(id) {
+    let element = genericElements.get(id);
+    if (!element) {
+      element = createGenericElement(id);
+      genericElements.set(id, element);
+    }
+    return element;
+  }
   const pauseButton = {
     textContent: '',
     addEventListener(eventName, handler) {
@@ -322,6 +368,9 @@ function createCanvasHarness(html) {
         if (id === 'browser-audio-lite-event-count') {
           return audioLiteEventCountElement;
         }
+        if (id === 'browser-ui-input-preview-status' || id.startsWith('browser-ui-widget-')) {
+          return getGenericElementById(id);
+        }
         throw new Error(`unexpected element lookup: ${id}`);
       }
     }
@@ -341,6 +390,8 @@ function createCanvasHarness(html) {
       }
     },
     operations,
+    genericElements,
+    getGenericElementById,
     gameplayHudElements,
     audioLiteEnableButton,
     audioLiteEventCountElement,
@@ -1856,6 +1907,167 @@ test('renderBrowserPlayableDemoHtmlV1 embeds UI System v1 as an opt-in screen-sp
   assert.doesNotMatch(uiHtml, /"uiInputStepReportVersion":/);
   assert.doesNotMatch(uiHtml, /"uiExplicitInputStepReportVersion":/);
   assert.doesNotMatch(uiHtml, /"uiExplicitInputVersion":/);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 enables Browser UI Input Preview v1 only with explicit metadata', async () => {
+  const scene = await loadSceneFile(uiActionSemanticsScenePath);
+  const snapshot = await buildRenderSnapshotV1(scene);
+  const uiSystemHtml = renderBrowserPlayableDemoHtmlV1({
+    title: 'ui-action-semantics Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { uiSystem: true })
+  });
+  const previewHtml = renderBrowserPlayableDemoHtmlV1({
+    title: 'ui-action-semantics Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+      uiSystem: true,
+      browserUiInputPreview: true
+    })
+  });
+
+  assert.doesNotMatch(uiSystemHtml, /"browserUiInputPreview":/);
+  assert.doesNotMatch(uiSystemHtml, /browser-ui-input-preview/);
+  assert.doesNotMatch(uiSystemHtml, /uiKey/);
+  assert.doesNotMatch(uiSystemHtml, /uiP=payload\.metadata\.browserUiInputPreview/);
+  assert.doesNotMatch(uiSystemHtml, /browserUiInputPreviewEnabled/);
+  assert.match(previewHtml, /"browserUiInputPreview":\{"actionCandidates":\[/);
+  assert.match(previewHtml, /"browserUiInputPreviewVersion":1/);
+  assert.match(previewHtml, /"sourceUiExplicitInputStepReportVersion":1/);
+  assert.match(previewHtml, /"uiExplicitInputVersion":1/);
+  assert.match(previewHtml, /id="browser-ui-input-preview-status"/);
+  assert.match(previewHtml, /data-ui-preview-action-id="menu\.start-mission"/);
+  assert.match(previewHtml, /data-ui-preview-action-id="menu\.continue-mission"/);
+  assert.match(previewHtml, /id="browser-ui-widget-menu\.main-menu\.start"[^>]+data-ui-preview-focus="true"/);
+  assert.doesNotMatch(previewHtml, /id="browser-ui-widget-hud\.main-hud\.score"[^>]+data-ui-preview-action-id/);
+  assert.equal(Buffer.byteLength(previewHtml, 'utf8') - Buffer.byteLength(uiSystemHtml, 'utf8') <= 3 * 1024, true);
+  assertNoForbiddenBrowserDemoHtmlSurface(previewHtml);
+});
+
+test('renderBrowserPlayableDemoHtmlV1 drives Browser UI Input Preview v1 from canvas keyboard input', async () => {
+  const scene = await loadSceneFile(uiActionSemanticsScenePath);
+  const snapshot = await buildRenderSnapshotV1(scene);
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'ui-action-semantics Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+      uiSystem: true,
+      browserUiInputPreview: true
+    })
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+  const statusElement = harness.getGenericElementById('browser-ui-input-preview-status');
+  const startElement = harness.getGenericElementById('browser-ui-widget-menu.main-menu.start');
+  const continueElement = harness.getGenericElementById('browser-ui-widget-menu.main-menu.continue');
+  let prevented = false;
+
+  assert.equal(startElement.getAttribute('data-ui-preview-focus'), 'true');
+  assert.equal(continueElement.hasAttribute('data-ui-preview-focus'), false);
+  assert.equal(statusElement.textContent, 'UI focus: menu.start-mission');
+
+  keydown({
+    code: 'ArrowDown',
+    preventDefault() {
+      prevented = true;
+    }
+  });
+
+  assert.equal(prevented, true);
+  assert.equal(startElement.hasAttribute('data-ui-preview-focus'), false);
+  assert.equal(continueElement.getAttribute('data-ui-preview-focus'), 'true');
+  assert.equal(statusElement.textContent, 'UI focus: menu.continue-mission');
+  assert.equal(harness.positionElement.textContent, 'Position: none');
+
+  keydown({
+    code: 'Enter',
+    preventDefault() {}
+  });
+
+  assert.equal(continueElement.getAttribute('data-ui-preview-activated'), 'true');
+  assert.equal(statusElement.textContent, 'UI activated: menu.continue-mission');
+});
+
+test('renderBrowserPlayableDemoHtmlV1 keeps Browser UI Input Preview v1 local no-op for screens without actions', async () => {
+  const scene = await loadSceneFile(uiProductionScenePath);
+  const snapshot = await buildRenderSnapshotV1(scene);
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'ui-production-screens Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+      uiSystem: true,
+      browserUiInputPreview: true
+    })
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+  const statusElement = harness.getGenericElementById('browser-ui-input-preview-status');
+
+  assert.match(html, /"browserUiInputPreview":\{"actionCandidates":\[\]/);
+  assert.match(html, /NO_ACTIONS_AVAILABLE/);
+  assert.equal(statusElement.textContent, 'UI focus: none');
+
+  keydown({
+    code: 'ArrowDown',
+    preventDefault() {}
+  });
+
+  assert.equal(statusElement.textContent, 'UI preview noop: no actions');
+  assert.equal(harness.positionElement.textContent, 'Position: none');
+});
+
+test('renderBrowserPlayableDemoHtmlV1 lets movement continue when Browser UI Input Preview v1 has no actions', () => {
+  const scene = createUiSystemScene();
+  const snapshot = {
+    renderSnapshotVersion: 1,
+    scene: 'ui-system-no-actions-controllable',
+    tick: 0,
+    viewport: { width: 64, height: 48 },
+    drawCalls: [
+      { kind: 'rect', id: 'player.hero', x: 4, y: 0, width: 8, height: 8, layer: 0 }
+    ]
+  };
+  const html = renderBrowserPlayableDemoHtmlV1({
+    title: 'ui-system no actions Browser Playable Demo',
+    renderSnapshot: snapshot,
+    metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+      uiSystem: true,
+      browserUiInputPreview: true
+    })
+  });
+  const harness = createCanvasHarness(html);
+  const keydown = harness.canvasListeners.get('keydown');
+  const statusElement = harness.getGenericElementById('browser-ui-input-preview-status');
+
+  assert.match(html, /"browserUiInputPreview":\{"actionCandidates":\[\]/);
+  assert.equal(harness.positionElement.textContent, 'Position: x 4, y 0');
+
+  keydown({
+    code: 'ArrowDown',
+    preventDefault() {}
+  });
+
+  assert.equal(statusElement.textContent, 'UI preview noop: no actions');
+  assert.equal(harness.positionElement.textContent, 'Position: x 4, y 4');
+});
+
+test('createBrowserPlayableDemoMetadataV1 requires UI System for Browser UI Input Preview v1', () => {
+  const scene = createUiSystemScene();
+  const snapshot = {
+    renderSnapshotVersion: 1,
+    scene: 'ui-system-browser-fixture',
+    tick: 0,
+    viewport: {
+      width: 64,
+      height: 48
+    },
+    drawCalls: []
+  };
+
+  assert.throws(
+    () => createBrowserPlayableDemoMetadataV1(scene, snapshot, { browserUiInputPreview: true }),
+    /metadata\.browserUiInputPreview.*metadata\.uiSystem/
+  );
 });
 
 test('renderBrowserPlayableDemoHtmlV1 blocks movement against solid entity bounds when movementBlocking is enabled', () => {

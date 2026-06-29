@@ -1391,7 +1391,8 @@ async function handleToolCall(params) {
           'playableSaveLoad',
           'audioLite',
           'spriteAnimation',
-          'uiSystem'
+          'uiSystem',
+          'uiInputPreview'
         ])
       );
       if (unexpectedArgument !== undefined) {
@@ -1506,6 +1507,20 @@ async function handleToolCall(params) {
         };
       }
 
+      if (args.uiInputPreview !== undefined && typeof args.uiInputPreview !== 'boolean') {
+        return {
+          content: toTextContent('render_browser_demo: `uiInputPreview` must be a boolean when provided.'),
+          isError: true
+        };
+      }
+
+      if (args.uiInputPreview === true && args.uiSystem !== true) {
+        return {
+          content: toTextContent('render_browser_demo: `uiInputPreview` requires `uiSystem: true`.'),
+          isError: true
+        };
+      }
+
       const scene = await loadSceneFile(targetPath);
       const resolvedAssetManifestPath = args.assetManifestPath === undefined
         ? undefined
@@ -1532,7 +1547,8 @@ async function handleToolCall(params) {
         audioLite: args.audioLite === true,
         spriteAnimation: args.spriteAnimation === true,
         atlasMaterial: atlasInputs.atlasMaterial,
-        uiSystem: args.uiSystem === true
+        uiSystem: args.uiSystem === true,
+        browserUiInputPreview: args.uiInputPreview === true
       });
       const html = renderBrowserPlayableDemoHtmlV1({
         title,

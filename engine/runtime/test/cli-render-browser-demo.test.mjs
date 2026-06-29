@@ -648,6 +648,43 @@ test('render-browser-demo --ui-system keeps authored action semantics passive in
   assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
 });
 
+test('render-browser-demo --ui-system --ui-input-preview enables Browser UI Input Preview v1', () => {
+  const result = runCli([
+    'render-browser-demo',
+    uiActionSemanticsScenePath,
+    '--ui-system',
+    '--ui-input-preview',
+    '--json'
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const payload = JSON.parse(result.stdout);
+  assertBrowserDemoEnvelopeShape(payload, { hasOutputPath: false });
+  assert.equal(payload.scene, 'ui-action-semantics');
+  assert.match(payload.html, /"uiSystem":\{"enabled":true,"scene":"ui-action-semantics"/);
+  assert.match(payload.html, /"browserUiInputPreview":\{"actionCandidates":\[/);
+  assert.match(payload.html, /"browserUiInputPreviewVersion":1/);
+  assert.match(payload.html, /"sourceUiExplicitInputStepReportVersion":1/);
+  assert.match(payload.html, /"uiExplicitInputVersion":1/);
+  assert.match(payload.html, /id="browser-ui-input-preview-status"/);
+  assert.match(payload.html, /data-ui-preview-action-id="menu\.start-mission"/);
+  assert.match(payload.html, /data-ui-preview-action-id="menu\.continue-mission"/);
+  assertNoForbiddenBrowserDemoHtmlSurface(payload.html);
+});
+
+test('render-browser-demo --ui-input-preview requires --ui-system', () => {
+  const result = runCli([
+    'render-browser-demo',
+    uiActionSemanticsScenePath,
+    '--ui-input-preview',
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /--ui-input-preview requires --ui-system/);
+});
+
 test('render-browser-demo combines HUD, movement blocking, Playable Save/Load Lite and Audio Lite', () => {
   const result = runCli([
     'render-browser-demo',

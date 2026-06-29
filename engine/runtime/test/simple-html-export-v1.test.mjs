@@ -213,6 +213,10 @@ test('Simple HTML Export v1 keeps action-semantics scenes passive when uiSystem 
   assert.doesNotMatch(withUiSystem.html, /"uiInputStepReportVersion":/);
   assert.doesNotMatch(withUiSystem.html, /"uiExplicitInputStepReportVersion":/);
   assert.doesNotMatch(withUiSystem.html, /"uiExplicitInputVersion":/);
+  assert.doesNotMatch(withUiSystem.html, /"browserUiInputPreview":/);
+  assert.doesNotMatch(withUiSystem.html, /browser-ui-input-preview/);
+  assert.doesNotMatch(withUiSystem.html, /uiKey/);
+  assert.doesNotMatch(withUiSystem.html, /uiP=payload\.metadata\.browserUiInputPreview/);
   assert.doesNotMatch(withUiSystem.html, /focusedActionIdBefore/);
   assert.doesNotMatch(withUiSystem.html, /activatedActionId/);
   assert.doesNotMatch(withUiSystem.html, /actionCandidates/);

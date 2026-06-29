@@ -209,6 +209,7 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'audioLite'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'spriteAnimation'));
     assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'uiSystem'));
+    assert.ok(Object.prototype.hasOwnProperty.call(renderBrowserDemoTool.inputSchema.properties, 'uiInputPreview'));
     assert.ok(toolsResponse.result.tools.some((tool) => tool.name === 'run_loop'));
     assert.ok(
       Object.prototype.hasOwnProperty.call(
@@ -1030,6 +1031,26 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(renderBrowserDemoWithUiSystemResponse.result.structuredContent.html, /id="browser-ui-system"/);
     assert.match(renderBrowserDemoWithUiSystemResponse.result.structuredContent.html, />Score: 000<\/div>/);
     assert.doesNotMatch(renderBrowserDemoWithUiSystemResponse.result.structuredContent.html, /"movementBlocking":/);
+    assert.doesNotMatch(renderBrowserDemoWithUiSystemResponse.result.structuredContent.html, /"browserUiInputPreview":/);
+
+    const renderBrowserDemoWithUiInputPreviewResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/ui-action-semantics.scene.json',
+        uiSystem: true,
+        uiInputPreview: true
+      }
+    });
+
+    assert.equal(renderBrowserDemoWithUiInputPreviewResponse.result.isError, false);
+    assert.equal(renderBrowserDemoWithUiInputPreviewResponse.result.structuredContent.scene, 'ui-action-semantics');
+    assert.match(renderBrowserDemoWithUiInputPreviewResponse.result.structuredContent.html, /"uiSystem":/);
+    assert.match(renderBrowserDemoWithUiInputPreviewResponse.result.structuredContent.html, /"browserUiInputPreview":\{"actionCandidates":\[/);
+    assert.match(
+      renderBrowserDemoWithUiInputPreviewResponse.result.structuredContent.html,
+      /id="browser-ui-input-preview-status"/
+    );
+    assert.match(renderBrowserDemoWithUiInputPreviewResponse.result.structuredContent.html, /data-ui-preview-action-id="menu\.start-mission"/);
 
     const renderBrowserDemoWithHudBlockingSaveLoadResponse = await client.request('tools/call', {
       name: 'render_browser_demo',
@@ -1337,6 +1358,34 @@ test('mcp server lists tools, validates scenes, emits snapshots and runs determi
     assert.match(
       renderBrowserDemoInvalidUiSystemResponse.result.content[0].text,
       /render_browser_demo: `uiSystem` must be a boolean when provided\./
+    );
+
+    const renderBrowserDemoInvalidUiInputPreviewResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/ui-action-semantics.scene.json',
+        uiInputPreview: 'yes'
+      }
+    });
+
+    assert.equal(renderBrowserDemoInvalidUiInputPreviewResponse.result.isError, true);
+    assert.match(
+      renderBrowserDemoInvalidUiInputPreviewResponse.result.content[0].text,
+      /render_browser_demo: `uiInputPreview` must be a boolean when provided\./
+    );
+
+    const renderBrowserDemoUiInputPreviewWithoutUiSystemResponse = await client.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: './scenes/ui-action-semantics.scene.json',
+        uiInputPreview: true
+      }
+    });
+
+    assert.equal(renderBrowserDemoUiInputPreviewWithoutUiSystemResponse.result.isError, true);
+    assert.match(
+      renderBrowserDemoUiInputPreviewWithoutUiSystemResponse.result.content[0].text,
+      /render_browser_demo: `uiInputPreview` requires `uiSystem: true`\./
     );
 
     const renderBrowserDemoUnexpectedArgumentResponse = await client.request('tools/call', {

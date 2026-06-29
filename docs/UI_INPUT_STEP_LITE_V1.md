@@ -8,7 +8,7 @@ O objetivo deste slice \u00e9 pequeno:
 
 - derivar um passo determin\u00edstico de UI a partir de `InputIntent v1` e `UiLocalScreenStateReport v1`/`UiActionSemanticsReport v1`;
 - expor runtime, CLI e MCP alinhados;
-- manter o resultado como `report-only`, sem consumo interativo no Browser Demo/export;
+- manter o resultado como `report-only`; o consumo posterior fica restrito ao Browser UI Input Preview v1;
 - preservar contratos existentes de UI e de fluxo (loop, replay, save/load, render).
 
 Importante: este pacote n\u00e3o adiciona novos componentes de cena.
@@ -163,4 +163,4 @@ npm run smoke
 
 ## Continuidade
 
-`UI Input Step Lite v1` fica preservado como report-only compativel baseado em `InputIntent v1`. `UI Explicit Input Lite v1`, `UI Explicit Input Step Lite v1` e `UI Regression Matrix v1` agora consolidam a trilha local de navegacao/ativacao sem mutar `InputIntent v1`; a matriz dedicada vive em `docs/UI_REGRESSION_MATRIX_V1.md`. O proximo passo seguro e `Browser UI Input Preview v1`, ainda restrito a Browser Demo.
+`UI Input Step Lite v1` fica preservado como report-only compativel baseado em `InputIntent v1`. `UI Explicit Input Lite v1`, `UI Explicit Input Step Lite v1`, `UI Regression Matrix v1` e `Browser UI Input Preview v1` agora consolidam a trilha local de navegacao/ativacao sem mutar `InputIntent v1`; a matriz dedicada vive em `docs/UI_REGRESSION_MATRIX_V1.md`. O proximo passo seguro e `Browser UI Input Preview Hardening Matrix v1`.

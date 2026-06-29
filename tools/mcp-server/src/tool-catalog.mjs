@@ -440,6 +440,10 @@ export const toolCatalog = [
         uiSystem: {
           type: 'boolean',
           description: 'When true, embed UI System v1 declarative screens as a passive screen-space overlay in the generated HTML.'
+        },
+        uiInputPreview: {
+          type: 'boolean',
+          description: 'When true, enable Browser UI Input Preview v1 local keyboard focus/activation on the Browser Demo canvas. Requires uiSystem.'
         }
       },
       additionalProperties: false

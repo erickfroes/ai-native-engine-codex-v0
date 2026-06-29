@@ -31,7 +31,7 @@ Handoff operacional: `docs/CODEX_HANDOFF.md`.
 - [ ] Meta 6 / V4 runtime/editor AA ainda nao iniciada.
 - [ ] Meta 7 / V5-V6 AAA aspiracional ainda nao iniciada.
 
-Proximo pacote recomendado: **Browser UI Input Preview v1**.
+Proximo pacote recomendado: **Browser UI Input Preview Hardening Matrix v1**.
 
 ---
 
@@ -104,12 +104,13 @@ Objetivo: sair de demo e chegar a uma base de producao pequena para jogos 2D/2.5
 - [x] Browser Demo, Simple HTML Export e Portable HTML Export com paridade runtime/CLI/MCP para UI de producao pequena.
 - [x] Preservar `RenderSnapshot v1`, HUD Lite e Playable Save/Load Lite sem acoplamento.
 - [x] UI Navigation/Focus Lite v1 report-only, derivado de `UiSystemReport v1`, com paridade runtime/CLI/MCP.
-- [x] UI Action Semantics Lite v1 report-only, via `ui.action.semantics` e `UiActionSemanticsReport v1`, sem consumo interativo no Browser Demo/export.
+- [x] UI Action Semantics Lite v1 report-only, via `ui.action.semantics` e `UiActionSemanticsReport v1`, sem consumo interativo naquele slice.
 - [x] UI Local Screen State Lite v1 report-only, opt-in, derivado de `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`, sem novo componente de cena e sem consumo no Browser Demo/export.
-- [x] UI Input Step Lite v1 report-only, opt-in, derivado de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, com paridade runtime/CLI/MCP e sem consumo interativo no Browser Demo/export.
-- [x] UI Explicit Input Lite v1 com `UiExplicitInput v1` e `UiExplicitInputStepReport v1`, separando `navigate`/`activate` de `InputIntent v1`, com paridade runtime/CLI/MCP e sem consumo interativo no Browser Demo/export.
-- [x] UI Regression Matrix v1 para cobrir input UI explicito, step legado e passividade de Browser Demo/export antes de qualquer consumo interativo.
-- [ ] Browser UI Input Preview v1 para definir um preview local opt-in de `navigate`/`activate` so na Browser Demo, sem acoplar exports ao runtime canonico.
+- [x] UI Input Step Lite v1 report-only, opt-in, derivado de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, com paridade runtime/CLI/MCP e sem consumo interativo naquele slice.
+- [x] UI Explicit Input Lite v1 com `UiExplicitInput v1` e `UiExplicitInputStepReport v1`, separando `navigate`/`activate` de `InputIntent v1`, com paridade runtime/CLI/MCP e sem consumo interativo naquele slice.
+- [x] UI Regression Matrix v1 para cobrir input UI explicito, step legado e passividade por padrao de Browser Demo/export antes do preview opt-in.
+- [x] Browser UI Input Preview v1 para preview local opt-in de `navigate`/`activate` so na Browser Demo, sem acoplar exports ao runtime canonico.
+- [ ] Browser UI Input Preview Hardening Matrix v1 para consolidar regressao/performance do preview sem ampliar interatividade.
 - [ ] Persistencia/savegame canonico de UI continua fora do V2 inicial.
 
 ### Animacao 2D
@@ -312,23 +313,23 @@ Criterio realista:
 
 ## Proximo pacote recomendado
 
-**Browser UI Input Preview v1**
+**Browser UI Input Preview Hardening Matrix v1**
 
 Checklist minimo do pacote:
 
 - [ ] Ler `README.md`, `docs/CODEX_HANDOFF.md`, `SPEC.md`, `docs/module-contracts.md`, `schemas/`, `ROADMAP.md`, `docs/UI_EXPLICIT_INPUT_LITE_V1.md` e `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`.
-- [ ] Ler `docs/UI_REGRESSION_MATRIX_V1.md` para preservar os guardrails fechados neste slice.
-- [ ] Usar subagentes: `explorer`, `engine_architect`, `tooling_editor_architect`, `qa_contract_auditor`, `perf_auditor` e `docs_handoff_auditor`.
-- [ ] Definir contrato opt-in para consumir `UiExplicitInput v1` na Browser Demo sem tocar loop, replay, savegame ou `InputIntent v1`.
-- [ ] Reutilizar a semantica de `UiExplicitInputStepReport v1` para `navigate previous|next` e `activate`.
-- [ ] Manter `export-html-game` e `export-portable-html-game` passivos neste pacote.
-- [ ] Manter o delta de HTML com `uiSystem` dentro do gate atual de `5 * 1024` bytes.
+- [ ] Ler `docs/BROWSER_UI_INPUT_PREVIEW_V1.md` e `docs/UI_REGRESSION_MATRIX_V1.md` para preservar os guardrails fechados.
+- [ ] Usar subagentes: `explorer`, `qa_contract_auditor`, `perf_auditor` e `docs_handoff_auditor`.
+- [ ] Consolidar golden tests para preview off sem sideband, status DOM ou handler em Browser Demo/export.
+- [ ] Consolidar budget de preview on em `<= 3 * 1024` bytes sobre `--ui-system`.
+- [ ] Cobrir paridade CLI/MCP para `{ uiSystem: true, uiInputPreview: true }` e erro previsivel sem `uiSystem`.
+- [ ] Manter `export-html-game` e `export-portable-html-game` passivos.
 - [ ] Atualizar docs e handoff.
 - [ ] Rodar `npm test`, `npm run validate:scenes` e `npm run smoke`.
 
 Fora do pacote inicial:
 
-- [ ] Consumo interativo em Browser Demo e exports ao mesmo tempo.
+- [ ] Consumo interativo em exports.
 - [ ] Promover `move == 0` de `InputIntent v1` a semantica canonica de ativacao de UI.
 - [ ] Mouse/touch, hit-testing e click.
 - [ ] Savegame canonico de UI.

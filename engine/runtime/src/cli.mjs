@@ -86,7 +86,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs inspect-visual-regression-baseline <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--json]
   node engine/runtime/src/cli.mjs render-svg-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs render-canvas-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
-  node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--atlas-material-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--out <path>] [--json]
+  node engine/runtime/src/cli.mjs render-browser-demo <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--atlas-material-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--ui-input-preview] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs export-html-game <path> --out <path> [--asset-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--ui-system] [--json]
   node engine/runtime/src/cli.mjs export-portable-html-game <path> --out <path> [--asset-manifest <path>] [--atlas-material-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--json]
   node engine/runtime/src/cli.mjs save-state <path> --ticks <n> [--seed <n>] --out <dir> [--json]
@@ -821,8 +821,12 @@ async function run() {
     const audioLite = hasFlag('--audio-lite');
     const spriteAnimation = hasFlag('--sprite-animation');
     const uiSystem = hasFlag('--ui-system');
+    const uiInputPreview = hasFlag('--ui-input-preview');
     if (spriteAnimation && atlasMaterialManifestPath !== undefined) {
       throw new Error('render-browser-demo: --sprite-animation cannot be combined with --atlas-material-manifest');
+    }
+    if (uiInputPreview && !uiSystem) {
+      throw new Error('render-browser-demo: --ui-input-preview requires --ui-system');
     }
     const scene = await loadSceneFile(maybePath);
     const atlasInputs = await resolveAtlasMaterialRenderInputsV1(scene, {
@@ -844,7 +848,8 @@ async function run() {
       audioLite,
       spriteAnimation,
       atlasMaterial: atlasInputs.atlasMaterial,
-      uiSystem
+      uiSystem,
+      browserUiInputPreview: uiInputPreview
     });
     const html = renderBrowserPlayableDemoHtmlV1({
       title,

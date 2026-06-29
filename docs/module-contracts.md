@@ -270,6 +270,7 @@ Compatibilidade:
 - Browser Playable Demo pode expor Sprite Animation v1 visual local opt-in com `render-browser-demo --sprite-animation` ou `render_browser_demo({ spriteAnimation: true })`;
 - Browser Playable Demo pode expor Atlas/Material Manifest v1 sprite-only opt-in com `render-browser-demo --atlas-material-manifest` ou `render_browser_demo({ atlasMaterialManifestPath })`;
 - Browser Playable Demo pode expor UI System v1 visual local opt-in com `render-browser-demo --ui-system` ou `render_browser_demo({ uiSystem: true })`;
+- Browser Playable Demo pode expor Browser UI Input Preview v1 local opt-in com `render-browser-demo --ui-system --ui-input-preview` ou `render_browser_demo({ uiSystem: true, uiInputPreview: true })`;
 - sem essas flags/opcoes, Browser Playable Demo permanece igual;
 - `InputIntent v1`, `KeyboardInputScript v1`, RenderSnapshot v1, Save/Load v1 e renderers permanecem inalterados;
 - nao adiciona UI system completo, fisica completa, resolucao complexa, pathfinding, editor ou servidor.
@@ -583,6 +584,23 @@ Contrato report-only para derivar um passo local de UI a partir de `UiExplicitIn
 - foco, candidatos, boundary warnings e ativacao reutilizam a mesma logica pura de `UiInputStepReport v1`.
 - nao inclui `inputIntentEntityId` nem `attemptedMove`.
 - Browser Demo, Simple HTML Export e Portable HTML Export permanecem passivos neste slice.
+
+## Browser UI Input Preview v1
+
+Contrato local e opt-in para consumir a semantica de input UI apenas na Browser Playable Demo:
+
+- ver `docs/BROWSER_UI_INPUT_PREVIEW_V1.md`.
+- runtime: `createBrowserPlayableDemoMetadataV1(scene, renderSnapshot, { uiSystem: true, browserUiInputPreview: true })`.
+- CLI: `render-browser-demo <scene> --ui-system --ui-input-preview`.
+- MCP: `render_browser_demo({ path, uiSystem: true, uiInputPreview: true })`.
+- `uiInputPreview` exige `uiSystem`; sem isso runtime, CLI e MCP falham de forma previsivel.
+- o HTML embute `metadata.browserUiInputPreview` apenas na Browser Demo e apenas com opt-in.
+- o sideband registra source versions de `UiSystemReport v1`, `UiNavigationFocusReport v1`, `UiActionSemanticsReport v1`, `UiLocalScreenStateReport v1` e `UiExplicitInputStepReport v1`.
+- o unico listener de teclado continua no `canvas`; o overlay de `uiSystem` permanece passivo.
+- `navigate previous|next` e `activate` seguem a semantica de `UiExplicitInput v1`, sem promover isso a loop canonico.
+- quando nao ha actions, o preview mostra no-op local e permite que o movimento da Browser Demo continue.
+- Simple HTML Export v1 e Portable HTML Export v2 continuam fora do escopo e nao embutem `browserUiInputPreview`.
+- nao altera `InputIntent v1`, `UiInputStepReport v1`, `UiExplicitInputStepReport v1`, `RenderSnapshot v1`, loop, replay, save/load ou schemas de cena.
 
 ## Sprite Animation v1
 
@@ -909,4 +927,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, UI Action Semantics Lite v1 report-only, UI Local Screen State Lite v1 report-only, UI Input Step Lite v1 report-only, UI Explicit Input Lite v1, UI Explicit Input Step Lite v1, UI Regression Matrix v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `Browser UI Input Preview v1`, restrito a Browser Demo e sem reabrir exports.
+- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, UI Action Semantics Lite v1 report-only, UI Local Screen State Lite v1 report-only, UI Input Step Lite v1 report-only, UI Explicit Input Lite v1, UI Explicit Input Step Lite v1, UI Regression Matrix v1, Browser UI Input Preview v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `Browser UI Input Preview Hardening Matrix v1`, sem ampliar interatividade para exports.

@@ -4,13 +4,13 @@
 
 Registrar o audit pequeno pedido apos o congelamento de `entity.prefab` v1 e a decisao do menor pacote seguro que abriu V2.
 
-Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, o follow-up imediato foi fechado como `SceneTransitionReport v1`, a composicao minima foi fechada como `Scene Composition Manifest v1`, o primeiro diagnostico de grid foi fechado como `Pathfinding Grid v1`, o manifesto atlas/material foi fechado como `Atlas/Material Manifest v1`, o consumo visual sprite-only foi fechado como `Atlas Region Consumption v1`, o binding explicito de sprites foi fechado como `Atlas Region Binding Contract v1`, telas pequenas de producao foram fechadas como `UI Production Screens v1`, foco/navegacao minima foi fechado como `UI Navigation/Focus Lite v1` report-only, a semantica autorada foi fechada como `UI Action Semantics Lite v1`, o estado local minimo foi fechado como `UI Local Screen State Lite v1`, o passo local de input foi fechado como `UI Input Step Lite v1`, input UI explicito foi fechado como `UI Explicit Input Lite v1` e a consolidacao de regressao foi fechada como `UI Regression Matrix v1`; a continuidade agora aponta para `Browser UI Input Preview v1`.
+Este documento e historico. A decisao principal ja foi executada por `Visual Regression Baseline v1`, o follow-up imediato foi fechado como `SceneTransitionReport v1`, a composicao minima foi fechada como `Scene Composition Manifest v1`, o primeiro diagnostico de grid foi fechado como `Pathfinding Grid v1`, o manifesto atlas/material foi fechado como `Atlas/Material Manifest v1`, o consumo visual sprite-only foi fechado como `Atlas Region Consumption v1`, o binding explicito de sprites foi fechado como `Atlas Region Binding Contract v1`, telas pequenas de producao foram fechadas como `UI Production Screens v1`, foco/navegacao minima foi fechado como `UI Navigation/Focus Lite v1` report-only, a semantica autorada foi fechada como `UI Action Semantics Lite v1`, o estado local minimo foi fechado como `UI Local Screen State Lite v1`, o passo local de input foi fechado como `UI Input Step Lite v1`, input UI explicito foi fechado como `UI Explicit Input Lite v1`, a consolidacao de regressao foi fechada como `UI Regression Matrix v1` e o preview local foi fechado como `Browser UI Input Preview v1`; a continuidade agora aponta para `Browser UI Input Preview Hardening Matrix v1`.
 
 ## Estado consolidado
 
 - V1 Small 2D esta release-checkpointed e permanece aberta apenas para bugfix, hardening e compatibilidade.
 - Audio Lite v1, UI System v1, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, UI Action Semantics Lite v1 report-only, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, AssetManifestValidationReport v1, Visual Regression Baseline v1, SceneTransitionReport v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja iniciam V2 em slices pequenos.
-- UI Input Step Lite v1 e UI Explicit Input Lite v1 ja fecham passos locais de navegacao/ativacao de UI como report-only, sem consumo interativo no Browser Demo/export.
+- UI Input Step Lite v1 e UI Explicit Input Lite v1 ja fecham passos locais de navegacao/ativacao de UI como report-only; Browser UI Input Preview v1 consome essa semantica apenas na Browser Demo, mantendo exports passivos.
 - `entity.prefab` v1 esta congelado: sem nested prefab, prefab hierarchy, hot reload, editor ou template engine.
 - O hardening de prefab inseguro ja cobre consumidores visuais/export por path, incluindo Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export.
 
@@ -143,7 +143,7 @@ Escopo executado:
 - cobrir fixtures validas/invalidas, paridade cross-interface, budget compacto e garantia report-only;
 - preservar Browser Demo/export, loop, replay, save/load e `InputIntent v1` sem consumo interativo.
 
-Proximo pacote recomendado: **Browser UI Input Preview v1**, para consumir `UiExplicitInput v1` so na Browser Demo, preservando exports passivos e sem tocar loop/savegame.
+Proximo pacote recomendado: **Browser UI Input Preview Hardening Matrix v1**, para consolidar drift/budget/paridade do preview antes de qualquer expansao de interatividade.
 
 Fora de escopo:
 

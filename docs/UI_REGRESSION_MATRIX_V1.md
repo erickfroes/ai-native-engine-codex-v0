@@ -1,15 +1,15 @@
 # UI Regression Matrix v1
 
-UI Regression Matrix v1 consolida a cobertura minima de regressao para input UI local antes de qualquer consumo interativo no Browser Demo/export.
+UI Regression Matrix v1 consolida a cobertura minima de regressao para input UI local antes do consumo local opt-in na Browser Demo e preserva exports passivos.
 
 O objetivo deste pacote e de hardening:
 
 - provar a convivencia entre `UiInputStepReport v1` legado e `UiExplicitInputStepReport v1`;
 - explicitar a paridade runtime/CLI/MCP nas superficies de input UI;
 - registrar budgets compactos de report;
-- confirmar que Browser Demo, Simple HTML Export v1 e Portable HTML Export v2 continuam passivos para input UI.
+- confirmar que Browser Demo sem preview, Simple HTML Export v1 e Portable HTML Export v2 continuam passivos para input UI.
 
-Este pacote nao adiciona componente de cena, estado persistido, handler de widget, hit-testing, click, mouse/touch nem navegacao interativa no HTML.
+Este pacote nao adiciona componente de cena, estado persistido, handler de widget, hit-testing, click, mouse/touch nem navegacao interativa em exports.
 
 ## Escopo coberto
 
@@ -67,6 +67,7 @@ Suites:
 Guardrails atuais:
 
 - Browser Demo com `uiSystem: true` continua gerando overlay DOM passivo sem embutir `UiInputStepReport v1`, `UiExplicitInputStepReport v1` ou `UiExplicitInput v1`.
+- Browser Demo com `uiSystem: true` e `uiInputPreview: true` pode embutir `metadata.browserUiInputPreview` e consumir input UI localmente, coberto por `docs/BROWSER_UI_INPUT_PREVIEW_V1.md`.
 - Simple HTML Export v1 com `--ui-system` continua sem consumo interativo de input UI.
 - Portable HTML Export v2 com `--ui-system` continua sem consumo interativo de input UI.
 
@@ -81,6 +82,7 @@ Sinais que continuam fora do HTML deste slice:
 - `uiInputStepReportVersion`
 - `uiExplicitInputStepReportVersion`
 - `uiExplicitInputVersion`
+- `browserUiInputPreview` nos exports e no Browser Demo sem opt-in de preview
 
 ## Comandos de validacao
 
@@ -98,7 +100,8 @@ node ./engine/runtime/src/cli.mjs export-portable-html-game ./scenes/ui-producti
 
 ## Fora de escopo
 
-- consumo interativo no Browser Demo/export;
+- consumo interativo em exports;
+- preview ativo sem opt-in explicito no Browser Demo;
 - `move == 0` promovido a semantica canonica de UI fora do report legado;
 - savegame canonico de UI;
 - click, mouse, touch e hit-testing;
@@ -107,4 +110,4 @@ node ./engine/runtime/src/cli.mjs export-portable-html-game ./scenes/ui-producti
 
 ## Continuidade
 
-Com esta matriz fechada, o menor proximo passo seguro e `Browser UI Input Preview v1`: consumo opt-in de `UiExplicitInput v1` apenas na Browser Demo, ainda sem tocar `export-html-game`, `export-portable-html-game`, loop canonico, replay, savegame, mouse/touch ou click.
+Com esta matriz e `Browser UI Input Preview v1` fechados, o menor proximo passo seguro e `Browser UI Input Preview Hardening Matrix v1`: consolidar drift, budget e paridade do preview antes de qualquer expansao para exports, mouse/touch, click ou savegame.

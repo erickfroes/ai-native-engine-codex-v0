@@ -29,15 +29,14 @@ function resolveFocusedActionIndex(actions, localScreenState) {
 }
 
 export function buildUiStepSummaryV1(actions, localScreenState, actionDirection) {
-  const warnings = [];
-  const actionCandidates = buildActionCandidates(actions);
+  const initialState = buildUiStepInitialStateV1(actions, localScreenState);
 
   if (actions.length === 0) {
     return {
       stepType: 'noop',
       direction: actionDirection,
       inputHandled: false,
-      actionCandidates,
+      actionCandidates: initialState.actionCandidates,
       focusedActionIndexBefore: null,
       focusedActionIdBefore: null,
       focusedWidgetIdBefore: null,
@@ -45,38 +44,18 @@ export function buildUiStepSummaryV1(actions, localScreenState, actionDirection)
       focusedActionIdAfter: null,
       focusedWidgetIdAfter: null,
       activatedActionId: null,
-      warnings: [
-        ...warnings,
-        {
-          code: 'NO_ACTIONS_AVAILABLE',
-          screenId: localScreenState.focusedScreenId,
-          entityId: localScreenState.focusedEntityId,
-          message: 'No actionable UI action was available in the focused scope.'
-        }
-      ]
+      warnings: initialState.warnings
     };
   }
 
-  let focusedActionIndex = resolveFocusedActionIndex(actions, localScreenState);
-  let focusedAction = focusedActionIndex === null ? null : actions[focusedActionIndex];
-
-  if (focusedAction === null) {
-    warnings.push({
-      code: 'FOCUSED_ACTION_NOT_RESOLVED',
-      screenId: localScreenState.focusedScreenId,
-      entityId: localScreenState.focusedEntityId,
-      message:
-        'The focused widget/action was not resolvable into a ui.action.semantics action; fallback to action index 0 for deterministic local stepping.'
-    });
-    focusedActionIndex = 0;
-    focusedAction = actions[focusedActionIndex];
-  }
+  const focusedActionIndex = initialState.focusedActionIndex;
+  const focusedAction = actions[focusedActionIndex];
 
   const stepSummary = {
     stepType: actionDirection === 0 ? 'activate' : 'focus',
     direction: actionDirection,
     inputHandled: true,
-    actionCandidates,
+    actionCandidates: initialState.actionCandidates,
     focusedActionIndexBefore: focusedActionIndex,
     focusedActionIdBefore: focusedAction.actionId,
     focusedWidgetIdBefore: focusedAction.widgetId,
@@ -84,7 +63,7 @@ export function buildUiStepSummaryV1(actions, localScreenState, actionDirection)
     focusedActionIdAfter: focusedAction.actionId,
     focusedWidgetIdAfter: focusedAction.widgetId,
     activatedActionId: null,
-    warnings
+    warnings: initialState.warnings
   };
 
   if (actionDirection === 0) {
@@ -128,4 +107,49 @@ export function buildUiStepSummaryV1(actions, localScreenState, actionDirection)
   }
 
   return stepSummary;
+}
+
+export function buildUiStepInitialStateV1(actions, localScreenState) {
+  const actionCandidates = buildActionCandidates(actions);
+
+  if (actions.length === 0) {
+    return {
+      actionCandidates,
+      focusedActionIndex: null,
+      focusedActionId: null,
+      focusedWidgetId: null,
+      warnings: [
+        {
+          code: 'NO_ACTIONS_AVAILABLE',
+          screenId: localScreenState.focusedScreenId,
+          entityId: localScreenState.focusedEntityId,
+          message: 'No actionable UI action was available in the focused scope.'
+        }
+      ]
+    };
+  }
+
+  let focusedActionIndex = resolveFocusedActionIndex(actions, localScreenState);
+  let focusedAction = focusedActionIndex === null ? null : actions[focusedActionIndex];
+  const warnings = [];
+
+  if (focusedAction === null) {
+    warnings.push({
+      code: 'FOCUSED_ACTION_NOT_RESOLVED',
+      screenId: localScreenState.focusedScreenId,
+      entityId: localScreenState.focusedEntityId,
+      message:
+        'The focused widget/action was not resolvable into a ui.action.semantics action; fallback to action index 0 for deterministic local stepping.'
+    });
+    focusedActionIndex = 0;
+    focusedAction = actions[focusedActionIndex];
+  }
+
+  return {
+    actionCandidates,
+    focusedActionIndex,
+    focusedActionId: focusedAction.actionId,
+    focusedWidgetId: focusedAction.widgetId,
+    warnings
+  };
 }

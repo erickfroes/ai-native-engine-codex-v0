@@ -18,6 +18,7 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - `metadata.spriteAnimation` e um envelope interno opcional do HTML, derivado de `SpriteAnimationReport v1` e gerado apenas quando o fluxo opt-in pede animacao local de sprites asset-backed.
 - `metadata.atlasMaterial` e um envelope interno opcional do HTML, derivado de `Atlas/Material Manifest v1` e gerado apenas quando o fluxo opt-in pede consumo sprite-only de atlas.
 - `metadata.uiSystem` e um envelope interno opcional do HTML, derivado de `UiSystemReport v1` e gerado apenas quando o fluxo opt-in pede UI System v1 visual.
+- `metadata.browserUiInputPreview` e um envelope interno opcional do HTML, derivado dos reports de UI e gerado apenas quando o fluxo opt-in pede preview local de input UI.
 - o loop visual local usa `requestAnimationFrame` apenas para redraw continuo do estado atual.
 
 ## Comportamento
@@ -57,6 +58,9 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 - Atlas Material v1 e Sprite Animation v1 nao se compoem neste slice; as interfaces publicas rejeitam a combinacao;
 - com `uiSystem` opt-in, embute metadata de `ui.screen` e renderiza um overlay DOM passivo em screen-space sobre o canvas;
 - UI System no browser renderiza apenas screens ativas, em ordem deterministica, sem input, binding, foco ou substituicao do HUD Lite;
+- com `uiSystem` e `uiInputPreview` opt-in, a Browser Demo adiciona status local e navega/ativa actions de `ui.action.semantics` pelo listener de teclado do `canvas`;
+- Browser UI Input Preview v1 reutiliza a semantica de `UiExplicitInput v1` para `navigate previous|next` e `activate`, mas nao altera `InputIntent v1`, loop, replay, savegame ou `RenderSnapshot v1`;
+- quando a UI focada nao tem actions, o preview mostra no-op e deixa o movimento local da demo continuar;
 - `Pause rendering`, `Resume rendering` e `Reset` sao controles locais do HTML autocontido e nao alteram contratos v1 publicados;
 - se a entidade controlavel configurada nao existir, faz fallback deterministico para o primeiro rect do snapshot; se nao houver rect, a demo permanece sem alvo controlavel;
 - nao importa o runtime Node no browser;
@@ -66,8 +70,8 @@ Definir uma demo interativa minima e autocontida no browser, derivada de `Render
 
 ## CLI e MCP
 
-- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--atlas-material-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--out <path>] [--json]`
-- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?, atlasMaterialManifestPath?, movementBlocking?, gameplayHud?, playableSaveLoad?, audioLite?, spriteAnimation?, uiSystem?)`
+- CLI: `render-browser-demo <scene> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--atlas-material-manifest <path>] [--movement-blocking] [--gameplay-hud] [--playable-save-load] [--audio-lite] [--sprite-animation] [--ui-system] [--ui-input-preview] [--out <path>] [--json]`
+- MCP: `render_browser_demo(path, tick?, width?, height?, assetManifestPath?, atlasMaterialManifestPath?, movementBlocking?, gameplayHud?, playableSaveLoad?, audioLite?, spriteAnimation?, uiSystem?, uiInputPreview?)`
 
 Exemplo para gerar um arquivo HTML:
 
@@ -115,6 +119,12 @@ Exemplo com UI System v1 visual opt-in:
 
 ```bash
 node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-browser-demo.html --json
+```
+
+Exemplo com Browser UI Input Preview v1 opt-in:
+
+```bash
+node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/ui-action-semantics.scene.json --ui-system --ui-input-preview --out ./tmp/ui-input-preview-browser-demo.html --json
 ```
 
 Depois de gerar com `--out`, abra o arquivo HTML diretamente no navegador. A demo sem `--asset-manifest` e autocontida: nao precisa de servidor local, assets reais ou runtime Node no cliente. Quando `--asset-manifest` e usado, o HTML continua single-file e deterministico, mas nao e portavel sozinho porque referencia imagens locais por `file:///...`; se o arquivo for movido sem os assets, o fallback `rect` preserva funcionamento basico.
@@ -210,6 +220,16 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 - o overlay e passivo (`pointer-events: none`) e nao captura input.
 - HUD Lite, Playable Save/Load Lite e Audio Lite continuam blocos locais independentes e nao sao ativados implicitamente por `--ui-system`.
 - sem opt-in, o HTML nao embute `metadata.uiSystem` nem `browser-ui-system`.
+
+### Browser UI Input Preview Local
+
+- `--ui-input-preview` no CLI e `uiInputPreview: true` no MCP exigem `--ui-system` / `uiSystem: true`.
+- o HTML embute `metadata.browserUiInputPreview` e o status `browser-ui-input-preview-status` apenas com esse opt-in.
+- o preview usa `UiActionSemanticsReport v1`, `UiLocalScreenStateReport v1` e a semantica de `UiExplicitInput v1`.
+- `ArrowRight`, `ArrowDown`, `KeyD` e `KeyS` navegam para a proxima action; `ArrowLeft`, `ArrowUp`, `KeyA` e `KeyW` navegam para a anterior; `Enter`, `NumpadEnter` e `Space` ativam a action focada.
+- widgets acionaveis recebem `data-ui-preview-action-id`; foco e ativacao sao marcados localmente por atributos `data-ui-preview-*`.
+- `render-browser-demo --ui-system` sem `--ui-input-preview` nao embute sideband, status ou handler do preview.
+- `export-html-game` e `export-portable-html-game` nao aceitam nem embutem Browser UI Input Preview v1.
 
 ### Asset Manifest Local
 

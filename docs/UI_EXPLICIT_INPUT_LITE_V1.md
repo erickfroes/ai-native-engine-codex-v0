@@ -83,11 +83,13 @@ Tools:
 
 - `InputIntent v1` permanece contrato de gameplay/movimento.
 - `move == 0` em `UiInputStepReport v1` continua compatibilidade local desse report legado, nao semantica canonica de ativacao de UI.
-- Browser Demo, Simple HTML Export e Portable HTML Export continuam passivos para UI input.
+- Browser Demo continua passiva por padrao; `--ui-system --ui-input-preview` consome a semantica de `navigate`/`activate` apenas localmente no HTML de demo.
+- Simple HTML Export e Portable HTML Export continuam passivos para UI input.
 
 ## Fora de Escopo
 
-- consumo interativo no Browser Demo/export;
+- consumo interativo em exports;
+- consumo interativo na Browser Demo sem opt-in explicito de preview;
 - mouse/touch/hit-testing/click;
 - estado de UI persistido em savegame;
 - novo componente de cena;
