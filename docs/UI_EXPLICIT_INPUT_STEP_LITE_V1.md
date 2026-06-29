@@ -109,4 +109,4 @@ npm run smoke
 
 ## Continuidade
 
-`UI Regression Matrix v1` ja consolida `UiExplicitInput v1`, `UiExplicitInputStepReport v1`, convivencia com `UiInputStepReport v1` legado e a garantia de passividade por padrao. `Browser UI Input Preview v1` fecha o primeiro consumo local opt-in restrito a Browser Demo. A matriz dedicada vive em `docs/UI_REGRESSION_MATRIX_V1.md`; o proximo passo seguro e `Browser UI Input Preview Hardening Matrix v1`.
+`UI Regression Matrix v1` ja consolida `UiExplicitInput v1`, `UiExplicitInputStepReport v1`, convivencia com `UiInputStepReport v1` legado e a garantia de passividade por padrao. `Browser UI Input Preview v1` fecha o primeiro consumo local opt-in restrito a Browser Demo e `Browser UI Input Preview Hardening Matrix v1` fecha drift, budget e paridade. A matriz dedicada vive em `docs/BROWSER_UI_INPUT_PREVIEW_HARDENING_MATRIX_V1.md`; o proximo passo seguro passa a ser `Audio v1 de jogo pequeno`.

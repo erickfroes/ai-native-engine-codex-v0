@@ -129,4 +129,4 @@ npm run smoke
 
 ## Continuidade
 
-`UI Local Screen State Lite v1`, `UI Input Step Lite v1`, `UI Explicit Input Lite v1`, `UI Regression Matrix v1` e `Browser UI Input Preview v1` ja fecham a trilha minima de foco/estado/input local. A matriz consolidada vive em `docs/UI_REGRESSION_MATRIX_V1.md`; o proximo passo seguro e `Browser UI Input Preview Hardening Matrix v1`.
+`UI Local Screen State Lite v1`, `UI Input Step Lite v1`, `UI Explicit Input Lite v1`, `UI Regression Matrix v1`, `Browser UI Input Preview v1` e `Browser UI Input Preview Hardening Matrix v1` ja fecham a trilha minima de foco/estado/input local. A matriz dedicada vive em `docs/BROWSER_UI_INPUT_PREVIEW_HARDENING_MATRIX_V1.md`; o proximo passo seguro passa a ser `Audio v1 de jogo pequeno`.

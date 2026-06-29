@@ -223,6 +223,75 @@ test('Simple HTML Export v1 keeps action-semantics scenes passive when uiSystem 
   assertNoForbiddenExportHtmlSurface(withUiSystem.html);
 });
 
+test('Simple HTML Export v1 keeps action-semantics scenes passive across runtime, CLI and MCP when uiSystem is enabled', async (t) => {
+  const runtimeEnvelope = await buildHtmlGameExportV1(uiActionSemanticsScenePath, { uiSystem: true });
+  const repeatedRuntimeEnvelope = await buildHtmlGameExportV1(uiActionSemanticsScenePath, { uiSystem: true });
+
+  assert.deepEqual(runtimeEnvelope, repeatedRuntimeEnvelope);
+  assert.equal(runtimeEnvelope.scene, 'ui-action-semantics');
+  assert.deepEqual(runtimeEnvelope.options, {
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    uiSystem: true
+  });
+
+  const repoTempDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(repoTempDir, 'cli-ui-action-semantics-passive.html');
+  const mcpOutPath = path.join(repoTempDir, 'mcp-ui-action-semantics-passive.html');
+  const cliResult = runCli([
+    'export-html-game',
+    uiActionSemanticsScenePath,
+    '--out',
+    cliOutPath,
+    '--ui-system',
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+  assertExportEnvelopeShape(cliEnvelope, { expectedScene: 'ui-action-semantics' });
+  const cliHtml = await readFile(cliEnvelope.outputPath, 'utf8');
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_html_game',
+      arguments: {
+        scenePath: './scenes/ui-action-semantics.scene.json',
+        outputPath: path.relative(repoRoot, mcpOutPath),
+        uiSystem: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+    assertExportEnvelopeShape(mcpEnvelope, { expectedScene: 'ui-action-semantics' });
+    const mcpHtml = await readFile(mcpEnvelope.outputPath, 'utf8');
+
+    assert.deepEqual(cliEnvelope.options, runtimeEnvelope.options);
+    assert.deepEqual(mcpEnvelope.options, runtimeEnvelope.options);
+    assert.equal(cliEnvelope.sizeBytes, runtimeEnvelope.sizeBytes);
+    assert.equal(mcpEnvelope.sizeBytes, runtimeEnvelope.sizeBytes);
+    assert.equal(cliEnvelope.htmlHash, runtimeEnvelope.htmlHash);
+    assert.equal(mcpEnvelope.htmlHash, runtimeEnvelope.htmlHash);
+    assert.equal(cliHtml, runtimeEnvelope.html);
+    assert.equal(mcpHtml, runtimeEnvelope.html);
+    assert.equal(mcpHtml, cliHtml);
+    assert.doesNotMatch(mcpHtml, /"browserUiInputPreview":/);
+    assert.doesNotMatch(mcpHtml, /browser-ui-input-preview/);
+    assert.doesNotMatch(mcpHtml, /uiP=payload\.metadata\.browserUiInputPreview/);
+    assert.doesNotMatch(mcpHtml, /data-ui-preview-action-id=/);
+    assertNoForbiddenExportHtmlSurface(cliHtml);
+    assertNoForbiddenExportHtmlSurface(mcpHtml);
+  } finally {
+    await client.close();
+  }
+});
+
 test('Simple HTML Export v1 keeps empty drawCalls aligned across runtime, CLI and MCP for scenes without visual components', async (t) => {
   const runtimeEnvelope = await buildHtmlGameExportV1(portableEmptyVisualScenePath);
   const repeatedRuntimeEnvelope = await buildHtmlGameExportV1(portableEmptyVisualScenePath);
@@ -484,6 +553,26 @@ test('export-html-game CLI requires --out and prints outputPath in readable mode
 
   const html = await readFile(outPath, 'utf8');
   assert.match(html, /^<!DOCTYPE html>/);
+});
+
+test('export-html-game CLI rejects --ui-input-preview to keep exports passive', async (t) => {
+  const outDir = await createTempDir(t);
+  const outPath = path.join(outDir, 'ui-input-preview-should-fail.html');
+  const result = runCli([
+    'export-html-game',
+    uiActionSemanticsScenePath,
+    '--out',
+    outPath,
+    '--ui-system',
+    '--ui-input-preview',
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(
+    result.stderr,
+    /export-html-game: --ui-input-preview is only supported by render-browser-demo/
+  );
 });
 
 test('Simple HTML Export v1 fails predictably across runtime, CLI and MCP for unsafe prefab path references', async (t) => {

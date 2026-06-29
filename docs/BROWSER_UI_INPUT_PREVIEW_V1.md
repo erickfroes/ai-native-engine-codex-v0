@@ -73,3 +73,7 @@ npm run smoke
 - novo componente de cena para input ou estado;
 - promover `move == 0` de `InputIntent v1` a ativacao canonica de UI;
 - layout engine, widget system amplo, binding de dados ou editor visual.
+
+## Continuidade
+
+`Browser UI Input Preview Hardening Matrix v1` agora fecha drift, budget, paridade cross-interface e a rejeicao explicita de `--ui-input-preview` fora de `render-browser-demo`. A matriz dedicada vive em `docs/BROWSER_UI_INPUT_PREVIEW_HARDENING_MATRIX_V1.md`; o menor proximo passo seguro passa a ser `Audio v1 de jogo pequeno`.

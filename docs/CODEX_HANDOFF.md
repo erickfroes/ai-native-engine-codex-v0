@@ -7,10 +7,10 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - Versao atual: V1 Small 2D release-checkpointed.
 - Politica atual: V1 apenas bugfix, hardening e compatibilidade.
 - Meta em andamento: Meta 4 / V2 2D-2.5D indie production.
-- Slice fechado: `Browser UI Input Preview v1`.
-- Proximo pacote recomendado: abrir `Browser UI Input Preview Hardening Matrix v1` para consolidar regressao/performance do preview sem ampliar interatividade para exports.
-- Slice atual em andamento: nenhum; o foco volta para hardening e continuidade documental ate abrir o proximo contrato.
-- Nao iniciar consumo interativo em exports, editor-lite, particle-lite, 3D, route solving ou pipeline pesado antes de fechar a matriz de hardening do preview local de UI.
+- Slice fechado: `Browser UI Input Preview Hardening Matrix v1`.
+- Proximo pacote recomendado: abrir `Audio v1 de jogo pequeno` para evoluir `Audio Lite v1` com bancos/clips/eventos pequenos, feedback de menu/gameplay e garantia de Browser Demo/export sem dependencia externa surpresa.
+- Slice atual em andamento: nenhum; o foco volta para continuidade documental e para o menor proximo contrato V2.
+- Nao iniciar export interativo de UI, savegame canonico de UI, editor-lite, particle-lite, route solving, 3D ou pipeline pesado antes de fechar um contrato pequeno de audio de jogo.
 
 ## Estado
 
@@ -30,6 +30,7 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - [x] UI Explicit Input Step Lite v1 fechado como `UiExplicitInputStepReport v1`, derivado de `UiExplicitInput v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, com runtime/CLI/MCP alinhados e Browser Demo/export ainda passivos.
 - [x] UI Regression Matrix v1 fechada com doc dedicada, casos `next/previous/activate`, budget compacto e guardrails de passividade para Browser Demo/export.
 - [x] Browser UI Input Preview v1 fechado como consumo local opt-in so na Browser Demo, com `--ui-system --ui-input-preview`, MCP `uiInputPreview`, budget de `3 * 1024` bytes e exports passivos.
+- [x] Browser UI Input Preview Hardening Matrix v1 fechada com cross-interface dedicado para preview on/off, budget guardado, exports `ui-action-semantics` passivos em runtime/CLI/MCP e rejeicao explicita de `--ui-input-preview` fora de `render-browser-demo`.
 - [x] Validacao final do slice: `npm test`, `npm run validate:scenes` e `npm run smoke`.
 
 Inventario completo: `docs/STATUS.md`.
@@ -38,36 +39,30 @@ Detalhe por versao: `docs/ENGINE_VERSION_ROADMAP.md`.
 
 ## Proximo passo
 
-### `Browser UI Input Preview Hardening Matrix v1`
+### `Audio v1 de jogo pequeno`
 
-Objetivo: consolidar a regressao do preview local de input UI ja entregue, sem adicionar comportamento novo e preservando exports HTML como superficies passivas.
+Objetivo: evoluir `Audio Lite v1` para um contrato pequeno de audio de jogo, com bancos/clips/eventos minimos, feedback local de menu/gameplay e compatibilidade previsivel entre Browser Demo e exports.
 
 Escopo minimo do pacote:
 
-- [ ] adicionar/confirmar golden tests de preview off sem `browserUiInputPreview`, status DOM ou helper JS em Browser Demo/export;
-- [ ] consolidar budget de preview on em `<= 3 * 1024` bytes sobre Browser Demo com `--ui-system`;
-- [ ] cobrir paridade CLI/MCP para `uiInputPreview: true` e erro previsivel quando `uiSystem` nao esta ativo;
-- [ ] preservar o `canvas` como unico listener de teclado e o overlay `uiSystem` passivo;
-- [ ] manter `export-html-game` e `export-portable-html-game` sem preview.
+- [ ] formalizar um contrato pequeno de audio de jogo acima de `Audio Lite v1`, sem mixer completo obrigatorio;
+- [ ] cobrir bancos/clips/eventos minimos para feedback de menu e gameplay pequeno;
+- [ ] preservar Browser Demo e exports como superficies previsiveis, sem dependencia externa surpresa;
+- [ ] expor runtime, CLI e MCP alinhados para a nova superficie;
+- [ ] registrar fixture minima, testes cross-interface e doc curta do contrato.
 
 Fora do pacote:
 
-- consumo interativo em `export-html-game` ou `export-portable-html-game`;
-- promover `move == 0` a semantica canonica de ativacao de UI;
-- acoplar input UI ao `InputIntent v1` de gameplay como contrato definitivo;
-- tocar loop canonico, replay, savegame ou `RenderSnapshot v1`;
-- mouse/touch, hit-testing e click;
-- estado de UI persistido em savegame canonico;
-- novo componente de cena para input/estado de UI;
-- layout engine completo;
-- widget system amplo;
-- binding de dados e HUD reativo;
+- export interativo de UI;
+- savegame canonico de UI;
+- mixer completo, streaming de musica, audio espacial ou backend pesado;
+- tocar `RenderSnapshot v1`, replay ou savegame fora do necessario para compatibilidade;
 - editor visual;
 - renderer novo;
 - glTF/3D;
 - particle-lite.
 
-Criterio de pronto: matriz/documentacao publicadas, drift de preview off fechado, budget de preview on guardado, exports HTML ainda passivos, `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
+Criterio de pronto: contrato/doc curta publicados, fixture minima e testes cross-interface alinhados, Browser Demo/export previsiveis, `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
 
 ## Como continuar
 
@@ -86,13 +81,9 @@ git status -sb
 - `schemas/`
 - `AGENTS.md`
 - `ROADMAP.md`
-- `docs/UI_REGRESSION_MATRIX_V1.md`
-- `docs/UI_SYSTEM_V1.md`
-- `docs/UI_NAVIGATION_FOCUS_LITE_V1.md`
-- `docs/UI_ACTION_SEMANTICS_LITE_V1.md`
-- `docs/UI_EXPLICIT_INPUT_LITE_V1.md`
-- `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`
-- `docs/BROWSER_UI_INPUT_PREVIEW_V1.md`
+- `docs/BROWSER_UI_INPUT_PREVIEW_HARDENING_MATRIX_V1.md`
+- `docs/AUDIO_LITE_V1.md`
+- `docs/AUDIO_LITE_TEST_MATRIX.md`
 - doc especifica do contrato tocado
 
 3. Para pacote medio/grande, usar subagentes antes de editar.
@@ -100,6 +91,7 @@ git status -sb
 Subagentes recomendados para o proximo pacote:
 
 - `explorer`
+- `gameplay_worker`
 - `qa_contract_auditor`
 - `perf_auditor`
 - `docs_handoff_auditor`
@@ -119,8 +111,7 @@ Subagentes recomendados para o proximo pacote:
 Subagentes para esta rodada:
 
 - `explorer`: mapeamento de código/contratos e pontos de integração.
-- `engine_architect`: validação de fronteiras arquitetura/runtime/CLI/MCP.
-- `tooling_editor_architect`: desenho da Browser Demo como preview local sem acoplar editor/export.
+- `gameplay_worker`: implementação direta do slice de audio pequeno.
 - `qa_contract_auditor`: schema, fixtures e paridade runtime/CLI/MCP.
 - `perf_auditor`: checagem de custo e ausência de regressão nos caminhos atuais.
 - `docs_handoff_auditor`: alinhamento de handoff/roadmap/STATUS.
@@ -150,9 +141,9 @@ node ./engine/runtime/src/cli.mjs inspect-ui-local-screen-state ./scenes/ui-acti
 node ./engine/runtime/src/cli.mjs inspect-ui-input-step ./scenes/ui-action-semantics.scene.json --input-intent ./fixtures/input/move-player-right.intent.json --json
 node ./engine/runtime/src/cli.mjs validate-ui-explicit-input ./fixtures/ui-input/navigate-next.ui-explicit-input.json --json
 node ./engine/runtime/src/cli.mjs inspect-ui-explicit-input-step ./scenes/ui-action-semantics.scene.json --ui-explicit-input ./fixtures/ui-input/navigate-next.ui-explicit-input.json --json
-node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/ui-action-semantics.scene.json --ui-system --ui-input-preview --out ./tmp/ui-input-preview-browser-demo.html --json
-node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-browser-demo.html --json
-node ./engine/runtime/src/cli.mjs export-portable-html-game ./scenes/ui-production-screens.scene.json --ui-system --out ./tmp/ui-production-portable.html --json
+node ./engine/runtime/src/cli.mjs inspect-audio-lite ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --json
+node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --audio-lite --out ./tmp/audio-lite-browser-demo.html --json
+node ./engine/runtime/src/cli.mjs export-html-game ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --audio-lite --out ./tmp/audio-lite-export.html --json
 node ./engine/runtime/src/cli.mjs export-html-game ./scenes/v1-small-2d.scene.json --movement-blocking --gameplay-hud --playable-save-load --out ./tmp/v1-small-2d.html --json
 ```
 
@@ -175,6 +166,8 @@ Use as tools MCP equivalentes quando estiver validando cenas, contratos ou repor
 - `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`: contrato report-only para passo local com `UiExplicitInput v1`.
 - `docs/UI_REGRESSION_MATRIX_V1.md`: matriz curta de regressao para input UI local e passividade de Browser Demo/export.
 - `docs/BROWSER_UI_INPUT_PREVIEW_V1.md`: contrato do preview local opt-in de input UI na Browser Demo.
+- `docs/BROWSER_UI_INPUT_PREVIEW_HARDENING_MATRIX_V1.md`: matriz de hardening do preview local de input UI.
+- `docs/AUDIO_LITE_V1.md`: contrato diagnostico atual de audio.
 - `docs/V2_GAP_AUDIT.md`: lacunas V2.
 - `docs/CODEX_SUBAGENT_STRATEGY.md`: estrategia de subagentes.
 

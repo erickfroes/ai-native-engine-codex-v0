@@ -31,7 +31,7 @@ Handoff operacional: `docs/CODEX_HANDOFF.md`.
 - [ ] Meta 6 / V4 runtime/editor AA ainda nao iniciada.
 - [ ] Meta 7 / V5-V6 AAA aspiracional ainda nao iniciada.
 
-Proximo pacote recomendado: **Browser UI Input Preview Hardening Matrix v1**.
+Proximo pacote recomendado: **Audio v1 de jogo pequeno**.
 
 ---
 
@@ -110,7 +110,7 @@ Objetivo: sair de demo e chegar a uma base de producao pequena para jogos 2D/2.5
 - [x] UI Explicit Input Lite v1 com `UiExplicitInput v1` e `UiExplicitInputStepReport v1`, separando `navigate`/`activate` de `InputIntent v1`, com paridade runtime/CLI/MCP e sem consumo interativo naquele slice.
 - [x] UI Regression Matrix v1 para cobrir input UI explicito, step legado e passividade por padrao de Browser Demo/export antes do preview opt-in.
 - [x] Browser UI Input Preview v1 para preview local opt-in de `navigate`/`activate` so na Browser Demo, sem acoplar exports ao runtime canonico.
-- [ ] Browser UI Input Preview Hardening Matrix v1 para consolidar regressao/performance do preview sem ampliar interatividade.
+- [x] Browser UI Input Preview Hardening Matrix v1 para consolidar regressao/performance do preview sem ampliar interatividade.
 - [ ] Persistencia/savegame canonico de UI continua fora do V2 inicial.
 
 ### Animacao 2D
@@ -313,32 +313,25 @@ Criterio realista:
 
 ## Proximo pacote recomendado
 
-**Browser UI Input Preview Hardening Matrix v1**
+**Audio v1 de jogo pequeno**
 
 Checklist minimo do pacote:
 
-- [ ] Ler `README.md`, `docs/CODEX_HANDOFF.md`, `SPEC.md`, `docs/module-contracts.md`, `schemas/`, `ROADMAP.md`, `docs/UI_EXPLICIT_INPUT_LITE_V1.md` e `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`.
-- [ ] Ler `docs/BROWSER_UI_INPUT_PREVIEW_V1.md` e `docs/UI_REGRESSION_MATRIX_V1.md` para preservar os guardrails fechados.
-- [ ] Usar subagentes: `explorer`, `qa_contract_auditor`, `perf_auditor` e `docs_handoff_auditor`.
-- [ ] Consolidar golden tests para preview off sem sideband, status DOM ou handler em Browser Demo/export.
-- [ ] Consolidar budget de preview on em `<= 3 * 1024` bytes sobre `--ui-system`.
-- [ ] Cobrir paridade CLI/MCP para `{ uiSystem: true, uiInputPreview: true }` e erro previsivel sem `uiSystem`.
-- [ ] Manter `export-html-game` e `export-portable-html-game` passivos.
+- [ ] Ler `README.md`, `docs/CODEX_HANDOFF.md`, `SPEC.md`, `docs/module-contracts.md`, `schemas/`, `ROADMAP.md` e `docs/AUDIO_LITE_V1.md`.
+- [ ] Preservar `Browser UI Input Preview Hardening Matrix v1`, exports HTML passivos para UI input e os guardrails atuais de Browser Demo/export.
+- [ ] Usar subagentes: `explorer`, `gameplay_worker`, `qa_contract_auditor`, `perf_auditor` e `docs_handoff_auditor`.
+- [ ] Evoluir `Audio Lite v1` para um contrato pequeno de audio de jogo com bancos/clips/eventos minimos.
+- [ ] Cobrir feedback de menu/gameplay pequeno sem mixer completo obrigatorio.
+- [ ] Garantir Browser Demo/export sem dependencia externa surpresa.
 - [ ] Atualizar docs e handoff.
 - [ ] Rodar `npm test`, `npm run validate:scenes` e `npm run smoke`.
 
 Fora do pacote inicial:
 
-- [ ] Consumo interativo em exports.
-- [ ] Promover `move == 0` de `InputIntent v1` a semantica canonica de ativacao de UI.
-- [ ] Mouse/touch, hit-testing e click.
+- [ ] Export interativo de UI.
 - [ ] Savegame canonico de UI.
-- [ ] Novo componente de cena para input/estado de UI.
-- [ ] Editor visual completo.
-- [ ] Layout engine completo.
-- [ ] Sistema de widgets interativos amplo.
-- [ ] Renderer novo.
-- [ ] 3D/glTF.
+- [ ] Mixer completo, streaming de musica, audio espacial ou backend pesado.
+- [ ] Editor-lite, particle-lite, route solving, renderer novo ou 3D/glTF.
 
 ---
 

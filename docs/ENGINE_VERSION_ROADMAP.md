@@ -225,6 +225,6 @@ Criterio realista:
 
 A partir do estado atual, seguir:
 
-1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1`, `UI Local Screen State Lite v1`, `UI Input Step Lite v1`, `UI Explicit Input Lite v1`, `Browser UI Input Preview v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `Browser UI Input Preview Hardening Matrix v1` como menor proximo passo seguro para consolidar regressao/performance do preview, mantendo exports passivos.
+1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1`, `UI Local Screen State Lite v1`, `UI Input Step Lite v1`, `UI Explicit Input Lite v1`, `Browser UI Input Preview v1`, `Browser UI Input Preview Hardening Matrix v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
+2. Abrir `Audio v1 de jogo pequeno` como menor proximo passo seguro, evoluindo `Audio Lite v1` com bancos/clips/eventos pequenos, feedback de menu/gameplay e garantia de Browser Demo/export sem dependencia externa surpresa.
 3. Manter editor-lite, particle-lite, route solving e 3D indie para depois de UI pequena e V2 demonstradas.

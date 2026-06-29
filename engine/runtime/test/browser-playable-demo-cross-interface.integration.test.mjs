@@ -17,6 +17,7 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
 const cliPath = path.join(repoRoot, 'engine', 'runtime', 'src', 'cli.mjs');
 const mcpServerPath = path.join(repoRoot, 'tools', 'mcp-server', 'src', 'index.mjs');
+const BROWSER_UI_INPUT_PREVIEW_DELTA_BUDGET_BYTES = 3 * 1024;
 const tutorialScenePath = path.join(repoRoot, 'scenes', 'tutorial.scene.json');
 const v1Small2dScenePath = path.join(repoRoot, 'scenes', 'v1-small-2d.scene.json');
 const spriteScenePath = path.join(repoRoot, 'fixtures', 'assets', 'sprite.scene.json');
@@ -59,6 +60,8 @@ const uiScreenPrefabScenePath = path.join(
   'fixtures',
   'ui-screen-prefab.scene.json'
 );
+const uiActionSemanticsScenePath = path.join(repoRoot, 'scenes', 'ui-action-semantics.scene.json');
+const uiActionSemanticsSceneMcpPath = './scenes/ui-action-semantics.scene.json';
 const uiProductionScenePath = path.join(repoRoot, 'scenes', 'ui-production-screens.scene.json');
 const uiProductionSceneMcpPath = './scenes/ui-production-screens.scene.json';
 const spriteAnimationIdleScenePath = path.join(
@@ -880,6 +883,189 @@ test('browser playable demo renders production UI screens without coupling HUD L
     assert.doesNotMatch(runtimeEnvelope.html, /data-screen-id="pause\.overlay"/);
     assert.doesNotMatch(runtimeEnvelope.html, /id="browser-gameplay-hud"/);
     assert.doesNotMatch(runtimeEnvelope.html, /id="browser-playable-save-load"/);
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('browser playable demo Browser UI Input Preview v1 stays opt-in and aligned across runtime, CLI and MCP', async () => {
+  const scene = await loadSceneFile(uiActionSemanticsScenePath);
+  const snapshot = await buildRenderSnapshotV1(scene);
+  const runtimeUiSystemEnvelope = {
+    browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderBrowserPlayableDemoHtmlV1({
+      title: `${snapshot.scene} Browser Playable Demo`,
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, { uiSystem: true })
+    })
+  };
+  const runtimePreviewEnvelope = {
+    browserDemoVersion: BROWSER_PLAYABLE_DEMO_VERSION,
+    scene: snapshot.scene,
+    tick: snapshot.tick,
+    html: renderBrowserPlayableDemoHtmlV1({
+      title: `${snapshot.scene} Browser Playable Demo`,
+      renderSnapshot: snapshot,
+      metadata: createBrowserPlayableDemoMetadataV1(scene, snapshot, {
+        uiSystem: true,
+        browserUiInputPreview: true
+      })
+    })
+  };
+
+  const cliUiSystemResult = runCli([
+    'render-browser-demo',
+    uiActionSemanticsScenePath,
+    '--ui-system',
+    '--json'
+  ]);
+  const cliPreviewResult = runCli([
+    'render-browser-demo',
+    uiActionSemanticsScenePath,
+    '--ui-system',
+    '--ui-input-preview',
+    '--json'
+  ]);
+
+  assert.equal(cliUiSystemResult.status, 0, cliUiSystemResult.stderr);
+  assert.equal(cliPreviewResult.status, 0, cliPreviewResult.stderr);
+
+  const cliUiSystemEnvelope = JSON.parse(cliUiSystemResult.stdout);
+  const cliPreviewEnvelope = JSON.parse(cliPreviewResult.stdout);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpUiSystemResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: uiActionSemanticsSceneMcpPath,
+        uiSystem: true
+      }
+    });
+    const mcpPreviewResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: uiActionSemanticsSceneMcpPath,
+        uiSystem: true,
+        uiInputPreview: true
+      }
+    });
+
+    assert.equal(mcpUiSystemResponse.result.isError, false);
+    assert.equal(mcpPreviewResponse.result.isError, false);
+
+    const mcpUiSystemEnvelope = mcpUiSystemResponse.result.structuredContent;
+    const mcpPreviewEnvelope = mcpPreviewResponse.result.structuredContent;
+
+    assertBrowserDemoEnvelope(runtimeUiSystemEnvelope, {
+      expectedScene: 'ui-action-semantics',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(cliUiSystemEnvelope, {
+      expectedScene: 'ui-action-semantics',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(mcpUiSystemEnvelope, {
+      expectedScene: 'ui-action-semantics',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(runtimePreviewEnvelope, {
+      expectedScene: 'ui-action-semantics',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(cliPreviewEnvelope, {
+      expectedScene: 'ui-action-semantics',
+      expectedTick: 0
+    });
+    assertBrowserDemoEnvelope(mcpPreviewEnvelope, {
+      expectedScene: 'ui-action-semantics',
+      expectedTick: 0
+    });
+
+    assert.deepEqual(runtimeUiSystemEnvelope, cliUiSystemEnvelope);
+    assert.deepEqual(runtimeUiSystemEnvelope, mcpUiSystemEnvelope);
+    assert.deepEqual(runtimePreviewEnvelope, cliPreviewEnvelope);
+    assert.deepEqual(runtimePreviewEnvelope, mcpPreviewEnvelope);
+
+    const uiSystemHtml = runtimeUiSystemEnvelope.html;
+    const previewHtml = runtimePreviewEnvelope.html;
+    assert.match(uiSystemHtml, /"uiSystem":\{"enabled":true,"scene":"ui-action-semantics"/);
+    assert.match(previewHtml, /"uiSystem":\{"enabled":true,"scene":"ui-action-semantics"/);
+    assert.doesNotMatch(uiSystemHtml, /"browserUiInputPreview":/);
+    assert.doesNotMatch(uiSystemHtml, /browser-ui-input-preview/);
+    assert.doesNotMatch(uiSystemHtml, /data-ui-preview-action-id=/);
+    assert.doesNotMatch(uiSystemHtml, /data-ui-preview-focus=/);
+    assert.doesNotMatch(uiSystemHtml, /uiP=payload\.metadata\.browserUiInputPreview/);
+    assert.match(previewHtml, /"browserUiInputPreview":\{"actionCandidates":\[/);
+    assert.match(previewHtml, /"browserUiInputPreviewVersion":1/);
+    assert.match(previewHtml, /"sourceUiExplicitInputStepReportVersion":1/);
+    assert.match(previewHtml, /"uiExplicitInputVersion":1/);
+    assert.match(previewHtml, /id="browser-ui-input-preview-status"/);
+    assert.match(previewHtml, /data-ui-preview-action-id="menu\.start-mission"/);
+    assert.match(previewHtml, /data-ui-preview-action-id="menu\.continue-mission"/);
+    assert.match(previewHtml, /data-ui-preview-focus="true"/);
+    assert.equal(
+      Buffer.byteLength(previewHtml, 'utf8') - Buffer.byteLength(uiSystemHtml, 'utf8') <=
+        BROWSER_UI_INPUT_PREVIEW_DELTA_BUDGET_BYTES,
+      true
+    );
+  } finally {
+    await mcp.close();
+  }
+});
+
+test('browser playable demo rejects Browser UI Input Preview v1 without uiSystem across runtime, CLI and MCP', async () => {
+  const scene = await loadSceneFile(uiActionSemanticsScenePath);
+  const snapshot = await buildRenderSnapshotV1(scene);
+
+  assert.throws(
+    () => createBrowserPlayableDemoMetadataV1(scene, snapshot, { browserUiInputPreview: true }),
+    /metadata\.browserUiInputPreview.*metadata\.uiSystem/
+  );
+
+  const cliResult = runCli([
+    'render-browser-demo',
+    uiActionSemanticsScenePath,
+    '--ui-input-preview',
+    '--json'
+  ]);
+
+  assert.notEqual(cliResult.status, 0);
+  assert.match(cliResult.stderr, /--ui-input-preview requires --ui-system/);
+
+  const mcp = createMcpClient();
+  try {
+    const initResponse = await mcp.request('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'node-test', version: '1.0.0' }
+    });
+    assert.equal(initResponse.result.protocolVersion, '2025-06-18');
+    mcp.notify('notifications/initialized');
+
+    const mcpResponse = await mcp.request('tools/call', {
+      name: 'render_browser_demo',
+      arguments: {
+        path: uiActionSemanticsSceneMcpPath,
+        uiInputPreview: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, true);
+    assert.match(
+      mcpResponse.result.content[0].text,
+      /render_browser_demo: `uiInputPreview` requires `uiSystem: true`\./
+    );
   } finally {
     await mcp.close();
   }

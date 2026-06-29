@@ -321,6 +321,7 @@ npm run smoke
 - `docs/UI_EXPLICIT_INPUT_STEP_LITE_V1.md`: contrato do report opt-in para passo local com `UiExplicitInput v1`
 - `docs/UI_REGRESSION_MATRIX_V1.md`: matriz curta de regressao para input UI local e passividade de Browser Demo/export
 - `docs/BROWSER_UI_INPUT_PREVIEW_V1.md`: contrato do preview local opt-in de input UI na Browser Demo
+- `docs/BROWSER_UI_INPUT_PREVIEW_HARDENING_MATRIX_V1.md`: matriz de hardening do preview local de input UI
 - `docs/GAME_TEMPLATES_V1.md`: templates V1 Small 2D copiar-e-adaptar
 - `docs/AUDIO_LITE_V1.md`: contrato de Audio Lite v1 diagnostico
 - `docs/SPRITE_ANIMATION_V1.md`: contrato de Sprite Animation v1 diagnostico e consumo visual opt-in na Browser Demo

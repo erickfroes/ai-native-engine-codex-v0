@@ -110,4 +110,4 @@ node ./engine/runtime/src/cli.mjs export-portable-html-game ./scenes/ui-producti
 
 ## Continuidade
 
-Com esta matriz e `Browser UI Input Preview v1` fechados, o menor proximo passo seguro e `Browser UI Input Preview Hardening Matrix v1`: consolidar drift, budget e paridade do preview antes de qualquer expansao para exports, mouse/touch, click ou savegame.
+Com esta matriz, `Browser UI Input Preview v1` e `Browser UI Input Preview Hardening Matrix v1` fechados, a trilha minima de input UI local fica consolidada sem mutar exports, loop, replay ou savegame. A matriz dedicada agora vive em `docs/BROWSER_UI_INPUT_PREVIEW_HARDENING_MATRIX_V1.md`; o menor proximo passo seguro passa a ser `Audio v1 de jogo pequeno`.

@@ -895,6 +895,9 @@ async function run() {
 
     const requestedOutPath = readStringFlag('export-html-game', '--out', undefined);
     const assetManifestPath = readStringFlag('export-html-game', '--asset-manifest', undefined);
+    if (hasFlag('--ui-input-preview')) {
+      throw new Error('export-html-game: --ui-input-preview is only supported by render-browser-demo');
+    }
     const movementBlocking = hasFlag('--movement-blocking');
     const gameplayHud = hasFlag('--gameplay-hud');
     const playableSaveLoad = hasFlag('--playable-save-load');
@@ -1375,6 +1378,9 @@ async function run() {
       '--atlas-material-manifest',
       undefined
     );
+    if (hasFlag('--ui-input-preview')) {
+      throw new Error('export-portable-html-game: --ui-input-preview is only supported by render-browser-demo');
+    }
     const movementBlocking = hasFlag('--movement-blocking');
     const gameplayHud = hasFlag('--gameplay-hud');
     const playableSaveLoad = hasFlag('--playable-save-load');

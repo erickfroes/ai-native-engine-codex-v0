@@ -163,4 +163,4 @@ npm run smoke
 
 ## Continuidade
 
-`UI Input Step Lite v1` fica preservado como report-only compativel baseado em `InputIntent v1`. `UI Explicit Input Lite v1`, `UI Explicit Input Step Lite v1`, `UI Regression Matrix v1` e `Browser UI Input Preview v1` agora consolidam a trilha local de navegacao/ativacao sem mutar `InputIntent v1`; a matriz dedicada vive em `docs/UI_REGRESSION_MATRIX_V1.md`. O proximo passo seguro e `Browser UI Input Preview Hardening Matrix v1`.
+`UI Input Step Lite v1` fica preservado como report-only compativel baseado em `InputIntent v1`. `UI Explicit Input Lite v1`, `UI Explicit Input Step Lite v1`, `UI Regression Matrix v1`, `Browser UI Input Preview v1` e `Browser UI Input Preview Hardening Matrix v1` agora consolidam a trilha local de navegacao/ativacao sem mutar `InputIntent v1`; a matriz dedicada vive em `docs/BROWSER_UI_INPUT_PREVIEW_HARDENING_MATRIX_V1.md`. O proximo passo seguro passa a ser `Audio v1 de jogo pequeno`.

@@ -229,7 +229,7 @@ No CLI, `outputPath` so aparece quando `--out` e usado.
 - `ArrowRight`, `ArrowDown`, `KeyD` e `KeyS` navegam para a proxima action; `ArrowLeft`, `ArrowUp`, `KeyA` e `KeyW` navegam para a anterior; `Enter`, `NumpadEnter` e `Space` ativam a action focada.
 - widgets acionaveis recebem `data-ui-preview-action-id`; foco e ativacao sao marcados localmente por atributos `data-ui-preview-*`.
 - `render-browser-demo --ui-system` sem `--ui-input-preview` nao embute sideband, status ou handler do preview.
-- `export-html-game` e `export-portable-html-game` nao aceitam nem embutem Browser UI Input Preview v1.
+- `export-html-game` e `export-portable-html-game` nao aceitam nem embutem Browser UI Input Preview v1; `--ui-input-preview` fora de `render-browser-demo` falha de forma previsivel no CLI.
 
 ### Asset Manifest Local
 

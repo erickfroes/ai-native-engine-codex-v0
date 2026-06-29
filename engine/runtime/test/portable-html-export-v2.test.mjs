@@ -280,6 +280,79 @@ test('Portable HTML Export v2 keeps action-semantics scenes passive when uiSyste
   assertNoForbiddenPortableExportHtmlSurface(withUiSystem.html);
 });
 
+test('Portable HTML Export v2 keeps action-semantics scenes passive across runtime, CLI and MCP when uiSystem is enabled', async (t) => {
+  const runtimeEnvelope = await buildPortableHtmlGameExportV2(uiActionSemanticsScenePath, { uiSystem: true });
+  const repeatedRuntimeEnvelope = await buildPortableHtmlGameExportV2(uiActionSemanticsScenePath, { uiSystem: true });
+
+  assert.deepEqual(runtimeEnvelope, repeatedRuntimeEnvelope);
+  assert.equal(runtimeEnvelope.scene, 'ui-action-semantics');
+  assert.deepEqual(runtimeEnvelope.options, {
+    assetManifest: false,
+    movementBlocking: false,
+    gameplayHud: false,
+    playableSaveLoad: false,
+    audioLite: false,
+    spriteAnimation: false,
+    uiSystem: true
+  });
+
+  const repoTempDir = await createRepoTempDir(t);
+  const cliOutPath = path.join(repoTempDir, 'cli-portable-ui-action-semantics-passive.html');
+  const mcpOutPath = path.join(repoTempDir, 'mcp-portable-ui-action-semantics-passive.html');
+  const cliResult = runCli([
+    'export-portable-html-game',
+    uiActionSemanticsScenePath,
+    '--out',
+    cliOutPath,
+    '--ui-system',
+    '--json'
+  ]);
+
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  const cliEnvelope = JSON.parse(cliResult.stdout);
+  assertPortableExportEnvelopeShape(cliEnvelope, { expectedScene: 'ui-action-semantics' });
+  const cliHtml = await readFile(cliEnvelope.outputPath, 'utf8');
+
+  const client = createMcpClient();
+  try {
+    await initializeMcp(client);
+
+    const mcpResponse = await client.request('tools/call', {
+      name: 'export_portable_html_game',
+      arguments: {
+        scenePath: './scenes/ui-action-semantics.scene.json',
+        outputPath: path.relative(repoRoot, mcpOutPath),
+        uiSystem: true
+      }
+    });
+
+    assert.equal(mcpResponse.result.isError, false);
+    const mcpEnvelope = mcpResponse.result.structuredContent;
+    assertPortableExportEnvelopeShape(mcpEnvelope, { expectedScene: 'ui-action-semantics' });
+    const mcpHtml = await readFile(mcpEnvelope.outputPath, 'utf8');
+
+    assert.deepEqual(cliEnvelope.options, runtimeEnvelope.options);
+    assert.deepEqual(mcpEnvelope.options, runtimeEnvelope.options);
+    assert.equal(cliEnvelope.embeddedAssetCount, runtimeEnvelope.embeddedAssetCount);
+    assert.equal(mcpEnvelope.embeddedAssetCount, runtimeEnvelope.embeddedAssetCount);
+    assert.equal(cliEnvelope.sizeBytes, runtimeEnvelope.sizeBytes);
+    assert.equal(mcpEnvelope.sizeBytes, runtimeEnvelope.sizeBytes);
+    assert.equal(cliEnvelope.htmlHash, runtimeEnvelope.htmlHash);
+    assert.equal(mcpEnvelope.htmlHash, runtimeEnvelope.htmlHash);
+    assert.equal(cliHtml, runtimeEnvelope.html);
+    assert.equal(mcpHtml, runtimeEnvelope.html);
+    assert.equal(mcpHtml, cliHtml);
+    assert.doesNotMatch(mcpHtml, /"browserUiInputPreview":/);
+    assert.doesNotMatch(mcpHtml, /browser-ui-input-preview/);
+    assert.doesNotMatch(mcpHtml, /uiP=payload\.metadata\.browserUiInputPreview/);
+    assert.doesNotMatch(mcpHtml, /data-ui-preview-action-id=/);
+    assertNoForbiddenPortableExportHtmlSurface(cliHtml);
+    assertNoForbiddenPortableExportHtmlSurface(mcpHtml);
+  } finally {
+    await client.close();
+  }
+});
+
 test('Portable HTML Export v2 keeps rect fallback without assetManifestPath even when spriteAnimation is enabled', async () => {
   const baseline = await buildPortableHtmlGameExportV2(spriteAnimationIdleScenePath, {
     spriteAnimation: true
@@ -1628,4 +1701,24 @@ test('export_portable_html_game MCP rejects invalid arguments and output paths o
   } finally {
     await client.close();
   }
+});
+
+test('export-portable-html-game CLI rejects --ui-input-preview to keep exports passive', async (t) => {
+  const outDir = await createTempDir(t);
+  const outPath = path.join(outDir, 'portable-ui-input-preview-should-fail.html');
+  const result = runCli([
+    'export-portable-html-game',
+    uiActionSemanticsScenePath,
+    '--out',
+    outPath,
+    '--ui-system',
+    '--ui-input-preview',
+    '--json'
+  ]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(
+    result.stderr,
+    /export-portable-html-game: --ui-input-preview is only supported by render-browser-demo/
+  );
 });
