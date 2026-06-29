@@ -54,6 +54,7 @@ import {
   buildTileCollisionReportV1,
   buildPathfindingGridReportV1,
   buildAudioLiteReportV1,
+  buildAudioEventBankReportV1,
   buildUiSystemReportV1,
   buildUiNavigationFocusReportV1,
   buildUiActionSemanticsReportV1,
@@ -81,6 +82,7 @@ function printUsage() {
   node engine/runtime/src/cli.mjs emit-world-snapshot <path> [--json]
   node engine/runtime/src/cli.mjs inspect-scene-transition <from> <to> [--json]
   node engine/runtime/src/cli.mjs inspect-scene-composition <path> [--json]
+  node engine/runtime/src/cli.mjs inspect-audio-event-bank <path> [--json]
   node engine/runtime/src/cli.mjs render-snapshot <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--json]
   node engine/runtime/src/cli.mjs render-svg <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--out <path>] [--json]
   node engine/runtime/src/cli.mjs inspect-visual-regression-baseline <path> [--tick <n>] [--width <n>] [--height <n>] [--asset-manifest <path>] [--json]
@@ -574,6 +576,54 @@ async function run() {
       console.log(`Scenes: ${report.scenes.length}`);
       for (const scene of report.scenes) {
         console.log(`- ${scene.ref ?? '(invalid)'}: ${scene.scene ?? '(invalid)'} (${scene.path})`);
+      }
+      if (report.errors.length > 0) {
+        console.log('');
+        console.log('Errors:');
+        for (const error of report.errors) {
+          const ref = error.ref === null ? '' : ` ${error.ref}`;
+          console.log(`- ${error.target}${ref} ${error.path}: ${error.message}`);
+        }
+      }
+      if (report.warnings.length > 0) {
+        console.log('');
+        console.log('Warnings:');
+        for (const warning of report.warnings) {
+          const ref = warning.ref === null ? '' : ` ${warning.ref}`;
+          console.log(`- ${warning.target}${ref} ${warning.path}: ${warning.message}`);
+        }
+      }
+    }
+
+    process.exitCode = report.ok ? 0 : 1;
+    return;
+  }
+
+  if (command === 'inspect-audio-event-bank') {
+    if (!maybePath || maybePath.startsWith('--')) {
+      printUsage();
+      process.exitCode = 2;
+      return;
+    }
+
+    const report = await buildAudioEventBankReportV1(maybePath);
+
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`Audio event bank report version: ${report.audioEventBankReportVersion}`);
+      console.log(report.ok ? 'Status: OK' : 'Status: INVALID');
+      console.log(`Manifest: ${report.absolutePath}`);
+      console.log(`Scene: ${report.scene ?? '(invalid)'}`);
+      console.log(`Scene path: ${report.sceneAbsolutePath ?? '(invalid)'}`);
+      console.log(`Banks: ${report.summary.bankCount}`);
+      console.log(`Events: ${report.summary.eventCount}`);
+      console.log(`Referenced clips: ${report.summary.referencedClipCount}/${report.summary.sceneClipCount}`);
+      for (const bank of report.banks) {
+        console.log(`- ${bank.bankId}: ${bank.eventCount} event(s)`);
+        for (const event of bank.events) {
+          console.log(`  - ${event.eventId}: ${event.clipIds.join(', ') || '(none)'}`);
+        }
       }
       if (report.errors.length > 0) {
         console.log('');

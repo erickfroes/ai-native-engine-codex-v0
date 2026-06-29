@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-native-engine.local/docs/schemas/audio-event-bank-report-v1.schema.json",
+  "title": "Audio Event Bank Report v1",
+  "type": "object",
+  "required": [
+    "audioEventBankReportVersion",
+    "ok",
+    "absolutePath",
+    "sceneAbsolutePath",
+    "scene",
+    "manifest",
+    "summary",
+    "sceneAudio",
+    "banks",
+    "errors",
+    "warnings"
+  ],
+  "properties": {
+    "audioEventBankReportVersion": {
+      "const": 1
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "absolutePath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sceneAbsolutePath": {
+      "type": ["string", "null"]
+    },
+    "scene": {
+      "type": ["string", "null"]
+    },
+    "manifest": {
+      "type": ["object", "null"]
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "bankCount",
+        "eventCount",
+        "sceneClipCount",
+        "referencedClipCount",
+        "unreferencedClipCount"
+      ],
+      "properties": {
+        "bankCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sceneClipCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "referencedClipCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unreferencedClipCount": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "sceneAudio": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": ["clips", "warnings", "invalidRefs"],
+          "properties": {
+            "clips": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/clip"
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "invalidRefs": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "banks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["bankId", "eventCount", "events"],
+        "properties": {
+          "bankId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "eventCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["eventId", "clipIds", "clips"],
+              "properties": {
+                "eventId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "clipIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "clips": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/clip"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/reportMessage"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/reportMessage"
+      }
+    }
+  },
+  "$defs": {
+    "clip": {
+      "type": "object",
+      "required": ["entityId", "clipId", "kind", "trigger", "volume", "loop", "src"],
+      "properties": {
+        "entityId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "clipId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": ["sfx", "music"]
+        },
+        "trigger": {
+          "enum": ["onDemoStart", "onMove", "onBlockedMove", "manual"]
+        },
+        "volume": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "loop": {
+          "type": "boolean"
+        },
+        "src": {
+          "type": ["string", "null"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "reportMessage": {
+      "type": "object",
+      "required": ["target", "ref", "path", "message"],
+      "properties": {
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ref": {
+          "type": ["string", "null"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

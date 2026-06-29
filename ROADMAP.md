@@ -31,7 +31,7 @@ Handoff operacional: `docs/CODEX_HANDOFF.md`.
 - [ ] Meta 6 / V4 runtime/editor AA ainda nao iniciada.
 - [ ] Meta 7 / V5-V6 AAA aspiracional ainda nao iniciada.
 
-Proximo pacote recomendado: **Audio v1 de jogo pequeno**.
+Proximo pacote recomendado: **Audio Browser Preview v1**.
 
 ---
 
@@ -80,6 +80,7 @@ Objetivo: sair de demo e chegar a uma base de producao pequena para jogos 2D/2.5
 - [x] UI System v1 declarativo/report-only com consumo visual opt-in.
 - [x] UI Production Screens v1 com fixture publica de menu/HUD/pause declarativos e paridade Browser Demo/export.
 - [x] Audio Lite v1.
+- [x] Audio Event Bank Manifest v1 report-only com cena/manifesto publicos para bancos/eventos pequenos.
 - [x] Sprite Animation v1 diagnostico e consumo visual opt-in inicial.
 - [x] Portable HTML Export v2.
 - [x] Visual Regression Baseline v1 estrutural.
@@ -122,9 +123,10 @@ Objetivo: sair de demo e chegar a uma base de producao pequena para jogos 2D/2.5
 
 ### Audio de jogo
 
-- [ ] Evoluir Audio Lite para audio v1 de jogo pequeno.
-- [ ] Validar bancos/clips/eventos sem mixer completo obrigatorio.
-- [ ] Cobrir menus, feedback de movimento e eventos de gameplay.
+- [x] Audio Event Bank Manifest v1 report-only acima de `Audio Lite v1`, com `scenes/audio-game-feedback.scene.json`, manifesto publico e runtime/CLI/MCP alinhados.
+- [ ] Consumir `AudioEventBankReport v1` na Browser Demo com preview local e paridade de report.
+- [ ] Cobrir menus, feedback de movimento e eventos de gameplay sem introduzir asset playback real ou mixer.
+- [ ] Garantir budget/paridade de Browser Demo antes de expandir exports.
 - [ ] Garantir export/browser sem dependencia externa surpresa.
 
 ### Particle-lite 2D
@@ -313,16 +315,17 @@ Criterio realista:
 
 ## Proximo pacote recomendado
 
-**Audio v1 de jogo pequeno**
+**Audio Browser Preview v1**
 
 Checklist minimo do pacote:
 
 - [ ] Ler `README.md`, `docs/CODEX_HANDOFF.md`, `SPEC.md`, `docs/module-contracts.md`, `schemas/`, `ROADMAP.md` e `docs/AUDIO_LITE_V1.md`.
+- [ ] Ler tambem `docs/AUDIO_EVENT_BANK_MANIFEST_V1.md`.
 - [ ] Preservar `Browser UI Input Preview Hardening Matrix v1`, exports HTML passivos para UI input e os guardrails atuais de Browser Demo/export.
 - [ ] Usar subagentes: `explorer`, `gameplay_worker`, `qa_contract_auditor`, `perf_auditor` e `docs_handoff_auditor`.
-- [ ] Evoluir `Audio Lite v1` para um contrato pequeno de audio de jogo com bancos/clips/eventos minimos.
-- [ ] Cobrir feedback de menu/gameplay pequeno sem mixer completo obrigatorio.
-- [ ] Garantir Browser Demo/export sem dependencia externa surpresa.
+- [ ] Consumir `AudioEventBankReport v1` na Browser Demo sem mutar `AudioLiteReport v1`.
+- [ ] Cobrir preview local de `scene.start`, `ui.navigate`, `ui.activate`, `player.move`, `player.blocked` e `manual.preview`.
+- [ ] Guardar budget de HTML e paridade report/metadata antes de tocar exports.
 - [ ] Atualizar docs e handoff.
 - [ ] Rodar `npm test`, `npm run validate:scenes` e `npm run smoke`.
 
@@ -330,7 +333,7 @@ Fora do pacote inicial:
 
 - [ ] Export interativo de UI.
 - [ ] Savegame canonico de UI.
-- [ ] Mixer completo, streaming de musica, audio espacial ou backend pesado.
+- [ ] Mixer completo, streaming de musica, audio espacial, asset playback real ou backend pesado.
 - [ ] Editor-lite, particle-lite, route solving, renderer novo ou 3D/glTF.
 
 ---

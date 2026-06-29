@@ -457,6 +457,23 @@ Contrato declarativo minimo para audio simples em cenas pequenas:
 - nao altera `RenderSnapshot v1`, `run-loop`, `InputIntent v1`, Movement Blocking, Tile Collision ou Browser Demo Local State v1.
 - nao e mixer completo, audio graph, spatial audio, streaming, timeline, editor, UI system completo ou runtime canonico de audio.
 
+## Audio Event Bank Manifest v1
+
+Contrato externo, opt-in e report-only para agrupar `audio.clip` em bancos/eventos pequenos acima de `Audio Lite v1`:
+
+- ver `docs/AUDIO_EVENT_BANK_MANIFEST_V1.md`.
+- schema formal do manifesto: `docs/schemas/audio-event-bank-manifest-v1.schema.json`.
+- schema formal do report: `docs/schemas/audio-event-bank-report-v1.schema.json`.
+- runtime: `buildAudioEventBankReportV1(manifestPath)`.
+- CLI: `inspect-audio-event-bank <manifest> [--json]`.
+- MCP: `inspect_audio_event_bank({ path })`.
+- manifesto externo usa `scenePath` relativo seguro ao diretorio do manifesto e deve apontar para `.scene.json`.
+- cada `banks[].events[].clipIds[]` deve referenciar um `audio.clip.fields.clipId` existente na cena.
+- `sceneAudio` do report reaproveita `AudioLiteReport v1` para clips/defaults/warnings/invalidRefs.
+- a fixture publica fica em `scenes/audio-game-feedback.scene.json` + `scenes/audio-game-feedback.audio-event-bank.json`.
+- nao altera `audio.clip` v1, `AudioLiteReport v1`, Browser Demo, exports HTML, `RenderSnapshot v1`, `run-loop`, replay ou save/load neste slice.
+- nao e mixer, playback real de asset, preview de browser, inline de audio no export portatil, savegame de audio ou novo componente de cena.
+
 ## UI System v1
 
 Contrato declarativo minimo para screens de UI com arvore serializavel de widgets, usado tambem como base pequena de telas de producao:
@@ -927,4 +944,4 @@ Contrato operacional de release para declarar a V1 Small 2D como release-checkpo
 - nao adiciona schema novo, runtime novo, comando CLI novo ou tool MCP nova.
 - nao altera Scene Document v1, RenderSnapshot v1, Browser Demo Local State v1, MovementBlockingReport v1, TileCollisionReport v1 ou Simple HTML Export v1.
 - registra que a V1 fica aberta apenas para bugfix, hardening e compatibilidade.
-- Audio Lite v1, UI System v1 visual opt-in, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, UI Action Semantics Lite v1 report-only, UI Local Screen State Lite v1 report-only, UI Input Step Lite v1 report-only, UI Explicit Input Lite v1, UI Explicit Input Step Lite v1, UI Regression Matrix v1, Browser UI Input Preview v1, Browser UI Input Preview Hardening Matrix v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `Audio v1 de jogo pequeno`, preservando exports passivos para UI input.
+- Audio Lite v1, Audio Event Bank Manifest v1 report-only, UI System v1 visual opt-in, UI Production Screens v1, UI Navigation/Focus Lite v1 report-only, UI Action Semantics Lite v1 report-only, UI Local Screen State Lite v1 report-only, UI Input Step Lite v1 report-only, UI Explicit Input Lite v1, UI Explicit Input Step Lite v1, UI Regression Matrix v1, Browser UI Input Preview v1, Browser UI Input Preview Hardening Matrix v1, Sprite Animation v1, Portable HTML Export v2, Prefab System v1, Visual Regression Baseline v1, Scene Transition Report v1, Scene Composition Manifest v1, Pathfinding Grid v1, Atlas/Material Manifest v1, Atlas Region Consumption v1 sprite-only e Atlas Region Binding Contract v1 ja foram entregues como incrementos pequenos pos-checkpoint; `entity.prefab` v1 deve ficar congelado para bugfix/compatibilidade; o audit pequeno de lacunas V2 esta registrado em `docs/V2_GAP_AUDIT.md`; o proximo pacote recomendado e `Audio Browser Preview v1`, preservando exports passivos para UI input.

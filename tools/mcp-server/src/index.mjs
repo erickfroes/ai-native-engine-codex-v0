@@ -53,6 +53,7 @@ import {
   buildTileCollisionReportV1,
   buildPathfindingGridReportV1,
   buildAudioLiteReportV1,
+  buildAudioEventBankReportV1,
   buildUiSystemReportV1,
   buildUiNavigationFocusReportV1,
   buildUiActionSemanticsReportV1,
@@ -165,6 +166,7 @@ async function handleToolCall(params) {
     params.name !== 'inspect_tile_collision' &&
     params.name !== 'inspect_pathfinding_grid' &&
     params.name !== 'inspect_audio_lite' &&
+    params.name !== 'inspect_audio_event_bank' &&
     params.name !== 'inspect_ui_system' &&
     params.name !== 'inspect_ui_navigation_focus' &&
     params.name !== 'inspect_ui_action_semantics' &&
@@ -614,6 +616,28 @@ async function handleToolCall(params) {
           report.ok
             ? `Atlas/material manifest inspected with ${report.summary.regionCount} region(s).`
             : 'Atlas/material manifest inspection failed validation.'
+        ),
+        structuredContent: report,
+        isError: !report.ok
+      };
+    }
+
+    if (params.name === 'inspect_audio_event_bank') {
+      const unexpectedArgument = findUnexpectedArgument(args, new Set(['path']));
+      if (unexpectedArgument !== undefined) {
+        return {
+          content: toTextContent(`inspect_audio_event_bank: unexpected argument \`${unexpectedArgument}\`.`),
+          isError: true
+        };
+      }
+
+      const report = await buildAudioEventBankReportV1(resolveRepoPath(args.path));
+
+      return {
+        content: toTextContent(
+          report.ok
+            ? `Audio event bank inspected for ${report.scene} with ${report.summary.eventCount} event(s).`
+            : 'Audio event bank inspection failed validation.'
         ),
         structuredContent: report,
         isError: !report.ok
@@ -1658,7 +1682,7 @@ async function handleRequest(message) {
         version: '0.2.0'
       },
       instructions:
-        'Use validate_scene, validate_asset_manifest, inspect_atlas_material_manifest, validate_input_intent, validate_ui_explicit_input, validate_prefab, keyboard_to_input_intent, keyboard_to_ui_explicit_input, validate_save, save_state_snapshot, load_save, emit_world_snapshot, inspect_scene_transition, inspect_scene_composition, render_snapshot, render_svg, inspect_visual_regression_baseline, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_pathfinding_grid, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_ui_navigation_focus, inspect_ui_action_semantics, inspect_ui_local_screen_state, inspect_ui_input_step, inspect_ui_explicit_input_step, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
+        'Use validate_scene, validate_asset_manifest, inspect_atlas_material_manifest, validate_input_intent, validate_ui_explicit_input, validate_prefab, keyboard_to_input_intent, keyboard_to_ui_explicit_input, validate_save, save_state_snapshot, load_save, emit_world_snapshot, inspect_scene_transition, inspect_scene_composition, inspect_audio_event_bank, render_snapshot, render_svg, inspect_visual_regression_baseline, render_canvas_demo, render_browser_demo, export_html_game, export_portable_html_game, inspect_collision_bounds, inspect_collision_overlaps, inspect_tile_collision, inspect_pathfinding_grid, inspect_prefab_usage, inspect_prefab_usage_v2, inspect_audio_lite, inspect_ui_system, inspect_ui_navigation_focus, inspect_ui_action_semantics, inspect_ui_local_screen_state, inspect_ui_input_step, inspect_ui_explicit_input_step, inspect_sprite_animation, inspect_movement_blocking, run_loop, run_replay and run_replay_artifact for deterministic validation workflows.'
     });
     return;
   }

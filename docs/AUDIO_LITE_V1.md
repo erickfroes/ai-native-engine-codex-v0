@@ -147,9 +147,9 @@ No browser, Audio Lite v1:
 - Asset Manifest v1 para audio;
 - sprite animation.
 
-## Proximo pacote recomendado
+## Relacao com o proximo slice
 
-UI System v1 ja possui consumo visual opt-in na Browser Demo/export, UI Production Screens v1 fechou a fixture publica de telas pequenas e Portable HTML Export v2 cobre assets inline + Sprite Animation no caminho portatil. `entity.prefab` v1 fica congelado para bugfix/compatibilidade; a continuidade atual fica em `docs/CODEX_HANDOFF.md`.
+`Audio Lite v1` permanece como base diagnostica de clips/defaults/warnings. O proximo degrau da trilha de audio agora comeca em `docs/AUDIO_EVENT_BANK_MANIFEST_V1.md`, que organiza `audio.clip` em bancos/eventos pequenos sem mutar Browser Demo, exports ou o shape de `AudioLiteReport v1`. A continuidade atual fica em `docs/CODEX_HANDOFF.md`.
 
 ## Test Matrix
 

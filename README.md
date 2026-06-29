@@ -79,7 +79,7 @@ Importante: o bloqueio de movimento e tile collision continuam opt-in. O `run-lo
 - multiplayer real;
 - captura/input runtime completo fora da Browser Playable Demo local.
 
-A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1, Sprite Animation v1 diagnostico consumido de forma visual opt-in na Browser Demo para sprites asset-backed e Portable HTML Export v2 com assets inline e `Sprite Animation v1` no export portatil.
+A Meta 3 ja adiciona `collision.bounds`, blocking opt-in, Playable Save/Load Lite, Simple HTML Export v1, Game Templates v1, o V1 Small 2D Game Creation Guide / Codex package e o V1 Small 2D Release Checkpoint. Os primeiros incrementos pos-checkpoint iniciam V2 de forma pequena com Audio Lite v1, `Audio Event Bank Manifest v1` report-only com cena/manifesto publicos para bancos e eventos pequenos, Sprite Animation v1 diagnostico consumido de forma visual opt-in na Browser Demo para sprites asset-backed e Portable HTML Export v2 com assets inline e `Sprite Animation v1` no export portatil.
 
 Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arquivo local, report diagnostico cross-interface e `Prefab Usage Report v2` com rastreabilidade por path/origem/override sem nested prefab. `entity.prefab` continua relativo a cena, exige alvo `.prefab.json` e rejeita URL, traversal e paths absolutos/UNC; Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export tambem falham de forma previsivel nesses casos. UI System v1 agora adiciona `ui.screen` declarativo com arvore de widgets, report cross-interface, consumo visual opt-in na Browser Demo/export por overlay passivo e uma fixture publica de telas pequenas em `scenes/ui-production-screens.scene.json`, preservando HUD Lite como diagnostico local. `UiNavigationFocusReport v1` deriva foco/navegacao sequencial report-only de `UiSystemReport v1` em runtime/CLI/MCP, sem mutar `ui.screen`, Browser Demo/export, `RenderSnapshot v1`, loop, replay ou savegame. `UiActionSemanticsReport v1` agora adiciona `ui.action.semantics` opt-in co-localizado com `ui.screen`, com `initialFocusWidgetId` e `actions[]` autorados, fixture publica em `scenes/ui-action-semantics.scene.json` e runtime/CLI/MCP alinhados, preservando `UiNavigationFocusReport v1` como heuristica derivada e mantendo Browser Demo/export passivos. `UiLocalScreenStateReport v1` agora explicita estado local minimo de telas em runtime/CLI/MCP como report opt-in e report-only, derivado de `UiSystemReport v1`, `UiNavigationFocusReport v1` e `UiActionSemanticsReport v1`, sem novo componente de cena, sem mutar os contratos anteriores e sem consumo no Browser Demo/export. `UiInputStepReport v1` agora fecha o primeiro passo local de navegacao/ativacao de UI como report opt-in, derivado de `InputIntent v1`, `UiActionSemanticsReport v1` e `UiLocalScreenStateReport v1`, ainda sem consumo interativo naquele slice. `UiExplicitInput v1` e `UiExplicitInputStepReport v1` agora separam input UI explicito (`navigate`/`activate`) de `InputIntent v1`, com runtime/CLI/MCP e fixtures proprias em `fixtures/ui-input/`. Browser UI Input Preview v1 agora consome essas actions de UI so na Browser Demo com `--ui-system --ui-input-preview`, mantendo exports passivos e sem tocar loop, replay, savegame ou `RenderSnapshot v1`. `AssetManifestValidationReport v1` agora expoe validacao direta minima de manifesto em runtime/CLI/MCP com erro previsivel para arquivo ausente e JSON malformado, sem mutar `RenderSnapshot v1`. `VisualRegressionBaselineReport v1` fecha uma linha minima de regressao visual estrutural por hashes de `RenderSnapshot v1` e `Render SVG v1`, sem pixel-diff obrigatorio. `SceneTransitionReport v1` fecha o primeiro slice multi-cena por dois paths explicitos em runtime/CLI/MCP. `Scene Composition Manifest v1` fecha a composicao multi-cena minima por manifesto externo com `entryScene` e refs explicitas. `PathfindingGridReport v1` fecha a primeira superficie de navegacao report-only por grid, derivada de `tile.layer` e `collision.bounds`, sem mutar `Scene Document v1`, `SceneValidationReport v1`, loop, render, Browser Demo, exports ou savegame. `AtlasMaterialManifestReport v1` fecha o primeiro contrato atlas/material, ancorado em `Asset Manifest v1`, com regioes, materiais e bindings sprite/tile validados em runtime/CLI/MCP; Browser Demo e Portable HTML Export v2 agora consomem sprites atlas-backed por `visual.sprite.fields.atlasBindingId` opt-in, com sideband `metadata.atlasMaterial` versionado/hash, sem mutar `RenderSnapshot v1`.
 
@@ -105,6 +105,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `inspect-prefab-usage`: inspeciona composicao declarativa de `entity.prefab`
 - `inspect-prefab-usage-v2`: inspeciona composicao declarativa de `entity.prefab` com rastreabilidade por path/origem/override
 - `inspect-audio-lite`: inspeciona clips e triggers declarativos de Audio Lite v1
+- `inspect-audio-event-bank`: inspeciona um manifesto externo de bancos/eventos ancorado em `audio.clip`
 - `inspect-ui-system`: inspeciona screens declarativas e arvores de widgets de UI System v1
 - `inspect-ui-navigation-focus`: inspeciona foco/navegacao sequencial report-only derivados de UI System v1
 - `inspect-ui-action-semantics`: inspeciona semantica autorada de acao/foco em `ui.action.semantics`
@@ -161,6 +162,7 @@ Prefab System v1 agora inicia V2 com resolucao minima de `entity.prefab` por arq
 - `inspect_prefab_usage`
 - `inspect_prefab_usage_v2`
 - `inspect_audio_lite`
+- `inspect_audio_event_bank`
 - `inspect_ui_system`
 - `inspect_ui_navigation_focus`
 - `inspect_ui_action_semantics`
@@ -234,6 +236,9 @@ node ./engine/runtime/src/cli.mjs render-browser-demo ./scenes/v1-small-2d.scene
 
 # gerar Browser Playable Demo com Audio Lite diagnostico opt-in
 node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --audio-lite --out ./tmp/audio-lite-browser-demo.html --json
+
+# inspecionar manifesto publico de bancos/eventos de audio
+node ./engine/runtime/src/cli.mjs inspect-audio-event-bank ./scenes/audio-game-feedback.audio-event-bank.json --json
 
 # inspecionar UI System v1 declarativo
 node ./engine/runtime/src/cli.mjs inspect-ui-system ./scenes/ui-production-screens.scene.json --json
@@ -324,6 +329,8 @@ npm run smoke
 - `docs/BROWSER_UI_INPUT_PREVIEW_HARDENING_MATRIX_V1.md`: matriz de hardening do preview local de input UI
 - `docs/GAME_TEMPLATES_V1.md`: templates V1 Small 2D copiar-e-adaptar
 - `docs/AUDIO_LITE_V1.md`: contrato de Audio Lite v1 diagnostico
+- `docs/AUDIO_EVENT_BANK_MANIFEST_V1.md`: contrato report-only de bancos/eventos pequenos acima de `Audio Lite v1`
+- `docs/AUDIO_EVENT_BANK_TEST_MATRIX_V1.md`: matriz curta de runtime/CLI/MCP para o manifesto de bancos/eventos
 - `docs/SPRITE_ANIMATION_V1.md`: contrato de Sprite Animation v1 diagnostico e consumo visual opt-in na Browser Demo
 - `docs/PORTABLE_HTML_EXPORT_V2.md`: contrato do export portatil v2 com assets inline e Sprite Animation opt-in
 - `docs/V2_GAP_AUDIT.md`: auditoria curta das lacunas V2 e proximo pacote recomendado

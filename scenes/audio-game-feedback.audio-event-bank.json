@@ -1,0 +1,43 @@
+{
+  "audioEventBankManifestVersion": 1,
+  "metadata": {
+    "name": "audio-game-feedback-bank"
+  },
+  "scenePath": "./audio-game-feedback.scene.json",
+  "banks": [
+    {
+      "bankId": "menu",
+      "events": [
+        {
+          "eventId": "scene.start",
+          "clipIds": ["music.title"]
+        },
+        {
+          "eventId": "ui.navigate",
+          "clipIds": ["sfx.ui.navigate"]
+        },
+        {
+          "eventId": "ui.activate",
+          "clipIds": ["sfx.ui.activate"]
+        }
+      ]
+    },
+    {
+      "bankId": "gameplay",
+      "events": [
+        {
+          "eventId": "player.move",
+          "clipIds": ["sfx.player.step"]
+        },
+        {
+          "eventId": "player.blocked",
+          "clipIds": ["sfx.player.bump"]
+        },
+        {
+          "eventId": "manual.preview",
+          "clipIds": ["sfx.ui.navigate", "sfx.player.bump"]
+        }
+      ]
+    }
+  ]
+}

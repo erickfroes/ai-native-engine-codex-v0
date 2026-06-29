@@ -1,0 +1,226 @@
+{
+  "version": 1,
+  "metadata": {
+    "name": "audio-game-feedback",
+    "tags": ["v2", "audio", "event-bank"]
+  },
+  "systems": [
+    "core.loop"
+  ],
+  "entities": [
+    {
+      "id": "player.hero",
+      "name": "Player",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "kind": "visual.sprite",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "assetId": "player.hero.sprite",
+            "width": 16,
+            "height": 16,
+            "layer": 0
+          }
+        },
+        {
+          "kind": "collision.bounds",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "width": 16,
+            "height": 16,
+            "solid": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "wall.block",
+      "name": "Wall",
+      "components": [
+        {
+          "kind": "transform",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "x": 16,
+            "y": 0
+          }
+        },
+        {
+          "kind": "collision.bounds",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "width": 16,
+            "height": 16,
+            "solid": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ui.menu",
+      "name": "Main Menu Screen With Actions",
+      "components": [
+        {
+          "kind": "ui.screen",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "screenId": "menu.main",
+            "active": true,
+            "layer": 200,
+            "widgets": [
+              {
+                "id": "menu.root",
+                "kind": "panel",
+                "x": 40,
+                "y": 40,
+                "width": 240,
+                "height": 128,
+                "children": [
+                  {
+                    "id": "menu.title",
+                    "kind": "label",
+                    "text": "Audio Game Feedback",
+                    "x": 24,
+                    "y": 16
+                  },
+                  {
+                    "id": "menu.start",
+                    "kind": "label",
+                    "text": "Start Mission",
+                    "x": 32,
+                    "y": 56
+                  },
+                  {
+                    "id": "menu.continue",
+                    "kind": "label",
+                    "text": "Continue Mission",
+                    "x": 32,
+                    "y": 80
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "ui.action.semantics",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "screenId": "menu.main",
+            "initialFocusWidgetId": "menu.start",
+            "actions": [
+              {
+                "widgetId": "menu.start",
+                "actionId": "menu.start-mission"
+              },
+              {
+                "widgetId": "menu.continue",
+                "actionId": "menu.continue-mission"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "audio.music.title",
+      "name": "Title Music Clip",
+      "components": [
+        {
+          "kind": "audio.clip",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "clipId": "music.title",
+            "kind": "music",
+            "volume": 0.4,
+            "loop": true,
+            "trigger": "onDemoStart"
+          }
+        }
+      ]
+    },
+    {
+      "id": "audio.ui.navigate",
+      "name": "Menu Navigate Clip",
+      "components": [
+        {
+          "kind": "audio.clip",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "clipId": "sfx.ui.navigate",
+            "kind": "sfx",
+            "volume": 0.55
+          }
+        }
+      ]
+    },
+    {
+      "id": "audio.ui.activate",
+      "name": "Menu Activate Clip",
+      "components": [
+        {
+          "kind": "audio.clip",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "clipId": "sfx.ui.activate",
+            "kind": "sfx",
+            "volume": 0.75
+          }
+        }
+      ]
+    },
+    {
+      "id": "audio.player.step",
+      "name": "Player Step Clip",
+      "components": [
+        {
+          "kind": "audio.clip",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "clipId": "sfx.player.step",
+            "kind": "sfx",
+            "volume": 0.5,
+            "trigger": "onMove"
+          }
+        }
+      ]
+    },
+    {
+      "id": "audio.player.bump",
+      "name": "Player Bump Clip",
+      "components": [
+        {
+          "kind": "audio.clip",
+          "version": 1,
+          "replicated": false,
+          "fields": {
+            "clipId": "sfx.player.bump",
+            "kind": "sfx",
+            "volume": 0.65,
+            "trigger": "onBlockedMove"
+          }
+        }
+      ]
+    }
+  ],
+  "assetRefs": []
+}

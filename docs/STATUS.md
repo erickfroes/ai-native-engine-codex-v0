@@ -50,6 +50,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 - V1 Small 2D Game Creation Guide / Codex package;
 - V1 Small 2D Release Checkpoint;
 - Audio Lite v1 como primeiro incremento pos-checkpoint;
+- Audio Event Bank Manifest v1 como contrato report-only externo acima de `Audio Lite v1`, com `scenes/audio-game-feedback.scene.json` e `scenes/audio-game-feedback.audio-event-bank.json`;
 - UI System v1 como contrato declarativo/report para screens e widget tree, com consumo visual opt-in na Browser Demo/export;
 - UI Production Screens v1 com `scenes/ui-production-screens.scene.json`, menu/HUD ativos, pause autoravel inativo, paridade Browser Demo/export e budget de HTML;
 - UI Navigation/Focus Lite v1 como report-only derivado de `UiSystemReport v1`, com runtime/CLI/MCP e sem consumo visual;
@@ -85,7 +86,7 @@ Neste ponto, a fundacao de gameplay por entidade e tile ja existe:
 ## Foco atual recomendado
 
 1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1`, `UI Action Semantics Lite v1`, `UI Local Screen State Lite v1`, `UI Input Step Lite v1`, `UI Explicit Input Lite v1`, `Browser UI Input Preview v1`, `Browser UI Input Preview Hardening Matrix v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `Audio v1 de jogo pequeno` como menor proximo passo seguro, evoluindo `Audio Lite v1` com bancos/clips/eventos pequenos, feedback de menu/gameplay e garantia de Browser Demo/export sem dependencia externa surpresa.
+2. Abrir `Audio Browser Preview v1` como menor proximo passo seguro, consumindo `AudioEventBankReport v1` na Browser Demo com preview local, paridade de report e budget de HTML antes de tocar exports.
 3. Se a lacuna de validacao estrita for atacada, criar superficie opt-in nova em vez de mutar `validate-scene` / `SceneValidationReport v1`.
 4. Adiar editor-lite, particle-lite, route solving e 3D ate UI pequena e V2 estarem mais demonstradas.
 

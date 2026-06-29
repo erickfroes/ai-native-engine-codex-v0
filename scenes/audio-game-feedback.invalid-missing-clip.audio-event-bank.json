@@ -1,0 +1,18 @@
+{
+  "audioEventBankManifestVersion": 1,
+  "metadata": {
+    "name": "audio-game-feedback-invalid-missing-clip"
+  },
+  "scenePath": "./audio-game-feedback.scene.json",
+  "banks": [
+    {
+      "bankId": "menu",
+      "events": [
+        {
+          "eventId": "ui.navigate",
+          "clipIds": ["sfx.ui.navigate", "sfx.missing.clip"]
+        }
+      ]
+    }
+  ]
+}

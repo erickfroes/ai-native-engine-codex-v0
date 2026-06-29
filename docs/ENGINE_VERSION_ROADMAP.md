@@ -65,6 +65,7 @@ Capacidades alvo:
 - UI Explicit Input Lite v1 entregue como contrato externo de `navigate`/`activate` e `UiExplicitInputStepReport v1`, separado de `InputIntent v1`, com runtime/CLI/MCP e sem consumo interativo naquele slice;
 - Browser UI Input Preview v1 entregue como consumo local opt-in de `navigate`/`activate` so na Browser Demo, mantendo exports, loop, replay, savegame e `RenderSnapshot v1` passivos;
 - Audio Lite v1 como primeiro pacote incremental pos-checkpoint;
+- Audio Event Bank Manifest v1 como contrato externo report-only para bancos/eventos pequenos acima de `Audio Lite v1`;
 - Sprite Animation v1 concluido como diagnostico declarativo runtime/CLI/MCP;
 - `AssetManifestValidationReport v1` concluido como validacao direta minima de manifesto em runtime/CLI/MCP, com report versionado e erros previsiveis;
 - `entity.prefab` agora endurece refs com extensao errada, traversal, URL e paths absolutos/UNC, falhando de forma previsivel fora do contrato v1 tambem em Render SVG, SVG Demo HTML, Canvas2D Demo, Simple HTML Export e Portable HTML Export;
@@ -226,5 +227,5 @@ Criterio realista:
 A partir do estado atual, seguir:
 
 1. Manter `Atlas Region Consumption v1`, `Atlas Region Binding Contract v1`, `Pathfinding Grid v1`, `Scene Composition Manifest v1`, `SceneTransitionReport v1`, `VisualRegressionBaselineReport v1`, `AssetManifestValidationReport v1`, `UI Local Screen State Lite v1`, `UI Input Step Lite v1`, `UI Explicit Input Lite v1`, `Browser UI Input Preview v1`, `Browser UI Input Preview Hardening Matrix v1` e `entity.prefab` v1 apenas em bugfix/compatibilidade.
-2. Abrir `Audio v1 de jogo pequeno` como menor proximo passo seguro, evoluindo `Audio Lite v1` com bancos/clips/eventos pequenos, feedback de menu/gameplay e garantia de Browser Demo/export sem dependencia externa surpresa.
+2. Abrir `Audio Browser Preview v1` como menor proximo passo seguro, consumindo `AudioEventBankReport v1` na Browser Demo com preview local, paridade de report e budget de HTML antes de tocar exports.
 3. Manter editor-lite, particle-lite, route solving e 3D indie para depois de UI pequena e V2 demonstradas.

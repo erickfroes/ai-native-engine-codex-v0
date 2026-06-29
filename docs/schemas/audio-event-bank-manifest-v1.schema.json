@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-native-engine.local/docs/schemas/audio-event-bank-manifest-v1.schema.json",
+  "title": "Audio Event Bank Manifest v1",
+  "type": "object",
+  "required": [
+    "audioEventBankManifestVersion",
+    "metadata",
+    "scenePath",
+    "banks"
+  ],
+  "properties": {
+    "audioEventBankManifestVersion": {
+      "const": 1
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "scenePath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "banks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["bankId", "events"],
+        "properties": {
+          "bankId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "events": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["eventId", "clipIds"],
+              "properties": {
+                "eventId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "clipIds": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

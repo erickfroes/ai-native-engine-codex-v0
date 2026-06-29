@@ -914,6 +914,22 @@ export const toolCatalog = [
     }
   },
   {
+    name: 'inspect_audio_event_bank',
+    title: 'Inspect Audio Event Bank',
+    description: 'Build AudioEventBankReport v1 from an external bank/event manifest anchored to scene audio.clip declarations.',
+    inputSchema: {
+      type: 'object',
+      required: ['path'],
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Absolute path or path relative to the repository root for an Audio Event Bank Manifest v1 JSON file.'
+        }
+      },
+      additionalProperties: false
+    }
+  },
+  {
     name: 'inspect_movement_blocking',
     title: 'Inspect Movement Blocking',
     description: 'Build MovementBlockingReport v1 from solid collision.bounds, solid tile.layer tiles, and an Input Intent v1 without mutating the run loop.',

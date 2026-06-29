@@ -7,10 +7,10 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - Versao atual: V1 Small 2D release-checkpointed.
 - Politica atual: V1 apenas bugfix, hardening e compatibilidade.
 - Meta em andamento: Meta 4 / V2 2D-2.5D indie production.
-- Slice fechado: `Browser UI Input Preview Hardening Matrix v1`.
-- Proximo pacote recomendado: abrir `Audio v1 de jogo pequeno` para evoluir `Audio Lite v1` com bancos/clips/eventos pequenos, feedback de menu/gameplay e garantia de Browser Demo/export sem dependencia externa surpresa.
+- Slice fechado: `Audio Event Bank Manifest v1`.
+- Proximo pacote recomendado: abrir `Audio Browser Preview v1` para consumir `AudioEventBankReport v1` na Browser Demo com preview local, paridade de report e budget de HTML antes de tocar exports.
 - Slice atual em andamento: nenhum; o foco volta para continuidade documental e para o menor proximo contrato V2.
-- Nao iniciar export interativo de UI, savegame canonico de UI, editor-lite, particle-lite, route solving, 3D ou pipeline pesado antes de fechar um contrato pequeno de audio de jogo.
+- Nao iniciar playback real de asset, export portatil com audio inline, savegame canonico de UI, editor-lite, particle-lite, route solving, 3D ou pipeline pesado antes de fechar um preview local pequeno de audio na Browser Demo.
 
 ## Estado
 
@@ -31,6 +31,7 @@ Pagina de partida para humanos e Codex. A funcao deste arquivo e responder rapid
 - [x] UI Regression Matrix v1 fechada com doc dedicada, casos `next/previous/activate`, budget compacto e guardrails de passividade para Browser Demo/export.
 - [x] Browser UI Input Preview v1 fechado como consumo local opt-in so na Browser Demo, com `--ui-system --ui-input-preview`, MCP `uiInputPreview`, budget de `3 * 1024` bytes e exports passivos.
 - [x] Browser UI Input Preview Hardening Matrix v1 fechada com cross-interface dedicado para preview on/off, budget guardado, exports `ui-action-semantics` passivos em runtime/CLI/MCP e rejeicao explicita de `--ui-input-preview` fora de `render-browser-demo`.
+- [x] Audio Event Bank Manifest v1 fechado como contrato externo report-only acima de `Audio Lite v1`, com `scenes/audio-game-feedback.scene.json`, manifesto publico, runtime/CLI/MCP e testes cross-interface.
 - [x] Validacao final do slice: `npm test`, `npm run validate:scenes` e `npm run smoke`.
 
 Inventario completo: `docs/STATUS.md`.
@@ -39,30 +40,30 @@ Detalhe por versao: `docs/ENGINE_VERSION_ROADMAP.md`.
 
 ## Proximo passo
 
-### `Audio v1 de jogo pequeno`
+### `Audio Browser Preview v1`
 
-Objetivo: evoluir `Audio Lite v1` para um contrato pequeno de audio de jogo, com bancos/clips/eventos minimos, feedback local de menu/gameplay e compatibilidade previsivel entre Browser Demo e exports.
+Objetivo: consumir `AudioEventBankReport v1` na Browser Demo como preview local pequeno de audio, com foco em menu/gameplay, paridade com o report e budget de HTML antes de qualquer ampliacao para exports.
 
 Escopo minimo do pacote:
 
-- [ ] formalizar um contrato pequeno de audio de jogo acima de `Audio Lite v1`, sem mixer completo obrigatorio;
-- [ ] cobrir bancos/clips/eventos minimos para feedback de menu e gameplay pequeno;
-- [ ] preservar Browser Demo e exports como superficies previsiveis, sem dependencia externa surpresa;
-- [ ] expor runtime, CLI e MCP alinhados para a nova superficie;
-- [ ] registrar fixture minima, testes cross-interface e doc curta do contrato.
+- [ ] consumir `AudioEventBankReport v1` sem mutar `AudioLiteReport v1`;
+- [ ] cobrir preview local de `scene.start`, `ui.navigate`, `ui.activate`, `player.move`, `player.blocked` e `manual.preview`;
+- [ ] preservar Browser Demo e exports como superficies previsiveis, sem `src` real, `fetch`, URL remota ou autoplay;
+- [ ] guardar budget de HTML e paridade de metadata/report;
+- [ ] registrar testes cross-interface e doc curta do preview local.
 
 Fora do pacote:
 
 - export interativo de UI;
 - savegame canonico de UI;
-- mixer completo, streaming de musica, audio espacial ou backend pesado;
+- mixer completo, streaming de musica, audio espacial, playback real de asset ou backend pesado;
 - tocar `RenderSnapshot v1`, replay ou savegame fora do necessario para compatibilidade;
 - editor visual;
 - renderer novo;
 - glTF/3D;
 - particle-lite.
 
-Criterio de pronto: contrato/doc curta publicados, fixture minima e testes cross-interface alinhados, Browser Demo/export previsiveis, `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
+Criterio de pronto: preview local/documentacao curtos publicados, paridade runtime/CLI/MCP preservada, budget HTML guardado, exports continuam passivos, `npm test`, `npm run validate:scenes` e `npm run smoke` passam.
 
 ## Como continuar
 
@@ -84,6 +85,8 @@ git status -sb
 - `docs/BROWSER_UI_INPUT_PREVIEW_HARDENING_MATRIX_V1.md`
 - `docs/AUDIO_LITE_V1.md`
 - `docs/AUDIO_LITE_TEST_MATRIX.md`
+- `docs/AUDIO_EVENT_BANK_MANIFEST_V1.md`
+- `docs/AUDIO_EVENT_BANK_TEST_MATRIX_V1.md`
 - doc especifica do contrato tocado
 
 3. Para pacote medio/grande, usar subagentes antes de editar.
@@ -141,6 +144,8 @@ node ./engine/runtime/src/cli.mjs inspect-ui-local-screen-state ./scenes/ui-acti
 node ./engine/runtime/src/cli.mjs inspect-ui-input-step ./scenes/ui-action-semantics.scene.json --input-intent ./fixtures/input/move-player-right.intent.json --json
 node ./engine/runtime/src/cli.mjs validate-ui-explicit-input ./fixtures/ui-input/navigate-next.ui-explicit-input.json --json
 node ./engine/runtime/src/cli.mjs inspect-ui-explicit-input-step ./scenes/ui-action-semantics.scene.json --ui-explicit-input ./fixtures/ui-input/navigate-next.ui-explicit-input.json --json
+node ./engine/runtime/src/cli.mjs validate-scene ./scenes/audio-game-feedback.scene.json --json
+node ./engine/runtime/src/cli.mjs inspect-audio-event-bank ./scenes/audio-game-feedback.audio-event-bank.json --json
 node ./engine/runtime/src/cli.mjs inspect-audio-lite ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --json
 node ./engine/runtime/src/cli.mjs render-browser-demo ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --audio-lite --out ./tmp/audio-lite-browser-demo.html --json
 node ./engine/runtime/src/cli.mjs export-html-game ./engine/runtime/test/fixtures/audio-lite-sfx.scene.json --audio-lite --out ./tmp/audio-lite-export.html --json
@@ -168,6 +173,8 @@ Use as tools MCP equivalentes quando estiver validando cenas, contratos ou repor
 - `docs/BROWSER_UI_INPUT_PREVIEW_V1.md`: contrato do preview local opt-in de input UI na Browser Demo.
 - `docs/BROWSER_UI_INPUT_PREVIEW_HARDENING_MATRIX_V1.md`: matriz de hardening do preview local de input UI.
 - `docs/AUDIO_LITE_V1.md`: contrato diagnostico atual de audio.
+- `docs/AUDIO_EVENT_BANK_MANIFEST_V1.md`: contrato report-only de bancos/eventos pequenos acima de `Audio Lite v1`.
+- `docs/AUDIO_EVENT_BANK_TEST_MATRIX_V1.md`: matriz curta de runtime/CLI/MCP para o manifesto de bancos/eventos.
 - `docs/V2_GAP_AUDIT.md`: lacunas V2.
 - `docs/CODEX_SUBAGENT_STRATEGY.md`: estrategia de subagentes.
 

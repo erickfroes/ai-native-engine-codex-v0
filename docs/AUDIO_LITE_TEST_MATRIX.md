@@ -35,3 +35,4 @@ npm run smoke
 - `npm run validate:scenes` still validates the canonical scenes in `./scenes`; Audio Lite scene coverage is fixture-based in `engine/runtime/test/fixtures`.
 - Browser Demo/export audio is opt-in and diagnostic. It is not a mixer, audio graph, streaming system, spatial audio, timeline or editor feature.
 - Headless runtime never plays audio; it only emits `AudioLiteReport v1`.
+- `Audio Event Bank Manifest v1` agora abre a trilha seguinte de bancos/eventos pequenos sem substituir esta matriz de clips diagnosticos.

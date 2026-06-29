@@ -108,6 +108,11 @@ export {
   PATHFINDING_GRID_REPORT_VERSION
 } from './pathfinding/build-pathfinding-grid-report-v1.mjs';
 export { buildAudioLiteReportV1 } from './audio/build-audio-lite-report-v1.mjs';
+export {
+  buildAudioEventBankReportV1,
+  AUDIO_EVENT_BANK_MANIFEST_VERSION,
+  AUDIO_EVENT_BANK_REPORT_VERSION
+} from './audio/build-audio-event-bank-report-v1.mjs';
 export { buildUiSystemReportV1 } from './ui/build-ui-system-report-v1.mjs';
 export {
   buildUiNavigationFocusReportV1,
